@@ -12,7 +12,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 2 | [Esquema de base de datos y migraciones](esquema-base-de-datos.md) | lista | 1 |
 | 3 | [Utilidades de dinero, fechas y errores](utilidades-de-dominio.md) | lista | 1 |
 | 4 | [Autenticación y roles](autenticacion.md) | lista | 2, 3 |
-| 5 | Alumnos | por escribir | 4 |
+| 5 | [Alumnos](alumnos.md) | en curso | 4 |
 | 6 | Packs | por escribir | 4 |
 | 7 | Profesores y porcentajes | por escribir | 4 |
 | 8 | Clases y sesiones | por escribir | 7 |
