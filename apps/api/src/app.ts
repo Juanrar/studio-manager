@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { rutasAlumnos } from './modules/alumnos/alumnos.routes.ts';
 import { rutasAuth } from './modules/auth/auth.routes.ts';
+import { rutasClases } from './modules/clases/clases.routes.ts';
 import { rutasPacks } from './modules/packs/packs.routes.ts';
 import { rutasProfesores } from './modules/profesores/profesores.routes.ts';
 import { rutasUsuarios } from './modules/usuarios/usuarios.routes.ts';
@@ -33,6 +34,7 @@ export function buildApp(opciones: OpcionesApp = {}): FastifyInstance {
   app.register(rutasAlumnos);
   app.register(rutasPacks);
   app.register(rutasProfesores);
+  app.register(rutasClases);
 
   return app;
 }

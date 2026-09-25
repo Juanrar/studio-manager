@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, lte, sql } from 'drizzle-orm';
-import type { PorcentajeProfesor, Profesor } from '@studio/shared';
+import type { PersonaResumen, PorcentajeProfesor, Profesor } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
 import { porcentajeProfesor, profesor, type NuevoProfesor } from '../../db/schema.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
@@ -31,6 +31,17 @@ export async function insertar(ej: Ejecutor, datos: NuevoProfesor): Promise<numb
 
 export async function buscarPorId(ej: Ejecutor, id: number, hoy: FechaDia): Promise<Profesor | null> {
   const [fila] = await ej.select(columnas(hoy)).from(profesor).where(eq(profesor.id, id));
+  return fila ?? null;
+}
+
+export async function buscarResumen(
+  ej: Ejecutor,
+  id: number,
+): Promise<(PersonaResumen & { activo: boolean }) | null> {
+  const [fila] = await ej
+    .select({ id: profesor.id, nombre: profesor.nombre, apellido: profesor.apellido, activo: profesor.activo })
+    .from(profesor)
+    .where(eq(profesor.id, id));
   return fila ?? null;
 }
 

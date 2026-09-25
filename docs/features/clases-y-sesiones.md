@@ -66,11 +66,11 @@ Formas:
 - Crear: `apps/api/src/modules/clases/clases.repository.ts`, `clases.service.ts`, `clases.routes.ts`
 - Test: `apps/api/src/modules/clases/clases.test.ts`
 
-- [ ] **Paso 1:** escribir los 4 tests de clases de la tabla.
-- [ ] **Paso 2:** correrlos y verificar que fallan con 404.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(clases): horario semanal de clases`.
+- [x] **Paso 1:** escribir los 4 tests de clases de la tabla.
+- [x] **Paso 2:** correrlos y verificar que fallan con 404.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(clases): horario semanal de clases`.
 
 ### Tarea 2: Sesiones y agenda del día
 

@@ -2,6 +2,7 @@ import type {
   ActualizarProfesorInput,
   CrearProfesorInput,
   NuevoPorcentajeInput,
+  PersonaResumen,
   PorcentajeProfesor,
   Profesor,
 } from '@studio/shared';
@@ -76,4 +77,15 @@ export async function porcentajeVigente(ej: Ejecutor, profesorId: number, fecha:
     throw new ReglaDeNegocioError(`El profesor no tiene un porcentaje vigente el ${fecha}`);
   }
   return porcentaje;
+}
+
+// Para clases y sesiones: el profesor tiene que existir y estar activo.
+export async function verificarProfesorActivo(ej: Ejecutor, id: number): Promise<PersonaResumen> {
+  const encontrado = await repo.buscarResumen(ej, id);
+  if (encontrado === null) throw new ReglaDeNegocioError(`No existe el profesor ${id}`);
+  const { activo, ...resumen } = encontrado;
+  if (!activo) {
+    throw new ReglaDeNegocioError(`El profesor ${resumen.nombre} ${resumen.apellido} está dado de baja`);
+  }
+  return resumen;
 }

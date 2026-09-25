@@ -5,3 +5,4 @@ export * from './comun.ts';
 export * from './alumnos.ts';
 export * from './packs.ts';
 export * from './profesores.ts';
+export * from './clases.ts';
