@@ -1,0 +1,32 @@
+# Skills de agentes: son herramientas locales, no parte del proyecto
+.agents/
+.claude/
+skills-lock.json
+
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Entorno
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Cobertura de tests
+coverage/
