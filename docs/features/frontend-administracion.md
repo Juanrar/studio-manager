@@ -1,6 +1,6 @@
 # Pantallas de administración
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** frontend-base, packs, profesores, clases-y-sesiones, autenticacion  
 **Listo cuando:** `pnpm test` pasa; admin gestiona packs, profesores con su historial de porcentajes, el horario semanal y los usuarios.
 
@@ -33,6 +33,7 @@ Todas son solo para admin y siguen el mismo patrón: tabla, "Nuevo…" en un di�
 | Cargar un porcentaje nuevo manda puntos básicos y la fecha de vigencia | Mismo riesgo de conversión, en el historial |
 | Crear una clase del martes manda `diaSemana: 2` y las horas en `HH:MM` | Si el día se manda 0-based, la clase aparece el lunes en la agenda |
 | Crear un usuario manda el rol elegido | Si el rol no se manda, la API rechaza y admin no puede dar de alta a recepción |
+| No se ofrece desactivar al propio usuario logueado | Si se muestra, admin se puede dejar afuera a sí mismo y quizás dejar el sistema sin admin (la API todavía lo permite) |
 
 ---
 
@@ -70,12 +71,12 @@ Todas son solo para admin y siguen el mismo patrón: tabla, "Nuevo…" en un di�
 
 **Archivos:** `apps/web/src/features/usuarios/UsuariosPage.tsx`, `api.ts`; test `usuarios.test.tsx`.
 
-- [ ] **Paso 1:** escribir el test de usuarios.
-- [ ] **Paso 2:** correrlo y verificar que falla.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr el test y verificar que pasa.
-- [ ] **Paso 5:** commit `feat(web): administración de usuarios`.
+- [x] **Paso 1:** escribir el test de usuarios.
+- [x] **Paso 2:** correrlo y verificar que falla.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr el test y verificar que pasa.
+- [x] **Paso 5:** commit `feat(web): administración de usuarios`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.

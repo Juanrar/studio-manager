@@ -9,6 +9,7 @@ import { RequiereSesion, SoloAdmin } from './features/auth/RequiereSesion.tsx';
 import { ClasesPage } from './features/clases/ClasesPage.tsx';
 import { PacksPage } from './features/packs/PacksPage.tsx';
 import { ProfesoresPage } from './features/profesores/ProfesoresPage.tsx';
+import { UsuariosPage } from './features/usuarios/UsuariosPage.tsx';
 
 export const rutas: RouteObject[] = [
   { path: '/login', element: <LoginPage /> },
@@ -27,7 +28,7 @@ export const rutas: RouteObject[] = [
           { path: 'packs', element: <PacksPage /> },
           { path: 'profesores', element: <ProfesoresPage /> },
           { path: 'clases', element: <ClasesPage /> },
-          { path: 'usuarios', element: <Proximamente titulo="Usuarios" /> },
+          { path: 'usuarios', element: <UsuariosPage /> },
           { path: 'liquidaciones', element: <Proximamente titulo="Liquidaciones" /> },
         ],
       },
