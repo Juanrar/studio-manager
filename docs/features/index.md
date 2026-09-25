@@ -14,7 +14,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 4 | [Autenticación y roles](autenticacion.md) | lista | 2, 3 |
 | 5 | [Alumnos](alumnos.md) | lista | 4 |
 | 6 | [Packs](packs.md) | lista | 4 |
-| 7 | [Profesores y porcentajes](profesores.md) | pendiente | 4 |
+| 7 | [Profesores y porcentajes](profesores.md) | lista | 4 |
 | 8 | Clases y sesiones | por escribir | 7 |
 | 9 | Pagos | por escribir | 5, 6 |
 | 10 | Asistencias | por escribir | 8, 9 |
@@ -33,6 +33,7 @@ Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo s
 
 | Fecha | Feature | Qué pasó |
 |---|---|---|
+| 2026-09-24 | 7. Profesores y porcentajes | Lista. ABM de profesores con porcentaje inicial vigente desde el alta, historial de porcentajes y `porcentajeVigente(ej, profesorId, fecha)` para asistencias. Suite 67/67 |
 | 2026-09-24 | 6. Packs | Lista. Catálogo con baja lógica; solo admin escribe; precio en pesos enteros validado por `precioSchema`. Suite 59/59 |
 | 2026-09-24 | 5. Alumnos | Lista. ABM con baja lógica, búsqueda sin tildes (`unaccent`) por nombre completo y DNI, paginación. Suite 56/56. Esquemas comunes en `packages/shared/src/comun.ts` (campos opcionales que convierten `''` en `null`, `precioSchema`, `listadoQuerySchema`) |
 | 2026-09-24 | 4. Autenticación y roles | Lista. Login, logout, sesión en cookie firmada de 7 días, roles `admin` y `recepcion`, ABM de usuarios y script `usuario:admin`. Suite 49/49. Cambios al plan: `scrypt` de Node en vez de argon2 (sin módulo nativo); `auth` es dueño de las sesiones para evitar una dependencia circular con `usuarios`; cambiar la contraseña también cierra sesiones. Pendientes menores: sin límite de intentos de login; un admin puede desactivarse a sí mismo |

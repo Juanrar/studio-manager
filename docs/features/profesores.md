@@ -1,6 +1,6 @@
 # Profesores y porcentajes
 
-**Estado:** pendiente  
+**Estado:** lista  
 **Depende de:** autenticacion  
 **Listo cuando:** `pnpm test` pasa; admin gestiona profesores y su historial de porcentajes, y existe `porcentajeVigente()` para calcular sueldos.
 
@@ -59,12 +59,12 @@ Forma del profesor: `{ id, nombre, apellido, dni, email, telefono, aliasCbu, act
 **Interfaces:**
 - Produce: `porcentajeVigente(ej: Ejecutor, profesorId: number, fecha: FechaDia): Promise<number>` y `obtenerProfesor(id): Promise<Profesor>`. La feature de asistencias usa `porcentajeVigente` dentro de su transacción.
 
-- [ ] **Paso 1:** escribir los 5 tests de la tabla.
-- [ ] **Paso 2:** correrlos y verificar que fallan (404 en las rutas; módulo inexistente en el service).
-- [ ] **Paso 3:** implementar esquemas, repository, service y rutas.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(profesores): ABM de profesores e historial de porcentajes`.
+- [x] **Paso 1:** escribir los 5 tests de la tabla.
+- [x] **Paso 2:** correrlos y verificar que fallan (404 en las rutas; módulo inexistente en el service).
+- [x] **Paso 3:** implementar esquemas, repository, service y rutas.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(profesores): ABM de profesores e historial de porcentajes`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.
