@@ -29,7 +29,7 @@
 - **Contraseñas con `scrypt` de `node:crypto`** en lugar de argon2. `scrypt` está recomendado por OWASP y viene con Node, así no hace falta compilar un módulo nativo (pnpm 12 bloquea esos scripts por defecto). Formato guardado: `scrypt$<N>$<r>$<p>$<salt base64>$<hash base64>`, para poder subir el costo más adelante sin romper los hashes viejos.
 - **Duración de la sesión:** 7 días desde el login. No se renueva sola.
 - **`admin` incluye a `recepcion`:** una ruta que pide `recepcion` también la puede usar `admin`.
-- **Desactivar un usuario borra sus sesiones.** Si no, seguiría logueado hasta que venza la cookie.
+- **Desactivar un usuario o cambiarle la contraseña borra sus sesiones.** Si no, seguiría logueado hasta que venza la cookie.
 - **Email en minúsculas y sin espacios**, tanto al crear como al loguear.
 
 ## API
@@ -71,7 +71,8 @@ Errores: cuerpo `{ error: string }`. Los de validación agregan `detalles: { cam
 | Sesión vencida responde 401 | Integración | Si la búsqueda de sesión no compara `expira_en` con el reloj, las sesiones no vencen |
 | Recepción recibe 403 en una ruta de admin y sin sesión 401 | Integración | Si `requerirRol` deja pasar a cualquier usuario logueado, recepción puede crear usuarios |
 | Admin crea un usuario que después puede loguearse | Integración | Si la ruta y el service no quedan conectados, o la respuesta incluye `password_hash` |
-| Desactivar un usuario cierra sus sesiones | Integración | Si `actualizarUsuario` cambia `activo` sin borrar sesiones, el usuario sigue logueado |
+| Desactivar un usuario cierra sus sesiones | Integración | Si `actualizarUsuario` cambia `activo` sin borrar sesiones, el usuario sigue logueado. El test reactiva al usuario y prueba la cookie vieja, porque la búsqueda de sesión ya ignora usuarios inactivos |
+| Cambiar la contraseña cierra las sesiones | Integración | Si alguien quita el cierre de sesiones al cambiar la contraseña, una contraseña filtrada sigue dando acceso después del cambio |
 
 **No se testea:** que `scrypt` sea seguro ni que `@fastify/cookie` firme bien (son librerías); getters y el mapeo de filas a objetos (lo cubren los tests de arriba).
 
@@ -141,11 +142,11 @@ Errores: cuerpo `{ error: string }`. Los de validación agregan `detalles: { cam
 - Crear: `apps/api/src/modules/usuarios/usuarios.routes.ts`
 - Test: `apps/api/src/modules/usuarios/usuarios.test.ts`
 
-- [ ] **Paso 1:** escribir los tests: recepción recibe 403 y sin sesión 401; admin crea un usuario que después puede loguearse; desactivar un usuario cierra sus sesiones.
-- [ ] **Paso 2:** correrlos y verificar que fallan con 404.
-- [ ] **Paso 3:** implementar las rutas y hacer que `actualizarUsuario` borre las sesiones al desactivar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(usuarios): rutas de administración de usuarios`.
+- [x] **Paso 1:** escribir los tests: recepción recibe 403 y sin sesión 401; admin crea un usuario que después puede loguearse; desactivar un usuario cierra sus sesiones.
+- [x] **Paso 2:** correrlos y verificar que fallan con 404.
+- [x] **Paso 3:** implementar las rutas y hacer que `actualizarUsuario` borre las sesiones al desactivar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(usuarios): rutas de administración de usuarios`.
 
 ### Tarea 5: Script para crear el primer admin
 

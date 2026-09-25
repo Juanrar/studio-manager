@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { rutasAuth } from './modules/auth/auth.routes.ts';
+import { rutasUsuarios } from './modules/usuarios/usuarios.routes.ts';
 import { registrarAutenticacion } from './plugins/autenticacion.ts';
 import { registrarManejoDeErrores } from './plugins/errores.ts';
 
@@ -25,6 +26,7 @@ export function buildApp(opciones: OpcionesApp = {}): FastifyInstance {
 
   app.get('/api/health', async () => ({ estado: 'ok' }));
   app.register(rutasAuth);
+  app.register(rutasUsuarios);
 
   return app;
 }
