@@ -6,6 +6,7 @@ import { AlumnosPage } from './features/alumnos/AlumnosPage.tsx';
 import { FichaAlumnoPage } from './features/alumnos/FichaAlumnoPage.tsx';
 import { LoginPage } from './features/auth/LoginPage.tsx';
 import { RequiereSesion, SoloAdmin } from './features/auth/RequiereSesion.tsx';
+import { ClasesPage } from './features/clases/ClasesPage.tsx';
 import { PacksPage } from './features/packs/PacksPage.tsx';
 import { ProfesoresPage } from './features/profesores/ProfesoresPage.tsx';
 
@@ -25,7 +26,7 @@ export const rutas: RouteObject[] = [
         children: [
           { path: 'packs', element: <PacksPage /> },
           { path: 'profesores', element: <ProfesoresPage /> },
-          { path: 'clases', element: <Proximamente titulo="Clases" /> },
+          { path: 'clases', element: <ClasesPage /> },
           { path: 'usuarios', element: <Proximamente titulo="Usuarios" /> },
           { path: 'liquidaciones', element: <Proximamente titulo="Liquidaciones" /> },
         ],

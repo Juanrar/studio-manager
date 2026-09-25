@@ -60,11 +60,11 @@ Todas son solo para admin y siguen el mismo patrón: tabla, "Nuevo…" en un di�
 
 **Archivos:** `apps/web/src/features/clases/ClasesPage.tsx`, `api.ts`; test `clases.test.tsx`.
 
-- [ ] **Paso 1:** escribir el test de clases.
-- [ ] **Paso 2:** correrlo y verificar que falla.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr el test y verificar que pasa.
-- [ ] **Paso 5:** commit `feat(web): administración del horario de clases`.
+- [x] **Paso 1:** escribir el test de clases.
+- [x] **Paso 2:** correrlo y verificar que falla.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr el test y verificar que pasa.
+- [x] **Paso 5:** commit `feat(web): administración del horario de clases`.
 
 ### Tarea 4: Usuarios
 
