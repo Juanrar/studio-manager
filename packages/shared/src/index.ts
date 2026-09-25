@@ -3,3 +3,4 @@ export * from './usuarios.ts';
 export * from './auth.ts';
 export * from './comun.ts';
 export * from './alumnos.ts';
+export * from './packs.ts';

@@ -1,6 +1,6 @@
 # Packs
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** autenticacion  
 **Listo cuando:** `pnpm test` pasa; admin puede crear y editar packs y recepción puede listarlos.
 
@@ -53,12 +53,12 @@ Forma del pack: `{ id, nombre, cantidadClases, precio, activo }`.
 **Interfaces:**
 - Produce: `obtenerPack(id): Promise<Pack>` (lanza `NoEncontradoError`), que usa la feature de pagos.
 
-- [ ] **Paso 1:** escribir los 3 tests de la tabla.
-- [ ] **Paso 2:** correrlos y verificar que fallan con 404.
-- [ ] **Paso 3:** implementar esquemas, repository, service y rutas.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(packs): catálogo de packs`.
+- [x] **Paso 1:** escribir los 3 tests de la tabla.
+- [x] **Paso 2:** correrlos y verificar que fallan con 404.
+- [x] **Paso 3:** implementar esquemas, repository, service y rutas.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(packs): catálogo de packs`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.
