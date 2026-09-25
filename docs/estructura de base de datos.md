@@ -14,10 +14,21 @@ Diseño de la base para la versión web del sistema de gestión del estudio de d
 
 1. **Separar el horario de la clase dictada.** `clase` es el horario semanal fijo ("Hip-Hop, martes 19:00"). `sesion` es una clase que ocurrió en una fecha, con el profesor que la dio de verdad. La asistencia apunta a la sesión. Así se pueden registrar suplencias y cancelaciones, y el historial no cambia si mañana se modifica el horario.
 2. **El pago guarda lo que se cobró.** `pago.monto` es lo que pagó el alumno ese día. Si el precio del pack sube, los pagos anteriores y los sueldos ya calculados no cambian.
-3. **El valor de cada asistencia se fija al registrarla.** `asistencia.valor_clase` = `pago.monto / pago.cantidad_clases`. `asistencia.porcentaje_profesor` copia el porcentaje vigente del profesor en ese momento. El sueldo es la suma de `valor_clase * porcentaje_profesor` y no depende de datos que puedan cambiar después.
+3. **El valor de cada asistencia se fija al registrarla.** `asistencia.valor_clase` = `pago.monto / pago.cantidad_clases`, redondeado. `asistencia.porcentaje_bp` copia el porcentaje vigente del profesor en ese momento. El sueldo es la suma de `valor_clase * porcentaje_bp / 10000` y no depende de datos que puedan cambiar después.
 4. **Las clases restantes se calculan, no se guardan.** Restantes = `pago.cantidad_clases - asistencias del pago`. Con un contador aparte (`cantidad_restante` en la app original) el número se desincronizaba al borrar o cambiar asistencias.
 5. **Nada que tenga historial se borra.** Packs, clases, profesores y alumnos se marcan `activo = false`. Un pago mal cargado se anula (`anulado_en`), no se elimina.
 6. **El pago copia los datos del pack.** `pago.cantidad_clases` copia `pack.cantidad_clases` al momento de la compra. Si el pack cambia, el pago conserva lo que el alumno compró.
+7. **El dinero se guarda como entero, en pesos.** No hay centavos en el sistema: los precios del estudio son montos redondos. Todas las columnas de dinero son `bigint`. Un pack de $8.000 se guarda como `8000`. Así no hay decimales de punto flotante ni conversiones de string, porque el driver de Postgres devuelve `numeric` como string.
+8. **Los porcentajes se guardan como entero, en puntos básicos.** `porcentaje_bp` va de 1 a 10000, donde 10000 es el 100% y 5000 es el 50%. Un profesor que cobra el 52,5% se guarda como `5250`. Mismo motivo que el dinero.
+
+### Redondeo
+
+El único redondeo del sistema pasa en dos lugares y siempre es al entero más cercano (medio para arriba):
+
+- `valor_clase = round(pago.monto / pago.cantidad_clases)`
+- monto del profesor por asistencia = `round(valor_clase * porcentaje_bp / 10000)`
+
+La diferencia por redondeo es de como máximo un peso por asistencia, y queda del lado del estudio.
 
 ## Diagrama
 
@@ -70,14 +81,14 @@ erDiagram
     porcentaje_profesor {
         bigint id PK
         bigint profesor_id FK
-        numeric porcentaje
+        smallint porcentaje_bp
         date vigente_desde
     }
     pack {
         bigint id PK
         text nombre
         int cantidad_clases
-        numeric precio
+        bigint precio
         boolean activo
     }
     pago {
@@ -85,7 +96,7 @@ erDiagram
         bigint alumno_id FK
         bigint pack_id FK
         int cantidad_clases
-        numeric monto
+        bigint monto
         medio_pago medio
         timestamptz fecha
         date vence_el
@@ -114,8 +125,8 @@ erDiagram
         bigint sesion_id FK
         bigint alumno_id FK
         bigint pago_id FK
-        numeric valor_clase
-        numeric porcentaje_profesor
+        bigint valor_clase
+        smallint porcentaje_bp
         bigint registrado_por FK
         timestamptz registrado_en
     }
@@ -123,7 +134,7 @@ erDiagram
         bigint id PK
         bigint profesor_id FK
         date periodo
-        numeric monto
+        bigint monto
         timestamptz pagado_en
     }
 ```
@@ -215,7 +226,7 @@ Historial del porcentaje que cobra cada profesor. El vigente es el de `vigente_d
 create table porcentaje_profesor (
   id            bigint generated always as identity primary key,
   profesor_id   bigint not null references profesor (id),
-  porcentaje    numeric(5,2) not null check (porcentaje > 0 and porcentaje <= 100),
+  porcentaje_bp smallint not null check (porcentaje_bp > 0 and porcentaje_bp <= 10000),
   vigente_desde date not null,
   unique (profesor_id, vigente_desde)
 );
@@ -230,7 +241,7 @@ create table pack (
   id              bigint generated always as identity primary key,
   nombre          text not null,
   cantidad_clases int  not null check (cantidad_clases > 0),
-  precio          numeric(12,2) not null check (precio >= 0),
+  precio          bigint not null check (precio >= 0),
   activo          boolean not null default true
 );
 ```
@@ -245,7 +256,7 @@ create table pago (
   alumno_id       bigint not null references alumno (id),
   pack_id         bigint not null references pack (id),
   cantidad_clases int    not null check (cantidad_clases > 0),
-  monto           numeric(12,2) not null check (monto >= 0),
+  monto           bigint not null check (monto >= 0),
   medio           medio_pago not null,
   fecha           timestamptz not null default now(),
   vence_el        date not null,
@@ -293,7 +304,7 @@ create index sesion_profesor_fecha_idx on sesion (profesor_id, fecha);
 
 ### asistencia
 
-Un alumno que asistió a una sesión y usó una clase de un pago. `valor_clase` y `porcentaje_profesor` se copian al registrar la asistencia.
+Un alumno que asistió a una sesión y usó una clase de un pago. `valor_clase` y `porcentaje_bp` se copian al registrar la asistencia.
 
 ```sql
 create table asistencia (
@@ -301,8 +312,8 @@ create table asistencia (
   sesion_id           bigint not null references sesion (id),
   alumno_id           bigint not null references alumno (id),
   pago_id             bigint not null references pago (id),
-  valor_clase         numeric(12,2) not null check (valor_clase >= 0),
-  porcentaje_profesor numeric(5,2)  not null,
+  valor_clase          bigint   not null check (valor_clase >= 0),
+  porcentaje_bp        smallint not null check (porcentaje_bp > 0 and porcentaje_bp <= 10000),
   registrado_por      bigint not null references usuario (id),
   registrado_en       timestamptz not null default now(),
   unique (sesion_id, alumno_id)
@@ -320,7 +331,7 @@ create table liquidacion (
   id           bigint generated always as identity primary key,
   profesor_id  bigint not null references profesor (id),
   periodo      date   not null check (extract(day from periodo) = 1),
-  monto        numeric(12,2) not null,
+  monto        bigint not null check (monto >= 0),
   pagado_en    timestamptz,
   registrado_por bigint not null references usuario (id),
   unique (profesor_id, periodo)
@@ -373,7 +384,7 @@ order by p.vence_el;
 ```sql
 select s.profesor_id,
        count(a.id) as asistencias,
-       sum(a.valor_clase * a.porcentaje_profesor / 100) as sueldo
+       sum(round(a.valor_clase * a.porcentaje_bp / 10000.0)) as sueldo
 from asistencia a
 join sesion s on s.id = a.sesion_id
 where s.profesor_id = $1
@@ -400,6 +411,7 @@ group by medio;
 | `clase` sin fecha: no hay suplencias ni cancelaciones | tabla `sesion` con `fecha` y `profesor_id` real |
 | El sueldo usaba `pack.precio` actual | `pago.monto` y `asistencia.valor_clase` se fijan al momento |
 | Sueldo = 100% de lo cobrado, con `switch` por id de pack | `porcentaje_profesor` con historial; `valor_clase = monto / cantidad_clases` |
+| Montos con decimales (`numeric`) leídos como string | todo el dinero en pesos enteros con `bigint`; porcentajes en puntos básicos |
 | `cantidad_restante` se desincronizaba | se calcula contando asistencias |
 | Vencimiento de 30 días fijo en una query | `pago.vence_el`, editable |
 | Cambiar de pack reiniciaba las clases usadas | el pago no se modifica; se anula y se crea otro |
