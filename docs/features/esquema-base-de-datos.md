@@ -1,6 +1,6 @@
 # Esquema de base de datos y migraciones
 
-**Estado:** pendiente  
+**Estado:** en curso  
 **Depende de:** monorepo-y-api  
 **Listo cuando:** `pnpm --filter @studio/api test` pasa con Docker corriendo y `\dt` lista las 11 tablas.
 
@@ -39,7 +39,7 @@
   - `crearCliente(url: string): { sql: Sql; db: DrizzleDb }` exportado desde `src/db/client.ts`. `DrizzleDb` es el tipo de la instancia de Drizzle con el esquema completo.
   - `db` y `sql`: instancias por defecto creadas con `config.databaseUrl`, usadas por la app.
 
-- [ ] **Paso 1: Instalar dependencias**
+- [x] **Paso 1: Instalar dependencias**
 
 Correr:
 
@@ -48,7 +48,7 @@ pnpm --filter @studio/api add drizzle-orm postgres
 pnpm --filter @studio/api add -D drizzle-kit @testcontainers/postgresql
 ```
 
-- [ ] **Paso 2: Crear el cliente**
+- [x] **Paso 2: Crear el cliente**
 
 `apps/api/src/db/client.ts`:
 
@@ -71,7 +71,7 @@ export const db = cliente.db;
 export type DrizzleDb = typeof db;
 ```
 
-- [ ] **Paso 3: Crear la configuración de drizzle-kit**
+- [x] **Paso 3: Crear la configuración de drizzle-kit**
 
 `apps/api/drizzle.config.ts`:
 
@@ -89,7 +89,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Paso 4: Agregar scripts de base a apps/api/package.json**
+- [x] **Paso 4: Agregar scripts de base a apps/api/package.json**
 
 Agregar dentro de `"scripts"`:
 
@@ -99,12 +99,12 @@ Agregar dentro de `"scripts"`:
 "db:studio": "drizzle-kit studio"
 ```
 
-- [ ] **Paso 5: Verificar que compila**
+- [x] **Paso 5: Verificar que compila**
 
 Correr: `pnpm --filter @studio/api typecheck`
 Esperado: FALLA con "Cannot find module './schema.ts'". Es lo esperado: el esquema se crea en la tarea 2.
 
-- [ ] **Paso 6: Commit**
+- [x] **Paso 6: Commit**
 
 ```bash
 git add apps/api/package.json apps/api/drizzle.config.ts apps/api/src/db/client.ts pnpm-lock.yaml
