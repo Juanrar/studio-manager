@@ -8,6 +8,13 @@
       "when": 1790296988862,
       "tag": "0000_windy_betty_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790298214356,
+      "tag": "0001_unaccent",
+      "breakpoints": true
     }
   ]
 }

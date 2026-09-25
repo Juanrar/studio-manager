@@ -56,9 +56,9 @@ Forma del alumno: `{ id, nombre, apellido, dni, email, telefono, fechaNacimiento
 **Archivos:**
 - Crear: migración custom con `pnpm --filter @studio/api exec drizzle-kit generate --custom --name=unaccent`, con el contenido `CREATE EXTENSION IF NOT EXISTS unaccent;`
 
-- [ ] **Paso 1:** generar la migración custom y escribir el `CREATE EXTENSION`.
-- [ ] **Paso 2:** aplicarla con `pnpm --filter @studio/api db:migrate` y verificar con `docker exec studio-manager-db psql -U studio -d studio_manager -c "select unaccent('García')"` que devuelve `Garcia`.
-- [ ] **Paso 3:** commit `feat(db): habilitar la extensión unaccent`.
+- [x] **Paso 1:** generar la migración custom y escribir el `CREATE EXTENSION`.
+- [x] **Paso 2:** aplicarla con `pnpm --filter @studio/api db:migrate` y verificar con `docker exec studio-manager-db psql -U studio -d studio_manager -c "select unaccent('García')"` que devuelve `Garcia`.
+- [x] **Paso 3:** commit `feat(db): habilitar la extensión unaccent`.
 
 ### Tarea 2: Módulo de alumnos
 
