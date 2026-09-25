@@ -127,3 +127,19 @@ describe('PATCH /api/sesiones/:id', () => {
     expect(clases.json().items[0].profesor).toEqual({ id: erik.id, nombre: 'Erik', apellido: 'Zapata' });
   });
 });
+
+describe('GET /api/sesiones/:id', () => {
+  it('devuelve la sesión con los datos de su clase', async () => {
+    const abierta = (await abrirSesion(hipHopMartes.id, MARTES)).json();
+
+    const respuesta = await app.inject({ method: 'GET', url: `/api/sesiones/${abierta.id}`, headers: { cookie } });
+
+    expect(respuesta.json()).toEqual({
+      ...abierta,
+      estilo: 'Hip-Hop',
+      nivel: 'Inicial',
+      horaInicio: '19:00',
+      horaFin: '20:30',
+    });
+  });
+});

@@ -1,7 +1,8 @@
 import { and, count, eq, sql, type SQL } from 'drizzle-orm';
-import type { EstadoSesion, Sesion } from '@studio/shared';
+import type { EstadoSesion, Sesion, SesionDetalle } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
-import { asistencia, profesor, sesion, type NuevaSesion } from '../../db/schema.ts';
+import { asistencia, clase, profesor, sesion, type NuevaSesion } from '../../db/schema.ts';
+import { horaHHMM } from './clases.repository.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 
 const columnas = {
@@ -83,4 +84,20 @@ export async function actualizarPorcentajeDeAsistencias(
   porcentajeBp: number,
 ): Promise<void> {
   await ej.update(asistencia).set({ porcentajeBp }).where(eq(asistencia.sesionId, sesionId));
+}
+
+export async function buscarDetalle(ej: Ejecutor, id: number): Promise<SesionDetalle | null> {
+  const [fila] = await ej
+    .select({
+      ...columnas,
+      estilo: clase.estilo,
+      nivel: clase.nivel,
+      horaInicio: horaHHMM(clase.horaInicio),
+      horaFin: horaHHMM(clase.horaFin),
+    })
+    .from(sesion)
+    .innerJoin(profesor, eq(profesor.id, sesion.profesorId))
+    .innerJoin(clase, eq(clase.id, sesion.claseId))
+    .where(eq(sesion.id, id));
+  return fila ?? null;
 }

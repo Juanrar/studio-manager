@@ -1,7 +1,11 @@
 export abstract class ErrorDeDominio extends Error {
   abstract readonly codigoHttp: number;
 
-  constructor(mensaje: string) {
+  // `codigo` es para el frontend: decide con él, no comparando el texto del mensaje.
+  constructor(
+    mensaje: string,
+    readonly codigo?: string,
+  ) {
     super(mensaje);
     this.name = new.target.name;
   }

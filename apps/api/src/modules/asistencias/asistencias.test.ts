@@ -119,6 +119,7 @@ describe('POST /api/sesiones/:id/asistencias', () => {
     expect(respuesta.statusCode).toBe(422);
     expect(respuesta.json()).toEqual({
       error: 'Martina García no tiene clases disponibles para el 2026-03-10',
+      codigo: 'SIN_CLASES_DISPONIBLES',
     });
   });
 

@@ -52,11 +52,11 @@
 - Modificar: `packages/shared/src/clases.ts` — `type SesionDetalle`.
 - Test: `apps/api/src/modules/clases/sesiones.test.ts`, `apps/api/src/modules/asistencias/asistencias.test.ts`
 
-- [ ] **Paso 1:** escribir los 2 tests de la API.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr la suite de la API y verificar que pasa.
-- [ ] **Paso 5:** commit `feat(api): detalle de sesión y código de error sin clases disponibles`.
+- [x] **Paso 1:** escribir los 2 tests de la API.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr la suite de la API y verificar que pasa.
+- [x] **Paso 5:** commit `feat(api): detalle de sesión y código de error sin clases disponibles`.
 
 ### Tarea 2: Agenda del día
 

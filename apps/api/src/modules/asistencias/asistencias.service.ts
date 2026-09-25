@@ -1,4 +1,4 @@
-import type { Asistencia, RegistrarAsistenciaInput } from '@studio/shared';
+import { SIN_CLASES_DISPONIBLES, type Asistencia, type RegistrarAsistenciaInput } from '@studio/shared';
 import { db } from '../../db/client.ts';
 import { dividirEnPartes } from '../../lib/dinero.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
@@ -30,7 +30,10 @@ export async function registrarAsistencia(
     let pago = await elegirPagoParaAsistencia(tx, alumno.id, sesion.fecha);
     if (pago === null) {
       if (datos.cobrar === undefined) {
-        throw new ReglaDeNegocioError(`${nombreCompleto} no tiene clases disponibles para el ${sesion.fecha}`);
+        throw new ReglaDeNegocioError(
+          `${nombreCompleto} no tiene clases disponibles para el ${sesion.fecha}`,
+          SIN_CLASES_DISPONIBLES,
+        );
       }
       pago = await registrarPagoEn(tx, { alumnoId: alumno.id, ...datos.cobrar }, usuarioId, ahora, hoy);
     }

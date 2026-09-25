@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { abrirSesionSchema, actualizarSesionSchema, agendaQuerySchema } from '@studio/shared';
 import { idParamSchema } from '../../lib/validacion.ts';
 import { requerirRol } from '../../plugins/autenticacion.ts';
-import { abrirSesion, actualizarSesion, agendaDelDia } from './sesiones.service.ts';
+import { abrirSesion, actualizarSesion, agendaDelDia, obtenerDetalleDeSesion } from './sesiones.service.ts';
 
 export async function rutasSesiones(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requerirRol('recepcion'));
@@ -10,6 +10,11 @@ export async function rutasSesiones(app: FastifyInstance): Promise<void> {
   app.get('/api/sesiones/dia', async (request) => {
     const { fecha } = agendaQuerySchema.parse(request.query);
     return agendaDelDia(fecha ?? app.hoy());
+  });
+
+  app.get('/api/sesiones/:id', async (request) => {
+    const { id } = idParamSchema.parse(request.params);
+    return obtenerDetalleDeSesion(id);
   });
 
   app.post('/api/sesiones', async (request, reply) => {

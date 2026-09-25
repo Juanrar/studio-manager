@@ -1,4 +1,4 @@
-import type { ActualizarSesionInput, AgendaDelDia, Sesion } from '@studio/shared';
+import type { ActualizarSesionInput, AgendaDelDia, Sesion, SesionDetalle } from '@studio/shared';
 import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { diaSemanaIso, type FechaDia } from '../../lib/fechas.ts';
@@ -77,6 +77,12 @@ export async function obtenerSesion(id: number): Promise<Sesion> {
 // La usa asistencias dentro de su transacción.
 export async function bloquearSesion(ej: Ejecutor, id: number): Promise<repo.SesionBloqueada> {
   const encontrada = await repo.bloquear(ej, id);
+  if (encontrada === null) throw new NoEncontradoError(`No existe la sesión ${id}`);
+  return encontrada;
+}
+
+export async function obtenerDetalleDeSesion(id: number): Promise<SesionDetalle> {
+  const encontrada = await repo.buscarDetalle(db, id);
   if (encontrada === null) throw new NoEncontradoError(`No existe la sesión ${id}`);
   return encontrada;
 }

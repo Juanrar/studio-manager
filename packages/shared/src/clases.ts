@@ -84,6 +84,13 @@ export type Sesion = {
   asistentes: number;
 };
 
+export type SesionDetalle = Sesion & {
+  estilo: string;
+  nivel: string | null;
+  horaInicio: string;
+  horaFin: string;
+};
+
 export type ClaseDelDia = {
   claseId: number;
   estilo: string;

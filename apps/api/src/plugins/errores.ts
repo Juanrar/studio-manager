@@ -5,7 +5,9 @@ import { esErrorDeDominio } from '../lib/errores.ts';
 export function registrarManejoDeErrores(app: FastifyInstance): void {
   app.setErrorHandler((error, request, reply) => {
     if (esErrorDeDominio(error)) {
-      return reply.status(error.codigoHttp).send({ error: error.message });
+      return reply
+        .status(error.codigoHttp)
+        .send(error.codigo === undefined ? { error: error.message } : { error: error.message, codigo: error.codigo });
     }
 
     if (error instanceof ZodError) {
