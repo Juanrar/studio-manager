@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { UsuarioPublico } from '@studio/shared';
-import { ADMIN, RECEPCION, conSesion, renderizarEn } from '../../../test/render.tsx';
+import { ADMIN, RECEPCION, conAgendaVacia, conSesion, renderizarEn } from '../../../test/render.tsx';
 import { servidor } from '../../../test/servidor.ts';
 
 // Simula la sesión del servidor: el login la abre y el logout la cierra.
@@ -31,6 +31,7 @@ function sesionDelServidor(usuarioAlLoguear: UsuarioPublico, logueadoAlEmpezar =
 describe('login', () => {
   it('con credenciales correctas lleva a la agenda y muestra el nombre del usuario', async () => {
     sesionDelServidor(ADMIN);
+    conAgendaVacia();
     const { router, usuario } = renderizarEn('/login');
 
     await usuario.type(await screen.findByLabelText('Email'), 'ana@estudio.test');
@@ -72,6 +73,7 @@ describe('sesión', () => {
     ['admin ve el menú de administración', ADMIN, true],
   ])('%s', async (_caso, usuarioLogueado, veAdministracion) => {
     conSesion(usuarioLogueado);
+    conAgendaVacia();
     renderizarEn('/agenda');
 
     expect(await screen.findByRole('link', { name: 'Alumnos' })).toBeInTheDocument();
@@ -80,6 +82,7 @@ describe('sesión', () => {
 
   it('cerrar sesión avisa a la API y vuelve al login', async () => {
     const registro = sesionDelServidor(RECEPCION, true);
+    conAgendaVacia();
     const { usuario, router } = renderizarEn('/agenda');
 
     await usuario.click(await screen.findByRole('button', { name: 'Cerrar sesión' }));

@@ -64,11 +64,11 @@
 - Crear: `apps/web/src/features/agenda/api.ts`, `AgendaPage.tsx`
 - Test: `apps/web/src/features/agenda/agenda.test.tsx`
 
-- [ ] **Paso 1:** escribir los 2 tests de la agenda.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): agenda del día`.
+- [x] **Paso 1:** escribir los 2 tests de la agenda.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): agenda del día`.
 
 ### Tarea 3: Pantalla de la sesión
 
