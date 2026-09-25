@@ -4,8 +4,9 @@ import { api, conQuery } from '../../lib/api.ts';
 
 export type FiltrosAlumnos = { q: string; pagina: number; incluirInactivos: boolean };
 
-export function useAlumnos(filtros: FiltrosAlumnos) {
+export function useAlumnos(filtros: FiltrosAlumnos, { habilitado = true }: { habilitado?: boolean } = {}) {
   return useQuery({
+    enabled: habilitado,
     queryKey: ['alumnos', 'listado', filtros],
     queryFn: () =>
       api.get<Listado<Alumno>>(

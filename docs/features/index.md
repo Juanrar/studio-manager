@@ -26,7 +26,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 |---|---|---|---|
 | 12 | [Base del frontend y login](frontend-base.md) | lista | 4 |
 | 13 | [Alumnos y pagos](frontend-alumnos.md) | lista | 12 |
-| 14 | [Agenda del día y asistencias](frontend-agenda.md) | en curso | 13 |
+| 14 | [Agenda del día y asistencias](frontend-agenda.md) | lista | 13 |
 | 15 | Administración: packs, profesores, clases y usuarios | por escribir | 12 |
 | 16 | Liquidaciones e ingresos | por escribir | 15 |
 | 17 | Prueba de punta a punta y build de producción | por escribir | 14, 16 |
@@ -37,6 +37,7 @@ Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo s
 
 | Fecha | Feature | Qué pasó |
 |---|---|---|
+| 2026-09-25 | 14. Agenda del día y asistencias | Lista. Agenda por fecha en la URL, apertura de sesión, anotar alumnos con buscador, cobrar clase suelta en el acto (decidido por `codigo: SIN_CLASES_DISPONIBLES`, no por el texto), quitar asistencias, suplencias y cancelar. En la API se agregó `GET /api/sesiones/:id` y el campo `codigo` en los errores de negocio. API 105, web 18 |
 | 2026-09-24 | 13. Pantallas de alumnos y pagos | Lista. Listado con búsqueda demorada y paginación, alta y edición con el esquema compartido, ficha con pagos (registrar y anular). 12 tests web |
 | 2026-09-24 | 12. Base del frontend | Lista. Vite 8, React 19, React Router 8, TanStack Query, Tailwind 4, Vitest 5 con MSW. Login, sesión, menú por rol y cerrar sesión; 6 tests. TypeScript fijado en 5.9 (se había instalado 7). El proxy de Vite apunta a `127.0.0.1` por el mismo problema de IPv6 de Windows. Probado a mano contra la API real |
 | 2026-09-24 | 11. Liquidaciones y reportes | Lista. Resumen y detalle de sueldos por mes, cierre que congela el monto y bloquea cambios de asistencias y suplencias en ese mes, marcar pagada, e ingresos por medio de pago según el día del estudio. El backend de v1 queda completo. Suite 104/104 |

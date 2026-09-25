@@ -6,6 +6,8 @@ export class ErrorDeApi extends Error {
     readonly status: number,
     mensaje: string,
     readonly detalles: DetalleError[] = [],
+    // Algunos errores de negocio traen un código para que la pantalla decida qué ofrecer.
+    readonly codigo?: string,
   ) {
     super(mensaje);
     this.name = 'ErrorDeApi';
@@ -27,11 +29,12 @@ async function pedir<T>(metodo: Metodo, ruta: string, cuerpo?: unknown): Promise
 
   const datos: unknown = await respuesta.json().catch(() => null);
   if (!respuesta.ok) {
-    const error = datos as { error?: string; detalles?: DetalleError[] } | null;
+    const error = datos as { error?: string; detalles?: DetalleError[]; codigo?: string } | null;
     throw new ErrorDeApi(
       respuesta.status,
       error?.error ?? 'Ocurrió un error inesperado. Probá de nuevo.',
       error?.detalles ?? [],
+      error?.codigo,
     );
   }
   return datos as T;

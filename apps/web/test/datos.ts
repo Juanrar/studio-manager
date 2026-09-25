@@ -1,6 +1,6 @@
 // Constructores de respuestas de la API para los handlers de MSW.
 // Devuelven la misma forma que la API real; el test pisa solo lo que le importa.
-import type { Alumno, Listado, Pack, Pago } from '@studio/shared';
+import type { Alumno, Asistencia, Listado, Pack, Pago, Profesor } from '@studio/shared';
 
 export function unAlumno(datos: Partial<Alumno> = {}): Alumno {
   return {
@@ -42,6 +42,34 @@ export function unPago(datos: Partial<Pago> = {}): Pago {
     anulado: false,
     motivoAnulacion: null,
     registradoPor: { id: 2, nombre: 'Rita Recepción' },
+    ...datos,
+  };
+}
+
+export function unProfesor(datos: Partial<Profesor> = {}): Profesor {
+  return {
+    id: 1,
+    nombre: 'Erik',
+    apellido: 'Zapata',
+    dni: null,
+    email: null,
+    telefono: null,
+    aliasCbu: null,
+    activo: true,
+    porcentajeVigenteBp: 5000,
+    ...datos,
+  };
+}
+
+export function unaAsistencia(datos: Partial<Asistencia> = {}): Asistencia {
+  return {
+    id: 900,
+    sesionId: 50,
+    alumno: { id: 10, nombre: 'Martina', apellido: 'García' },
+    pagoId: 100,
+    pack: 'Pack x8',
+    valorClase: 1200,
+    porcentajeBp: 5000,
     ...datos,
   };
 }

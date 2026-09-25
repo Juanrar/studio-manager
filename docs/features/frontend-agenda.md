@@ -1,6 +1,6 @@
 # Agenda del día y asistencias
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** frontend-alumnos, asistencias  
 **Listo cuando:** `pnpm test` pasa; recepción ve las clases del día, abre una clase, anota alumnos (y cobra una clase suelta en el acto si hace falta), borra una asistencia y registra una suplencia.
 
@@ -77,12 +77,12 @@
 - Crear: `apps/web/src/features/profesores/api.ts`
 - Test: `apps/web/src/features/agenda/sesion.test.tsx`
 
-- [ ] **Paso 1:** escribir los 4 tests de la sesión.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): tomar asistencia, cobrar en el acto y suplencias`.
+- [x] **Paso 1:** escribir los 4 tests de la sesión.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): tomar asistencia, cobrar en el acto y suplencias`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.
