@@ -64,3 +64,15 @@ export function sumarDias(fecha: string, dias: number): string {
   const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
   return new Date(Date.UTC(anio, mes - 1, dia + dias)).toISOString().slice(0, 10);
 }
+
+export const NOMBRES_MEDIO_DE_PAGO: Record<string, string> = {
+  efectivo: 'Efectivo',
+  transferencia: 'Transferencia',
+  mercado_pago: 'Mercado Pago',
+  otro: 'Otro',
+};
+
+// Un instante ISO a DD/MM/AAAA, con el día del estudio.
+export function formatearInstante(instante: string): string {
+  return formatearFecha(hoyEnEstudio(new Date(instante)));
+}

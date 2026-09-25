@@ -1,6 +1,6 @@
 # Pantallas de alumnos y pagos
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** frontend-base, alumnos, pagos  
 **Listo cuando:** `pnpm test` pasa; recepción busca alumnos, los crea y edita, y desde la ficha de un alumno ve sus pagos, registra uno nuevo y anula uno mal cargado.
 
@@ -27,6 +27,7 @@
 
 - **Los errores de la API se muestran donde corresponden:** los `detalles` de un 400 van al campo; un 422 (DNI repetido, pago con asistencias) va como aviso arriba del formulario.
 - **El formulario usa `crearAlumnoSchema`** de `packages/shared`: los mismos mensajes que la API.
+- **Estado de un pago en la ficha**, en este orden: Anulado, Vencido, Sin clases, Vigente. Un pago vencido con clases sin usar se muestra como Vencido: ya no se puede usar.
 - **Después de guardar** se recargan las consultas afectadas (`alumnos`, `pagos`), no se edita la caché a mano.
 
 ## Tests
@@ -65,12 +66,12 @@
 - Crear: `apps/web/src/features/packs/api.ts`
 - Test: `apps/web/src/features/alumnos/ficha.test.tsx`
 
-- [ ] **Paso 1:** escribir los 3 tests de la ficha.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): ficha del alumno con pagos`.
+- [x] **Paso 1:** escribir los 3 tests de la ficha.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): ficha del alumno con pagos`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.

@@ -25,7 +25,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | # | Feature | Estado | Depende de |
 |---|---|---|---|
 | 12 | [Base del frontend y login](frontend-base.md) | lista | 4 |
-| 13 | [Alumnos y pagos](frontend-alumnos.md) | en curso | 12 |
+| 13 | [Alumnos y pagos](frontend-alumnos.md) | lista | 12 |
 | 14 | Agenda del día y asistencias | por escribir | 13 |
 | 15 | Administración: packs, profesores, clases y usuarios | por escribir | 12 |
 | 16 | Liquidaciones e ingresos | por escribir | 15 |
@@ -37,6 +37,7 @@ Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo s
 
 | Fecha | Feature | Qué pasó |
 |---|---|---|
+| 2026-09-24 | 13. Pantallas de alumnos y pagos | Lista. Listado con búsqueda demorada y paginación, alta y edición con el esquema compartido, ficha con pagos (registrar y anular). 12 tests web |
 | 2026-09-24 | 12. Base del frontend | Lista. Vite 8, React 19, React Router 8, TanStack Query, Tailwind 4, Vitest 5 con MSW. Login, sesión, menú por rol y cerrar sesión; 6 tests. TypeScript fijado en 5.9 (se había instalado 7). El proxy de Vite apunta a `127.0.0.1` por el mismo problema de IPv6 de Windows. Probado a mano contra la API real |
 | 2026-09-24 | 11. Liquidaciones y reportes | Lista. Resumen y detalle de sueldos por mes, cierre que congela el monto y bloquea cambios de asistencias y suplencias en ese mes, marcar pagada, e ingresos por medio de pago según el día del estudio. El backend de v1 queda completo. Suite 104/104 |
 | 2026-09-24 | 10. Asistencias | Lista. Registrar asistencia en una transacción (bloquea sesión y pagos, elige el que vence primero, cobra clase suelta en el acto), borrar, y las reglas de cancelación, suplencia y anulación. El test HTTP de concurrencia detectaba la carrera solo a veces; se agregó uno determinístico con `lock_timeout`. Suite 95/95 |

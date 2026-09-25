@@ -1,6 +1,7 @@
 import { Navigate, type RouteObject } from 'react-router';
 import { Proximamente } from './components/Layout.tsx';
 import { AlumnosPage } from './features/alumnos/AlumnosPage.tsx';
+import { FichaAlumnoPage } from './features/alumnos/FichaAlumnoPage.tsx';
 import { LoginPage } from './features/auth/LoginPage.tsx';
 import { RequiereSesion, SoloAdmin } from './features/auth/RequiereSesion.tsx';
 
@@ -13,6 +14,7 @@ export const rutas: RouteObject[] = [
       { index: true, element: <Navigate to="/agenda" replace /> },
       { path: 'agenda', element: <Proximamente titulo="Agenda del día" /> },
       { path: 'alumnos', element: <AlumnosPage /> },
+      { path: 'alumnos/:id', element: <FichaAlumnoPage /> },
       {
         element: <SoloAdmin />,
         children: [
