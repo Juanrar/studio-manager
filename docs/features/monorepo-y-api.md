@@ -1,6 +1,6 @@
 # Monorepo y esqueleto de la API
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** Ninguna  
 **Listo cuando:** `pnpm test` pasa y `curl http://localhost:3000/api/health` devuelve `{"estado":"ok"}`.
 
@@ -522,8 +522,8 @@ git commit -m "docs: agregar README con instrucciones de instalación"
 
 ## Verificación final del plan
 
-- [ ] `pnpm install` termina sin error.
-- [ ] `docker compose ps` muestra `db` como `healthy`.
-- [ ] `pnpm test` pasa.
-- [ ] `pnpm typecheck` pasa.
-- [ ] `curl http://localhost:3000/api/health` devuelve `{"estado":"ok"}`.
+- [x] `pnpm install` termina sin error.
+- [x] `docker compose ps` muestra `db` como `healthy`.
+- [x] `pnpm test` pasa.
+- [x] `pnpm typecheck` pasa.
+- [x] `curl http://localhost:3000/api/health` devuelve `{"estado":"ok"}`.

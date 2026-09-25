@@ -8,7 +8,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 
 | # | Feature | Estado | Depende de |
 |---|---|---|---|
-| 1 | [Monorepo y esqueleto de la API](monorepo-y-api.md) | en curso | — |
+| 1 | [Monorepo y esqueleto de la API](monorepo-y-api.md) | lista | — |
 | 2 | [Esquema de base de datos y migraciones](esquema-base-de-datos.md) | pendiente | 1 |
 | 3 | [Utilidades de dinero, fechas y errores](utilidades-de-dominio.md) | pendiente | 1 |
 | 4 | Autenticación y roles | por escribir | 2, 3 |
@@ -33,6 +33,7 @@ Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo s
 
 | Fecha | Feature | Qué pasó |
 |---|---|---|
+| 2026-09-24 | 1. Monorepo y API | Lista. `pnpm test` 2/2, typecheck ok, `/api/health` responde. Cambios al plan: `tsx` en lugar de `node` para correr `.ts` (Node 22.12 no lo hace sin flag) y se permitió el postinstall de esbuild que pide pnpm 12. Pendientes menores: agregar `.gitattributes`, mover `engine-strict` a `pnpm-workspace.yaml`, fijar `packageManager` |
 | 2026-09-24 | — | Se reorganizó la documentación: las features viven en `docs/features/` y el progreso se sigue en este índice |
 
 ## Decisiones tomadas
