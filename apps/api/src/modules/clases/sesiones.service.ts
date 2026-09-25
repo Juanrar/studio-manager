@@ -3,6 +3,7 @@ import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { diaSemanaIso, type FechaDia } from '../../lib/fechas.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
+import { verificarMesAbierto } from '../liquidaciones/liquidaciones.service.ts';
 import { porcentajeVigente, verificarProfesorActivo } from '../profesores/profesores.service.ts';
 import * as clasesRepo from './clases.repository.ts';
 import * as repo from './sesiones.repository.ts';
@@ -54,6 +55,9 @@ export async function actualizarSesion(id: number, datos: ActualizarSesionInput)
     }
 
     if (datos.profesorId !== undefined && datos.profesorId !== actual.profesorId) {
+      // La suplencia mueve el sueldo de esta clase de un profesor a otro: los dos meses tienen que estar abiertos.
+      await verificarMesAbierto(tx, actual.profesorId, actual.fecha);
+      await verificarMesAbierto(tx, datos.profesorId, actual.fecha);
       await verificarProfesorActivo(tx, datos.profesorId);
       const porcentajeBp = await porcentajeVigente(tx, datos.profesorId, actual.fecha);
       await repo.actualizarPorcentajeDeAsistencias(tx, id, porcentajeBp);

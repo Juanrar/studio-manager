@@ -173,3 +173,48 @@ describe('POST /api/liquidaciones', () => {
     expect(respuesta.json()).toEqual({ error: 'El período 2026-03 todavía no terminó' });
   });
 });
+
+describe('con el mes liquidado', () => {
+  const MENSAJE = { error: 'La liquidación de 2026-03 de Erik Zapata ya está cerrada' };
+  let cookieRecepcion: string;
+
+  beforeEach(async () => {
+    await cerrar('2026-03');
+    cookieRecepcion = await loguear(app, RECEPCION.email, RECEPCION.password);
+  });
+
+  it('no se registran asistencias de ese profesor', async () => {
+    const respuesta = await app.inject({
+      method: 'POST',
+      url: `/api/sesiones/${sesion3DeMarzo.id}/asistencias`,
+      payload: { alumnoId: joaquin.id, cobrar: { packId: claseSuelta.id, medio: 'efectivo' } },
+      headers: { cookie: cookieRecepcion },
+    });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual(MENSAJE);
+  });
+
+  it('no se borran asistencias de ese profesor', async () => {
+    const respuesta = await app.inject({
+      method: 'DELETE',
+      url: `/api/asistencias/${asistenciaDeMartinaEl10.id}`,
+      headers: { cookie: cookieRecepcion },
+    });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual(MENSAJE);
+  });
+
+  it('no se cambia el profesor de una sesión', async () => {
+    const respuesta = await app.inject({
+      method: 'PATCH',
+      url: `/api/sesiones/${sesion10DeMarzo.id}`,
+      payload: { profesorId: iaru.id },
+      headers: { cookie: cookieRecepcion },
+    });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual(MENSAJE);
+  });
+});

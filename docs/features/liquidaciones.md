@@ -76,11 +76,11 @@ Formas:
 - Modificar: `apps/api/src/modules/asistencias/asistencias.service.ts`, `apps/api/src/modules/clases/sesiones.service.ts`
 - Test: los 3 tests de "mes cerrado" en `liquidaciones.test.ts`
 
-- [ ] **Paso 1:** escribir los 3 tests.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** llamar a `verificarMesAbierto` en registrar, borrar y suplencia.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(liquidaciones): congelar las asistencias de un mes liquidado`.
+- [x] **Paso 1:** escribir los 3 tests.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** llamar a `verificarMesAbierto` en registrar, borrar y suplencia.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(liquidaciones): congelar las asistencias de un mes liquidado`.
 
 ### Tarea 3: Ingresos del mes
 

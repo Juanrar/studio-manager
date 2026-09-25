@@ -6,6 +6,7 @@ import type { FechaDia } from '../../lib/fechas.ts';
 import { esViolacionUnica } from '../../lib/postgres.ts';
 import { obtenerAlumno } from '../alumnos/alumnos.service.ts';
 import { bloquearSesion } from '../clases/sesiones.service.ts';
+import { verificarMesAbierto } from '../liquidaciones/liquidaciones.service.ts';
 import { elegirPagoParaAsistencia, registrarPagoEn } from '../pagos/pagos.service.ts';
 import { porcentajeVigente } from '../profesores/profesores.service.ts';
 import * as repo from './asistencias.repository.ts';
@@ -24,6 +25,7 @@ export async function registrarAsistencia(
   const id = await db.transaction(async (tx) => {
     const sesion = await bloquearSesion(tx, sesionId);
     if (sesion.estado === 'cancelada') throw new ReglaDeNegocioError('La clase está cancelada');
+    await verificarMesAbierto(tx, sesion.profesorId, sesion.fecha);
 
     let pago = await elegirPagoParaAsistencia(tx, alumno.id, sesion.fecha);
     if (pago === null) {
@@ -67,6 +69,10 @@ export async function listarAsistenciasDeSesion(sesionId: number): Promise<Asist
 
 // Borrarla devuelve la clase al pack: las clases restantes se calculan contando asistencias.
 export async function borrarAsistencia(id: number): Promise<void> {
-  const borrada = await repo.borrar(db, id);
-  if (!borrada) throw new NoEncontradoError(`No existe la asistencia ${id}`);
+  await db.transaction(async (tx) => {
+    const sesion = await repo.buscarSesionDe(tx, id);
+    if (sesion === null) throw new NoEncontradoError(`No existe la asistencia ${id}`);
+    await verificarMesAbierto(tx, sesion.profesorId, sesion.fecha);
+    await repo.borrar(tx, id);
+  });
 }

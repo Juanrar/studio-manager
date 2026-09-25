@@ -1,7 +1,7 @@
 import { asc, eq, type SQL } from 'drizzle-orm';
 import type { Asistencia } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
-import { alumno, asistencia, pack, pago, type NuevaAsistencia } from '../../db/schema.ts';
+import { alumno, asistencia, pack, pago, sesion, type NuevaAsistencia } from '../../db/schema.ts';
 
 const columnas = {
   id: asistencia.id,
@@ -40,4 +40,16 @@ export async function listarDeSesion(ej: Ejecutor, sesionId: number): Promise<As
 export async function borrar(ej: Ejecutor, id: number): Promise<boolean> {
   const filas = await ej.delete(asistencia).where(eq(asistencia.id, id)).returning({ id: asistencia.id });
   return filas.length > 0;
+}
+
+export async function buscarSesionDe(
+  ej: Ejecutor,
+  asistenciaId: number,
+): Promise<{ profesorId: number; fecha: string } | null> {
+  const [fila] = await ej
+    .select({ profesorId: sesion.profesorId, fecha: sesion.fecha })
+    .from(asistencia)
+    .innerJoin(sesion, eq(sesion.id, asistencia.sesionId))
+    .where(eq(asistencia.id, asistenciaId));
+  return fila ?? null;
 }
