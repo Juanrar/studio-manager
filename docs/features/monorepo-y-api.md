@@ -193,7 +193,7 @@ git commit -m "chore: agregar Postgres local con Docker Compose"
 - Consume: `tsconfig.base.json` de la tarea 1.
 - Produce: el paquete `@studio/shared`, que exporta desde `src/index.ts`. Por ahora exporta `MEDIOS_PAGO: readonly ['efectivo', 'transferencia', 'mercado_pago', 'otro']` y el tipo `MedioPago`. Los módulos siguientes agregan sus esquemas Zod acá.
 
-- [ ] **Paso 1: Crear el package.json del paquete**
+- [x] **Paso 1: Crear el package.json del paquete**
 
 ```json
 {
@@ -216,7 +216,7 @@ git commit -m "chore: agregar Postgres local con Docker Compose"
 }
 ```
 
-- [ ] **Paso 2: Crear el tsconfig del paquete**
+- [x] **Paso 2: Crear el tsconfig del paquete**
 
 ```json
 {
@@ -229,7 +229,7 @@ git commit -m "chore: agregar Postgres local con Docker Compose"
 }
 ```
 
-- [ ] **Paso 3: Crear el index**
+- [x] **Paso 3: Crear el index**
 
 `packages/shared/src/index.ts`:
 
@@ -243,12 +243,12 @@ export const ROLES = ['admin', 'recepcion'] as const;
 export type Rol = (typeof ROLES)[number];
 ```
 
-- [ ] **Paso 4: Instalar y verificar tipos**
+- [x] **Paso 4: Instalar y verificar tipos**
 
 Correr: `pnpm install && pnpm --filter @studio/shared typecheck`
 Esperado: sin errores.
 
-- [ ] **Paso 5: Commit**
+- [x] **Paso 5: Commit**
 
 ```bash
 git add packages/shared pnpm-lock.yaml
