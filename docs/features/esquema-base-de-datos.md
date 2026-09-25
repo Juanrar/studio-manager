@@ -122,7 +122,7 @@ git commit -m "chore(api): agregar Drizzle, driver de Postgres y configuración 
 - Consume: nada.
 - Produce: las tablas `usuario`, `sesionUsuario`, `alumno`, `profesor`, `porcentajeProfesor`, `pack`, `pago`, `clase`, `sesion`, `asistencia`, `liquidacion`, y los enums `rolEnum`, `medioPagoEnum`, `estadoSesionEnum`. Cada tabla exporta además sus tipos `select` e `insert`, por ejemplo `type Alumno` y `type NuevoAlumno`.
 
-- [ ] **Paso 1: Escribir el esquema**
+- [x] **Paso 1: Escribir el esquema**
 
 `apps/api/src/db/schema.ts`:
 
@@ -374,12 +374,12 @@ export type Liquidacion = typeof liquidacion.$inferSelect;
 export type NuevaLiquidacion = typeof liquidacion.$inferInsert;
 ```
 
-- [ ] **Paso 2: Verificar tipos**
+- [x] **Paso 2: Verificar tipos**
 
 Correr: `pnpm --filter @studio/api typecheck`
 Esperado: sin errores.
 
-- [ ] **Paso 3: Commit**
+- [x] **Paso 3: Commit**
 
 ```bash
 git add apps/api/src/db/schema.ts
