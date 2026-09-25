@@ -76,3 +76,10 @@ export const NOMBRES_MEDIO_DE_PAGO: Record<string, string> = {
 export function formatearInstante(instante: string): string {
   return formatearFecha(hoyEnEstudio(new Date(instante)));
 }
+
+// "52,5" o "52.5" a 5250 puntos básicos. Devuelve null si no es un número.
+export function textoAPorcentajeBp(texto: string): number | null {
+  const numero = Number(texto.trim().replace(',', '.'));
+  if (texto.trim() === '' || !Number.isFinite(numero)) return null;
+  return porcentajeABp(numero);
+}

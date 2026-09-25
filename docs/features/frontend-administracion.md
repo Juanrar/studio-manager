@@ -50,11 +50,11 @@ Todas son solo para admin y siguen el mismo patrón: tabla, "Nuevo…" en un di�
 
 **Archivos:** `apps/web/src/features/profesores/ProfesoresPage.tsx`, `api.ts`; `lib/formato.ts`; test `profesores.test.tsx`.
 
-- [ ] **Paso 1:** escribir los 2 tests de profesores.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): administración de profesores y porcentajes`.
+- [x] **Paso 1:** escribir los 2 tests de profesores.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): administración de profesores y porcentajes`.
 
 ### Tarea 3: Horario de clases
 
