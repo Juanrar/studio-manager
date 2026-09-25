@@ -25,7 +25,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | # | Feature | Estado | Depende de |
 |---|---|---|---|
 | 12 | [Base del frontend y login](frontend-base.md) | lista | 4 |
-| 13 | Alumnos y pagos | por escribir | 12 |
+| 13 | [Alumnos y pagos](frontend-alumnos.md) | en curso | 12 |
 | 14 | Agenda del día y asistencias | por escribir | 13 |
 | 15 | Administración: packs, profesores, clases y usuarios | por escribir | 12 |
 | 16 | Liquidaciones e ingresos | por escribir | 15 |
