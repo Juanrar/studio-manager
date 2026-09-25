@@ -1,0 +1,55 @@
+# Índice de features
+
+Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad del progreso: un agente que empieza una sesión lo lee primero y elige acá qué hacer.
+
+**Estados:** `pendiente` (sin empezar), `en curso` (alguien la está haciendo), `lista` (todas sus tareas pasan y quedó commiteada), `bloqueada` (falta una decisión o una dependencia).
+
+## Backend
+
+| # | Feature | Estado | Depende de |
+|---|---|---|---|
+| 1 | [Monorepo y esqueleto de la API](monorepo-y-api.md) | pendiente | — |
+| 2 | [Esquema de base de datos y migraciones](esquema-base-de-datos.md) | pendiente | 1 |
+| 3 | [Utilidades de dinero, fechas y errores](utilidades-de-dominio.md) | pendiente | 1 |
+| 4 | Autenticación y roles | por escribir | 2, 3 |
+| 5 | Alumnos | por escribir | 4 |
+| 6 | Packs | por escribir | 4 |
+| 7 | Profesores y porcentajes | por escribir | 4 |
+| 8 | Clases y sesiones | por escribir | 7 |
+| 9 | Pagos | por escribir | 5, 6 |
+| 10 | Asistencias | por escribir | 8, 9 |
+| 11 | Liquidaciones y reportes | por escribir | 10 |
+
+## Frontend
+
+| # | Feature | Estado | Depende de |
+|---|---|---|---|
+| 12 | Base del frontend y login | por escribir | 4 |
+| 13+ | Pantallas por módulo | por escribir | 12 |
+
+## Bitácora
+
+Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo sin releer todo el repositorio.
+
+| Fecha | Feature | Qué pasó |
+|---|---|---|
+| 2026-09-24 | — | Se reorganizó la documentación: las features viven en `docs/features/` y el progreso se sigue en este índice |
+
+## Decisiones tomadas
+
+Las decisiones de negocio y de diseño viven en los documentos de `docs/`. Estas son las que más afectan al código y conviene tener a mano:
+
+- El dinero son pesos enteros. No hay centavos en ninguna parte del sistema.
+- Los porcentajes son enteros en puntos básicos: 10000 es el 100%.
+- Las clases restantes de un pago se calculan contando asistencias. No hay contador guardado.
+- Un pago vence 1 mes después de la compra, y el admin puede extender la fecha.
+- Las sesiones se crean cuando recepción abre la clase del día, no por adelantado.
+- No existe la deuda: `asistencia.pago_id` es `not null`.
+
+## Decisiones pendientes
+
+No bloquean las features 1 a 3. Hay que resolverlas antes de escribir las features 9 y 10.
+
+1. Cambio de pack a mitad de camino: cómo se cobra la diferencia y qué pasa con las clases ya usadas.
+2. Cupo por clase: si alguna clase tiene un máximo de alumnos.
+3. Egresos que no son sueldos (alquiler, servicios), para calcular la ganancia del mes.
