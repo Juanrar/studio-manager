@@ -132,7 +132,7 @@ git commit -m "chore: inicializar monorepo con pnpm workspaces"
 
 Se usa el puerto 5433 y no el 5432 para no chocar con un Postgres ya instalado en la máquina.
 
-- [ ] **Paso 1: Crear docker-compose.yml**
+- [x] **Paso 1: Crear docker-compose.yml**
 
 ```yaml
 services:
@@ -158,7 +158,7 @@ volumes:
   studio-db-data:
 ```
 
-- [ ] **Paso 2: Crear .env.example**
+- [x] **Paso 2: Crear .env.example**
 
 ```
 DATABASE_URL=postgres://studio:studio@localhost:5433/studio_manager
@@ -168,12 +168,12 @@ PORT=3000
 NODE_ENV=development
 ```
 
-- [ ] **Paso 3: Levantar la base y verificar**
+- [x] **Paso 3: Levantar la base y verificar**
 
 Correr: `docker compose up -d && docker compose ps`
 Esperado: el servicio `db` aparece como `healthy`.
 
-- [ ] **Paso 4: Commit**
+- [x] **Paso 4: Commit**
 
 ```bash
 git add docker-compose.yml .env.example
