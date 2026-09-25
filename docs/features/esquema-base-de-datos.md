@@ -1,6 +1,6 @@
 # Esquema de base de datos y migraciones
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** monorepo-y-api  
 **Listo cuando:** `pnpm --filter @studio/api test` pasa con Docker corriendo y `\dt` lista las 11 tablas.
 
@@ -636,8 +636,8 @@ git commit -m "feat(db): agregar seed con los packs iniciales"
 
 ## Verificación final del plan
 
-- [ ] `pnpm --filter @studio/api typecheck` pasa.
-- [ ] `pnpm --filter @studio/api test` pasa, con Docker corriendo.
-- [ ] `docker exec studio-manager-db psql -U studio -d studio_manager -c "\dt"` lista las 11 tablas.
-- [ ] Todas las columnas de dinero son `bigint` y guardan pesos enteros.
-- [ ] `git status` está limpio.
+- [x] `pnpm --filter @studio/api typecheck` pasa.
+- [x] `pnpm --filter @studio/api test` pasa, con Docker corriendo.
+- [x] `docker exec studio-manager-db psql -U studio -d studio_manager -c "\dt"` lista las 11 tablas.
+- [x] Todas las columnas de dinero son `bigint` y guardan pesos enteros.
+- [x] `git status` está limpio.
