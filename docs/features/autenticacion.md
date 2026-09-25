@@ -157,9 +157,9 @@ Errores: cuerpo `{ error: string }`. Los de validación agregan `detalles: { cam
 
 Uso: `ADMIN_PASSWORD='...' pnpm --filter @studio/api usuario:admin <email> "<nombre>"`. La contraseña va por variable de entorno para que no quede en el historial como argumento.
 
-- [ ] **Paso 1:** implementar el script con `crearUsuario`.
-- [ ] **Paso 2:** correrlo contra la base local y verificar con `curl` que el login funciona y `/api/auth/yo` devuelve el usuario.
-- [ ] **Paso 3:** commit `feat(usuarios): script para crear el primer admin`.
+- [x] **Paso 1:** implementar el script con `crearUsuario`.
+- [x] **Paso 2:** correrlo contra la base local y verificar con `curl` que el login funciona y `/api/auth/yo` devuelve el usuario.
+- [x] **Paso 3:** commit `feat(usuarios): script para crear el primer admin`.
 
 ## Verificación final
 

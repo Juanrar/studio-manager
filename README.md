@@ -19,6 +19,16 @@ pnpm dev:api
 
 La API queda en `http://localhost:3000`. Para verificar: `curl http://localhost:3000/api/health`.
 
+La primera vez, además:
+
+```bash
+pnpm --filter @studio/api db:migrate
+pnpm --filter @studio/api db:seed
+ADMIN_PASSWORD='una-clave-larga' pnpm --filter @studio/api usuario:admin admin@tuestudio.com "Nombre del admin"
+```
+
+`db:seed` carga los packs iniciales. `usuario:admin` crea el primer usuario admin; la contraseña va por variable de entorno para que no quede en el historial de la terminal.
+
 ## Comandos
 
 | Comando | Qué hace |
