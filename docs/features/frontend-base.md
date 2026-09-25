@@ -38,10 +38,10 @@
 - Crear: `apps/web/test/servidor.ts`, `test/render.tsx`, `test/setup.ts`
 - Modificar: `package.json` de la raíz — script `dev:web`.
 
-- [ ] **Paso 1:** instalar dependencias y configurar Vite, Tailwind, Vitest y MSW.
-- [ ] **Paso 2:** implementar el cliente de la API, el formato y los componentes base.
-- [ ] **Paso 3:** verificar que `pnpm --filter @studio/web typecheck` y `build` pasan.
-- [ ] **Paso 4:** commit `feat(web): base de la app con Vite, Tailwind y cliente de la API`.
+- [x] **Paso 1:** instalar dependencias y configurar Vite, Tailwind, Vitest y MSW.
+- [x] **Paso 2:** implementar el cliente de la API, el formato y los componentes base.
+- [x] **Paso 3:** verificar que `pnpm --filter @studio/web typecheck` y `build` pasan.
+- [x] **Paso 4:** commit `feat(web): base de la app con Vite, Tailwind y cliente de la API`.
 
 ### Tarea 2: Login, sesión y layout
 
