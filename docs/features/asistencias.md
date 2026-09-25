@@ -51,7 +51,8 @@ Forma de la asistencia: `{ id, sesionId, alumno: { id, nombre, apellido }, pagoI
 | Sin pago válido y con `cobrar`, registra una clase suelta en el acto y la usa | Integración | Si el cobro queda fuera de la transacción o no se usa el pago nuevo, recepción cobra y la asistencia falla |
 | El mismo alumno dos veces en la misma sesión responde 422 | Integración | Si no se traduce `asistencia_sesion_alumno_uq`, un doble clic da un 500 |
 | No se registran asistencias en una sesión cancelada | Integración | Si se saltea el chequeo de estado, se pagan clases que no se dieron |
-| Dos registros simultáneos no pueden usar la misma última clase | Integración | Si se quita el `for update` o se cuenta antes de bloquear, un pack de 1 clase termina con 2 asistencias |
+| Seis registros simultáneos con una sola clase disponible: uno pasa y cinco reciben 422 | Integración | Es la regla vista desde afuera. Detecta la carrera sin `for update` solo a veces (1 de cada 3 corridas en la prueba), por eso existe el test siguiente |
+| Una segunda transacción no puede elegir el pago que tiene bloqueado la primera | Service con base | Determinístico: con `lock_timeout = 50ms` la segunda falla esperando el bloqueo. Si se quita el `for update`, no hay nada que esperar y el test falla siempre |
 | Borrar una asistencia devuelve la clase al pack | Integración | Si alguien vuelve a agregar un contador de clases restantes, se desincroniza (el bug de la app original) |
 | No se cancela una sesión con asistencias | Integración | Si se quita la regla, la sesión cancelada sigue sumando al sueldo |
 | Una suplencia recalcula el porcentaje de las asistencias ya tomadas | Integración | Si solo se cambia el profesor, el suplente cobra con el porcentaje del titular |
@@ -67,11 +68,11 @@ Forma de la asistencia: `{ id, sesionId, alumno: { id, nombre, apellido }, pagoI
 - Crear: `apps/api/src/modules/asistencias/asistencias.repository.ts`, `asistencias.service.ts`, `asistencias.routes.ts`
 - Test: `apps/api/src/modules/asistencias/asistencias.test.ts`
 
-- [ ] **Paso 1:** escribir los 8 primeros tests de la tabla.
-- [ ] **Paso 2:** correrlos y verificar que fallan con 404.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan. Para el de concurrencia, verificar también que falla si se quita el `for update`.
-- [ ] **Paso 5:** commit `feat(asistencias): registrar asistencias consumiendo clases del pack`.
+- [x] **Paso 1:** escribir los 9 primeros tests de la tabla (el de bloqueo va en `pagos.service.test.ts`).
+- [x] **Paso 2:** correrlos y verificar que fallan con 404.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan. Para el de concurrencia, verificar también que falla si se quita el `for update`.
+- [x] **Paso 5:** commit `feat(asistencias): registrar asistencias consumiendo clases del pack`.
 
 ### Tarea 2: Reglas en sesiones y pagos
 
