@@ -1,6 +1,6 @@
 # Monorepo y esqueleto de la API
 
-**Estado:** pendiente  
+**Estado:** en curso  
 **Depende de:** Ninguna  
 **Listo cuando:** `pnpm test` pasa y `curl http://localhost:3000/api/health` devuelve `{"estado":"ok"}`.
 
@@ -37,7 +37,7 @@
 - Consume: nada.
 - Produce: workspace con los globs `apps/*` y `packages/*`. `tsconfig.base.json` con `strict: true`, `module: "nodenext"`, `target: "es2023"`, que los tsconfig de cada paquete extienden.
 
-- [ ] **Paso 1: Crear el archivo de workspace**
+- [x] **Paso 1: Crear el archivo de workspace**
 
 `pnpm-workspace.yaml`:
 
@@ -47,7 +47,7 @@ packages:
   - 'packages/*'
 ```
 
-- [ ] **Paso 2: Crear el package.json de la raíz**
+- [x] **Paso 2: Crear el package.json de la raíz**
 
 `package.json`:
 
@@ -73,7 +73,7 @@ packages:
 }
 ```
 
-- [ ] **Paso 3: Crear el tsconfig base**
+- [x] **Paso 3: Crear el tsconfig base**
 
 `tsconfig.base.json`:
 
@@ -98,7 +98,7 @@ packages:
 }
 ```
 
-- [ ] **Paso 4: Crear .npmrc**
+- [x] **Paso 4: Crear .npmrc**
 
 `.npmrc`:
 
@@ -106,12 +106,12 @@ packages:
 engine-strict=true
 ```
 
-- [ ] **Paso 5: Instalar y verificar**
+- [x] **Paso 5: Instalar y verificar**
 
 Correr: `pnpm install`
 Esperado: termina sin error y crea `pnpm-lock.yaml`.
 
-- [ ] **Paso 6: Commit**
+- [x] **Paso 6: Commit**
 
 ```bash
 git add pnpm-workspace.yaml package.json tsconfig.base.json .npmrc pnpm-lock.yaml

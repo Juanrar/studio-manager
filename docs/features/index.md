@@ -8,7 +8,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 
 | # | Feature | Estado | Depende de |
 |---|---|---|---|
-| 1 | [Monorepo y esqueleto de la API](monorepo-y-api.md) | pendiente | — |
+| 1 | [Monorepo y esqueleto de la API](monorepo-y-api.md) | en curso | — |
 | 2 | [Esquema de base de datos y migraciones](esquema-base-de-datos.md) | pendiente | 1 |
 | 3 | [Utilidades de dinero, fechas y errores](utilidades-de-dominio.md) | pendiente | 1 |
 | 4 | Autenticación y roles | por escribir | 2, 3 |
