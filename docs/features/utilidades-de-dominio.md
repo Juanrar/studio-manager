@@ -382,7 +382,7 @@ git commit -m "feat(lib): agregar utilidades de fechas con la zona del estudio"
 
 El plugin de errores de Fastify, que se crea en la feature `autenticacion`, usa `esErrorDeDominio` para traducir estos errores a respuestas HTTP.
 
-- [ ] **Paso 1: Escribir los tests que fallan**
+- [x] **Paso 1: Escribir los tests que fallan**
 
 `apps/api/src/lib/errores.test.ts`:
 
@@ -421,12 +421,12 @@ describe('errores de dominio', () => {
 });
 ```
 
-- [ ] **Paso 2: Correr los tests y verificar que fallan**
+- [x] **Paso 2: Correr los tests y verificar que fallan**
 
 Correr: `pnpm --filter @studio/api test src/lib/errores.test.ts`
 Esperado: FALLA con "Cannot find module './errores.ts'".
 
-- [ ] **Paso 3: Implementar el módulo**
+- [x] **Paso 3: Implementar el módulo**
 
 `apps/api/src/lib/errores.ts`:
 
@@ -441,15 +441,15 @@ export abstract class ErrorDeDominio extends Error {
 }
 
 export class NoEncontradoError extends ErrorDeDominio {
-  readonly codigoHttp = 404;
+  override readonly codigoHttp = 404;
 }
 
 export class ReglaDeNegocioError extends ErrorDeDominio {
-  readonly codigoHttp = 422;
+  override readonly codigoHttp = 422;
 }
 
 export class SinPermisoError extends ErrorDeDominio {
-  readonly codigoHttp = 403;
+  override readonly codigoHttp = 403;
 }
 
 export function esErrorDeDominio(error: unknown): error is ErrorDeDominio {
@@ -457,12 +457,12 @@ export function esErrorDeDominio(error: unknown): error is ErrorDeDominio {
 }
 ```
 
-- [ ] **Paso 4: Correr los tests y verificar que pasan**
+- [x] **Paso 4: Correr los tests y verificar que pasan**
 
 Correr: `pnpm --filter @studio/api test src/lib/errores.test.ts`
 Esperado: los 4 tests PASAN.
 
-- [ ] **Paso 5: Commit**
+- [x] **Paso 5: Commit**
 
 ```bash
 git add apps/api/src/lib/errores.ts apps/api/src/lib/errores.test.ts
