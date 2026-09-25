@@ -83,3 +83,9 @@ export function textoAPorcentajeBp(texto: string): number | null {
   if (texto.trim() === '' || !Number.isFinite(numero)) return null;
   return porcentajeABp(numero);
 }
+
+// El mes anterior al de la fecha, como AAAA-MM: es el que se liquida.
+export function periodoAnterior(fecha: string): string {
+  const [anio, mes] = fecha.split('-').map(Number) as [number, number];
+  return mes === 1 ? `${anio - 1}-12` : `${anio}-${String(mes - 1).padStart(2, '0')}`;
+}

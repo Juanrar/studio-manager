@@ -50,12 +50,3 @@ export function Layout({ usuario, children }: { usuario: UsuarioPublico; childre
     </div>
   );
 }
-
-export function Proximamente({ titulo }: { titulo: string }) {
-  return (
-    <section>
-      <h1 className="mb-2 text-2xl font-semibold">{titulo}</h1>
-      <p className="text-stone-500">Próximamente.</p>
-    </section>
-  );
-}

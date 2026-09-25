@@ -28,7 +28,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 13 | [Alumnos y pagos](frontend-alumnos.md) | lista | 12 |
 | 14 | [Agenda del día y asistencias](frontend-agenda.md) | lista | 13 |
 | 15 | [Administración: packs, profesores, clases y usuarios](frontend-administracion.md) | lista | 12 |
-| 16 | [Liquidaciones e ingresos](frontend-liquidaciones.md) | en curso | 15 |
+| 16 | [Liquidaciones e ingresos](frontend-liquidaciones.md) | lista | 15 |
 | 17 | Prueba de punta a punta y build de producción | por escribir | 14, 16 |
 
 ## Bitácora
@@ -37,6 +37,7 @@ Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo s
 
 | Fecha | Feature | Qué pasó |
 |---|---|---|
+| 2026-09-25 | 16. Pantalla de liquidaciones e ingresos | Lista. Mes en la URL (por defecto el anterior), ingresos por medio, sueldos con estado, cerrar, marcar pagada y detalle descargable en CSV con `;` y BOM (reemplaza el Excel de la app original). Ya no quedan pantallas "Próximamente". Web 29 tests |
 | 2026-09-25 | 15. Pantallas de administración | Lista. Packs, profesores con historial de porcentajes (se escriben en % y se mandan en puntos básicos), horario agrupado por día y usuarios. La pantalla de usuarios no ofrece desactivarse a uno mismo; la API todavía lo permite. Web 25 tests |
 | 2026-09-25 | 14. Agenda del día y asistencias | Lista. Agenda por fecha en la URL, apertura de sesión, anotar alumnos con buscador, cobrar clase suelta en el acto (decidido por `codigo: SIN_CLASES_DISPONIBLES`, no por el texto), quitar asistencias, suplencias y cancelar. En la API se agregó `GET /api/sesiones/:id` y el campo `codigo` en los errores de negocio. API 105, web 18 |
 | 2026-09-24 | 13. Pantallas de alumnos y pagos | Lista. Listado con búsqueda demorada y paginación, alta y edición con el esquema compartido, ficha con pagos (registrar y anular). 12 tests web |

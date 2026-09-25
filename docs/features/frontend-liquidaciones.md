@@ -1,6 +1,6 @@
 # Pantalla de liquidaciones e ingresos
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** frontend-administracion, liquidaciones  
 **Listo cuando:** `pnpm test` pasa; admin elige un mes, ve los ingresos por medio de pago y el sueldo de cada profesor, cierra y marca pagadas las liquidaciones, y descarga el detalle de un profesor.
 
@@ -39,12 +39,12 @@
 - Crear: `apps/web/src/features/liquidaciones/api.ts`, `LiquidacionesPage.tsx`, `csv.ts`
 - Test: `apps/web/src/features/liquidaciones/liquidaciones.test.tsx`, `csv.test.ts`
 
-- [ ] **Paso 1:** escribir los 4 tests.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): liquidaciones e ingresos del mes`.
+- [x] **Paso 1:** escribir los 4 tests.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): liquidaciones e ingresos del mes`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.
