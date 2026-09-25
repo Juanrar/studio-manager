@@ -114,9 +114,11 @@ Los services lanzan errores. No devuelven `null` ni códigos para indicar fallas
 
 ## Dinero y fechas
 
-**Dinero.** Postgres devuelve `numeric` como string. En el código los montos se manejan en una sola representación y toda conversión pasa por `lib/dinero.ts`. Nunca se hacen cuentas con `number` de punto flotante sobre montos.
+**Dinero.** Todos los montos son pesos enteros, tanto en la base (`bigint`) como en el código (`number`). No hay centavos en ninguna parte del sistema. Los porcentajes son enteros en puntos básicos (`porcentaje_bp`, de 1 a 10000). Nunca se usan decimales para dinero.
 
-Decisión pendiente: centavos como enteros o una librería decimal.
+El único redondeo permitido está en `lib/dinero.ts`, en dos funciones: dividir un pago entre las clases del pack, y calcular la parte del profesor. Ningún módulo hace esas cuentas por su lado.
+
+Las columnas `bigint` se leen como `number` con `mode: 'number'` en Drizzle. Un `number` de JavaScript representa enteros exactos hasta 2^53, muy por encima de cualquier monto del estudio.
 
 **Fechas.** `pago.vence_el` y `sesion.fecha` son fechas sin hora. La zona horaria del estudio (`America/Argentina/Buenos_Aires`) se define en `config.ts`. Ningún cálculo depende de la zona del servidor. Toda conversión pasa por `lib/fechas.ts`.
 

@@ -7,6 +7,8 @@ Sistema web de gestión para un estudio de danza. Lo usa solo el personal del es
 - [Estructura de base de datos](estructura%20de%20base%20de%20datos.md)
 - [Arquitectura del backend](arquitectura%20backend.md)
 - [Arquitectura del frontend](arquitectura%20frontend.md)
+- [Índice de features](features/index.md): qué está hecho y qué falta
+- [CLAUDE.md](../CLAUDE.md): cómo trabaja un agente en este repositorio
 
 ## Stack
 
