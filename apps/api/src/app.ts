@@ -1,4 +1,6 @@
 import Fastify, { type FastifyInstance } from 'fastify';
+import { rutasAuth } from './modules/auth/auth.routes.ts';
+import { registrarAutenticacion } from './plugins/autenticacion.ts';
 import { registrarManejoDeErrores } from './plugins/errores.ts';
 
 export type OpcionesApp = {
@@ -19,8 +21,10 @@ export function buildApp(opciones: OpcionesApp = {}): FastifyInstance {
 
   app.decorate('reloj', opciones.reloj ?? (() => new Date()));
   registrarManejoDeErrores(app);
+  registrarAutenticacion(app);
 
   app.get('/api/health', async () => ({ estado: 'ok' }));
+  app.register(rutasAuth);
 
   return app;
 }

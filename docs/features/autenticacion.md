@@ -129,11 +129,11 @@ Errores: cuerpo `{ error: string }`. Los de validación agregan `detalles: { cam
 **Interfaces:**
 - Produce: `request.usuario: UsuarioPublico | null`; `requerirRol(rol: Rol)` para usar como `preHandler`; la cookie se llama `sid`.
 
-- [ ] **Paso 1:** escribir los tests de login correcto, credenciales inválidas (tabla), usuario desactivado, logout y sesión vencida.
-- [ ] **Paso 2:** correrlos y verificar que fallan con 404 (las rutas no existen).
-- [ ] **Paso 3:** instalar `@fastify/cookie` e implementar repository, service, plugin y rutas.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(auth): login, logout y sesiones en cookie`.
+- [x] **Paso 1:** escribir los tests de login correcto, credenciales inválidas (tabla), usuario desactivado, logout y sesión vencida.
+- [x] **Paso 2:** correrlos y verificar que fallan con 404 (las rutas no existen).
+- [x] **Paso 3:** instalar `@fastify/cookie` e implementar repository, service, plugin y rutas.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(auth): login, logout y sesiones en cookie`.
 
 ### Tarea 4: Rutas de usuarios con roles
 
