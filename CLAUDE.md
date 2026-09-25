@@ -77,6 +77,23 @@ Estas reglas se rompen fácil y cuestan caro. Están explicadas en [docs/estruct
 - Nunca se mockea la base de datos. Los tests de integración corren contra un Postgres real con Testcontainers.
 - Nada de secretos en el repositorio. `.env` está ignorado; se versiona `.env.example`.
 
+## Tests de referencia
+
+Antes de escribir tests nuevos, mirá estos. Son el modelo a seguir; si un test viejo no se parece, ganan estos.
+
+| Tipo | Archivo | Qué muestra |
+|---|---|---|
+| Integración HTTP | `apps/api/src/modules/auth/auth.test.ts` | App completa con `crearAppDeTest()`, reloj fijo, login con `loguear()`, aserciones sobre la respuesta completa |
+| Service con base real | `apps/api/src/modules/usuarios/usuarios.service.test.ts` | Llamar al service directo y verificar lo persistido |
+| Unitario puro | `apps/api/src/lib/dinero.test.ts` | Funciones sin dependencias |
+
+Reglas que siguen:
+
+- La mayoría de los tests son de integración, con `app.inject()` contra el Postgres de test.
+- Nunca `new Date()` en un test: la app se crea con `reloj: relojFijo(...)` (ver `apps/api/test/app.ts`).
+- Cada test tiene una razón escrita en la tabla de tests de su feature: qué cambio de código lo rompería.
+- Aserciones completas con valores escritos a mano, no chequeos de un campo suelto.
+
 ## Comandos
 
 | Comando | Qué hace |
@@ -90,6 +107,14 @@ Estas reglas se rompen fácil y cuestan caro. Están explicadas en [docs/estruct
 | `pnpm --filter @studio/api db:migrate` | Aplica las migraciones |
 
 Los tests de integración necesitan Docker corriendo.
+
+## Cosas del entorno que ya se resolvieron
+
+- **pnpm 12 bloquea los scripts de instalación** de las dependencias. Se aprueban o rechazan en `allowBuilds` de `pnpm-workspace.yaml`. Hoy: `esbuild` sí; `cpu-features`, `ssh2` y `protobufjs` no (vienen con testcontainers y no hacen falta).
+- **Testcontainers en Windows:** `localhost` resuelve a `::1` y Docker Desktop publica solo en IPv4. `apps/api/test/global-setup.ts` define `TESTCONTAINERS_HOST_OVERRIDE=127.0.0.1`.
+- **Node 22.12 no ejecuta `.ts` sin flag.** Los scripts usan `tsx`.
+- **Drizzle envuelve los errores del driver** en `cause`. Para detectar violaciones de `unique` usá `esViolacionUnica()` de `lib/postgres.ts`.
+- **Un solo Postgres por corrida de tests**, archivos en serie. Cada archivo llama a `base.limpiar()` en `beforeEach`.
 
 ## Estilo de escritura
 

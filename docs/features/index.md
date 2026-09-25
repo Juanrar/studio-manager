@@ -11,7 +11,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 1 | [Monorepo y esqueleto de la API](monorepo-y-api.md) | lista | — |
 | 2 | [Esquema de base de datos y migraciones](esquema-base-de-datos.md) | lista | 1 |
 | 3 | [Utilidades de dinero, fechas y errores](utilidades-de-dominio.md) | lista | 1 |
-| 4 | [Autenticación y roles](autenticacion.md) | en curso | 2, 3 |
+| 4 | [Autenticación y roles](autenticacion.md) | lista | 2, 3 |
 | 5 | Alumnos | por escribir | 4 |
 | 6 | Packs | por escribir | 4 |
 | 7 | Profesores y porcentajes | por escribir | 4 |
@@ -33,6 +33,7 @@ Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo s
 
 | Fecha | Feature | Qué pasó |
 |---|---|---|
+| 2026-09-24 | 4. Autenticación y roles | Lista. Login, logout, sesión en cookie firmada de 7 días, roles `admin` y `recepcion`, ABM de usuarios y script `usuario:admin`. Suite 49/49. Cambios al plan: `scrypt` de Node en vez de argon2 (sin módulo nativo); `auth` es dueño de las sesiones para evitar una dependencia circular con `usuarios`; cambiar la contraseña también cierra sesiones. Pendientes menores: sin límite de intentos de login; un admin puede desactivarse a sí mismo |
 | 2026-09-24 | 3. Utilidades de dominio | Lista. `lib/dinero.ts`, `lib/fechas.ts` y `lib/errores.ts`; suite completa 35/35. Cambio al plan: `override` en `codigoHttp` porque el tsconfig usa `noImplicitOverride` |
 | 2026-09-24 | 2. Esquema de base de datos | Lista. 11 tablas migradas, tests 7/7. Cambios al plan: PK con identity (como la spec), `casing: 'snake_case'` también en el cliente, un solo Postgres por corrida de tests, seed que no duplica packs. En Windows hace falta `TESTCONTAINERS_HOST_OVERRIDE=127.0.0.1` (lo pone `global-setup.ts`). Se agregó `.gitattributes`. Pendiente menor: los tests unitarios también levantan el contenedor |
 | 2026-09-24 | 1. Monorepo y API | Lista. `pnpm test` 2/2, typecheck ok, `/api/health` responde. Cambios al plan: `tsx` en lugar de `node` para correr `.ts` (Node 22.12 no lo hace sin flag) y se permitió el postinstall de esbuild que pide pnpm 12. Pendientes menores: agregar `.gitattributes`, mover `engine-strict` a `pnpm-workspace.yaml`, fijar `packageManager` |

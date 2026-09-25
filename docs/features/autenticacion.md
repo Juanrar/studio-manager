@@ -1,6 +1,6 @@
 # Autenticación y roles
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** esquema-base-de-datos, utilidades-de-dominio  
 **Listo cuando:** `pnpm test` pasa, un usuario puede loguearse y desloguearse, y las rutas de admin responden 403 a recepción y 401 sin sesión.
 
@@ -163,5 +163,5 @@ Uso: `ADMIN_PASSWORD='...' pnpm --filter @studio/api usuario:admin <email> "<nom
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
-- [ ] Con la API levantada: login con el admin creado por el script devuelve `200` y `Set-Cookie: sid=...`; `GET /api/auth/yo` con esa cookie devuelve el usuario; `GET /api/usuarios` sin cookie devuelve `401`.
+- [x] `pnpm test` y `pnpm typecheck` pasan.
+- [x] Con la API levantada: login con el admin creado por el script devuelve `200` y `Set-Cookie: sid=...`; `GET /api/auth/yo` con esa cookie devuelve el usuario; `GET /api/usuarios` sin cookie devuelve `401`.
