@@ -1,6 +1,6 @@
 # Utilidades de dinero, fechas y errores
 
-**Estado:** pendiente  
+**Estado:** en curso  
 **Depende de:** monorepo-y-api  
 **Listo cuando:** `pnpm --filter @studio/api test` pasa, incluidos los tests de dinero, fechas y errores.
 
@@ -41,7 +41,7 @@
   - `aplicarPorcentaje(monto: Pesos, porcentajeBp: number): Pesos` — parte del profesor.
   - `formatearPesos(monto: Pesos): string` — para logs y reportes del backend.
 
-- [ ] **Paso 1: Escribir los tests que fallan**
+- [x] **Paso 1: Escribir los tests que fallan**
 
 `apps/api/src/lib/dinero.test.ts`:
 
@@ -122,12 +122,12 @@ describe('formatearPesos', () => {
 });
 ```
 
-- [ ] **Paso 2: Correr los tests y verificar que fallan**
+- [x] **Paso 2: Correr los tests y verificar que fallan**
 
 Correr: `pnpm --filter @studio/api test src/lib/dinero.test.ts`
 Esperado: FALLA con "Cannot find module './dinero.ts'".
 
-- [ ] **Paso 3: Implementar el módulo**
+- [x] **Paso 3: Implementar el módulo**
 
 `apps/api/src/lib/dinero.ts`:
 
@@ -172,14 +172,14 @@ export function formatearPesos(monto: Pesos): string {
 }
 ```
 
-- [ ] **Paso 4: Correr los tests y verificar que pasan**
+- [x] **Paso 4: Correr los tests y verificar que pasan**
 
 Correr: `pnpm --filter @studio/api test src/lib/dinero.test.ts`
 Esperado: todos PASAN.
 
 Si `formatearPesos` falla, revisar el separador: `Intl` con `es-AR` deja un espacio duro entre el símbolo y el número, y por eso el `replace`. Ajustar hasta que la salida sea exactamente `$9.600`.
 
-- [ ] **Paso 5: Commit**
+- [x] **Paso 5: Commit**
 
 ```bash
 git add apps/api/src/lib/dinero.ts apps/api/src/lib/dinero.test.ts
