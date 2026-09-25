@@ -28,7 +28,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 13 | [Alumnos y pagos](frontend-alumnos.md) | lista | 12 |
 | 14 | [Agenda del día y asistencias](frontend-agenda.md) | lista | 13 |
 | 15 | [Administración: packs, profesores, clases y usuarios](frontend-administracion.md) | lista | 12 |
-| 16 | Liquidaciones e ingresos | por escribir | 15 |
+| 16 | [Liquidaciones e ingresos](frontend-liquidaciones.md) | en curso | 15 |
 | 17 | Prueba de punta a punta y build de producción | por escribir | 14, 16 |
 
 ## Bitácora
