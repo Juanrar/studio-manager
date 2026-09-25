@@ -15,7 +15,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 5 | [Alumnos](alumnos.md) | lista | 4 |
 | 6 | [Packs](packs.md) | lista | 4 |
 | 7 | [Profesores y porcentajes](profesores.md) | lista | 4 |
-| 8 | [Clases y sesiones](clases-y-sesiones.md) | en curso | 7 |
+| 8 | [Clases y sesiones](clases-y-sesiones.md) | lista | 7 |
 | 9 | Pagos | por escribir | 5, 6 |
 | 10 | Asistencias | por escribir | 8, 9 |
 | 11 | Liquidaciones y reportes | por escribir | 10 |
@@ -33,6 +33,7 @@ Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo s
 
 | Fecha | Feature | Qué pasó |
 |---|---|---|
+| 2026-09-24 | 8. Clases y sesiones | Lista. Horario semanal (horas `HH:MM`), agenda del día, apertura idempotente de sesiones y suplencias. `bloquearSesion()` listo para asistencias. Fábricas de test en `apps/api/test/fabricas.ts`. Suite 75/75 |
 | 2026-09-24 | 7. Profesores y porcentajes | Lista. ABM de profesores con porcentaje inicial vigente desde el alta, historial de porcentajes y `porcentajeVigente(ej, profesorId, fecha)` para asistencias. Suite 67/67 |
 | 2026-09-24 | 6. Packs | Lista. Catálogo con baja lógica; solo admin escribe; precio en pesos enteros validado por `precioSchema`. Suite 59/59 |
 | 2026-09-24 | 5. Alumnos | Lista. ABM con baja lógica, búsqueda sin tildes (`unaccent`) por nombre completo y DNI, paginación. Suite 56/56. Esquemas comunes en `packages/shared/src/comun.ts` (campos opcionales que convierten `''` en `null`, `precioSchema`, `listadoQuerySchema`) |

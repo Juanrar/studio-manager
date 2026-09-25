@@ -1,6 +1,6 @@
 # Clases y sesiones
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** profesores  
 **Listo cuando:** `pnpm test` pasa; admin arma el horario semanal y recepción ve la agenda del día, abre sesiones y registra suplencias.
 
@@ -49,7 +49,7 @@ Formas:
 | Hora de fin igual o anterior al inicio responde 400 al crear | Integración | Si se pierde el `refine` del esquema, la base rechaza con su `check` y el usuario ve un 500 |
 | `PATCH` que deja el fin antes del inicio responde 422 | Integración | En el `PATCH` el esquema no ve la otra hora; si el service no traduce la violación de `clase_horario_valido`, sale un 500 |
 | Profesor inactivo como titular responde 422 | Integración | Si el service no valida al profesor, se arman clases con profesores dados de baja |
-| La agenda de un martes trae solo las clases activas del martes, por hora, sin sesión | Integración | Si el día de la semana se calcula 0-based (domingo = 0), la agenda del martes muestra las del miércoles |
+| La agenda de un martes trae solo las clases activas del martes, por hora, sin sesión | Integración | Si el día se calcula con otra convención (lunes = 0, como `(getDay() + 6) % 7`), la agenda del martes muestra las clases del lunes. Verificado con esa mutación |
 | Abrir la misma sesión dos veces devuelve la misma sesión | Integración | Si el service inserta sin mirar `sesion_clase_fecha_uq`, un doble clic de recepción da un 500 |
 | Abrir una sesión en una fecha de otro día de la semana responde 422 | Integración | Si no se compara el día, se crean sesiones de una clase en días que no se dicta |
 | Una suplencia cambia el profesor de la sesión y no el titular de la clase | Integración | Si el `PATCH` de sesión actualiza la clase, la suplencia de un día cambia al titular para siempre |
@@ -81,12 +81,12 @@ Formas:
 **Interfaces:**
 - Produce: `bloquearSesion(tx, sesionId): Promise<{ id, claseId, fecha, estado, profesorId }>` (hace `select ... for update`), que usa la feature de asistencias.
 
-- [ ] **Paso 1:** escribir los 4 tests de sesiones de la tabla.
-- [ ] **Paso 2:** correrlos y verificar que fallan con 404.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(clases): sesiones, agenda del día y suplencias`.
+- [x] **Paso 1:** escribir los 4 tests de sesiones de la tabla.
+- [x] **Paso 2:** correrlos y verificar que fallan con 404.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(clases): sesiones, agenda del día y suplencias`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.
