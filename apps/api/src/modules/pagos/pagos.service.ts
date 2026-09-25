@@ -51,6 +51,9 @@ export async function anularPago(id: number, motivo: string, ahora: Date, hoy: F
     const pago = await repo.bloquear(tx, id);
     if (pago === null) throw new NoEncontradoError(`No existe el pago ${id}`);
     if (pago.anuladoEn !== null) throw new ReglaDeNegocioError('El pago ya está anulado');
+    if ((await repo.contarAsistencias(tx, id)) > 0) {
+      throw new ReglaDeNegocioError('El pago tiene asistencias registradas. Borralas antes de anularlo');
+    }
     await repo.actualizar(tx, id, { anuladoEn: ahora, motivoAnulacion: motivo });
   });
   return obtenerPago(id, hoy);

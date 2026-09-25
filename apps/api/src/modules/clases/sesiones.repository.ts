@@ -1,4 +1,4 @@
-import { and, eq, sql, type SQL } from 'drizzle-orm';
+import { and, count, eq, sql, type SQL } from 'drizzle-orm';
 import type { EstadoSesion, Sesion } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
 import { asistencia, profesor, sesion, type NuevaSesion } from '../../db/schema.ts';
@@ -69,4 +69,18 @@ export async function bloquear(ej: Ejecutor, id: number): Promise<SesionBloquead
     .where(eq(sesion.id, id))
     .for('update');
   return fila ?? null;
+}
+
+export async function contarAsistencias(ej: Ejecutor, sesionId: number): Promise<number> {
+  const [fila] = await ej.select({ total: count() }).from(asistencia).where(eq(asistencia.sesionId, sesionId));
+  return fila?.total ?? 0;
+}
+
+// Una suplencia registrada después de tomar asistencia: el sueldo sigue a quien dio la clase.
+export async function actualizarPorcentajeDeAsistencias(
+  ej: Ejecutor,
+  sesionId: number,
+  porcentajeBp: number,
+): Promise<void> {
+  await ej.update(asistencia).set({ porcentajeBp }).where(eq(asistencia.sesionId, sesionId));
 }

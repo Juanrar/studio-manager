@@ -115,6 +115,7 @@ Los tests de integración necesitan Docker corriendo.
 - **Node 22.12 no ejecuta `.ts` sin flag.** Los scripts usan `tsx`.
 - **Drizzle envuelve los errores del driver** en `cause`. Para detectar violaciones de `unique` usá `esViolacionUnica()` de `lib/postgres.ts`.
 - **Un test que adelanta el reloj más de 7 días** tiene que volver a loguearse con la app nueva: la sesión vence a los 7 días.
+- **Para probar un bloqueo `for update`** sin depender de la suerte: abrir una transacción que tome el bloqueo y, adentro, otra con `set local lock_timeout = '50ms'` que tiene que fallar con código `55P03`. Ver `apps/api/src/modules/pagos/pagos.service.test.ts`.
 - **Un solo Postgres por corrida de tests**, archivos en serie. Cada archivo llama a `base.limpiar()` en `beforeEach`.
 
 ## Estilo de escritura

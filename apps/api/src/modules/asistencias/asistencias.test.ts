@@ -184,3 +184,59 @@ describe('DELETE /api/asistencias/:id', () => {
     expect(await restantes(pago.id)).toBe(4);
   });
 });
+
+describe('reglas que dependen de las asistencias', () => {
+  it('no se cancela una sesión con asistencias', async () => {
+    await pagar(packX4);
+    await registrar(sesion.id, { alumnoId: martina.id });
+
+    const respuesta = await app.inject({
+      method: 'PATCH',
+      url: `/api/sesiones/${sesion.id}`,
+      payload: { estado: 'cancelada' },
+      headers: { cookie },
+    });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({
+      error: 'La clase tiene asistencias registradas. Borralas antes de cancelarla',
+    });
+  });
+
+  it('una suplencia recalcula el porcentaje de las asistencias ya tomadas', async () => {
+    const iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni', porcentajeBp: 6000 });
+    await pagar(packX4);
+    await registrar(sesion.id, { alumnoId: martina.id });
+
+    await app.inject({
+      method: 'PATCH',
+      url: `/api/sesiones/${sesion.id}`,
+      payload: { profesorId: iaru.id },
+      headers: { cookie },
+    });
+    const asistencias = await app.inject({
+      method: 'GET',
+      url: `/api/sesiones/${sesion.id}/asistencias`,
+      headers: { cookie },
+    });
+
+    expect(asistencias.json().items.map((a: { porcentajeBp: number }) => a.porcentajeBp)).toEqual([6000]);
+  });
+
+  it('no se anula un pago con asistencias', async () => {
+    const pago = await pagar(packX4);
+    await registrar(sesion.id, { alumnoId: martina.id });
+
+    const respuesta = await app.inject({
+      method: 'POST',
+      url: `/api/pagos/${pago.id}/anular`,
+      payload: { motivo: 'Error de carga' },
+      headers: { cookie },
+    });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({
+      error: 'El pago tiene asistencias registradas. Borralas antes de anularlo',
+    });
+  });
+});

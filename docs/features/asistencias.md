@@ -1,6 +1,6 @@
 # Asistencias
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** clases-y-sesiones, pagos  
 **Listo cuando:** `pnpm test` pasa; recepción registra asistencias que consumen clases del pack correcto, cobra una clase suelta en el acto si hace falta, y dos registros simultáneos no pueden usar la misma última clase.
 
@@ -81,12 +81,12 @@ Forma de la asistencia: `{ id, sesionId, alumno: { id, nombre, apellido }, pagoI
 - Modificar: `apps/api/src/modules/pagos/pagos.service.ts`
 - Test: los 3 últimos tests de la tabla, en `asistencias.test.ts`
 
-- [ ] **Paso 1:** escribir los 3 tests.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar las tres reglas.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(asistencias): reglas de cancelación, suplencia y anulación`.
+- [x] **Paso 1:** escribir los 3 tests.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar las tres reglas.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(asistencias): reglas de cancelación, suplencia y anulación`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.

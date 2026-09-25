@@ -3,7 +3,7 @@ import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { diaSemanaIso, type FechaDia } from '../../lib/fechas.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
-import { verificarProfesorActivo } from '../profesores/profesores.service.ts';
+import { porcentajeVigente, verificarProfesorActivo } from '../profesores/profesores.service.ts';
 import * as clasesRepo from './clases.repository.ts';
 import * as repo from './sesiones.repository.ts';
 
@@ -46,9 +46,21 @@ export async function abrirSesion(claseId: number, fecha: FechaDia): Promise<{ s
 }
 
 export async function actualizarSesion(id: number, datos: ActualizarSesionInput): Promise<Sesion> {
-  if (datos.profesorId !== undefined) await verificarProfesorActivo(db, datos.profesorId);
-  const existe = await repo.actualizar(db, id, sinIndefinidos(datos));
-  if (!existe) throw new NoEncontradoError(`No existe la sesión ${id}`);
+  await db.transaction(async (tx) => {
+    const actual = await bloquearSesion(tx, id);
+
+    if (datos.estado === 'cancelada' && (await repo.contarAsistencias(tx, id)) > 0) {
+      throw new ReglaDeNegocioError('La clase tiene asistencias registradas. Borralas antes de cancelarla');
+    }
+
+    if (datos.profesorId !== undefined && datos.profesorId !== actual.profesorId) {
+      await verificarProfesorActivo(tx, datos.profesorId);
+      const porcentajeBp = await porcentajeVigente(tx, datos.profesorId, actual.fecha);
+      await repo.actualizarPorcentajeDeAsistencias(tx, id, porcentajeBp);
+    }
+
+    await repo.actualizar(tx, id, sinIndefinidos(datos));
+  });
   return obtenerSesion(id);
 }
 
