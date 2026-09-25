@@ -88,11 +88,11 @@ Errores: cuerpo `{ error: string }`. Los de validación agregan `detalles: { cam
 **Interfaces:**
 - Produce: `buildApp(opciones?: OpcionesApp): FastifyInstance`, con `app.reloj(): Date`. `NoAutenticadoError`. Todo error de dominio responde `{ error }` con su código; `ZodError` responde 400 con `detalles`.
 
-- [ ] **Paso 1:** escribir en `app.test.ts` los tests "error inesperado responde 500 sin exponer el mensaje" y "datos inválidos responden 400 con los campos". Cada test registra una ruta propia antes de `inject`.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test src/app.test.ts` y verificar que fallan (hoy Fastify devuelve el mensaje del error y un 500 para Zod).
-- [ ] **Paso 3:** implementar el plugin de errores, `NoAutenticadoError` y la opción `reloj`.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(api): plugin de errores y reloj inyectable`.
+- [x] **Paso 1:** escribir en `app.test.ts` los tests "error inesperado responde 500 sin exponer el mensaje" y "datos inválidos responden 400 con los campos". Cada test registra una ruta propia antes de `inject`.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test src/app.test.ts` y verificar que fallan (hoy Fastify devuelve el mensaje del error y un 500 para Zod).
+- [x] **Paso 3:** implementar el plugin de errores, `NoAutenticadoError` y la opción `reloj`.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(api): plugin de errores y reloj inyectable`.
 
 ### Tarea 2: Contraseñas y service de usuarios
 

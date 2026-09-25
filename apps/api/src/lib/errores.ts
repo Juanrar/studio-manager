@@ -11,6 +11,10 @@ export class NoEncontradoError extends ErrorDeDominio {
   override readonly codigoHttp = 404;
 }
 
+export class NoAutenticadoError extends ErrorDeDominio {
+  override readonly codigoHttp = 401;
+}
+
 export class ReglaDeNegocioError extends ErrorDeDominio {
   override readonly codigoHttp = 422;
 }
