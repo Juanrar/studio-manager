@@ -18,7 +18,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 8 | [Clases y sesiones](clases-y-sesiones.md) | lista | 7 |
 | 9 | [Pagos](pagos.md) | lista | 5, 6 |
 | 10 | [Asistencias](asistencias.md) | lista | 8, 9 |
-| 11 | Liquidaciones y reportes | por escribir | 10 |
+| 11 | [Liquidaciones y reportes](liquidaciones.md) | en curso | 10 |
 
 ## Frontend
 
