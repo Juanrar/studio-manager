@@ -40,11 +40,11 @@ Todas son solo para admin y siguen el mismo patrón: tabla, "Nuevo…" en un di�
 
 **Archivos:** `apps/web/src/features/packs/PacksPage.tsx`, `api.ts`; test `packs.test.tsx`.
 
-- [ ] **Paso 1:** escribir los 2 tests de packs.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): administración de packs`.
+- [x] **Paso 1:** escribir los 2 tests de packs.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): administración de packs`.
 
 ### Tarea 2: Profesores y porcentajes
 
