@@ -8,3 +8,9 @@ export function esViolacionUnica(error: unknown, restriccion: string): boolean {
   }
   return false;
 }
+
+// Patrón para `like` que busca el texto en cualquier parte. Escapa los comodines
+// para que un `%` o un `_` escrito por el usuario se busque literal.
+export function patronContiene(texto: string): string {
+  return `%${texto.replace(/[\%_]/g, (caracter) => `\${caracter}`)}%`;
+}

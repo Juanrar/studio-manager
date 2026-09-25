@@ -1,4 +1,5 @@
 import Fastify, { type FastifyInstance } from 'fastify';
+import { rutasAlumnos } from './modules/alumnos/alumnos.routes.ts';
 import { rutasAuth } from './modules/auth/auth.routes.ts';
 import { rutasUsuarios } from './modules/usuarios/usuarios.routes.ts';
 import { registrarAutenticacion } from './plugins/autenticacion.ts';
@@ -27,6 +28,7 @@ export function buildApp(opciones: OpcionesApp = {}): FastifyInstance {
   app.get('/api/health', async () => ({ estado: 'ok' }));
   app.register(rutasAuth);
   app.register(rutasUsuarios);
+  app.register(rutasAlumnos);
 
   return app;
 }

@@ -1,3 +1,5 @@
 export * from './constantes.ts';
 export * from './usuarios.ts';
 export * from './auth.ts';
+export * from './comun.ts';
+export * from './alumnos.ts';

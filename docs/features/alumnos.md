@@ -1,6 +1,6 @@
 # Alumnos
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** autenticacion  
 **Listo cuando:** `pnpm test` pasa y recepción puede crear, buscar, editar y dar de baja alumnos por la API.
 
@@ -17,7 +17,7 @@
 - **Solo nombre y apellido son obligatorios.** Email, DNI y el resto son opcionales: mucha gente que llega a tomar una clase suelta no los da. Un texto vacío se guarda como `null`.
 - **DNI:** solo números, entre 6 y 9 dígitos. No se puede repetir.
 - **No hay borrado.** La baja es `activo = false` con `PATCH`. Un alumno con pagos no se puede borrar sin perder historial.
-- **Búsqueda:** `q` busca en nombre, apellido y DNI, sin distinguir tildes ni mayúsculas. Usa la extensión `unaccent` de Postgres. Los caracteres `%` y `_` de `q` se escapan.
+- **Búsqueda:** `q` busca en el nombre completo (en los dos órdenes, así "martina garcia" y "garcia martina" encuentran lo mismo) y en el DNI, sin distinguir tildes ni mayúsculas. Usa la extensión `unaccent` de Postgres. Los caracteres `%` y `_` de `q` se escapan.
 - **Orden:** apellido y nombre.
 - **Paginación:** `pagina` desde 1, `porPagina` por defecto 20 y máximo 100. `total` cuenta todos los resultados, no solo la página.
 - **Por defecto se listan solo activos.** `incluirInactivos=true` muestra todos.
@@ -72,12 +72,12 @@ Forma del alumno: `{ id, nombre, apellido, dni, email, telefono, fechaNacimiento
 **Interfaces:**
 - Produce: `crearAlumno(datos)`, `actualizarAlumno(id, datos)`, `obtenerAlumno(id)`, `listarAlumnos(filtros): Promise<Listado<Alumno>>`. Las features de pagos y asistencias usan `obtenerAlumno` para validar que el alumno existe y está activo.
 
-- [ ] **Paso 1:** escribir los 7 tests de la tabla.
-- [ ] **Paso 2:** correrlos y verificar que fallan con 404.
-- [ ] **Paso 3:** implementar esquemas, repository, service y rutas.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(alumnos): ABM y búsqueda de alumnos`.
+- [x] **Paso 1:** escribir los 7 tests de la tabla.
+- [x] **Paso 2:** correrlos y verificar que fallan con 404.
+- [x] **Paso 3:** implementar esquemas, repository, service y rutas.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(alumnos): ABM y búsqueda de alumnos`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.
