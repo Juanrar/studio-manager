@@ -16,7 +16,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 6 | [Packs](packs.md) | lista | 4 |
 | 7 | [Profesores y porcentajes](profesores.md) | lista | 4 |
 | 8 | [Clases y sesiones](clases-y-sesiones.md) | lista | 7 |
-| 9 | Pagos | por escribir | 5, 6 |
+| 9 | [Pagos](pagos.md) | en curso | 5, 6 |
 | 10 | Asistencias | por escribir | 8, 9 |
 | 11 | Liquidaciones y reportes | por escribir | 10 |
 
@@ -54,10 +54,11 @@ Las decisiones de negocio y de diseño viven en los documentos de `docs/`. Estas
 - Las sesiones se crean cuando recepción abre la clase del día, no por adelantado.
 - No existe la deuda: `asistencia.pago_id` es `not null`.
 
-## Decisiones pendientes
+## Decisiones tomadas por defecto en v1
 
-No bloquean las features 1 a 3. Hay que resolverlas antes de escribir las features 9 y 10.
+Se tomaron para poder avanzar. Cualquiera se puede cambiar; conviene revisarlas con quien atiende la recepción del estudio.
 
-1. Cambio de pack a mitad de camino: cómo se cobra la diferencia y qué pasa con las clases ya usadas.
-2. Cupo por clase: si alguna clase tiene un máximo de alumnos.
-3. Egresos que no son sueldos (alquiler, servicios), para calcular la ganancia del mes.
+1. **Cambio de pack a mitad de camino:** no hay una operación especial. Se anula el pago y se registra otro.
+2. **Monto del pago:** siempre el precio del pack. Descuentos, becas y precios especiales quedan fuera de v1.
+3. **Cupo por clase:** no hay. El estudio tiene una sola sala y no se limita la cantidad de alumnos.
+4. **Egresos que no son sueldos** (alquiler, servicios): fuera de v1. Los reportes muestran ingresos y liquidaciones.
