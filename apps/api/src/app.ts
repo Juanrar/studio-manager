@@ -6,6 +6,7 @@ import { rutasAsistencias } from './modules/asistencias/asistencias.routes.ts';
 import { rutasAuth } from './modules/auth/auth.routes.ts';
 import { rutasClases } from './modules/clases/clases.routes.ts';
 import { rutasSesiones } from './modules/clases/sesiones.routes.ts';
+import { rutasLiquidaciones } from './modules/liquidaciones/liquidaciones.routes.ts';
 import { rutasPacks } from './modules/packs/packs.routes.ts';
 import { rutasPagos } from './modules/pagos/pagos.routes.ts';
 import { rutasProfesores } from './modules/profesores/profesores.routes.ts';
@@ -47,6 +48,7 @@ export function buildApp(opciones: OpcionesApp = {}): FastifyInstance {
   app.register(rutasSesiones);
   app.register(rutasPagos);
   app.register(rutasAsistencias);
+  app.register(rutasLiquidaciones);
 
   return app;
 }

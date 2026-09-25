@@ -64,11 +64,11 @@ Formas:
 - Modificar: `apps/api/src/lib/fechas.ts` — `periodoAFecha`, `rangoDelPeriodo`.
 - Test: `apps/api/src/modules/liquidaciones/liquidaciones.test.ts`
 
-- [ ] **Paso 1:** escribir los 4 primeros tests de la tabla y el de permisos.
-- [ ] **Paso 2:** correrlos y verificar que fallan con 404.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(liquidaciones): resumen, detalle y cierre de sueldos`.
+- [x] **Paso 1:** escribir los 4 primeros tests de la tabla y el de permisos.
+- [x] **Paso 2:** correrlos y verificar que fallan con 404.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan. El de permisos queda rojo solo en la parte de ingresos, que llega en la tarea 3.
+- [x] **Paso 5:** commit `feat(liquidaciones): resumen, detalle y cierre de sueldos`.
 
 ### Tarea 2: Mes congelado
 

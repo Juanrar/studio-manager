@@ -8,3 +8,4 @@ export * from './profesores.ts';
 export * from './clases.ts';
 export * from './pagos.ts';
 export * from './asistencias.ts';
+export * from './liquidaciones.ts';

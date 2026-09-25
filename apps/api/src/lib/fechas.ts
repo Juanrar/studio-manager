@@ -57,3 +57,16 @@ function aUtc(fecha: FechaDia): Date {
 function formatear(anio: number, mes: number, dia: number): FechaDia {
   return `${String(anio).padStart(4, '0')}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
 }
+
+// Un período es un mes: `AAAA-MM`.
+export type Periodo = string;
+
+// Del primer día del mes (incluido) al primer día del mes siguiente (excluido).
+export function rangoDelPeriodo(periodo: Periodo): { desde: FechaDia; hasta: FechaDia } {
+  const desde = `${periodo}-01`;
+  return { desde, hasta: sumarUnMes(desde) };
+}
+
+export function periodoDe(fecha: FechaDia): Periodo {
+  return fecha.slice(0, 7);
+}
