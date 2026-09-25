@@ -275,7 +275,9 @@ git commit -m "feat(shared): crear paquete compartido con tipos base"
   - `buildApp(): FastifyInstance` exportado desde `src/app.ts`. Devuelve la app armada y sin escuchar. Todos los tests HTTP la usan con `app.inject()`.
   - `GET /api/health` responde `200` con `{ estado: 'ok' }`.
 
-- [ ] **Paso 1: Crear el package.json de la API**
+- [x] **Paso 1: Crear el package.json de la API**
+
+> Cambio respecto del plan original: `dev` y `start` usan `tsx` en lugar de `node`. Node 22 antes de la versión 22.18 no ejecuta archivos `.ts` sin el flag `--experimental-strip-types`, y la máquina de desarrollo tenía Node 22.12. `tsx` funciona igual en cualquier Node 22.
 
 ```json
 {
@@ -284,8 +286,8 @@ git commit -m "feat(shared): crear paquete compartido con tipos base"
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --watch --env-file=.env src/server.ts",
-    "start": "node --env-file=.env src/server.ts",
+    "dev": "tsx watch --env-file=.env src/server.ts",
+    "start": "tsx --env-file=.env src/server.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
@@ -297,13 +299,14 @@ git commit -m "feat(shared): crear paquete compartido con tipos base"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   }
 }
 ```
 
-- [ ] **Paso 2: Crear el tsconfig y el config de Vitest**
+- [x] **Paso 2: Crear el tsconfig y el config de Vitest**
 
 `apps/api/tsconfig.json`:
 
@@ -335,7 +338,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Paso 3: Crear config.ts**
+- [x] **Paso 3: Crear config.ts**
 
 `apps/api/src/config.ts`:
 
@@ -366,7 +369,7 @@ export const config = {
 };
 ```
 
-- [ ] **Paso 4: Escribir el test que falla**
+- [x] **Paso 4: Escribir el test que falla**
 
 `apps/api/src/app.test.ts`:
 
@@ -396,12 +399,12 @@ describe('GET /api/health', () => {
 });
 ```
 
-- [ ] **Paso 5: Correr el test y verificar que falla**
+- [x] **Paso 5: Correr el test y verificar que falla**
 
 Correr: `pnpm --filter @studio/api test`
 Esperado: FALLA con un error de importación, porque `src/app.ts` todavía no existe.
 
-- [ ] **Paso 6: Implementar app.ts**
+- [x] **Paso 6: Implementar app.ts**
 
 `apps/api/src/app.ts`:
 
@@ -419,12 +422,12 @@ export function buildApp(): FastifyInstance {
 }
 ```
 
-- [ ] **Paso 7: Correr el test y verificar que pasa**
+- [x] **Paso 7: Correr el test y verificar que pasa**
 
 Correr: `pnpm --filter @studio/api test`
 Esperado: los 2 tests PASAN.
 
-- [ ] **Paso 8: Implementar server.ts**
+- [x] **Paso 8: Implementar server.ts**
 
 `apps/api/src/server.ts`:
 
@@ -442,14 +445,14 @@ try {
 }
 ```
 
-- [ ] **Paso 9: Verificar que el servidor arranca**
+- [x] **Paso 9: Verificar que el servidor arranca**
 
 Correr: `cp .env.example apps/api/.env` y después `pnpm dev:api`
 Esperado: el log muestra que escucha en el puerto 3000. `curl http://localhost:3000/api/health` devuelve `{"estado":"ok"}`. Cortar con Ctrl+C.
 
 Nota: `SESSION_SECRET` del `.env.example` tiene más de 32 caracteres, así que la validación pasa.
 
-- [ ] **Paso 10: Commit**
+- [x] **Paso 10: Commit**
 
 ```bash
 git add apps/api pnpm-lock.yaml
