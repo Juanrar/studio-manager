@@ -470,7 +470,7 @@ git commit -m "feat(api): esqueleto de Fastify con /api/health y config validada
 - Consume: los scripts definidos en las tareas 1 a 4.
 - Produce: instrucciones para levantar el proyecto.
 
-- [ ] **Paso 1: Escribir el README**
+- [x] **Paso 1: Escribir el README**
 
 ````markdown
 # Studio Manager
@@ -511,7 +511,7 @@ La API queda en `http://localhost:3000`. Para verificar: `curl http://localhost:
 - [Features](docs/features/index.md)
 ````
 
-- [ ] **Paso 2: Commit**
+- [x] **Paso 2: Commit**
 
 ```bash
 git add README.md
