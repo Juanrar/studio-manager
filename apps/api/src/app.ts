@@ -1,9 +1,12 @@
 import Fastify, { type FastifyInstance } from 'fastify';
+import { config } from './config.ts';
+import { hoyEnEstudio, type FechaDia } from './lib/fechas.ts';
 import { rutasAlumnos } from './modules/alumnos/alumnos.routes.ts';
 import { rutasAuth } from './modules/auth/auth.routes.ts';
 import { rutasClases } from './modules/clases/clases.routes.ts';
 import { rutasSesiones } from './modules/clases/sesiones.routes.ts';
 import { rutasPacks } from './modules/packs/packs.routes.ts';
+import { rutasPagos } from './modules/pagos/pagos.routes.ts';
 import { rutasProfesores } from './modules/profesores/profesores.routes.ts';
 import { rutasUsuarios } from './modules/usuarios/usuarios.routes.ts';
 import { registrarAutenticacion } from './plugins/autenticacion.ts';
@@ -17,6 +20,8 @@ export type OpcionesApp = {
 declare module 'fastify' {
   interface FastifyInstance {
     reloj: () => Date;
+    // El día actual en la zona del estudio, según el reloj de la app.
+    hoy: () => FechaDia;
   }
 }
 
@@ -25,7 +30,9 @@ export function buildApp(opciones: OpcionesApp = {}): FastifyInstance {
     logger: process.env.NODE_ENV !== 'test',
   });
 
-  app.decorate('reloj', opciones.reloj ?? (() => new Date()));
+  const reloj = opciones.reloj ?? (() => new Date());
+  app.decorate('reloj', reloj);
+  app.decorate('hoy', () => hoyEnEstudio(reloj(), config.tzEstudio));
   registrarManejoDeErrores(app);
   registrarAutenticacion(app);
 
@@ -37,6 +44,7 @@ export function buildApp(opciones: OpcionesApp = {}): FastifyInstance {
   app.register(rutasProfesores);
   app.register(rutasClases);
   app.register(rutasSesiones);
+  app.register(rutasPagos);
 
   return app;
 }

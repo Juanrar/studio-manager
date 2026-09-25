@@ -16,7 +16,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 6 | [Packs](packs.md) | lista | 4 |
 | 7 | [Profesores y porcentajes](profesores.md) | lista | 4 |
 | 8 | [Clases y sesiones](clases-y-sesiones.md) | lista | 7 |
-| 9 | [Pagos](pagos.md) | en curso | 5, 6 |
+| 9 | [Pagos](pagos.md) | lista | 5, 6 |
 | 10 | Asistencias | por escribir | 8, 9 |
 | 11 | Liquidaciones y reportes | por escribir | 10 |
 
@@ -33,6 +33,7 @@ Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo s
 
 | Fecha | Feature | Qué pasó |
 |---|---|---|
+| 2026-09-24 | 9. Pagos | Lista. Registrar (congela monto y clases), anular con motivo, extender vencimiento (admin), clases restantes calculadas. Se agregó `app.hoy()` para el día del estudio. Aprendido: un test que adelanta el reloj más de 7 días tiene que volver a loguearse. Suite 83/83 |
 | 2026-09-24 | 8. Clases y sesiones | Lista. Horario semanal (horas `HH:MM`), agenda del día, apertura idempotente de sesiones y suplencias. `bloquearSesion()` listo para asistencias. Fábricas de test en `apps/api/test/fabricas.ts`. Suite 75/75 |
 | 2026-09-24 | 7. Profesores y porcentajes | Lista. ABM de profesores con porcentaje inicial vigente desde el alta, historial de porcentajes y `porcentajeVigente(ej, profesorId, fecha)` para asistencias. Suite 67/67 |
 | 2026-09-24 | 6. Packs | Lista. Catálogo con baja lógica; solo admin escribe; precio en pesos enteros validado por `precioSchema`. Suite 59/59 |

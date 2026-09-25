@@ -1,7 +1,17 @@
 // Datos de prueba creados con los services, igual que en producción.
 // Cada fábrica tiene valores por defecto válidos; el test pisa solo lo que le importa.
-import type { CrearClaseInput, CrearProfesorInput, Profesor } from '@studio/shared';
+import type {
+  Alumno,
+  CrearAlumnoInput,
+  CrearClaseInput,
+  CrearPackInput,
+  CrearProfesorInput,
+  Pack,
+  Profesor,
+} from '@studio/shared';
+import { crearAlumno } from '../src/modules/alumnos/alumnos.service.ts';
 import { crearClase } from '../src/modules/clases/clases.service.ts';
+import { crearPack } from '../src/modules/packs/packs.service.ts';
 import { crearProfesor } from '../src/modules/profesores/profesores.service.ts';
 
 // El porcentaje inicial queda vigente desde esta fecha, antes del AHORA de los tests.
@@ -21,4 +31,12 @@ export async function crearClaseDeTest(profesorId: number, datos: Partial<CrearC
     profesorId,
     ...datos,
   });
+}
+
+export async function crearAlumnoDeTest(datos: Partial<CrearAlumnoInput> = {}): Promise<Alumno> {
+  return crearAlumno({ nombre: 'Martina', apellido: 'García', ...datos });
+}
+
+export async function crearPackDeTest(datos: Partial<CrearPackInput> = {}): Promise<Pack> {
+  return crearPack({ nombre: 'Pack x8', cantidadClases: 8, precio: 9600, ...datos });
 }

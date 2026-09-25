@@ -1,6 +1,6 @@
 # Pagos
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** alumnos, packs  
 **Listo cuando:** `pnpm test` pasa; recepción registra y anula pagos, admin extiende vencimientos, y cada pago muestra sus clases restantes.
 
@@ -60,12 +60,12 @@ Forma del pago: `{ id, alumnoId, pack: { id, nombre }, cantidadClases, clasesUsa
 **Interfaces:**
 - Produce: `registrarPago(datos, usuarioId, ahora: Date, hoy: FechaDia)`, `anularPago(id, motivo, ahora, hoy)`, `extenderVencimiento(id, venceEl, hoy)`, `listarPagosDeAlumno(alumnoId, hoy)`. La feature de asistencias agrega `elegirPagoParaAsistencia(tx, alumnoId, fecha)`.
 
-- [ ] **Paso 1:** escribir los 6 tests de la tabla.
-- [ ] **Paso 2:** correrlos y verificar que fallan con 404.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(pagos): registrar, anular y extender pagos`.
+- [x] **Paso 1:** escribir los 6 tests de la tabla.
+- [x] **Paso 2:** correrlos y verificar que fallan con 404.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(pagos): registrar, anular y extender pagos`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.

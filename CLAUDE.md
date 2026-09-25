@@ -114,6 +114,7 @@ Los tests de integración necesitan Docker corriendo.
 - **Testcontainers en Windows:** `localhost` resuelve a `::1` y Docker Desktop publica solo en IPv4. `apps/api/test/global-setup.ts` define `TESTCONTAINERS_HOST_OVERRIDE=127.0.0.1`.
 - **Node 22.12 no ejecuta `.ts` sin flag.** Los scripts usan `tsx`.
 - **Drizzle envuelve los errores del driver** en `cause`. Para detectar violaciones de `unique` usá `esViolacionUnica()` de `lib/postgres.ts`.
+- **Un test que adelanta el reloj más de 7 días** tiene que volver a loguearse con la app nueva: la sesión vence a los 7 días.
 - **Un solo Postgres por corrida de tests**, archivos en serie. Cada archivo llama a `base.limpiar()` en `beforeEach`.
 
 ## Estilo de escritura

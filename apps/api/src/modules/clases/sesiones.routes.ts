@@ -1,7 +1,5 @@
 import type { FastifyInstance } from 'fastify';
 import { abrirSesionSchema, actualizarSesionSchema, agendaQuerySchema } from '@studio/shared';
-import { config } from '../../config.ts';
-import { hoyEnEstudio } from '../../lib/fechas.ts';
 import { idParamSchema } from '../../lib/validacion.ts';
 import { requerirRol } from '../../plugins/autenticacion.ts';
 import { abrirSesion, actualizarSesion, agendaDelDia } from './sesiones.service.ts';
@@ -11,7 +9,7 @@ export async function rutasSesiones(app: FastifyInstance): Promise<void> {
 
   app.get('/api/sesiones/dia', async (request) => {
     const { fecha } = agendaQuerySchema.parse(request.query);
-    return agendaDelDia(fecha ?? hoyEnEstudio(app.reloj(), config.tzEstudio));
+    return agendaDelDia(fecha ?? app.hoy());
   });
 
   app.post('/api/sesiones', async (request, reply) => {
