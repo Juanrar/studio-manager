@@ -13,8 +13,8 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 3 | [Utilidades de dinero, fechas y errores](utilidades-de-dominio.md) | lista | 1 |
 | 4 | [Autenticación y roles](autenticacion.md) | lista | 2, 3 |
 | 5 | [Alumnos](alumnos.md) | lista | 4 |
-| 6 | Packs | por escribir | 4 |
-| 7 | Profesores y porcentajes | por escribir | 4 |
+| 6 | [Packs](packs.md) | en curso | 4 |
+| 7 | [Profesores y porcentajes](profesores.md) | pendiente | 4 |
 | 8 | Clases y sesiones | por escribir | 7 |
 | 9 | Pagos | por escribir | 5, 6 |
 | 10 | Asistencias | por escribir | 8, 9 |
