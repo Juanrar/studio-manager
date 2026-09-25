@@ -397,12 +397,12 @@ git commit -m "feat(db): definir el esquema completo con Drizzle"
 - Consume: `schema.ts` de la tarea 2.
 - Produce: la carpeta `src/db/migrations` con el SQL inicial y su metadata, que consume el runner de migraciones de la tarea 4.
 
-- [ ] **Paso 1: Generar la migración**
+- [x] **Paso 1: Generar la migración**
 
 Correr: `pnpm --filter @studio/api db:generate`
 Esperado: crea `src/db/migrations/0000_<nombre>.sql` y la carpeta `meta/`.
 
-- [ ] **Paso 2: Revisar el SQL generado**
+- [x] **Paso 2: Revisar el SQL generado**
 
 Abrir el archivo `.sql` y verificar que estén:
 - los 3 tipos enum;
@@ -412,15 +412,12 @@ Abrir el archivo `.sql` y verificar que estén:
 
 Si falta alguno, corregir `schema.ts`, borrar la carpeta `migrations` y volver a generar.
 
-- [ ] **Paso 3: Aplicar la migración a la base local**
+- [x] **Paso 3: Aplicar la migración a la base local**
 
-Correr: `pnpm db:up` y después `cd apps/api && node --env-file=.env ../../node_modules/drizzle-kit/bin.cjs migrate`
+Correr: `pnpm db:up` y después `pnpm --filter @studio/api db:migrate`. `drizzle.config.ts` usa la base local por defecto si no hay `DATABASE_URL`.
+Esperado: `migrations applied successfully`.
 
-Alternativa más simple si el comando anterior falla: `pnpm --filter @studio/api db:migrate` con `DATABASE_URL` exportada en el entorno.
-
-Esperado: aplica la migración sin error.
-
-- [ ] **Paso 4: Verificar las tablas en la base**
+- [x] **Paso 4: Verificar las tablas en la base**
 
 Correr:
 
@@ -428,9 +425,9 @@ Correr:
 docker exec studio-manager-db psql -U studio -d studio_manager -c "\dt"
 ```
 
-Esperado: se listan las 11 tablas más `__drizzle_migrations`.
+Esperado: se listan las 11 tablas en el esquema `public`. Drizzle guarda el registro de migraciones en `drizzle.__drizzle_migrations`, en otro esquema, así que no aparece en esta lista.
 
-- [ ] **Paso 5: Commit**
+- [x] **Paso 5: Commit**
 
 ```bash
 git add apps/api/src/db/migrations

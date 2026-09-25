@@ -1,0 +1,1180 @@
+{
+  "id": "fa3a4c60-85f7-4571-8eef-41a432a27645",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.alumno": {
+      "name": "alumno",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "alumno_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "apellido": {
+          "name": "apellido",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dni": {
+          "name": "dni",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefono": {
+          "name": "telefono",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fecha_nacimiento": {
+          "name": "fecha_nacimiento",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contacto_emergencia": {
+          "name": "contacto_emergencia",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notas": {
+          "name": "notas",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activo": {
+          "name": "activo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "alumno_busqueda_idx": {
+          "name": "alumno_busqueda_idx",
+          "columns": [
+            {
+              "expression": "lower(\"apellido\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "lower(\"nombre\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "alumno_dni_unique": {
+          "name": "alumno_dni_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "dni"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.asistencia": {
+      "name": "asistencia",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "asistencia_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "sesion_id": {
+          "name": "sesion_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "alumno_id": {
+          "name": "alumno_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pago_id": {
+          "name": "pago_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor_clase": {
+          "name": "valor_clase",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "porcentaje_bp": {
+          "name": "porcentaje_bp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "registrado_por": {
+          "name": "registrado_por",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "registrado_en": {
+          "name": "registrado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "asistencia_pago_idx": {
+          "name": "asistencia_pago_idx",
+          "columns": [
+            {
+              "expression": "pago_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "asistencia_sesion_id_sesion_id_fk": {
+          "name": "asistencia_sesion_id_sesion_id_fk",
+          "tableFrom": "asistencia",
+          "tableTo": "sesion",
+          "columnsFrom": [
+            "sesion_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "asistencia_alumno_id_alumno_id_fk": {
+          "name": "asistencia_alumno_id_alumno_id_fk",
+          "tableFrom": "asistencia",
+          "tableTo": "alumno",
+          "columnsFrom": [
+            "alumno_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "asistencia_pago_id_pago_id_fk": {
+          "name": "asistencia_pago_id_pago_id_fk",
+          "tableFrom": "asistencia",
+          "tableTo": "pago",
+          "columnsFrom": [
+            "pago_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "asistencia_registrado_por_usuario_id_fk": {
+          "name": "asistencia_registrado_por_usuario_id_fk",
+          "tableFrom": "asistencia",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "registrado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "asistencia_sesion_alumno_uq": {
+          "name": "asistencia_sesion_alumno_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "sesion_id",
+            "alumno_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "asistencia_valor_no_negativo": {
+          "name": "asistencia_valor_no_negativo",
+          "value": "\"asistencia\".\"valor_clase\" >= 0"
+        },
+        "asistencia_porcentaje_rango": {
+          "name": "asistencia_porcentaje_rango",
+          "value": "\"asistencia\".\"porcentaje_bp\" > 0 and \"asistencia\".\"porcentaje_bp\" <= 10000"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.clase": {
+      "name": "clase",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "clase_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "estilo": {
+          "name": "estilo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nivel": {
+          "name": "nivel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dia_semana": {
+          "name": "dia_semana",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hora_inicio": {
+          "name": "hora_inicio",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hora_fin": {
+          "name": "hora_fin",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "profesor_id": {
+          "name": "profesor_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "activa": {
+          "name": "activa",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "clase_profesor_id_profesor_id_fk": {
+          "name": "clase_profesor_id_profesor_id_fk",
+          "tableFrom": "clase",
+          "tableTo": "profesor",
+          "columnsFrom": [
+            "profesor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "clase_dia_valido": {
+          "name": "clase_dia_valido",
+          "value": "\"clase\".\"dia_semana\" between 1 and 7"
+        },
+        "clase_horario_valido": {
+          "name": "clase_horario_valido",
+          "value": "\"clase\".\"hora_fin\" > \"clase\".\"hora_inicio\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.liquidacion": {
+      "name": "liquidacion",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "liquidacion_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "profesor_id": {
+          "name": "profesor_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "periodo": {
+          "name": "periodo",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monto": {
+          "name": "monto",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pagado_en": {
+          "name": "pagado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "registrado_por": {
+          "name": "registrado_por",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "liquidacion_profesor_id_profesor_id_fk": {
+          "name": "liquidacion_profesor_id_profesor_id_fk",
+          "tableFrom": "liquidacion",
+          "tableTo": "profesor",
+          "columnsFrom": [
+            "profesor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "liquidacion_registrado_por_usuario_id_fk": {
+          "name": "liquidacion_registrado_por_usuario_id_fk",
+          "tableFrom": "liquidacion",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "registrado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "liquidacion_profesor_periodo_uq": {
+          "name": "liquidacion_profesor_periodo_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "profesor_id",
+            "periodo"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "liquidacion_periodo_dia_uno": {
+          "name": "liquidacion_periodo_dia_uno",
+          "value": "extract(day from \"liquidacion\".\"periodo\") = 1"
+        },
+        "liquidacion_monto_no_negativo": {
+          "name": "liquidacion_monto_no_negativo",
+          "value": "\"liquidacion\".\"monto\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pack": {
+      "name": "pack",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "pack_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cantidad_clases": {
+          "name": "cantidad_clases",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "precio": {
+          "name": "precio",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "activo": {
+          "name": "activo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pack_cantidad_positiva": {
+          "name": "pack_cantidad_positiva",
+          "value": "\"pack\".\"cantidad_clases\" > 0"
+        },
+        "pack_precio_no_negativo": {
+          "name": "pack_precio_no_negativo",
+          "value": "\"pack\".\"precio\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.pago": {
+      "name": "pago",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "pago_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "alumno_id": {
+          "name": "alumno_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pack_id": {
+          "name": "pack_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cantidad_clases": {
+          "name": "cantidad_clases",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monto": {
+          "name": "monto",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "medio": {
+          "name": "medio",
+          "type": "medio_pago",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fecha": {
+          "name": "fecha",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "vence_el": {
+          "name": "vence_el",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "registrado_por": {
+          "name": "registrado_por",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "anulado_en": {
+          "name": "anulado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_anulacion": {
+          "name": "motivo_anulacion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "pago_alumno_idx": {
+          "name": "pago_alumno_idx",
+          "columns": [
+            {
+              "expression": "alumno_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "vence_el",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pago_alumno_id_alumno_id_fk": {
+          "name": "pago_alumno_id_alumno_id_fk",
+          "tableFrom": "pago",
+          "tableTo": "alumno",
+          "columnsFrom": [
+            "alumno_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "pago_pack_id_pack_id_fk": {
+          "name": "pago_pack_id_pack_id_fk",
+          "tableFrom": "pago",
+          "tableTo": "pack",
+          "columnsFrom": [
+            "pack_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "pago_registrado_por_usuario_id_fk": {
+          "name": "pago_registrado_por_usuario_id_fk",
+          "tableFrom": "pago",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "registrado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "pago_cantidad_positiva": {
+          "name": "pago_cantidad_positiva",
+          "value": "\"pago\".\"cantidad_clases\" > 0"
+        },
+        "pago_monto_no_negativo": {
+          "name": "pago_monto_no_negativo",
+          "value": "\"pago\".\"monto\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.porcentaje_profesor": {
+      "name": "porcentaje_profesor",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "porcentaje_profesor_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "profesor_id": {
+          "name": "profesor_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "porcentaje_bp": {
+          "name": "porcentaje_bp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vigente_desde": {
+          "name": "vigente_desde",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "porcentaje_profesor_profesor_id_profesor_id_fk": {
+          "name": "porcentaje_profesor_profesor_id_profesor_id_fk",
+          "tableFrom": "porcentaje_profesor",
+          "tableTo": "profesor",
+          "columnsFrom": [
+            "profesor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "porcentaje_profesor_vigencia_uq": {
+          "name": "porcentaje_profesor_vigencia_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "profesor_id",
+            "vigente_desde"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "porcentaje_bp_rango": {
+          "name": "porcentaje_bp_rango",
+          "value": "\"porcentaje_profesor\".\"porcentaje_bp\" > 0 and \"porcentaje_profesor\".\"porcentaje_bp\" <= 10000"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.profesor": {
+      "name": "profesor",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "profesor_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "apellido": {
+          "name": "apellido",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dni": {
+          "name": "dni",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefono": {
+          "name": "telefono",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alias_cbu": {
+          "name": "alias_cbu",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activo": {
+          "name": "activo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "profesor_dni_unique": {
+          "name": "profesor_dni_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "dni"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sesion": {
+      "name": "sesion",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "sesion_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "clase_id": {
+          "name": "clase_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fecha": {
+          "name": "fecha",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "profesor_id": {
+          "name": "profesor_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estado": {
+          "name": "estado",
+          "type": "estado_sesion",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'programada'"
+        }
+      },
+      "indexes": {
+        "sesion_profesor_fecha_idx": {
+          "name": "sesion_profesor_fecha_idx",
+          "columns": [
+            {
+              "expression": "profesor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "fecha",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sesion_clase_id_clase_id_fk": {
+          "name": "sesion_clase_id_clase_id_fk",
+          "tableFrom": "sesion",
+          "tableTo": "clase",
+          "columnsFrom": [
+            "clase_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "sesion_profesor_id_profesor_id_fk": {
+          "name": "sesion_profesor_id_profesor_id_fk",
+          "tableFrom": "sesion",
+          "tableTo": "profesor",
+          "columnsFrom": [
+            "profesor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "sesion_clase_fecha_uq": {
+          "name": "sesion_clase_fecha_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "clase_id",
+            "fecha"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sesion_usuario": {
+      "name": "sesion_usuario",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expira_en": {
+          "name": "expira_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "sesion_usuario_usuario_idx": {
+          "name": "sesion_usuario_usuario_idx",
+          "columns": [
+            {
+              "expression": "usuario_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sesion_usuario_usuario_id_usuario_id_fk": {
+          "name": "sesion_usuario_usuario_id_usuario_id_fk",
+          "tableFrom": "sesion_usuario",
+          "tableTo": "usuario",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.usuario": {
+      "name": "usuario",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "usuario_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rol": {
+          "name": "rol",
+          "type": "rol",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "activo": {
+          "name": "activo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "usuario_email_unique": {
+          "name": "usuario_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.estado_sesion": {
+      "name": "estado_sesion",
+      "schema": "public",
+      "values": [
+        "programada",
+        "dictada",
+        "cancelada"
+      ]
+    },
+    "public.medio_pago": {
+      "name": "medio_pago",
+      "schema": "public",
+      "values": [
+        "efectivo",
+        "transferencia",
+        "mercado_pago",
+        "otro"
+      ]
+    },
+    "public.rol": {
+      "name": "rol",
+      "schema": "public",
+      "values": [
+        "admin",
+        "recepcion"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
