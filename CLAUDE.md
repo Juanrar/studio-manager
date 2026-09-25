@@ -104,6 +104,9 @@ Reglas que siguen:
 | `pnpm typecheck` | Verifica los tipos |
 | `pnpm dev:api` | Levanta la API en el puerto 3000 |
 | `pnpm dev:web` | Levanta el frontend en el puerto 5173, con proxy de `/api` a la API |
+| `pnpm build` | Compila el frontend en `apps/web/dist` |
+| `pnpm start` | Levanta la API; con `WEB_DIST=../web/dist` también sirve el frontend |
+| `pnpm e2e` | Prueba de punta a punta con Playwright: base limpia, build y recorrido en Chromium |
 | `pnpm --filter @studio/api db:generate` | Genera una migración desde `schema.ts` |
 | `pnpm --filter @studio/api db:migrate` | Aplica las migraciones |
 
@@ -121,6 +124,7 @@ Los tests de integración necesitan Docker corriendo.
 - **Tests del frontend:** `apps/web/test/render.tsx` renderiza la app completa en una ruta con `renderizarEn()`, y `conSesion()` simula `GET /api/auth/yo`. MSW falla si llega un pedido que el test no previó. No necesitan Docker.
 - **Si la sesión se reinició, Docker Desktop puede estar apagado.** Los tests de la API fallan con `Could not find a working container runtime strategy`. Hay que abrir Docker Desktop y esperar a que `docker info` responda.
 - **Tests web que pasan por `/agenda`** sin probar la agenda: llamar a `conAgendaVacia()`, si no la agenda hace un pedido que MSW no esperaba.
+- **`pnpm e2e` no corre dentro de `pnpm test`:** necesita Docker, compila el frontend y usa la base `studio_manager_e2e` (se borra y se crea en cada corrida). Usa el reloj real: crea la clase para el día de hoy en Buenos Aires.
 - **Un solo Postgres por corrida de tests**, archivos en serie. Cada archivo llama a `base.limpiar()` en `beforeEach`.
 
 ## Estilo de escritura

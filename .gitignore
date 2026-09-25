@@ -30,3 +30,7 @@ Thumbs.db
 
 # Cobertura de tests
 coverage/
+
+# Resultados de Playwright
+e2e/test-results/
+e2e/playwright-report/

@@ -30,6 +30,7 @@ studio-manager/
 │   └── web/          # frontend
 ├── packages/
 │   └── shared/       # esquemas Zod y tipos que usan api y web
+├── e2e/              # prueba de punta a punta con Playwright
 ├── docs/
 ├── docker-compose.yml   # Postgres local
 ├── package.json         # scripts de raíz

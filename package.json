@@ -14,7 +14,8 @@
     "db:down": "docker compose down",
     "dev:web": "pnpm --filter @studio/web dev",
     "build": "pnpm --filter @studio/web build",
-    "start": "pnpm --filter @studio/api start"
+    "start": "pnpm --filter @studio/api start",
+    "e2e": "pnpm --filter @studio/e2e e2e"
   },
   "devDependencies": {
     "typescript": "^5.7.2"

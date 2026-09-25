@@ -1,6 +1,6 @@
 # Prueba de punta a punta y build de producción
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** frontend-agenda, frontend-liquidaciones  
 **Listo cuando:** `pnpm test` pasa, `pnpm build && pnpm start` sirve la app completa desde la API, y `pnpm e2e` recorre el flujo principal en un navegador real contra la API y una base limpia.
 
@@ -47,12 +47,12 @@
 - Crear: `e2e/package.json`, `e2e/playwright.config.ts`, `e2e/preparar.ts`, `e2e/flujo-principal.spec.ts`
 - Modificar: `pnpm-workspace.yaml` — incluir `e2e`; `package.json` de la raíz — script `e2e`.
 
-- [ ] **Paso 1:** instalar Playwright y Chromium.
-- [ ] **Paso 2:** escribir `preparar.ts` (base limpia, migraciones, packs y un admin) y el recorrido.
-- [ ] **Paso 3:** correr `pnpm e2e` y verificar que pasa.
-- [ ] **Paso 4:** commit `test(e2e): recorrido principal en el navegador`.
+- [x] **Paso 1:** instalar Playwright y Chromium.
+- [x] **Paso 2:** escribir `preparar.ts` (base limpia, migraciones, packs y un admin) y el recorrido.
+- [x] **Paso 3:** correr `pnpm e2e` y verificar que pasa.
+- [x] **Paso 4:** commit `test(e2e): recorrido principal en el navegador`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
-- [ ] `pnpm e2e` pasa.
+- [x] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm e2e` pasa.
