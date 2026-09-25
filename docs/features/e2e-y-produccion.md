@@ -22,6 +22,7 @@
 |---|---|---|
 | Con `WEB_DIST`, `/` y una ruta del frontend devuelven `index.html`, y un archivo de `assets/` se sirve tal cual | API | Si falta el fallback, recargar cualquier pantalla que no sea `/` da 404 en producción |
 | Con `WEB_DIST`, una ruta `/api/` inexistente sigue respondiendo 404 en JSON | API | Si el fallback atrapa también `/api/`, el frontend recibe HTML donde espera JSON y los errores se vuelven incomprensibles |
+| `WEB_DIST` acepta una ruta relativa | API | `@fastify/static` exige una ruta absoluta; sin `resolve()` la API no arranca con `WEB_DIST=../web/dist`, que es lo que dice el README. Apareció en la prueba manual |
 | Recorrido completo en el navegador | Punta a punta | Si cualquier pieza no encaja con otra (formato de la API, rutas, cookie, proxy, build), el flujo se corta |
 
 ---
@@ -34,11 +35,11 @@
 - Modificar: `package.json` de la raíz — scripts `build` y `start`; `.env.example`; `README.md`.
 - Test: `apps/api/src/web.test.ts`
 
-- [ ] **Paso 1:** escribir los 2 tests de la API.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan; probar `pnpm build && pnpm start` a mano.
-- [ ] **Paso 5:** commit `feat(api): servir el frontend compilado en producción`.
+- [x] **Paso 1:** escribir los 3 tests de la API.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan; probar `pnpm build && pnpm start` a mano.
+- [x] **Paso 5:** commit `feat(api): servir el frontend compilado en producción`.
 
 ### Tarea 2: Prueba de punta a punta
 

@@ -2,7 +2,8 @@ import type { FastifyInstance } from 'fastify';
 import { ZodError } from 'zod';
 import { esErrorDeDominio } from '../lib/errores.ts';
 
-export function registrarManejoDeErrores(app: FastifyInstance): void {
+// Con `sirveFrontend`, una ruta desconocida fuera de /api/ devuelve index.html: la resuelve el router del frontend.
+export function registrarManejoDeErrores(app: FastifyInstance, { sirveFrontend = false } = {}): void {
   app.setErrorHandler((error, request, reply) => {
     if (esErrorDeDominio(error)) {
       return reply
@@ -30,5 +31,10 @@ export function registrarManejoDeErrores(app: FastifyInstance): void {
     return reply.status(500).send({ error: 'Error interno del servidor' });
   });
 
-  app.setNotFoundHandler((_request, reply) => reply.status(404).send({ error: 'Ruta no encontrada' }));
+  app.setNotFoundHandler((request, reply) => {
+    if (sirveFrontend && request.method === 'GET' && !request.url.startsWith('/api/')) {
+      return reply.sendFile('index.html');
+    }
+    return reply.status(404).send({ error: 'Ruta no encontrada' });
+  });
 }

@@ -1,3 +1,5 @@
+import { resolve } from 'node:path';
+import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { config } from './config.ts';
 import { hoyEnEstudio, type FechaDia } from './lib/fechas.ts';
@@ -17,6 +19,8 @@ import { registrarManejoDeErrores } from './plugins/errores.ts';
 export type OpcionesApp = {
   // Los tests pasan un reloj fijo. En producción es la hora real.
   reloj?: () => Date;
+  // Carpeta del frontend compilado. Si viene, la API también sirve la app web.
+  directorioWeb?: string | undefined;
 };
 
 declare module 'fastify' {
@@ -35,7 +39,10 @@ export function buildApp(opciones: OpcionesApp = {}): FastifyInstance {
   const reloj = opciones.reloj ?? (() => new Date());
   app.decorate('reloj', reloj);
   app.decorate('hoy', () => hoyEnEstudio(reloj(), config.tzEstudio));
-  registrarManejoDeErrores(app);
+  registrarManejoDeErrores(app, { sirveFrontend: opciones.directorioWeb !== undefined });
+  if (opciones.directorioWeb !== undefined) {
+    app.register(fastifyStatic, { root: resolve(opciones.directorioWeb) });
+  }
   registrarAutenticacion(app);
 
   app.get('/api/health', async () => ({ estado: 'ok' }));

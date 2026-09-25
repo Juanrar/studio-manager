@@ -29,6 +29,17 @@ ADMIN_PASSWORD='una-clave-larga' pnpm --filter @studio/api usuario:admin admin@t
 
 `db:seed` carga los packs iniciales. `usuario:admin` crea el primer usuario admin; la contraseña va por variable de entorno para que no quede en el historial de la terminal.
 
+## Producción
+
+La API sirve el frontend compilado, así la app corre en un solo proceso:
+
+```bash
+pnpm build
+WEB_DIST=../web/dist pnpm start
+```
+
+`WEB_DIST` es relativa a `apps/api`. La app queda en `http://localhost:3000`.
+
 ## Comandos
 
 | Comando | Qué hace |
@@ -37,6 +48,9 @@ ADMIN_PASSWORD='una-clave-larga' pnpm --filter @studio/api usuario:admin admin@t
 | `pnpm typecheck` | Verifica los tipos |
 | `pnpm db:up` | Levanta Postgres en el puerto 5433 |
 | `pnpm db:down` | Apaga Postgres |
+| `pnpm dev:web` | Levanta el frontend en el puerto 5173 |
+| `pnpm build` | Compila el frontend en `apps/web/dist` |
+| `pnpm start` | Levanta la API (con `WEB_DIST`, también sirve el frontend) |
 
 ## Documentación
 

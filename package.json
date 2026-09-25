@@ -12,7 +12,9 @@
     "typecheck": "pnpm -r typecheck",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "dev:web": "pnpm --filter @studio/web dev"
+    "dev:web": "pnpm --filter @studio/web dev",
+    "build": "pnpm --filter @studio/web build",
+    "start": "pnpm --filter @studio/api start"
   },
   "devDependencies": {
     "typescript": "^5.7.2"
