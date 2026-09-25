@@ -438,62 +438,47 @@ git commit -m "feat(db): generar la migración inicial"
 
 ### Tarea 4: Infraestructura de tests contra Postgres real
 
+> Cambio respecto del plan original: en lugar de un contenedor por archivo de test, hay un solo Postgres por corrida. Con más de diez archivos de test, un contenedor por archivo suma minutos. Los archivos corren en serie y cada test limpia las tablas.
+
 **Archivos:**
+- Crear: `apps/api/test/global-setup.ts` — levanta el contenedor, aplica las migraciones y publica la URL con `provide('databaseUrl')`.
+- Crear: `apps/api/test/setup-env.ts` — antes de cada archivo, pone `DATABASE_URL` del contenedor, un `SESSION_SECRET` de test y `NODE_ENV=test`. Así `src/db/client.ts` y `src/config.ts` funcionan igual que en producción.
 - Crear: `apps/api/test/db.ts`
-- Modificar: `apps/api/vitest.config.ts`
+- Modificar: `apps/api/vitest.config.ts` — `globalSetup`, `setupFiles`, `fileParallelism: false`, `hookTimeout: 120_000`.
+- Modificar: `apps/api/tsconfig.json` — incluir `test`, `vitest.config.ts` y `drizzle.config.ts`; quitar `rootDir`.
 - Test: `apps/api/src/db/schema.test.ts`
 
 **Interfaces:**
-- Consume: `schema.ts` (tarea 2) y las migraciones (tarea 3).
+- Consume: `db` y `sql` de `src/db/client.ts`, y las migraciones de la tarea 3.
 - Produce:
-  - `levantarBaseDeTest(): Promise<{ db: DrizzleDb; limpiar: () => Promise<void>; cerrar: () => Promise<void> }>` exportado desde `test/db.ts`. Levanta un contenedor de Postgres, aplica las migraciones y devuelve el cliente.
-  - `limpiar()` borra todas las filas de todas las tablas, para usar entre tests.
-  - Esta función la usan todos los tests de integración de los planes siguientes.
+  - `levantarBaseDeTest(): Promise<{ db: DrizzleDb; limpiar: () => Promise<void>; cerrar: () => Promise<void> }>` exportado desde `test/db.ts`.
+  - `limpiar()` hace `truncate ... restart identity cascade` de todas las tablas. Se llama en `beforeEach`.
+  - `cerrar()` cierra el pool del archivo. Se llama en `afterAll`.
+  - Todos los tests de integración de las features siguientes usan esta función.
 
-- [ ] **Paso 1: Escribir el helper de base de test**
+**Nota para Windows:** testcontainers resuelve `localhost` a `::1` y Docker Desktop publica los puertos solo en IPv4. `global-setup.ts` define `TESTCONTAINERS_HOST_OVERRIDE=127.0.0.1` si no viene definido.
 
-`apps/api/test/db.ts`:
+- [x] **Paso 1: Escribir el helper de base de test**
+
+El código final está en `apps/api/test/`. `test/db.ts`:
 
 ```ts
-import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import { migrate } from 'drizzle-orm/postgres-js/migrator';
-import { sql } from 'drizzle-orm';
-import postgres from 'postgres';
-import * as schema from '../src/db/schema.ts';
+import { sql as sqlTag } from 'drizzle-orm';
+import { db, sql } from '../src/db/client.ts';
 
 const TABLAS = [
-  'asistencia',
-  'liquidacion',
-  'sesion',
-  'clase',
-  'pago',
-  'pack',
-  'porcentaje_profesor',
-  'profesor',
-  'alumno',
-  'sesion_usuario',
-  'usuario',
+  'asistencia', 'liquidacion', 'sesion', 'clase', 'pago', 'pack',
+  'porcentaje_profesor', 'profesor', 'alumno', 'sesion_usuario', 'usuario',
 ];
 
 export async function levantarBaseDeTest() {
-  const contenedor: StartedPostgreSqlContainer = await new PostgreSqlContainer(
-    'postgres:16-alpine',
-  ).start();
-
-  const cliente = postgres(contenedor.getConnectionUri(), { max: 1 });
-  const db = drizzle(cliente, { schema });
-
-  await migrate(db, { migrationsFolder: './src/db/migrations' });
-
   return {
     db,
     async limpiar() {
-      await db.execute(sql.raw(`truncate ${TABLAS.join(', ')} restart identity cascade`));
+      await db.execute(sqlTag.raw(`truncate ${TABLAS.join(', ')} restart identity cascade`));
     },
     async cerrar() {
-      await cliente.end();
-      await contenedor.stop();
+      await sql.end();
     },
   };
 }
@@ -501,7 +486,7 @@ export async function levantarBaseDeTest() {
 export type BaseDeTest = Awaited<ReturnType<typeof levantarBaseDeTest>>;
 ```
 
-- [ ] **Paso 2: Escribir el test que falla**
+- [x] **Paso 2: Escribir el test que falla**
 
 `apps/api/src/db/schema.test.ts`:
 
@@ -579,12 +564,12 @@ describe('esquema', () => {
 });
 ```
 
-- [ ] **Paso 3: Correr el test y verificar que falla**
+- [x] **Paso 3: Correr el test y verificar que falla**
 
 Correr: `pnpm --filter @studio/api test`
 Esperado: FALLA, porque `test/db.ts` todavía no está incluido en el `tsconfig` ni el test puede resolver las migraciones. Si ya pasa en este punto, revisar que Docker esté corriendo.
 
-- [ ] **Paso 4: Incluir la carpeta test en el tsconfig**
+- [x] **Paso 4: Incluir la carpeta test en el tsconfig**
 
 En `apps/api/tsconfig.json`, cambiar `"include": ["src"]` por:
 
@@ -594,12 +579,12 @@ En `apps/api/tsconfig.json`, cambiar `"include": ["src"]` por:
 
 y quitar `"rootDir": "src"`.
 
-- [ ] **Paso 5: Correr los tests y verificar que pasan**
+- [x] **Paso 5: Correr los tests y verificar que pasan**
 
 Correr: `pnpm --filter @studio/api test`
 Esperado: los 5 tests de esquema PASAN. La primera corrida tarda más porque descarga la imagen de Postgres.
 
-- [ ] **Paso 6: Commit**
+- [x] **Paso 6: Commit**
 
 ```bash
 git add apps/api/test apps/api/src/db/schema.test.ts apps/api/tsconfig.json apps/api/vitest.config.ts
