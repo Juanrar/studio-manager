@@ -51,11 +51,11 @@
 - Crear: `apps/web/test/datos.ts` — constructores de alumnos, packs y pagos para MSW.
 - Test: `apps/web/src/features/alumnos/alumnos.test.tsx`
 
-- [ ] **Paso 1:** escribir los 3 primeros tests de la tabla.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): listado, búsqueda y alta de alumnos`.
+- [x] **Paso 1:** escribir los 3 primeros tests de la tabla.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): listado, búsqueda y alta de alumnos`.
 
 ### Tarea 2: Ficha del alumno con pagos
 
