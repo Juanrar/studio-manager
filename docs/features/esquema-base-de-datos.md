@@ -603,47 +603,29 @@ git commit -m "test(db): levantar Postgres con Testcontainers y verificar el esq
 - Consume: `db` de `src/db/client.ts` y las tablas de `schema.ts`.
 - Produce: el script `pnpm --filter @studio/api db:seed`, que inserta los packs iniciales. No inserta usuarios: eso lo hace la feature `autenticacion`, que ya tiene el hasheo de contraseñas.
 
-- [ ] **Paso 1: Escribir el seed**
+- [x] **Paso 1: Escribir el seed**
 
-`apps/api/src/db/seed.ts`:
+> Cambio respecto del plan original: el seed inserta los packs solo si la tabla está vacía. `pack.nombre` no tiene `unique`, así que `onConflictDoNothing()` no evitaba duplicados al correrlo dos veces.
 
-```ts
-import { db, sql as cliente } from './client.ts';
-import { pack } from './schema.ts';
+El código está en `apps/api/src/db/seed.ts`. Cuenta los packs; si hay alguno, no inserta nada.
 
-const PACKS = [
-  { nombre: 'Clase suelta', cantidadClases: 1, precio: 1500 },
-  { nombre: 'Pack x4', cantidadClases: 4, precio: 5200 },
-  { nombre: 'Pack x8', cantidadClases: 8, precio: 9600 },
-  { nombre: 'Pack x16', cantidadClases: 16, precio: 17_600 },
-];
-
-const insertados = await db.insert(pack).values(PACKS).onConflictDoNothing().returning();
-
-console.log(`Packs insertados: ${insertados.length}`);
-
-await cliente.end();
-```
-
-Los precios son de ejemplo y el administrador los cambia desde la aplicación.
-
-- [ ] **Paso 2: Agregar el script**
+- [x] **Paso 2: Agregar el script**
 
 En `apps/api/package.json`, dentro de `"scripts"`:
 
 ```json
-"db:seed": "node --env-file=.env src/db/seed.ts"
+"db:seed": "tsx --env-file=.env src/db/seed.ts"
 ```
 
-- [ ] **Paso 3: Correr el seed y verificar**
+- [x] **Paso 3: Correr el seed y verificar**
 
 Correr: `pnpm --filter @studio/api db:seed`
-Esperado: imprime `Packs insertados: 4`.
+Esperado: imprime `Packs insertados: 4`. Una segunda corrida imprime `Ya hay 4 packs cargados. No se insertó nada.`
 
 Verificar: `docker exec studio-manager-db psql -U studio -d studio_manager -c "select nombre, cantidad_clases, precio from pack order by id"`
 Esperado: las 4 filas, con `precio` en pesos enteros (1500, 5200, 9600, 17600).
 
-- [ ] **Paso 4: Commit**
+- [x] **Paso 4: Commit**
 
 ```bash
 git add apps/api/src/db/seed.ts apps/api/package.json
