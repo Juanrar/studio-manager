@@ -206,7 +206,7 @@ git commit -m "feat(lib): agregar utilidades de dinero en pesos enteros"
 
 `sumarUnMes` tiene que resolver el caso de fin de mes: el 31 de enero más un mes es el 28 o 29 de febrero, no el 3 de marzo.
 
-- [ ] **Paso 1: Escribir los tests que fallan**
+- [x] **Paso 1: Escribir los tests que fallan**
 
 `apps/api/src/lib/fechas.test.ts`:
 
@@ -280,12 +280,12 @@ describe('esFechaDia', () => {
 });
 ```
 
-- [ ] **Paso 2: Correr los tests y verificar que fallan**
+- [x] **Paso 2: Correr los tests y verificar que fallan**
 
 Correr: `pnpm --filter @studio/api test src/lib/fechas.test.ts`
 Esperado: FALLA con "Cannot find module './fechas.ts'".
 
-- [ ] **Paso 3: Implementar el módulo**
+- [x] **Paso 3: Implementar el módulo**
 
 `apps/api/src/lib/fechas.ts`:
 
@@ -351,12 +351,12 @@ function formatear(anio: number, mes: number, dia: number): FechaDia {
 }
 ```
 
-- [ ] **Paso 4: Correr los tests y verificar que pasan**
+- [x] **Paso 4: Correr los tests y verificar que pasan**
 
 Correr: `pnpm --filter @studio/api test src/lib/fechas.test.ts`
 Esperado: todos PASAN.
 
-- [ ] **Paso 5: Commit**
+- [x] **Paso 5: Commit**
 
 ```bash
 git add apps/api/src/lib/fechas.ts apps/api/src/lib/fechas.test.ts
