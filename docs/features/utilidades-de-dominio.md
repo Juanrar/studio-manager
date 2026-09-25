@@ -1,6 +1,6 @@
 # Utilidades de dinero, fechas y errores
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** monorepo-y-api  
 **Listo cuando:** `pnpm --filter @studio/api test` pasa, incluidos los tests de dinero, fechas y errores.
 
@@ -473,7 +473,7 @@ git commit -m "feat(lib): agregar errores de dominio con su código HTTP"
 
 ## Verificación final del plan
 
-- [ ] `pnpm --filter @studio/api test` pasa, incluidos los tests de los planes anteriores.
-- [ ] `pnpm --filter @studio/api typecheck` pasa.
-- [ ] Ninguna función de `src/lib/` importa nada de `src/db/` ni de `src/modules/`.
-- [ ] `git status` está limpio.
+- [x] `pnpm --filter @studio/api test` pasa, incluidos los tests de los planes anteriores.
+- [x] `pnpm --filter @studio/api typecheck` pasa.
+- [x] Ninguna función de `src/lib/` importa nada de `src/db/` ni de `src/modules/`.
+- [x] `git status` está limpio.
