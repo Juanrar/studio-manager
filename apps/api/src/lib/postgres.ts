@@ -1,0 +1,10 @@
+// Drizzle envuelve el error del driver en `cause`, así que se recorre la cadena.
+export function esViolacionUnica(error: unknown, restriccion: string): boolean {
+  let actual: unknown = error;
+  while (actual !== null && typeof actual === 'object') {
+    const candidato = actual as { code?: unknown; constraint_name?: unknown; cause?: unknown };
+    if (candidato.code === '23505' && candidato.constraint_name === restriccion) return true;
+    actual = candidato.cause;
+  }
+  return false;
+}

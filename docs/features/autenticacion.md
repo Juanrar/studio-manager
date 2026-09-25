@@ -106,13 +106,14 @@ Errores: cuerpo `{ error: string }`. Los de validación agregan `detalles: { cam
 - Test: `apps/api/src/modules/usuarios/usuarios.service.test.ts`
 
 **Interfaces:**
-- Produce: `crearUsuario(datos: CrearUsuarioInput): Promise<UsuarioPublico>`, `listarUsuarios(): Promise<UsuarioPublico[]>`, `actualizarUsuario(id, datos: ActualizarUsuarioInput): Promise<UsuarioPublico>`, `buscarParaLogin(email): Promise<{ usuario: UsuarioPublico; passwordHash: string } | null>`.
+- Produce: `crearUsuario(datos: CrearUsuarioInput): Promise<UsuarioPublico>`, `listarUsuarios(): Promise<UsuarioPublico[]>`. `actualizarUsuario` se agrega en la tarea 4.
+- La búsqueda de usuario para el login vive en el módulo `auth`, no acá: `usuarios` depende de `auth` para cerrar sesiones, y si `auth` dependiera de `usuarios` habría una dependencia circular.
 
-- [ ] **Paso 1:** escribir los tests del service: contraseña hasheada y verificable, y email repetido lanza `ReglaDeNegocioError`.
-- [ ] **Paso 2:** correrlos y verificar que fallan porque el módulo no existe.
-- [ ] **Paso 3:** implementar esquemas, contraseñas, repository y service.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(usuarios): service de usuarios con contraseñas hasheadas`.
+- [x] **Paso 1:** escribir los tests del service: contraseña hasheada y verificable, y email repetido lanza `ReglaDeNegocioError`.
+- [x] **Paso 2:** correrlos y verificar que fallan porque el módulo no existe.
+- [x] **Paso 3:** implementar esquemas, contraseñas, repository y service.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(usuarios): service de usuarios con contraseñas hasheadas`.
 
 ### Tarea 3: Login, logout y sesión
 
