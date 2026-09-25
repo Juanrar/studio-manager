@@ -218,3 +218,34 @@ describe('con el mes liquidado', () => {
     expect(respuesta.json()).toEqual(MENSAJE);
   });
 });
+
+describe('GET /api/pagos/ingresos', () => {
+  it('suma por medio los pagos del mes según el día del estudio, sin los anulados', async () => {
+    // El 31 de marzo a las 23:00 en Buenos Aires ya es 1 de abril en UTC.
+    await registrarPago(
+      { alumnoId: martina.id, packId: packX4.id, medio: 'transferencia' },
+      recepcion.id,
+      new Date('2026-04-01T02:00:00Z'),
+      '2026-03-31',
+    );
+    const anulado = await pagar(martina, claseSuelta, '2026-03-15');
+    await app.inject({
+      method: 'POST',
+      url: `/api/pagos/${anulado.id}/anular`,
+      payload: { motivo: 'Se cobró dos veces' },
+      headers: { cookie: cookieAdmin },
+    });
+
+    const respuesta = await get('/api/pagos/ingresos?periodo=2026-03');
+
+    // Queda afuera el pack x4 de Martina del 20 de febrero.
+    expect(respuesta.json()).toEqual({
+      periodo: '2026-03',
+      total: 6700,
+      porMedio: [
+        { medio: 'efectivo', cantidad: 1, total: 1500 },
+        { medio: 'transferencia', cantidad: 1, total: 5200 },
+      ],
+    });
+  });
+});

@@ -98,3 +98,23 @@ export async function contarAsistencias(ej: Ejecutor, pagoId: number): Promise<n
   const [fila] = await ej.select({ total: count() }).from(asistencia).where(eq(asistencia.pagoId, pagoId));
   return fila?.total ?? 0;
 }
+
+// El día de un pago se toma en la zona del estudio: un cobro a las 23:00 del 31 es de ese mes.
+export async function ingresosPorMedio(
+  ej: Ejecutor,
+  desde: FechaDia,
+  hasta: FechaDia,
+  tz: string,
+): Promise<{ medio: NuevoPago['medio']; cantidad: number; total: number }[]> {
+  const dia = sql`(${pago.fecha} at time zone ${tz})::date`;
+  return ej
+    .select({
+      medio: pago.medio,
+      cantidad: count(),
+      total: sql<number>`coalesce(sum(${pago.monto}), 0)`.mapWith(Number),
+    })
+    .from(pago)
+    .where(and(isNull(pago.anuladoEn), sql`${dia} >= ${desde}`, sql`${dia} < ${hasta}`))
+    .groupBy(pago.medio)
+    .orderBy(asc(pago.medio));
+}

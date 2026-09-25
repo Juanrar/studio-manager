@@ -1,6 +1,6 @@
 # Liquidaciones y reportes
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** asistencias  
 **Listo cuando:** `pnpm test` pasa; admin ve el sueldo calculado de cada profesor en un mes, lo cierra, lo marca pagado y ve los ingresos del mes por medio de pago.
 
@@ -88,12 +88,12 @@ Formas:
 - Modificar: `apps/api/src/modules/pagos/pagos.repository.ts`, `pagos.service.ts`, `pagos.routes.ts`
 - Test: el test de ingresos en `liquidaciones.test.ts`
 
-- [ ] **Paso 1:** escribir el test.
-- [ ] **Paso 2:** correrlo y verificar que falla.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr el test y verificar que pasa.
-- [ ] **Paso 5:** commit `feat(pagos): ingresos del mes por medio de pago`.
+- [x] **Paso 1:** escribir el test.
+- [x] **Paso 2:** correrlo y verificar que falla.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr el test y verificar que pasa.
+- [x] **Paso 5:** commit `feat(pagos): ingresos del mes por medio de pago`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.

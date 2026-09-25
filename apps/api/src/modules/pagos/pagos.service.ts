@@ -1,8 +1,8 @@
-import type { Pago, RegistrarPagoInput } from '@studio/shared';
+import type { IngresosDelPeriodo, Pago, RegistrarPagoInput } from '@studio/shared';
 import { config } from '../../config.ts';
 import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
-import { hoyEnEstudio, sumarUnMes, type FechaDia } from '../../lib/fechas.ts';
+import { hoyEnEstudio, rangoDelPeriodo, sumarUnMes, type FechaDia, type Periodo } from '../../lib/fechas.ts';
 import { obtenerAlumno } from '../alumnos/alumnos.service.ts';
 import { obtenerPack } from '../packs/packs.service.ts';
 import * as repo from './pagos.repository.ts';
@@ -106,4 +106,10 @@ export async function elegirPagoParaAsistencia(
     if (usadas < candidato.cantidadClases) return candidato;
   }
   return null;
+}
+
+export async function ingresosDelPeriodo(periodo: Periodo): Promise<IngresosDelPeriodo> {
+  const { desde, hasta } = rangoDelPeriodo(periodo);
+  const porMedio = await repo.ingresosPorMedio(db, desde, hasta, config.tzEstudio);
+  return { periodo, total: porMedio.reduce((suma, fila) => suma + fila.total, 0), porMedio };
 }
