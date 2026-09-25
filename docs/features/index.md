@@ -11,7 +11,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 1 | [Monorepo y esqueleto de la API](monorepo-y-api.md) | lista | — |
 | 2 | [Esquema de base de datos y migraciones](esquema-base-de-datos.md) | lista | 1 |
 | 3 | [Utilidades de dinero, fechas y errores](utilidades-de-dominio.md) | lista | 1 |
-| 4 | Autenticación y roles | por escribir | 2, 3 |
+| 4 | [Autenticación y roles](autenticacion.md) | en curso | 2, 3 |
 | 5 | Alumnos | por escribir | 4 |
 | 6 | Packs | por escribir | 4 |
 | 7 | Profesores y porcentajes | por escribir | 4 |
