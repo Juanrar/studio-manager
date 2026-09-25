@@ -1,6 +1,6 @@
 # Base del frontend y login
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** autenticacion  
 **Listo cuando:** `pnpm test` pasa; con la API levantada, `pnpm dev:web` abre el login, se puede entrar y salir, y el menú muestra solo lo que corresponde al rol.
 
@@ -50,13 +50,13 @@
 - Crear: `apps/web/src/components/Layout.tsx`, `src/rutas.tsx`, `src/App.tsx`
 - Test: `apps/web/src/features/auth/auth.test.tsx`
 
-- [ ] **Paso 1:** escribir los 5 tests de la tabla.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** probar a mano con la API real: `pnpm dev:api` y `pnpm dev:web`, entrar con el admin local.
-- [ ] **Paso 6:** commit `feat(web): login, sesión y menú por rol`.
+- [x] **Paso 1:** escribir los 5 tests de la tabla.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** probar a mano con la API real: `pnpm dev:api` y `pnpm dev:web`, entrar con el admin local.
+- [x] **Paso 6:** commit `feat(web): login, sesión y menú por rol`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan.

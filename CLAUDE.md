@@ -103,6 +103,7 @@ Reglas que siguen:
 | `pnpm test` | Corre los tests de todos los paquetes |
 | `pnpm typecheck` | Verifica los tipos |
 | `pnpm dev:api` | Levanta la API en el puerto 3000 |
+| `pnpm dev:web` | Levanta el frontend en el puerto 5173, con proxy de `/api` a la API |
 | `pnpm --filter @studio/api db:generate` | Genera una migración desde `schema.ts` |
 | `pnpm --filter @studio/api db:migrate` | Aplica las migraciones |
 
@@ -116,6 +117,8 @@ Los tests de integración necesitan Docker corriendo.
 - **Drizzle envuelve los errores del driver** en `cause`. Para detectar violaciones de `unique` usá `esViolacionUnica()` de `lib/postgres.ts`.
 - **Un test que adelanta el reloj más de 7 días** tiene que volver a loguearse con la app nueva: la sesión vence a los 7 días.
 - **Para probar un bloqueo `for update`** sin depender de la suerte: abrir una transacción que tome el bloqueo y, adentro, otra con `set local lock_timeout = '50ms'` que tiene que fallar con código `55P03`. Ver `apps/api/src/modules/pagos/pagos.service.test.ts`.
+- **`localhost` en Windows resuelve a `::1`** y la API escucha en IPv4: el proxy de Vite apunta a `127.0.0.1:3000`.
+- **Tests del frontend:** `apps/web/test/render.tsx` renderiza la app completa en una ruta con `renderizarEn()`, y `conSesion()` simula `GET /api/auth/yo`. MSW falla si llega un pedido que el test no previó. No necesitan Docker.
 - **Un solo Postgres por corrida de tests**, archivos en serie. Cada archivo llama a `base.limpiar()` en `beforeEach`.
 
 ## Estilo de escritura

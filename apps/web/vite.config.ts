@@ -7,7 +7,8 @@ export default defineConfig({
   server: {
     port: 5173,
     // En desarrollo la API corre aparte; el proxy deja la cookie en el mismo origen.
-    proxy: { '/api': 'http://localhost:3000' },
+    // 127.0.0.1 y no localhost: en Windows localhost resuelve a ::1 y la API escucha en IPv4.
+    proxy: { '/api': 'http://127.0.0.1:3000' },
   },
   test: {
     environment: 'jsdom',
