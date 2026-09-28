@@ -21,23 +21,23 @@ export function Layout({ usuario, children }: { usuario: UsuarioPublico; childre
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-stone-200 bg-white">
+      <header className="border-b border-stone-800 bg-stone-900">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-4 py-3">
-          <span className="font-semibold text-violet-800">Studio Manager</span>
+          <span className="font-semibold text-violet-400">Studio Manager</span>
           <nav className="flex flex-1 flex-wrap gap-1">
             {opciones.map((opcion) => (
               <NavLink
                 key={opcion.ruta}
                 to={opcion.ruta}
                 className={({ isActive }) =>
-                  `rounded-md px-3 py-1.5 text-sm ${isActive ? 'bg-violet-100 text-violet-900' : 'text-stone-600 hover:bg-stone-100'}`
+                  `rounded-md px-3 py-1.5 text-sm ${isActive ? 'bg-violet-900/60 text-violet-100' : 'text-stone-400 hover:bg-stone-800 hover:text-stone-200'}`
                 }
               >
                 {opcion.texto}
               </NavLink>
             ))}
           </nav>
-          <span className="text-sm text-stone-600">{usuario.nombre}</span>
+          <span className="text-sm text-stone-400">{usuario.nombre}</span>
           <Boton
             variante="secundario"
             onClick={() => logout.mutate(undefined, { onSuccess: () => navegar('/login', { replace: true }) })}

@@ -28,7 +28,7 @@ export function FichaAlumnoPage() {
 
   return (
     <section>
-      <Link to="/alumnos" className="text-sm text-violet-800 hover:underline">
+      <Link to="/alumnos" className="text-sm text-violet-400 hover:underline">
         ← Alumnos
       </Link>
       <Titulo
@@ -52,10 +52,10 @@ export function FichaAlumnoPage() {
 
       {actualizar.isError && <Aviso>{mensajeDeError(actualizar.error)}</Aviso>}
 
-      <dl className="grid gap-x-6 gap-y-2 rounded-md border border-stone-200 bg-white p-4 text-sm sm:grid-cols-2">
+      <dl className="grid gap-x-6 gap-y-2 rounded-md border border-stone-800 bg-stone-900 p-4 text-sm sm:grid-cols-2">
         {filas.map(([etiqueta, valor]) => (
           <div key={etiqueta}>
-            <dt className="text-stone-500">{etiqueta}</dt>
+            <dt className="text-stone-400">{etiqueta}</dt>
             <dd>{valor ?? '—'}</dd>
           </div>
         ))}

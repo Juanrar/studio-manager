@@ -11,9 +11,9 @@ import { useId } from 'react';
 type VarianteBoton = 'primario' | 'secundario' | 'peligro';
 
 const estilosBoton: Record<VarianteBoton, string> = {
-  primario: 'bg-violet-700 text-white hover:bg-violet-800',
-  secundario: 'border border-stone-300 bg-white text-stone-800 hover:bg-stone-100',
-  peligro: 'bg-red-600 text-white hover:bg-red-700',
+  primario: 'bg-violet-700 text-white hover:bg-violet-600',
+  secundario: 'border border-stone-700 bg-stone-900 text-stone-200 hover:bg-stone-800',
+  peligro: 'bg-red-700 text-white hover:bg-red-600',
 };
 
 export function Boton({
@@ -32,7 +32,7 @@ export function Boton({
 }
 
 const estiloEntrada =
-  'w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm focus:border-violet-600 focus:outline-none focus:ring-1 focus:ring-violet-600';
+  'w-full rounded-md border border-stone-700 bg-stone-800 px-3 py-2 text-sm placeholder:text-stone-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500';
 
 // Etiqueta, control y mensaje de error. El control recibe el id para que la etiqueta lo nombre.
 export function Campo({
@@ -47,11 +47,11 @@ export function Campo({
   const id = useId();
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-medium text-stone-700">
+      <label htmlFor={id} className="text-sm font-medium text-stone-300">
         {etiqueta}
       </label>
       {children(id)}
-      {error !== undefined && <p className="text-sm text-red-600">{error}</p>}
+      {error !== undefined && <p className="text-sm text-red-400">{error}</p>}
     </div>
   );
 }
@@ -81,7 +81,7 @@ export function AreaDeTexto({
 }
 
 export function Aviso({ tipo = 'error', children }: { tipo?: 'error' | 'exito'; children: ReactNode }) {
-  const estilo = tipo === 'error' ? 'border-red-200 bg-red-50 text-red-800' : 'border-green-200 bg-green-50 text-green-800';
+  const estilo = tipo === 'error' ? 'border-red-900 bg-red-950 text-red-200' : 'border-green-900 bg-green-950 text-green-200';
   return (
     <div role={tipo === 'error' ? 'alert' : 'status'} className={`rounded-md border px-3 py-2 text-sm ${estilo}`}>
       {children}
@@ -91,9 +91,9 @@ export function Aviso({ tipo = 'error', children }: { tipo?: 'error' | 'exito'; 
 
 export function Tabla({ columnas, children }: { columnas: string[]; children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-md border border-stone-200 bg-white">
+    <div className="overflow-x-auto rounded-md border border-stone-800 bg-stone-900">
       <table className="w-full text-left text-sm">
-        <thead className="bg-stone-100 text-stone-600">
+        <thead className="bg-stone-800 text-stone-400">
           <tr>
             {columnas.map((columna) => (
               <th key={columna} scope="col" className="px-3 py-2 font-medium">
@@ -102,7 +102,7 @@ export function Tabla({ columnas, children }: { columnas: string[]; children: Re
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-stone-100">{children}</tbody>
+        <tbody className="divide-y divide-stone-800">{children}</tbody>
       </table>
     </div>
   );
@@ -126,12 +126,12 @@ export function Dialogo({
   const idTitulo = useId();
   if (!abierto) return null;
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/40 p-4" onClick={alCerrar}>
+    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/60 p-4" onClick={alCerrar}>
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={idTitulo}
-        className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl"
+        className="w-full max-w-lg rounded-lg border border-stone-800 bg-stone-900 p-5 shadow-xl"
         onClick={(evento) => evento.stopPropagation()}
       >
         <h2 id={idTitulo} className="mb-4 text-lg font-semibold">
@@ -153,15 +153,15 @@ export function Titulo({ children, acciones }: { children: ReactNode; acciones?:
 }
 
 export function Cargando() {
-  return <p className="text-sm text-stone-500">Cargando…</p>;
+  return <p className="text-sm text-stone-400">Cargando…</p>;
 }
 
 export function Insignia({ children, tono = 'gris' }: { children: ReactNode; tono?: 'gris' | 'verde' | 'rojo' | 'ambar' }) {
   const estilos = {
-    gris: 'bg-stone-100 text-stone-700',
-    verde: 'bg-green-100 text-green-800',
-    rojo: 'bg-red-100 text-red-800',
-    ambar: 'bg-amber-100 text-amber-800',
+    gris: 'bg-stone-800 text-stone-300',
+    verde: 'bg-green-950 text-green-300',
+    rojo: 'bg-red-950 text-red-300',
+    ambar: 'bg-amber-950 text-amber-300',
   };
   return <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${estilos[tono]}`}>{children}</span>;
 }

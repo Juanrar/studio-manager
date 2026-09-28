@@ -21,7 +21,7 @@ export function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
-      <form onSubmit={enviar} className="flex w-full max-w-sm flex-col gap-4 rounded-lg bg-white p-6 shadow" noValidate>
+      <form onSubmit={enviar} className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-stone-800 bg-stone-900 p-6 shadow" noValidate>
         <h1 className="text-xl font-semibold">Iniciar sesión</h1>
         {login.isError && <Aviso>{mensajeDeError(login.error)}</Aviso>}
         <Campo etiqueta="Email" error={errores.email?.message}>

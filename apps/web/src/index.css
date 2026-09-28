@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* Por ahora la app es solo oscura. Así los controles nativos (fechas, selects, scroll) también lo son. */
+:root {
+  color-scheme: dark;
+}

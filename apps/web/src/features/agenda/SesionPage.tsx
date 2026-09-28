@@ -20,11 +20,11 @@ export function SesionPage() {
   return (
     <section className="flex flex-col gap-6">
       <div>
-        <Link to={`/agenda?fecha=${datos.fecha}`} className="text-sm text-violet-800 hover:underline">
+        <Link to={`/agenda?fecha=${datos.fecha}`} className="text-sm text-violet-400 hover:underline">
           ← Agenda
         </Link>
         <h1 className="text-2xl font-semibold">Asistencia · {datos.estilo}</h1>
-        <p className="capitalize text-stone-600">
+        <p className="capitalize text-stone-400">
           {formatearFechaLarga(datos.fecha)}, {datos.horaInicio} a {datos.horaFin}
           {datos.nivel !== null && ` · ${datos.nivel}`}
         </p>
@@ -88,7 +88,7 @@ function Asistentes({ sesionId }: { sesionId: number }) {
       <h2 className="mb-2 text-lg font-semibold">Asistentes</h2>
       {asistencias.isPending && <Cargando />}
       {quitar.isError && <Aviso>{mensajeDeError(quitar.error)}</Aviso>}
-      {asistencias.data?.length === 0 && <p className="text-sm text-stone-500">Todavía no hay asistentes.</p>}
+      {asistencias.data?.length === 0 && <p className="text-sm text-stone-400">Todavía no hay asistentes.</p>}
       {asistencias.data && asistencias.data.length > 0 && (
         <Tabla columnas={['Alumno', 'Pack', '']}>
           {asistencias.data.map((asistencia) => (

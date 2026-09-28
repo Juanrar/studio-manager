@@ -111,7 +111,7 @@ function Sueldos({ periodo }: { periodo: string }) {
                   {/* Cerrada, vale el monto guardado; si las asistencias cambiaron después, se avisa. */}
                   {formatearPesos(liquidacion?.monto ?? fila.montoCalculado)}
                   {liquidacion !== null && liquidacion.monto !== fila.montoCalculado && (
-                    <span className="block text-xs text-amber-700">
+                    <span className="block text-xs text-amber-400">
                       Calculado hoy: {formatearPesos(fila.montoCalculado)}
                     </span>
                   )}
@@ -164,7 +164,7 @@ function DetalleDeSueldo({ fila, periodo }: { fila: ResumenProfesor; periodo: st
 
   return (
     <div className="flex flex-col gap-3">
-      {detalle.data.length === 0 && <p className="text-sm text-stone-500">No dio clases con asistentes este mes.</p>}
+      {detalle.data.length === 0 && <p className="text-sm text-stone-400">No dio clases con asistentes este mes.</p>}
       {detalle.data.length > 0 && (
         <Tabla columnas={['Fecha', 'Clase', 'Asistentes', 'Monto']}>
           {detalle.data.map((item) => (

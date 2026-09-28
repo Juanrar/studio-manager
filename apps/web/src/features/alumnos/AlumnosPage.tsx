@@ -44,7 +44,7 @@ export function AlumnosPage() {
             setPagina(1);
           }}
         />
-        <label className="flex items-center gap-2 text-sm text-stone-700">
+        <label className="flex items-center gap-2 text-sm text-stone-300">
           <input
             type="checkbox"
             checked={incluirInactivos}
@@ -65,7 +65,7 @@ export function AlumnosPage() {
             {alumnos.data.items.map((alumno) => (
               <tr key={alumno.id}>
                 <Celda>
-                  <Link to={`/alumnos/${alumno.id}`} className="font-medium text-violet-800 hover:underline">
+                  <Link to={`/alumnos/${alumno.id}`} className="font-medium text-violet-400 hover:underline">
                     {alumno.apellido}, {alumno.nombre}
                   </Link>
                 </Celda>
@@ -78,9 +78,9 @@ export function AlumnosPage() {
             ))}
           </Tabla>
           {alumnos.data.items.length === 0 && (
-            <p className="mt-3 text-sm text-stone-500">No hay alumnos que coincidan con la búsqueda.</p>
+            <p className="mt-3 text-sm text-stone-400">No hay alumnos que coincidan con la búsqueda.</p>
           )}
-          <div className="mt-3 flex items-center justify-between text-sm text-stone-600">
+          <div className="mt-3 flex items-center justify-between text-sm text-stone-400">
             <span>{alumnos.data.total} alumnos</span>
             <div className="flex items-center gap-2">
               <Boton variante="secundario" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>

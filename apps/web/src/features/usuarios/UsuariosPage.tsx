@@ -156,7 +156,7 @@ function EditarUsuarioForm({ usuario, alTerminar }: { usuario: UsuarioPublico; a
   return (
     <form onSubmit={enviar} className="flex flex-col gap-3" noValidate>
       {errors.root?.message !== undefined && <Aviso>{errors.root.message}</Aviso>}
-      <p className="text-sm text-stone-600">{usuario.email}</p>
+      <p className="text-sm text-stone-400">{usuario.email}</p>
       <Campo etiqueta="Nombre" error={errors.nombre?.message}>
         {(id) => <Entrada id={id} {...formulario.register('nombre')} />}
       </Campo>

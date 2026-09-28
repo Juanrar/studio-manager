@@ -49,7 +49,7 @@ export function ProfesoresPage() {
   return (
     <section>
       <Titulo acciones={<Boton onClick={() => setEditando('nuevo')}>Nuevo profesor</Boton>}>Profesores</Titulo>
-      <label className="mb-4 flex items-center gap-2 text-sm text-stone-700">
+      <label className="mb-4 flex items-center gap-2 text-sm text-stone-300">
         <input type="checkbox" checked={incluirInactivos} onChange={(e) => setIncluirInactivos(e.target.checked)} />
         Mostrar dados de baja
       </label>

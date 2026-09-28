@@ -34,7 +34,7 @@ export function ClasesPage() {
   return (
     <section>
       <Titulo acciones={<Boton onClick={() => setEditando('nueva')}>Nueva clase</Boton>}>Horario de clases</Titulo>
-      <label className="mb-4 flex items-center gap-2 text-sm text-stone-700">
+      <label className="mb-4 flex items-center gap-2 text-sm text-stone-300">
         <input type="checkbox" checked={incluirInactivas} onChange={(e) => setIncluirInactivas(e.target.checked)} />
         Mostrar clases dadas de baja
       </label>
@@ -42,7 +42,7 @@ export function ClasesPage() {
       {clases.isPending && <Cargando />}
       {clases.isError && <Aviso>{mensajeDeError(clases.error)}</Aviso>}
       {actualizar.isError && <Aviso>{mensajeDeError(actualizar.error)}</Aviso>}
-      {clases.data?.length === 0 && <p className="text-stone-500">Todavía no hay clases en el horario.</p>}
+      {clases.data?.length === 0 && <p className="text-stone-400">Todavía no hay clases en el horario.</p>}
       {[...porDia.entries()].map(([dia, delDia]) => (
         <div key={dia} className="mb-6">
           <h2 className="mb-2 text-lg font-semibold">{nombreDelDia(dia)}</h2>

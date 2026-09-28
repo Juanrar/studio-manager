@@ -44,7 +44,7 @@ export function PagosDelAlumno({ alumnoId, puedeRegistrar }: { alumnoId: number;
 
       {pagos.isPending && <Cargando />}
       {pagos.isError && <Aviso>{mensajeDeError(pagos.error)}</Aviso>}
-      {pagos.data && pagos.data.length === 0 && <p className="text-sm text-stone-500">Todavía no tiene pagos.</p>}
+      {pagos.data && pagos.data.length === 0 && <p className="text-sm text-stone-400">Todavía no tiene pagos.</p>}
       {pagos.data && pagos.data.length > 0 && (
         <Tabla columnas={['Pack', 'Compra', 'Vence', 'Clases', 'Monto', 'Medio', 'Estado', '']}>
           {pagos.data.map((pago) => (
@@ -60,7 +60,7 @@ export function PagosDelAlumno({ alumnoId, puedeRegistrar }: { alumnoId: number;
               <Celda>
                 <EstadoDelPago pago={pago} />
                 {pago.motivoAnulacion !== null && (
-                  <span className="ml-2 text-xs text-stone-500">{pago.motivoAnulacion}</span>
+                  <span className="ml-2 text-xs text-stone-400">{pago.motivoAnulacion}</span>
                 )}
               </Celda>
               <Celda>
@@ -151,7 +151,7 @@ function AnularPagoForm({ alumnoId, pago, alTerminar }: { alumnoId: number; pago
         anular.mutate({ pagoId: pago.id, motivo }, { onSuccess: alTerminar });
       }}
     >
-      <p className="text-sm text-stone-600">
+      <p className="text-sm text-stone-400">
         {pago.pack.nombre} del {formatearInstante(pago.fecha)} por {formatearPesos(pago.monto)}.
       </p>
       {anular.isError && <Aviso>{mensajeDeError(anular.error)}</Aviso>}
