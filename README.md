@@ -13,13 +13,14 @@ Sistema de gestión para un estudio de danza. Lo usa el personal del estudio: ad
 ```bash
 pnpm install
 cp .env.example apps/api/.env
-pnpm db:up
-pnpm dev:api
+pnpm dev
 ```
 
-La API queda en `http://localhost:3000`. Para verificar: `curl http://localhost:3000/api/health`.
+`pnpm dev` levanta Postgres, espera a que acepte conexiones y arranca la API y el frontend. El frontend queda en `http://localhost:5173` y la API en `http://localhost:3000`. Para verificar: `curl http://localhost:3000/api/health`.
 
-La primera vez, además:
+Ctrl+C corta la API y el frontend. Postgres sigue corriendo hasta `pnpm db:down`.
+
+La primera vez, con `pnpm dev` corriendo, en otra terminal:
 
 ```bash
 pnpm --filter @studio/api db:migrate
@@ -44,6 +45,7 @@ WEB_DIST=../web/dist pnpm start
 
 | Comando | Qué hace |
 |---|---|
+| `pnpm dev` | Levanta Postgres, la API y el frontend |
 | `pnpm test` | Corre los tests de todos los paquetes |
 | `pnpm typecheck` | Verifica los tipos |
 | `pnpm db:up` | Levanta Postgres en el puerto 5433 |

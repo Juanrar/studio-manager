@@ -99,6 +99,7 @@ Reglas que siguen:
 | Comando | Qué hace |
 |---|---|
 | `pnpm install` | Instala las dependencias del monorepo |
+| `pnpm dev` | Levanta Postgres, espera el healthcheck y arranca la API y el frontend juntos |
 | `pnpm db:up` / `pnpm db:down` | Levanta o apaga Postgres en el puerto 5433 |
 | `pnpm test` | Corre los tests de todos los paquetes |
 | `pnpm typecheck` | Verifica los tipos |
@@ -121,6 +122,8 @@ Los tests de integración necesitan Docker corriendo.
 - **Un test que adelanta el reloj más de 7 días** tiene que volver a loguearse con la app nueva: la sesión vence a los 7 días.
 - **Para probar un bloqueo `for update`** sin depender de la suerte: abrir una transacción que tome el bloqueo y, adentro, otra con `set local lock_timeout = '50ms'` que tiene que fallar con código `55P03`. Ver `apps/api/src/modules/pagos/pagos.service.test.ts`.
 - **`localhost` en Windows resuelve a `::1`** y la API escucha en IPv4: el proxy de Vite apunta a `127.0.0.1:3000`.
+- **Vite escucha solo en `[::1]:5173`.** Un `curl` a `127.0.0.1:5173` queda colgado; usá `localhost:5173`.
+- **Cortar `pnpm dev` desde una tarea en segundo plano** deja vivos la API y Vite en Windows. Buscá los PID con `netstat -ano` en los puertos 3000 y 5173 y cerralos.
 - **Tests del frontend:** `apps/web/test/render.tsx` renderiza la app completa en una ruta con `renderizarEn()`, y `conSesion()` simula `GET /api/auth/yo`. MSW falla si llega un pedido que el test no previó. No necesitan Docker.
 - **Si la sesión se reinició, Docker Desktop puede estar apagado.** Los tests de la API fallan con `Could not find a working container runtime strategy`. Hay que abrir Docker Desktop y esperar a que `docker info` responda.
 - **Tests web que pasan por `/agenda`** sin probar la agenda: llamar a `conAgendaVacia()`, si no la agenda hace un pedido que MSW no esperaba.
