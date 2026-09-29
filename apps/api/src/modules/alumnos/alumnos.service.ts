@@ -1,5 +1,5 @@
 import type { ActualizarAlumnoInput, Alumno, CrearAlumnoInput } from '@studio/shared';
-import { db } from '../../db/client.ts';
+import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
 import { esViolacionUnica } from '../../lib/postgres.ts';
@@ -50,6 +50,15 @@ export async function actualizarAlumno(
     // No es null: el alumno existe y quedó bloqueado hasta el final de la transacción.
     return actualizado!;
   });
+}
+
+// Quien compra un pack o una clase suelta pasa a estar activo, esté como esté. Corre dentro de la
+// transacción del pago, y queda registrado a nombre de quien cobró.
+export async function reactivarPorCompra(ej: Ejecutor, id: number, usuarioId: number, ahora: Date): Promise<void> {
+  const antes = await repo.bloquear(ej, id);
+  if (antes === null || antes.activo) return;
+  await repo.actualizar(ej, id, { activo: true });
+  await repo.registrarCambiosDeEstado(ej, [{ alumnoId: id, activo: true, registradoPor: usuarioId, registradoEn: ahora }]);
 }
 
 export async function obtenerAlumno(id: number): Promise<Alumno> {

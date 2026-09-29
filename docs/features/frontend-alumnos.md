@@ -18,7 +18,7 @@
 - Botón "Nuevo alumno" que abre el formulario en un diálogo.
 
 **`/alumnos/:id`** (ficha)
-- Datos del alumno, botón "Editar" (mismo formulario) y "Dar de baja" / "Reactivar".
+- Datos del alumno y botón "Editar" (mismo formulario). No hay botón de baja: el estado lo cambia el sistema (baja automática al no comprar, reactivación al comprar).
 - Tabla de pagos: pack, fecha de compra, vencimiento, clases (restantes de total), monto, medio y estado (Vigente, Sin clases, Vencido, Anulado).
 - Botón "Registrar pago": elige pack activo y medio.
 - En cada pago no anulado, "Anular": pide el motivo.

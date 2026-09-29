@@ -14,7 +14,8 @@ export function AnotarAlumno({ sesionId }: { sesionId: number }) {
   const [texto, setTexto] = useState('');
   const q = useDemorado(texto.trim());
   const buscando = q.length >= 2;
-  const sugerencias = useAlumnos({ q, pagina: 1, incluirInactivos: false }, { habilitado: buscando });
+  // Incluye a los dados de baja: al pagar su clase vuelven a estar activos.
+  const sugerencias = useAlumnos({ q, pagina: 1, incluirInactivos: true }, { habilitado: buscando });
   const registrar = useRegistrarAsistencia(sesionId);
   const [sinClases, setSinClases] = useState<{ alumno: Alumno; mensaje: string } | null>(null);
 

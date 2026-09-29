@@ -49,8 +49,7 @@ export function FichaAlumnoPage() {
 function Ficha({ datos, alCerrar }: { datos: FichaDeAlumno; alCerrar: () => void }) {
   const [pestana, setPestana] = useState<IdPestana>('actividad');
   const nombre = `${datos.nombre} ${datos.apellido}`;
-  // A un alumno dado de baja no se le cobra: la API lo rechaza.
-  const acciones = datos.activo && <RegistrarPago alumnoId={datos.id} />;
+  const acciones = <RegistrarPago alumnoId={datos.id} />;
 
   return (
     <PanelLateral etiqueta={`Ficha de ${nombre}`} alCerrar={alCerrar} acciones={acciones}>
@@ -233,13 +232,6 @@ function Datos({ datos }: { datos: FichaDeAlumno }) {
       <div className="flex justify-end gap-2">
         <Boton variante="secundario" onClick={() => setEditando(true)}>
           Editar
-        </Boton>
-        <Boton
-          variante={datos.activo ? 'peligro' : 'secundario'}
-          disabled={actualizar.isPending}
-          onClick={() => actualizar.mutate({ activo: !datos.activo })}
-        >
-          {datos.activo ? 'Dar de baja' : 'Reactivar'}
         </Boton>
       </div>
 

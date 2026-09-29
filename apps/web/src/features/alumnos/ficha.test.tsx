@@ -121,6 +121,16 @@ describe('/alumnos/:id', () => {
     ]);
   });
 
+  it('no hay botón para dar de baja ni reactivar, y a un alumno dado de baja se le puede registrar un pago', async () => {
+    const { usuario } = fichaDeMartina({ ficha: { activo: false } });
+    const ficha = await laFicha();
+
+    await usuario.click(within(ficha).getByRole('tab', { name: 'Datos' }));
+
+    expect(within(ficha).queryByRole('button', { name: /dar de baja|reactivar/i })).toBeNull();
+    expect(within(ficha).getByRole('button', { name: 'Registrar pago' })).toBeTruthy();
+  });
+
   it('la pestaña Datos muestra los datos, el pack que está usando y "Vacío" en lo que falta', async () => {
     const { usuario } = fichaDeMartina({
       ficha: {

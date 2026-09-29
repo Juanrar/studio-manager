@@ -8,7 +8,7 @@
 
 ## La regla
 
-Se pidió que, además de "Dar de baja" a mano, un alumno pase a baja solo cuando no compra un pack durante 2 meses. Los detalles son decisiones tomadas por defecto (anotadas en el índice):
+Se pidió que un alumno pase a baja solo cuando no compra un pack durante 2 meses. Después se pidió que comprar (pack o clase suelta) lo reactive y se sacó el botón manual: el estado es solo para las métricas del administrador y nunca impide comprar ni anotarse. Los detalles son decisiones tomadas por defecto (anotadas en el índice):
 
 - **Se cuenta desde la última compra**: el día, en la zona del estudio, del último pago no anulado. Cualquier pago cuenta, también una clase suelta cobrada en el acto. Un pago anulado no cuenta.
 - **Si nunca compró, desde el alta.** Si se lo reactivó después de su última compra, desde la reactivación: si no, la baja automática volvería a darlo de baja apenas recepción lo reactiva.
@@ -102,5 +102,5 @@ Cambio al plan: `programarTareas` devuelve una función para detenerlas en lugar
 - [x] Con la API real (`server.ts`) sobre la base del e2e: un alumno con el alta del 1 de julio y sin compras quedó de baja al arrancar (el log dice "Baja automática por no comprar" y el cambio quedó sin usuario), y su ficha muestra "Baja automática: 2 meses sin comprar un pack". Una baja y una reactivación a mano quedaron con el usuario y se ven en la actividad, ordenadas por hora.
 
 Para tener en cuenta:
-- **La base de desarrollo necesita la migración**: `pnpm dev` no la aplica. Sin la tabla, la actividad de la ficha y "Dar de baja" / "Reactivar" responden 500, y la tarea deja un error en el log al arrancar.
-- **Quien quedó de baja no aparece al anotar alumnos en una clase**: el buscador de la sesión muestra solo activos, igual que antes. Si vuelve, recepción lo reactiva desde su ficha (pestaña Datos) y después le cobra.
+- **La base de desarrollo necesita la migración**: `pnpm dev` no la aplica. Sin la tabla, la actividad de la ficha y los pagos responden 500, y la tarea deja un error en el log al arrancar.
+- **Quien quedó de baja aparece al anotar alumnos en una clase**: el buscador de la sesión ya no filtra por estado. Actualización: la búsqueda ahora incluye a los dados de baja, y al cobrarles se reactivan.

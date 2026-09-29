@@ -40,7 +40,8 @@ Forma del pago: `{ id, alumnoId, pack: { id, nombre }, cantidadClases, clasesUsa
 |---|---|---|
 | Registrar un pago copia precio y clases del pack, vence en un mes y guarda quién lo cobró | Integración | Si `venceEl` se calcula con 30 días o sobre la fecha UTC, o si no se guarda `registradoPor` |
 | Cambiar el precio del pack no cambia pagos ya hechos | Integración | Si el listado toma el precio con un join al pack (como hacía la app original), un aumento reescribe la historia |
-| No se puede pagar un pack dado de baja ni para un alumno dado de baja (tabla) | Integración | Si el service no mira `activo`, recepción vende packs que ya no existen |
+| No se puede pagar un pack dado de baja (tabla) | Integración | Si el service no mira `activo`, recepción vende packs que ya no existen |
+| Un alumno dado de baja que compra queda activo y la reactivación queda a nombre de quien cobró; uno activo no genera cambios de estado | Integración | Si comprar no reactiva, un alumno que vuelve sigue figurando inactivo en las métricas |
 | Un pago está vigente el día del vencimiento y vencido al día siguiente (tabla) | Integración | Si la comparación usa `<=` en lugar de `<`, el alumno pierde un día de su pack |
 | Anular un pago lo marca anulado con su motivo, y anularlo de nuevo responde 422 | Integración | Si anular pisa `anuladoEn` cada vez, se pierde cuándo se anuló de verdad |
 | Recepción no puede extender un vencimiento, y admin no puede ponerlo antes de la compra | Integración | Si la ruta queda con rol `recepcion` o sin validar la fecha, se regalan meses o se crean pagos vencidos desde el origen |

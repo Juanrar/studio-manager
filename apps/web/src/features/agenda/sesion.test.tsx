@@ -70,6 +70,22 @@ describe('/sesiones/:id', () => {
     expect(cuerpoRecibido).toEqual({ alumnoId: 10 });
   });
 
+  it('la búsqueda para anotar incluye a los alumnos dados de baja, para que puedan comprar y volver', async () => {
+    let consulta = '';
+    const { usuario } = sesionDeHipHop([]);
+    servidor.use(
+      http.get('/api/alumnos', ({ request }) => {
+        consulta = new URL(request.url).search;
+        return HttpResponse.json(unListadoDeAlumnos([unAlumnoEnListado({ id: 10, nombre: 'Martina', apellido: 'García' })]));
+      }),
+    );
+
+    await usuario.type(await screen.findByRole('searchbox', { name: 'Buscar alumno para anotar' }), 'mart');
+    await screen.findByRole('button', { name: 'García, Martina' });
+
+    expect(new URLSearchParams(consulta).get('incluirInactivos')).toBe('true');
+  });
+
   it('sin clases disponibles ofrece cobrar, y "Cobrar y anotar" manda el pack y el medio', async () => {
     const cuerpos: unknown[] = [];
     servidor.use(

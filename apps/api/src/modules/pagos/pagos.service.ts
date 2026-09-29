@@ -3,7 +3,7 @@ import { config } from '../../config.ts';
 import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { hoyEnEstudio, rangoDelPeriodo, sumarUnMes, type FechaDia, type Periodo } from '../../lib/fechas.ts';
-import { obtenerAlumno } from '../alumnos/alumnos.service.ts';
+import { obtenerAlumno, reactivarPorCompra } from '../alumnos/alumnos.service.ts';
 import { obtenerPack } from '../packs/packs.service.ts';
 import { estadoDelPack } from './estado-del-pack.ts';
 import * as repo from './pagos.repository.ts';
@@ -14,12 +14,13 @@ export async function registrarPago(
   ahora: Date,
   hoy: FechaDia,
 ): Promise<Pago> {
-  const { id } = await registrarPagoEn(db, datos, usuarioId, ahora, hoy);
+  const { id } = await db.transaction((tx) => registrarPagoEn(tx, datos, usuarioId, ahora, hoy));
   return obtenerPago(id, hoy);
 }
 
 // El pago congela el precio y la cantidad de clases del pack al momento de la compra.
-// Recibe el ejecutor para que asistencias pueda cobrar dentro de su transacción.
+// Recibe el ejecutor para que asistencias pueda cobrar dentro de su transacción. Si el alumno estaba
+// dado de baja, comprar lo reactiva.
 export async function registrarPagoEn(
   ej: Ejecutor,
   datos: RegistrarPagoInput,
@@ -28,9 +29,6 @@ export async function registrarPagoEn(
   hoy: FechaDia,
 ): Promise<repo.PagoUsable> {
   const alumno = await obtenerAlumno(datos.alumnoId);
-  if (!alumno.activo) {
-    throw new ReglaDeNegocioError(`El alumno ${alumno.nombre} ${alumno.apellido} está dado de baja`);
-  }
   const pack = await obtenerPack(datos.packId);
   if (!pack.activo) throw new ReglaDeNegocioError(`El pack ${pack.nombre} ya no se vende`);
 
@@ -44,6 +42,7 @@ export async function registrarPagoEn(
     venceEl: sumarUnMes(hoy),
     registradoPor: usuarioId,
   });
+  await reactivarPorCompra(ej, alumno.id, usuarioId, ahora);
   return { id, monto: pack.precio, cantidadClases: pack.cantidadClases };
 }
 

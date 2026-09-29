@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { Alumno, Clase, Pack, Profesor, Sesion, UsuarioPublico } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -9,6 +10,8 @@ import {
   crearPackDeTest,
   crearProfesorDeTest,
 } from '../../../test/fabricas.ts';
+import { alumno } from '../../db/schema.ts';
+import { actualizarAlumno } from '../alumnos/alumnos.service.ts';
 import { abrirSesion, actualizarSesion } from '../clases/sesiones.service.ts';
 import { anularPago, obtenerPago, registrarPago } from '../pagos/pagos.service.ts';
 
@@ -132,6 +135,19 @@ describe('POST /api/sesiones/:id/asistencias', () => {
     expect(respuesta.statusCode).toBe(201);
     expect(respuesta.json()).toMatchObject({ pack: 'Clase suelta', valorClase: 1500 });
     expect(await restantes(respuesta.json().pagoId)).toBe(0);
+  });
+
+  it('un alumno dado de baja que paga la clase queda activo de nuevo', async () => {
+    await actualizarAlumno(martina.id, { activo: false }, recepcion.id, AHORA);
+
+    const respuesta = await registrar(sesion.id, {
+      alumnoId: martina.id,
+      cobrar: { packId: claseSuelta.id, medio: 'efectivo' },
+    });
+
+    expect(respuesta.statusCode).toBe(201);
+    const [fila] = await base.db.select().from(alumno).where(eq(alumno.id, martina.id));
+    expect(fila?.activo).toBe(true);
   });
 
   it('responde 422 si el alumno ya tiene asistencia en esa sesión', async () => {

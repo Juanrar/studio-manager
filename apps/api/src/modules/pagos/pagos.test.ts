@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { Alumno, Pack, UsuarioPublico } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -10,6 +11,7 @@ import {
   loguear,
   relojFijo,
 } from '../../../test/app.ts';
+import { alumno, cambioEstadoAlumno } from '../../db/schema.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
 import { crearAlumnoDeTest, crearPackDeTest } from '../../../test/fabricas.ts';
 import { actualizarAlumno } from '../alumnos/alumnos.service.ts';
@@ -107,13 +109,28 @@ describe('POST /api/pagos', () => {
     expect(respuesta.json()).toEqual({ error: 'El pack Pack x8 ya no se vende' });
   });
 
-  it('responde 422 si el alumno está dado de baja', async () => {
-    await actualizarAlumno(martina.id, { activo: false }, recepcion.id, AHORA);
+  it('un alumno dado de baja puede comprar y queda activo de nuevo, con la reactivación a nombre de quien cobró', async () => {
+    await actualizarAlumno(martina.id, { activo: false }, recepcion.id, new Date('2026-03-01T15:00:00Z'));
 
     const respuesta = await registrarPago({ alumnoId: martina.id, packId: packX8.id, medio: 'efectivo' });
 
-    expect(respuesta.statusCode).toBe(422);
-    expect(respuesta.json()).toEqual({ error: 'El alumno Martina García está dado de baja' });
+    expect(respuesta.statusCode).toBe(201);
+    const [fila] = await base.db.select().from(alumno).where(eq(alumno.id, martina.id));
+    expect(fila?.activo).toBe(true);
+    const cambios = await base.db
+      .select({ activo: cambioEstadoAlumno.activo, registradoPor: cambioEstadoAlumno.registradoPor, registradoEn: cambioEstadoAlumno.registradoEn })
+      .from(cambioEstadoAlumno)
+      .orderBy(cambioEstadoAlumno.id);
+    expect(cambios).toEqual([
+      { activo: false, registradoPor: recepcion.id, registradoEn: new Date('2026-03-01T15:00:00Z') },
+      { activo: true, registradoPor: recepcion.id, registradoEn: AHORA },
+    ]);
+  });
+
+  it('un alumno activo que compra no genera cambios de estado', async () => {
+    await registrarPago({ alumnoId: martina.id, packId: packX8.id, medio: 'efectivo' });
+
+    expect(await base.db.select().from(cambioEstadoAlumno)).toEqual([]);
   });
 });
 

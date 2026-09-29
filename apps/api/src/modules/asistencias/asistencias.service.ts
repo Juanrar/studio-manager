@@ -20,7 +20,6 @@ export async function registrarAsistencia(
 ): Promise<Asistencia> {
   const alumno = await obtenerAlumno(datos.alumnoId);
   const nombreCompleto = `${alumno.nombre} ${alumno.apellido}`;
-  if (!alumno.activo) throw new ReglaDeNegocioError(`El alumno ${nombreCompleto} está dado de baja`);
 
   const id = await db.transaction(async (tx) => {
     const sesion = await bloquearSesion(tx, sesionId);
