@@ -35,6 +35,9 @@ export type PagoActual = {
   venceEl: string;
 };
 
+// Lo que el listado y la ficha muestran del pack de un alumno.
+export type ResumenDelPack = { estadoPack: EstadoPack; pagoActual: PagoActual | null };
+
 export type Pago = {
   id: number;
   alumnoId: number;

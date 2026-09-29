@@ -71,11 +71,11 @@ Reglas:
 - Modificar: `alumnos.service.ts`, `alumnos.repository.ts`, `alumnos.routes.ts`, `apps/api/test/fabricas.ts`, `apps/api/src/modules/pagos/estado-del-pack.ts`, `packages/shared/src/alumnos.ts`, `packages/shared/src/pagos.ts`
 - Test: `apps/api/src/modules/alumnos/alumnos.test.ts`
 
-- [ ] **Paso 1:** escribir el test HTTP de la ficha.
-- [ ] **Paso 2:** correrlo y verificar que falla porque la respuesta no trae `alta` ni el estado del pack.
-- [ ] **Paso 3:** implementar `crearAlumno` con `ahora`, la consulta con el alta y `obtenerFicha`.
-- [ ] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(alumnos): ficha con el alta y el estado del pack`.
+- [x] **Paso 1:** escribir el test HTTP de la ficha.
+- [x] **Paso 2:** correrlo y verificar que falla porque la respuesta no trae `alta` ni el estado del pack.
+- [x] **Paso 3:** implementar `crearAlumno` con `ahora`, la consulta con el alta y `obtenerFicha`.
+- [x] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(alumnos): ficha con el alta y el estado del pack`.
 
 ### Tarea 2: La actividad en la API
 

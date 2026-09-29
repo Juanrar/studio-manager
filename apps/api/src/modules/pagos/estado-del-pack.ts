@@ -1,4 +1,4 @@
-import type { EstadoPack, PagoActual } from '@studio/shared';
+import type { PagoActual, ResumenDelPack } from '@studio/shared';
 import { sumarDias, type FechaDia } from '../../lib/fechas.ts';
 
 // Decisión por defecto de v1 (ver el índice de features): se avisa cuando queda una clase o una semana.
@@ -13,8 +13,6 @@ export type PagoDeAlumno = {
   clasesUsadas: number;
   venceEl: FechaDia;
 };
-
-export type ResumenDelPack = { estadoPack: EstadoPack; pagoActual: PagoActual | null };
 
 // Recibe los pagos no anulados del alumno: por lo menos los que no vencieron y el último.
 export function estadoDelPack(pagos: PagoDeAlumno[], hoy: FechaDia): ResumenDelPack {

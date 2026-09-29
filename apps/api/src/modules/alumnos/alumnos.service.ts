@@ -5,7 +5,8 @@ import { sinIndefinidos } from '../../lib/objetos.ts';
 import { esViolacionUnica } from '../../lib/postgres.ts';
 import * as repo from './alumnos.repository.ts';
 
-export async function crearAlumno(datos: CrearAlumnoInput): Promise<Alumno> {
+// El alta toma el reloj de la app, no el de la base: la ficha muestra ese día.
+export async function crearAlumno(datos: CrearAlumnoInput, ahora: Date): Promise<Alumno> {
   try {
     return await repo.insertar(db, {
       nombre: datos.nombre,
@@ -16,6 +17,7 @@ export async function crearAlumno(datos: CrearAlumnoInput): Promise<Alumno> {
       fechaNacimiento: datos.fechaNacimiento ?? null,
       contactoEmergencia: datos.contactoEmergencia ?? null,
       notas: datos.notas ?? null,
+      creadoEn: ahora,
     });
   } catch (error) {
     throw traducirDniRepetido(error);

@@ -1,11 +1,11 @@
-import type { IngresosDelPeriodo, Pago, RegistrarPagoInput } from '@studio/shared';
+import type { IngresosDelPeriodo, Pago, RegistrarPagoInput, ResumenDelPack } from '@studio/shared';
 import { config } from '../../config.ts';
 import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { hoyEnEstudio, rangoDelPeriodo, sumarUnMes, type FechaDia, type Periodo } from '../../lib/fechas.ts';
 import { obtenerAlumno } from '../alumnos/alumnos.service.ts';
 import { obtenerPack } from '../packs/packs.service.ts';
-import { estadoDelPack, type ResumenDelPack } from './estado-del-pack.ts';
+import { estadoDelPack } from './estado-del-pack.ts';
 import * as repo from './pagos.repository.ts';
 
 export async function registrarPago(

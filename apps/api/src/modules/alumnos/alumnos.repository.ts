@@ -27,6 +27,14 @@ export async function buscarPorId(ej: Ejecutor, id: number): Promise<Alumno | nu
   return fila ?? null;
 }
 
+export async function buscarConAlta(ej: Ejecutor, id: number): Promise<(Alumno & { creadoEn: Date }) | null> {
+  const [fila] = await ej
+    .select({ ...columnas, creadoEn: alumno.creadoEn })
+    .from(alumno)
+    .where(eq(alumno.id, id));
+  return fila ?? null;
+}
+
 export async function actualizar(
   ej: Ejecutor,
   id: number,

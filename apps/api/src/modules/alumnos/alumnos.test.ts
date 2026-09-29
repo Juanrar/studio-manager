@@ -51,6 +51,16 @@ async function listar(query: string) {
   return respuesta.json();
 }
 
+// Registra un pago como si se hubiera cobrado el día `dia` (a las 12:00 de Buenos Aires).
+async function pagar(alumno: Alumno, pack: Pack, dia: string) {
+  return registrarPago(
+    { alumnoId: alumno.id, packId: pack.id, medio: 'efectivo' },
+    recepcion.id,
+    new Date(`${dia}T15:00:00Z`),
+    dia,
+  );
+}
+
 describe('/api/alumnos', () => {
   it('responde 401 sin sesión', async () => {
     const respuesta = await app.inject({ method: 'GET', url: '/api/alumnos' });
@@ -132,16 +142,6 @@ describe('GET /api/alumnos', () => {
     });
   });
 
-  // Registra un pago como si se hubiera cobrado el día `dia` (a las 12:00 de Buenos Aires).
-  async function pagar(alumno: Alumno, pack: Pack, dia: string) {
-    return registrarPago(
-      { alumnoId: alumno.id, packId: pack.id, medio: 'efectivo' },
-      recepcion.id,
-      new Date(`${dia}T15:00:00Z`),
-      dia,
-    );
-  }
-
   it('trae el estado del pack, el pago en uso y la última clase, sin pagos anulados ni clases futuras, y cuenta vigentes entre los activos', async () => {
     const packX8 = await crearPackDeTest({ nombre: 'Pack x8', cantidadClases: 8, precio: 9600 });
     const packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
@@ -195,6 +195,25 @@ describe('GET /api/alumnos', () => {
       porPagina: 20,
       vigentes: 1,
       hoy: HOY,
+    });
+  });
+});
+
+describe('GET /api/alumnos/:id', () => {
+  it('devuelve la ficha: el alumno, el día de su alta en la zona del estudio y el estado de su pack', async () => {
+    const packX8 = await crearPackDeTest({ nombre: 'Pack x8', cantidadClases: 8, precio: 9600 });
+    // Se cargó el 5 de marzo a las 23:30 de Buenos Aires, que en UTC ya es el 6.
+    const martina = await crearAlumnoDeTest({}, new Date('2026-03-06T02:30:00Z'));
+    await pagar(martina, packX8, '2026-03-06');
+
+    const respuesta = await app.inject({ method: 'GET', url: `/api/alumnos/${martina.id}`, headers: { cookie } });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json()).toEqual({
+      ...martina,
+      alta: '2026-03-05',
+      estadoPack: 'vigente',
+      pagoActual: { pack: 'Pack x8', cantidadClases: 8, clasesRestantes: 8, venceEl: '2026-04-06' },
     });
   });
 });

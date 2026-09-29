@@ -13,6 +13,7 @@ import { crearAlumno } from '../src/modules/alumnos/alumnos.service.ts';
 import { crearClase } from '../src/modules/clases/clases.service.ts';
 import { crearPack } from '../src/modules/packs/packs.service.ts';
 import { crearProfesor } from '../src/modules/profesores/profesores.service.ts';
+import { AHORA } from './app.ts';
 
 // El porcentaje inicial queda vigente desde esta fecha, antes del AHORA de los tests.
 export const ALTA_PROFESORES = '2026-01-01';
@@ -33,8 +34,9 @@ export async function crearClaseDeTest(profesorId: number, datos: Partial<CrearC
   });
 }
 
-export async function crearAlumnoDeTest(datos: Partial<CrearAlumnoInput> = {}): Promise<Alumno> {
-  return crearAlumno({ nombre: 'Martina', apellido: 'García', ...datos });
+// `ahora` es el momento del alta.
+export async function crearAlumnoDeTest(datos: Partial<CrearAlumnoInput> = {}, ahora: Date = AHORA): Promise<Alumno> {
+  return crearAlumno({ nombre: 'Martina', apellido: 'García', ...datos }, ahora);
 }
 
 export async function crearPackDeTest(datos: Partial<CrearPackInput> = {}): Promise<Pack> {
