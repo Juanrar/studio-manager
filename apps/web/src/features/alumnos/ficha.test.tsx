@@ -2,14 +2,17 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { Pago } from '@studio/shared';
-import { unAlumno, unPack, unPago } from '../../../test/datos.ts';
+import { unAlumno, unListado, unPack, unPago } from '../../../test/datos.ts';
 import { RECEPCION, conSesion, renderizarEn } from '../../../test/render.tsx';
 import { servidor } from '../../../test/servidor.ts';
 
 function fichaDeMartina(pagos: Pago[]) {
   conSesion(RECEPCION);
+  const martina = unAlumno({ id: 10, nombre: 'Martina', apellido: 'García' });
   servidor.use(
-    http.get('/api/alumnos/10', () => HttpResponse.json(unAlumno({ id: 10, nombre: 'Martina', apellido: 'García' }))),
+    // La ficha se abre en un panel encima de la lista, que también se carga.
+    http.get('/api/alumnos', () => HttpResponse.json(unListado([martina]))),
+    http.get('/api/alumnos/10', () => HttpResponse.json(martina)),
     http.get('/api/pagos', () => HttpResponse.json({ items: pagos })),
     http.get('/api/packs', () =>
       HttpResponse.json({

@@ -20,8 +20,8 @@ export const rutas: RouteObject[] = [
       { index: true, element: <Navigate to="/agenda" replace /> },
       { path: 'agenda', element: <AgendaPage /> },
       { path: 'sesiones/:id', element: <SesionPage /> },
-      { path: 'alumnos', element: <AlumnosPage /> },
-      { path: 'alumnos/:id', element: <FichaAlumnoPage /> },
+      // La ficha se abre en un panel encima de la lista, que sigue montada con su búsqueda.
+      { path: 'alumnos', element: <AlumnosPage />, children: [{ path: ':id', element: <FichaAlumnoPage /> }] },
       {
         element: <SoloAdmin />,
         children: [

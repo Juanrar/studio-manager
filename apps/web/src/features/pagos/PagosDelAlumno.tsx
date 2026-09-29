@@ -37,7 +37,7 @@ export function PagosDelAlumno({ alumnoId, puedeRegistrar }: { alumnoId: number;
   const [anulando, setAnulando] = useState<Pago | null>(null);
 
   return (
-    <section className="mt-8">
+    <section>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-base font-semibold">Pagos</h2>
         {puedeRegistrar && <Boton onClick={() => setRegistrando(true)}>Registrar pago</Boton>}

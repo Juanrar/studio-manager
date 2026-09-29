@@ -83,11 +83,13 @@ Cambios al plan:
 - Modificar: `apps/web/src/rutas.tsx`, `apps/web/src/features/alumnos/AlumnosPage.tsx`, `FichaAlumnoPage.tsx`
 - Test: `apps/web/src/features/alumnos/alumnos.test.tsx`, `ficha.test.tsx` (la ficha ahora también carga la lista)
 
-- [ ] **Paso 1:** escribir el test del panel.
-- [ ] **Paso 2:** correrlo y verificar que falla porque no hay panel.
-- [ ] **Paso 3:** implementar: ruta hija, `Outlet` en la lista, fila marcada y ficha dentro de `PanelLateral`. Agregar el listado a los handlers de `ficha.test.tsx`.
-- [ ] **Paso 4:** correr los tests web, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): ficha del alumno en un panel al costado de la lista`.
+- [x] **Paso 1:** escribir el test del panel.
+- [x] **Paso 2:** correrlo y verificar que falla porque no hay panel.
+- [x] **Paso 3:** implementar: ruta hija, `Outlet` en la lista, fila marcada y ficha dentro de `PanelLateral`. Agregar el listado a los handlers de `ficha.test.tsx`.
+- [x] **Paso 4:** correr los tests web, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): ficha del alumno en un panel al costado de la lista`.
+
+Cambio al plan: la ficha se separó en `FichaAlumnoPage` (carga y panel) y `Ficha` (contenido) con `key` por alumno, para que el diálogo de edición no quede abierto al pasar de un alumno a otro con el panel abierto.
 
 ### Tarea 4: Agenda del día en una tabla
 
