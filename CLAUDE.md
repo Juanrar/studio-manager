@@ -130,6 +130,8 @@ Los tests de integración necesitan Docker corriendo.
 - **Tests del frontend:** `apps/web/test/render.tsx` renderiza la app completa en una ruta con `renderizarEn()`, y `conSesion()` simula `GET /api/auth/yo`. MSW falla si llega un pedido que el test no previó. No necesitan Docker.
 - **Si la sesión se reinició, Docker Desktop puede estar apagado.** Los tests de la API fallan con `Could not find a working container runtime strategy`. Hay que abrir Docker Desktop y esperar a que `docker info` responda.
 - **Tests web que pasan por `/agenda`** sin probar la agenda: llamar a `conAgendaVacia()`, si no la agenda hace un pedido que MSW no esperaba.
+- **Tests web de tablas:** `celdasDe(fila)` de `apps/web/test/tabla.ts` devuelve el texto de cada celda sin lo que es `aria-hidden` (la inicial del avatar). El listado de alumnos se simula con `unListadoDeAlumnos` y `unAlumnoEnListado` de `test/datos.ts`.
+- **Asistencias en fechas pasadas:** el profesor tiene que tener un porcentaje vigente desde antes de esa fecha, si no la API responde 422. En los tests, `crearProfesorDeTest` lo pone desde `2026-01-01`.
 - **`pnpm e2e` no corre dentro de `pnpm test`:** necesita Docker, compila el frontend y usa la base `studio_manager_e2e` (se borra y se crea en cada corrida). Usa el reloj real: crea la clase para el día de hoy en Buenos Aires.
 - **Un solo Postgres por corrida de tests**, archivos en serie. Cada archivo llama a `base.limpiar()` en `beforeEach`.
 - **Drizzle escribe las columnas sin la tabla** cuando la consulta es de una sola tabla. En una subconsulta con `sql`, `${profesor.id}` sale como `"id"` y puede apuntar a la tabla de adentro. Para ver el SQL sin ejecutarlo: `.toSQL()`.

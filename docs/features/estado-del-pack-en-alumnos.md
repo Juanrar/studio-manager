@@ -1,6 +1,6 @@
 # Estado del pack en el listado de alumnos
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** pagos, asistencias, rediseno-de-la-interfaz  
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; el listado de alumnos muestra, por cada alumno, el estado de su pack, el pack que está usando, las clases que le quedan, el vencimiento y su última clase, y el total de alumnos con el pack vigente.
 
@@ -109,5 +109,5 @@ Cambios al plan:
 
 ## Verificación final
 
-- [ ] `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan.
-- [ ] Captura de la pantalla de alumnos con datos reales de la API, comparada con la maqueta.
+- [x] `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan: API 119, web 31, e2e 1.
+- [x] Captura de la pantalla de alumnos con datos reales de la API, comparada con la maqueta: vigente, por vencer, sin clases, vencido y sin pack, con el total de vigentes que coincide con la tabla.
