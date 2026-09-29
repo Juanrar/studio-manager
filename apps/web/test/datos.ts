@@ -1,6 +1,15 @@
 // Constructores de respuestas de la API para los handlers de MSW.
 // Devuelven la misma forma que la API real; el test pisa solo lo que le importa.
-import type { Alumno, Asistencia, Listado, Pack, Pago, Profesor } from '@studio/shared';
+import type {
+  Alumno,
+  AlumnoEnListado,
+  Asistencia,
+  Listado,
+  ListadoDeAlumnos,
+  Pack,
+  Pago,
+  Profesor,
+} from '@studio/shared';
 
 export function unAlumno(datos: Partial<Alumno> = {}): Alumno {
   return {
@@ -20,6 +29,19 @@ export function unAlumno(datos: Partial<Alumno> = {}): Alumno {
 
 export function unListado<T>(items: T[], datos: Partial<Listado<T>> = {}): Listado<T> {
   return { items, total: items.length, pagina: 1, porPagina: 20, ...datos };
+}
+
+// Una fila de GET /api/alumnos. Por defecto, sin pack y sin clases.
+export function unAlumnoEnListado(datos: Partial<AlumnoEnListado> = {}): AlumnoEnListado {
+  return { ...unAlumno(), estadoPack: 'sin_pack', pagoActual: null, ultimaClase: null, ...datos };
+}
+
+// El martes 10 de marzo de 2026, como el reloj de los tests de la API.
+export function unListadoDeAlumnos(
+  items: AlumnoEnListado[],
+  datos: Partial<ListadoDeAlumnos> = {},
+): ListadoDeAlumnos {
+  return { ...unListado(items), vigentes: 0, hoy: '2026-03-10', ...datos };
 }
 
 export function unPack(datos: Partial<Pack> = {}): Pack {

@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { SIN_CLASES_DISPONIBLES, type Asistencia, type SesionDetalle } from '@studio/shared';
-import { unAlumno, unaAsistencia, unListado, unPack, unProfesor } from '../../../test/datos.ts';
+import { unAlumnoEnListado, unaAsistencia, unListadoDeAlumnos, unPack, unProfesor } from '../../../test/datos.ts';
 import { RECEPCION, conSesion, renderizarEn } from '../../../test/render.tsx';
 import { servidor } from '../../../test/servidor.ts';
 
@@ -30,7 +30,9 @@ function sesionDeHipHop(asistencias: Asistencia[]) {
         items: [unProfesor({ id: 1, nombre: 'Erik', apellido: 'Zapata' }), unProfesor({ id: 2, nombre: 'Iaru', apellido: 'Speroni' })],
       }),
     ),
-    http.get('/api/alumnos', () => HttpResponse.json(unListado([unAlumno({ id: 10, nombre: 'Martina', apellido: 'García' })]))),
+    http.get('/api/alumnos', () =>
+      HttpResponse.json(unListadoDeAlumnos([unAlumnoEnListado({ id: 10, nombre: 'Martina', apellido: 'García' })])),
+    ),
     http.get('/api/packs', () =>
       HttpResponse.json({
         items: [

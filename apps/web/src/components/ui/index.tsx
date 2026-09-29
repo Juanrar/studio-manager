@@ -127,22 +127,30 @@ export function Aviso({ tipo = 'error', children }: { tipo?: 'error' | 'exito'; 
   );
 }
 
-// Tabla densa: filas de 32px y bordes finos entre celdas.
-export function Tabla({ columnas, children }: { columnas: string[]; children: ReactNode }) {
+type Columna = string | { texto: string; icono: NombreIcono };
+
+// Tabla densa: filas de 32px y bordes finos entre celdas. Una columna puede llevar ícono en el encabezado.
+export function Tabla({ columnas, children }: { columnas: readonly Columna[]; children: ReactNode }) {
   return (
     <div className="overflow-x-auto rounded-md border border-borde">
       <table className="w-full border-collapse text-left">
         <thead>
           <tr>
-            {columnas.map((columna) => (
-              <th
-                key={columna}
-                scope="col"
-                className="h-8 border-r border-b border-borde px-2 font-medium whitespace-nowrap text-apagado last:border-r-0"
-              >
-                {columna}
-              </th>
-            ))}
+            {columnas.map((columna) => {
+              const texto = typeof columna === 'string' ? columna : columna.texto;
+              return (
+                <th
+                  key={texto}
+                  scope="col"
+                  className="h-8 border-r border-b border-borde px-2 font-medium whitespace-nowrap text-apagado last:border-r-0"
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    {typeof columna !== 'string' && <Icono nombre={columna.icono} className="size-3.5" />}
+                    {texto}
+                  </span>
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody className="[&>tr:hover]:bg-elevado [&>tr:last-child>td]:border-b-0">{children}</tbody>
@@ -269,15 +277,20 @@ export function Cargando() {
   return <p className="text-apagado">Cargando…</p>;
 }
 
-export function Insignia({ children, tono = 'gris' }: { children: ReactNode; tono?: 'gris' | 'verde' | 'rojo' | 'ambar' }) {
-  const estilos = {
-    gris: 'bg-neutral-500/20 text-neutral-300',
-    verde: 'bg-green-500/15 text-green-300',
-    rojo: 'bg-red-500/15 text-red-300',
-    ambar: 'bg-amber-500/15 text-amber-300',
-  };
+export type TonoInsignia = 'gris' | 'verde' | 'rojo' | 'ambar' | 'azul' | 'violeta';
+
+const estilosInsignia: Record<TonoInsignia, string> = {
+  gris: 'bg-neutral-500/20 text-neutral-300',
+  verde: 'bg-green-500/15 text-green-300',
+  rojo: 'bg-red-500/15 text-red-300',
+  ambar: 'bg-amber-500/15 text-amber-300',
+  azul: 'bg-blue-500/15 text-blue-300',
+  violeta: 'bg-violet-500/15 text-violet-300',
+};
+
+export function Insignia({ children, tono = 'gris' }: { children: ReactNode; tono?: TonoInsignia }) {
   return (
-    <span className={`inline-flex h-5 items-center rounded px-1.5 text-xs font-medium whitespace-nowrap ${estilos[tono]}`}>
+    <span className={`inline-flex h-5 items-center rounded px-1.5 text-xs font-medium whitespace-nowrap ${estilosInsignia[tono]}`}>
       {children}
     </span>
   );

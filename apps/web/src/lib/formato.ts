@@ -37,6 +37,16 @@ export function formatearFechaLarga(fecha: string): string {
   }).format(new Date(Date.UTC(anio, mes - 1, dia)));
 }
 
+// Propios y no de Intl: según la versión, Intl escribe "sept" o agrega "de".
+const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+// AAAA-MM-DD a "18 oct". Si no es del año de `hoy`, lleva el año: "20 dic 2025".
+export function formatearFechaCorta(fecha: string, hoy: string): string {
+  const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
+  const texto = `${dia} ${MESES_CORTOS[mes - 1]}`;
+  return fecha.slice(0, 4) === hoy.slice(0, 4) ? texto : `${texto} ${anio}`;
+}
+
 export const DIAS_DE_LA_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 // 1 es lunes, 7 es domingo (ISO), igual que la API.

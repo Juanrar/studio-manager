@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ActualizarAlumnoInput, Alumno, CrearAlumnoInput, Listado } from '@studio/shared';
+import type { ActualizarAlumnoInput, Alumno, CrearAlumnoInput, ListadoDeAlumnos } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
 export type FiltrosAlumnos = { q: string; pagina: number; incluirInactivos: boolean };
@@ -9,7 +9,7 @@ export function useAlumnos(filtros: FiltrosAlumnos, { habilitado = true }: { hab
     enabled: habilitado,
     queryKey: ['alumnos', 'listado', filtros],
     queryFn: () =>
-      api.get<Listado<Alumno>>(
+      api.get<ListadoDeAlumnos>(
         conQuery('/alumnos', {
           q: filtros.q,
           pagina: filtros.pagina,

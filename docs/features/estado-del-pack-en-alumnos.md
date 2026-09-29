@@ -96,11 +96,16 @@ Cambio al plan: el test "total cuenta todos los resultados" compara la respuesta
 - Modificar: `apps/web/src/features/alumnos/AlumnosPage.tsx`, `api.ts`, `apps/web/src/lib/formato.ts`, `apps/web/src/components/ui/index.tsx`, `Icono.tsx`
 - Test: `apps/web/src/features/alumnos/alumnos.test.tsx`, `ficha.test.tsx`, `apps/web/src/features/agenda/sesion.test.tsx`, `apps/web/test/datos.ts`
 
-- [ ] **Paso 1:** escribir el test de la tabla y pasar los handlers del listado a la forma nueva.
-- [ ] **Paso 2:** correrlo y verificar que falla porque faltan las columnas.
-- [ ] **Paso 3:** implementar las columnas con íconos en los encabezados, la barra de clases, las fechas cortas y el total de vigentes.
-- [ ] **Paso 4:** correr los tests web, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): estado del pack en la tabla de alumnos`.
+- [x] **Paso 1:** escribir el test de la tabla y pasar los handlers del listado a la forma nueva.
+- [x] **Paso 2:** correrlo y verificar que falla porque faltan las columnas.
+- [x] **Paso 3:** implementar las columnas con íconos en los encabezados, la barra de clases, las fechas cortas y el total de vigentes.
+- [x] **Paso 4:** correr los tests web, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): estado del pack en la tabla de alumnos`.
+
+Cambios al plan:
+- `test/tabla.ts` tiene `celdasDe(fila)`: el texto de cada celda sin lo que es `aria-hidden`, como la inicial del avatar.
+- `Tabla` acepta columnas con ícono (`{ texto, icono }`); por ahora solo la usa esta pantalla.
+- Las fechas cortas usan una lista propia de meses: `Intl` en español escribe "sept" o "20 de dic de 2025" según la versión de ICU.
 
 ## Verificación final
 
