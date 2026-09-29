@@ -46,11 +46,11 @@ Se pidió que, además de "Dar de baja" a mano, un alumno pase a baja solo cuand
 - Crear: `apps/api/src/modules/alumnos/baja-automatica.ts`, `baja-automatica.test.ts`
 - Modificar: `apps/api/src/lib/fechas.ts`, `fechas.test.ts`
 
-- [ ] **Paso 1:** escribir los tests de `sumarMeses` y de la regla.
-- [ ] **Paso 2:** correrlos y verificar que fallan porque las funciones no existen.
-- [ ] **Paso 3:** implementar `sumarMeses` (con `sumarUnMes` encima) y `correspondeBajaAutomatica`.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(alumnos): regla de la baja automática`.
+- [x] **Paso 1:** escribir los tests de `sumarMeses` y de la regla.
+- [x] **Paso 2:** correrlos y verificar que fallan porque las funciones no existen.
+- [x] **Paso 3:** implementar `sumarMeses` (con `sumarUnMes` encima) y `correspondeBajaAutomatica`.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(alumnos): regla de la baja automática`.
 
 ### Tarea 2: La baja automática y el registro de bajas
 

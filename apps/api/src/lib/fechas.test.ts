@@ -5,6 +5,7 @@ import {
   hoyEnEstudio,
   primerDiaDelMes,
   sumarDias,
+  sumarMeses,
   sumarUnMes,
 } from './fechas.ts';
 
@@ -57,6 +58,19 @@ describe('sumarUnMes', () => {
 
   it('cruza el cambio de año', () => {
     expect(sumarUnMes('2026-12-15')).toBe('2027-01-15');
+  });
+});
+
+describe('sumarMeses', () => {
+  it('suma meses y cruza el cambio de año', () => {
+    expect(sumarMeses('2026-07-29', 2)).toBe('2026-09-29');
+    expect(sumarMeses('2026-11-15', 2)).toBe('2027-01-15');
+  });
+
+  it('recorta al último día del mes de destino, sin pasar por el mes del medio', () => {
+    expect(sumarMeses('2026-12-31', 2)).toBe('2027-02-28');
+    // Sumando de a un mes daría el 28 de marzo.
+    expect(sumarMeses('2027-01-31', 2)).toBe('2027-03-31');
   });
 });
 

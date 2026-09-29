@@ -29,12 +29,17 @@ export function diaSemanaIso(fecha: FechaDia): number {
 }
 
 export function sumarUnMes(fecha: FechaDia): FechaDia {
+  return sumarMeses(fecha, 1);
+}
+
+// Si el mes de destino es más corto, recorta a su último día: el 31 de enero más un mes es el 28 de febrero.
+export function sumarMeses(fecha: FechaDia, meses: number): FechaDia {
   const [anio, mes, dia] = partes(fecha);
-  const anioDestino = mes === 12 ? anio + 1 : anio;
-  const mesDestino = mes === 12 ? 1 : mes + 1;
+  const mesesDesdeElAnio = mes - 1 + meses;
+  const anioDestino = anio + Math.floor(mesesDesdeElAnio / 12);
+  const mesDestino = (((mesesDesdeElAnio % 12) + 12) % 12) + 1;
   const ultimoDia = new Date(Date.UTC(anioDestino, mesDestino, 0)).getUTCDate();
-  const diaDestino = Math.min(dia, ultimoDia);
-  return formatear(anioDestino, mesDestino, diaDestino);
+  return formatear(anioDestino, mesDestino, Math.min(dia, ultimoDia));
 }
 
 export function sumarDias(fecha: FechaDia, dias: number): FechaDia {
