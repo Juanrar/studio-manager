@@ -1,6 +1,6 @@
 # Ficha del alumno con actividad
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** estado-del-pack-en-alumnos  
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; la ficha del alumno muestra en el encabezado el estado de su pack y el pack que está usando, y tiene tres pestañas: Actividad (asistencias, pagos y alta agrupados por mes), Datos y Pagos.
 
@@ -117,5 +117,7 @@ Cambios al plan:
 
 ## Verificación final
 
-- [ ] `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan.
-- [ ] Captura de la ficha con datos reales de la API, comparada con la maqueta: encabezado, actividad con asistencias, pagos y alta, Datos y Pagos.
+- [x] `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan: API 122, web 33, e2e 1.
+- [x] Captura de la ficha con datos reales de la API, comparada con la maqueta, en escritorio y en celular: encabezado con estado y pack; actividad con asistencias (dos con suplente), un pago anulado y el alta de otro año; Datos y Pagos.
+
+Encontrado durante la verificación, sin arreglar: `ClasesPage.tsx` también usa `Map.groupBy`, así que la pantalla de clases no anda en Safari anterior a 17.4.

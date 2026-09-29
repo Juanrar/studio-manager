@@ -32,7 +32,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 17 | [Prueba de punta a punta y build de producción](e2e-y-produccion.md) | lista | 14, 16 |
 | 18 | [Rediseño de la interfaz](rediseno-de-la-interfaz.md) | lista | 17 |
 | 19 | [Estado del pack en el listado de alumnos](estado-del-pack-en-alumnos.md) | lista | 9, 10, 18 |
-| 20 | [Ficha del alumno con actividad](ficha-del-alumno.md) | en curso | 19 |
+| 20 | [Ficha del alumno con actividad](ficha-del-alumno.md) | lista | 19 |
 
 ## Bitácora
 
@@ -40,6 +40,7 @@ Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo s
 
 | Fecha | Feature | Qué pasó |
 |---|---|---|
+| 2026-09-29 | 20. Ficha del alumno con actividad | Lista. `GET /api/alumnos/:id` devuelve la ficha (alta en la zona del estudio y estado del pack) y `GET /api/alumnos/:id/actividad` junta asistencias hasta hoy con quien dio la clase, pagos (también anulados) y alta. `crearAlumno` recibe `ahora`: el alta toma el reloj de la app. La ficha tiene encabezado con estado y pack, y pestañas Actividad, Datos y Pagos; "Registrar pago" va en la barra del panel y "Editar" y "Dar de baja" en Datos. Registrar o anular un pago ahora recarga también la lista. Quedó afuera "cargada por Recepción": no se guarda quién carga al alumno. Encontrado sin arreglar: `ClasesPage` usa `Map.groupBy`, que no existe en Safari anterior a 17.4. Vite avisa que el bundle pasa los 500 kB (507 kB, 152 kB con gzip). API 122, web 33, e2e 1 |
 | 2026-09-29 | 19. Estado del pack en el listado de alumnos | Lista. `GET /api/alumnos` suma estado del pack, pago en uso y última clase, más `vigentes` y `hoy`. La regla es una función pura en `pagos/estado-del-pack.ts`; "por vencer" (1 clase o 7 días, decisión por defecto 5) mira todos los pagos que sirven. El listado pasó a `alumnos/listado.service.ts` para no crear un ciclo con pagos y asistencias. La tabla sigue la maqueta, sin el selector de vistas ni la columna "+". API 119, web 31, e2e 1 |
 | 2026-09-29 | 18. Rediseño de la interfaz | Lista. Aspecto de Twenty CRM en oscuro: colores como variables de Tailwind, Inter empaquetada, barra lateral por rol, `Pagina` con barra superior, tablas densas, ficha del alumno en un panel lateral (ruta hija de `/alumnos`, la búsqueda se conserva) y agenda en tabla con estado. Quedó afuera: buscador Ctrl K, columnas de pack y vencimiento en el listado de alumnos (la API no las da) y modo claro. Encontrado y sin arreglar: el listado de profesores muestra el mismo porcentaje para todos (subconsulta sin correlacionar en `profesores.repository.ts`). API 108, web 30, e2e 1 |
 | 2026-09-25 | 17. Punta a punta y producción | Lista. La API sirve el frontend compilado con fallback de SPA (`WEB_DIST`). `pnpm e2e` crea una base limpia, compila el frontend y recorre con Chromium login, profesor, clase de hoy, pago, asistencia, cobro en el acto y liquidación; pasa en unos 7 segundos. La prueba manual encontró que `@fastify/static` exige ruta absoluta; se agregó el test. Con esto se completan las 17 features de v1. API 108, web 29, e2e 1 |
