@@ -98,11 +98,22 @@ Cambio al plan: en la asistencia, `profesor` es `{ id, nombre, apellido }`, igua
 - Modificar: `FichaAlumnoPage.tsx`, `AlumnosPage.tsx`, `alumnos/api.ts`, `pagos/PagosDelAlumno.tsx`, `pagos/api.ts`, `components/ui/index.tsx`, `Icono.tsx`, `lib/formato.ts`, `e2e/flujo-principal.spec.ts`
 - Test: `apps/web/src/features/alumnos/ficha.test.tsx`, `alumnos.test.tsx`, `apps/web/test/datos.ts`
 
-- [ ] **Paso 1:** escribir los tests del encabezado, la actividad y Datos; adaptar los de pagos y el del panel a las pestañas.
-- [ ] **Paso 2:** correrlos y verificar que fallan porque no hay pestañas.
-- [ ] **Paso 3:** implementar `Pestanas`, el encabezado, las tres pestañas y "Registrar pago" en la barra del panel. Adaptar el paso de cobro del e2e.
-- [ ] **Paso 4:** correr los tests web, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): ficha del alumno con pestañas y actividad`.
+- [x] **Paso 1:** escribir los tests del encabezado, la actividad y Datos; adaptar los de pagos y el del panel a las pestañas.
+- [x] **Paso 2:** correrlos y verificar que fallan porque no hay pestañas.
+- [x] **Paso 3:** implementar `Pestanas`, el encabezado, las tres pestañas y "Registrar pago" en la barra del panel. Adaptar el paso de cobro del e2e.
+- [x] **Paso 4:** correr los tests web, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): ficha del alumno con pestañas y actividad`.
+
+Cambios al plan:
+- El encabezado no tiene test propio: lo cubre el de registrar un pago, que ve "Sin pack" antes de cobrar y "Vigente" con el pack después.
+- La actividad agrupa los meses con un `Map` armado a mano: `Map.groupBy` no existe en Safari anterior a 17.4, y Vite no agrega funciones que falten.
+- En la tabla de pagos, el motivo de una anulación se parte en líneas. Si no, ensancha la columna Estado y "Anular" queda fuera del panel. Se vio en las capturas.
+- `Pestanas` va en `components/ui`, con el patrón de ARIA: las flechas pasan de una pestaña a otra y el panel toma el nombre de la elegida.
+- `PagosDelAlumno` se separó en la tabla (`PagosDelAlumno`) y el botón con su diálogo (`RegistrarPago`), que va en la barra del panel. `PanelLateral` ignora `false` en `acciones`, igual que `Pagina`.
+- Los meses de la actividad salen de una lista propia ("Septiembre 2026"), la misma de la que salen los meses cortos.
+- El medio de pago va con la preposición que corresponde: "en efectivo", "por transferencia", "con Mercado Pago". Con "otro" no se nombra.
+- Las etiquetas de Datos son las del formulario ("Fecha de nacimiento", "Contacto de emergencia") y no las cortas de la maqueta.
+- El e2e, después de cobrar, verifica "Vigente" en el encabezado de la ficha y busca el pago en la pestaña Pagos.
 
 ## Verificación final
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Outlet, useMatch } from 'react-router';
-import type { AlumnoEnListado, EstadoPack, PagoActual } from '@studio/shared';
+import type { AlumnoEnListado } from '@studio/shared';
 import {
   Aviso,
   Avatar,
@@ -13,13 +13,13 @@ import {
   Insignia,
   Pagina,
   Tabla,
-  type TonoInsignia,
 } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFechaCorta } from '../../lib/formato.ts';
 import { useDemorado } from '../../lib/useDemorado.ts';
 import { AlumnoForm } from './AlumnoForm.tsx';
 import { useAlumnos, useCrearAlumno } from './api.ts';
+import { ClasesRestantes, EstadoDelAlumno } from './EstadoDelPack.tsx';
 
 const COLUMNAS = [
   { texto: 'Alumno', icono: 'persona' },
@@ -31,15 +31,6 @@ const COLUMNAS = [
   { texto: 'DNI', icono: 'documento' },
   { texto: 'Última clase', icono: 'historial' },
 ] as const;
-
-// Las reglas de cada estado viven en la API; acá solo se nombran.
-const ESTADOS_PACK: Record<EstadoPack, { texto: string; tono: TonoInsignia }> = {
-  vigente: { texto: 'Vigente', tono: 'verde' },
-  por_vencer: { texto: 'Por vencer', tono: 'ambar' },
-  sin_clases: { texto: 'Sin clases', tono: 'rojo' },
-  vencido: { texto: 'Vencido', tono: 'rojo' },
-  sin_pack: { texto: 'Sin pack', tono: 'azul' },
-};
 
 export function AlumnosPage() {
   const [texto, setTexto] = useState('');
@@ -137,7 +128,6 @@ export function AlumnosPage() {
 // `hoy` viene de la API: con él se decide si una fecha lleva el año.
 function FilaDeAlumno({ alumno, hoy, abierto }: { alumno: AlumnoEnListado; hoy: string; abierto: boolean }) {
   const { pagoActual: pago } = alumno;
-  const estado = ESTADOS_PACK[alumno.estadoPack];
 
   return (
     <tr className={abierto ? 'bg-acento-fondo' : ''}>
@@ -151,7 +141,7 @@ function FilaDeAlumno({ alumno, hoy, abierto }: { alumno: AlumnoEnListado; hoy: 
         </Link>
       </Celda>
       <Celda>
-        {alumno.activo ? <Insignia tono={estado.tono}>{estado.texto}</Insignia> : <Insignia>Dado de baja</Insignia>}
+        <EstadoDelAlumno activo={alumno.activo} estadoPack={alumno.estadoPack} />
       </Celda>
       <Celda>{pago === null ? '—' : <Insignia tono="violeta">{pago.pack}</Insignia>}</Celda>
       <Celda>{pago === null ? '—' : <ClasesRestantes pago={pago} />}</Celda>
@@ -160,21 +150,5 @@ function FilaDeAlumno({ alumno, hoy, abierto }: { alumno: AlumnoEnListado; hoy: 
       <Celda>{alumno.dni ?? '—'}</Celda>
       <Celda>{alumno.ultimaClase === null ? '—' : formatearFechaCorta(alumno.ultimaClase, hoy)}</Celda>
     </tr>
-  );
-}
-
-// La barra muestra cuánto le queda del pack; en ámbar cuando queda una clase o ninguna.
-function ClasesRestantes({ pago }: { pago: PagoActual }) {
-  const porcentaje = (pago.clasesRestantes / pago.cantidadClases) * 100;
-  return (
-    <span className="flex items-center gap-2">
-      <span aria-hidden="true" className="h-1.5 w-16 overflow-hidden rounded-full bg-resalte">
-        <span
-          className={`block h-full rounded-full ${pago.clasesRestantes <= 1 ? 'bg-amber-400' : 'bg-acento'}`}
-          style={{ width: `${porcentaje}%` }}
-        />
-      </span>
-      {pago.clasesRestantes} de {pago.cantidadClases}
-    </span>
   );
 }

@@ -4,6 +4,7 @@ import type {
   Alumno,
   AlumnoEnListado,
   Asistencia,
+  FichaDeAlumno,
   Listado,
   ListadoDeAlumnos,
   Pack,
@@ -34,6 +35,11 @@ export function unListado<T>(items: T[], datos: Partial<Listado<T>> = {}): Lista
 // Una fila de GET /api/alumnos. Por defecto, sin pack y sin clases.
 export function unAlumnoEnListado(datos: Partial<AlumnoEnListado> = {}): AlumnoEnListado {
   return { ...unAlumno(), estadoPack: 'sin_pack', pagoActual: null, ultimaClase: null, ...datos };
+}
+
+// GET /api/alumnos/:id. Por defecto, sin pack.
+export function unaFichaDeAlumno(datos: Partial<FichaDeAlumno> = {}): FichaDeAlumno {
+  return { ...unAlumno(), alta: '2025-03-10', estadoPack: 'sin_pack', pagoActual: null, ...datos };
 }
 
 // El martes 10 de marzo de 2026, como el reloj de los tests de la API.

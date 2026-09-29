@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { AlumnoEnListado } from '@studio/shared';
-import { unAlumno, unAlumnoEnListado, unListadoDeAlumnos } from '../../../test/datos.ts';
+import { unAlumno, unAlumnoEnListado, unaFichaDeAlumno, unListadoDeAlumnos } from '../../../test/datos.ts';
 import { RECEPCION, conSesion, renderizarEn } from '../../../test/render.tsx';
 import { servidor } from '../../../test/servidor.ts';
 import { celdasDe } from '../../../test/tabla.ts';
@@ -88,11 +88,13 @@ describe('/alumnos', () => {
 
   it('abrir un alumno muestra su ficha al costado sin perder la búsqueda, y cerrarla vuelve a la lista', async () => {
     conSesion(RECEPCION);
-    const martina = unAlumno({ id: 10, nombre: 'Martina', apellido: 'García', dni: '38555666' });
+    const martina = unaFichaDeAlumno({ id: 10, nombre: 'Martina', apellido: 'García' });
     servidor.use(
-      http.get('/api/alumnos', () => HttpResponse.json(unListadoDeAlumnos([unAlumnoEnListado(martina)]))),
+      http.get('/api/alumnos', () =>
+        HttpResponse.json(unListadoDeAlumnos([unAlumnoEnListado({ id: 10, nombre: 'Martina', apellido: 'García' })])),
+      ),
       http.get('/api/alumnos/10', () => HttpResponse.json(martina)),
-      http.get('/api/pagos', () => HttpResponse.json({ items: [] })),
+      http.get('/api/alumnos/10/actividad', () => HttpResponse.json({ items: [{ tipo: 'alta', fecha: '2025-03-10' }] })),
     );
     const { usuario, router } = renderizarEn('/alumnos');
 
@@ -100,7 +102,8 @@ describe('/alumnos', () => {
     await usuario.click(await screen.findByRole('link', { name: 'García, Martina' }));
 
     const ficha = await screen.findByRole('complementary', { name: 'Ficha de Martina García' });
-    expect(within(ficha).getByText('38555666')).toBeInTheDocument();
+    expect(within(ficha).getByRole('heading', { name: 'Martina García' })).toBeInTheDocument();
+    expect(await within(ficha).findByRole('listitem')).toHaveTextContent('Alta en el estudio');
     expect(router.state.location.pathname).toBe('/alumnos/10');
     expect(screen.getByRole('searchbox', { name: 'Buscar alumno' })).toHaveValue('garcia');
 

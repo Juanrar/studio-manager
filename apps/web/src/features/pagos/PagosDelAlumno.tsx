@@ -31,23 +31,41 @@ function EstadoDelPago({ pago }: { pago: Pago }) {
   return <Insignia tono="verde">Vigente</Insignia>;
 }
 
-export function PagosDelAlumno({ alumnoId, puedeRegistrar }: { alumnoId: number; puedeRegistrar: boolean }) {
-  const pagos = usePagosDeAlumno(alumnoId);
+const COLUMNAS = [
+  { texto: 'Pack', icono: 'packs' },
+  { texto: 'Compra', icono: 'calendario' },
+  { texto: 'Vence', icono: 'calendarioVence' },
+  { texto: 'Clases', icono: 'pila' },
+  { texto: 'Monto', icono: 'pesos' },
+  { texto: 'Medio', icono: 'billetera' },
+  { texto: 'Estado', icono: 'progreso' },
+  '',
+] as const;
+
+// El botón va en la barra de la ficha: se cobra desde cualquier pestaña.
+export function RegistrarPago({ alumnoId }: { alumnoId: number }) {
   const [registrando, setRegistrando] = useState(false);
+  return (
+    <>
+      <Boton onClick={() => setRegistrando(true)}>Registrar pago</Boton>
+      <Dialogo titulo="Registrar pago" abierto={registrando} alCerrar={() => setRegistrando(false)}>
+        <RegistrarPagoForm alumnoId={alumnoId} alTerminar={() => setRegistrando(false)} />
+      </Dialogo>
+    </>
+  );
+}
+
+export function PagosDelAlumno({ alumnoId }: { alumnoId: number }) {
+  const pagos = usePagosDeAlumno(alumnoId);
   const [anulando, setAnulando] = useState<Pago | null>(null);
 
   return (
-    <section>
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-base font-semibold">Pagos</h2>
-        {puedeRegistrar && <Boton onClick={() => setRegistrando(true)}>Registrar pago</Boton>}
-      </div>
-
+    <>
       {pagos.isPending && <Cargando />}
       {pagos.isError && <Aviso>{mensajeDeError(pagos.error)}</Aviso>}
       {pagos.data && pagos.data.length === 0 && <p className="text-apagado">Todavía no tiene pagos.</p>}
       {pagos.data && pagos.data.length > 0 && (
-        <Tabla columnas={['Pack', 'Compra', 'Vence', 'Clases', 'Monto', 'Medio', 'Estado', '']}>
+        <Tabla columnas={COLUMNAS}>
           {pagos.data.map((pago) => (
             <tr key={pago.id}>
               <Celda>{pago.pack.nombre}</Celda>
@@ -60,8 +78,9 @@ export function PagosDelAlumno({ alumnoId, puedeRegistrar }: { alumnoId: number;
               <Celda>{NOMBRES_MEDIO_DE_PAGO[pago.medio]}</Celda>
               <Celda>
                 <EstadoDelPago pago={pago} />
+                {/* El motivo puede partirse en líneas: si no, ensancha la columna y "Anular" queda fuera del panel. */}
                 {pago.motivoAnulacion !== null && (
-                  <span className="ml-2 text-xs text-apagado">{pago.motivoAnulacion}</span>
+                  <span className="ml-2 text-xs whitespace-normal text-apagado">{pago.motivoAnulacion}</span>
                 )}
               </Celda>
               <CeldaDeAcciones>
@@ -76,16 +95,12 @@ export function PagosDelAlumno({ alumnoId, puedeRegistrar }: { alumnoId: number;
         </Tabla>
       )}
 
-      <Dialogo titulo="Registrar pago" abierto={registrando} alCerrar={() => setRegistrando(false)}>
-        <RegistrarPagoForm alumnoId={alumnoId} alTerminar={() => setRegistrando(false)} />
-      </Dialogo>
-
       <Dialogo titulo="Anular pago" abierto={anulando !== null} alCerrar={() => setAnulando(null)}>
         {anulando !== null && (
           <AnularPagoForm alumnoId={alumnoId} pago={anulando} alTerminar={() => setAnulando(null)} />
         )}
       </Dialogo>
-    </section>
+    </>
   );
 }
 

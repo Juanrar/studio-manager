@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import type { Pago, RegistrarPagoInput } from '@studio/shared';
 import { api } from '../../lib/api.ts';
 
@@ -9,11 +9,19 @@ export function usePagosDeAlumno(alumnoId: number) {
   });
 }
 
+// Un pago cambia el estado del pack: se recargan sus pagos y las consultas de alumnos (lista, ficha y actividad).
+function recargarDespuesDeUnPago(clienteQuery: QueryClient, alumnoId: number) {
+  return Promise.all([
+    clienteQuery.invalidateQueries({ queryKey: ['pagos', alumnoId] }),
+    clienteQuery.invalidateQueries({ queryKey: ['alumnos'] }),
+  ]);
+}
+
 export function useRegistrarPago() {
   const clienteQuery = useQueryClient();
   return useMutation({
     mutationFn: (datos: RegistrarPagoInput) => api.post<Pago>('/pagos', datos),
-    onSuccess: (pago) => clienteQuery.invalidateQueries({ queryKey: ['pagos', pago.alumnoId] }),
+    onSuccess: (pago) => recargarDespuesDeUnPago(clienteQuery, pago.alumnoId),
   });
 }
 
@@ -22,6 +30,6 @@ export function useAnularPago(alumnoId: number) {
   return useMutation({
     mutationFn: ({ pagoId, motivo }: { pagoId: number; motivo: string }) =>
       api.post<Pago>(`/pagos/${pagoId}/anular`, { motivo }),
-    onSuccess: () => clienteQuery.invalidateQueries({ queryKey: ['pagos', alumnoId] }),
+    onSuccess: () => recargarDespuesDeUnPago(clienteQuery, alumnoId),
   });
 }

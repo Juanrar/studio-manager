@@ -38,13 +38,39 @@ export function formatearFechaLarga(fecha: string): string {
 }
 
 // Propios y no de Intl: según la versión, Intl escribe "sept" o agrega "de".
-const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const MESES = [
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
+];
+const MESES_CORTOS = MESES.map((mes) => mes.slice(0, 3));
+
+// AAAA-MM-DD a "18 oct", sin el año.
+export function formatearDiaYMes(fecha: string): string {
+  const [, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
+  return `${dia} ${MESES_CORTOS[mes - 1]}`;
+}
 
 // AAAA-MM-DD a "18 oct". Si no es del año de `hoy`, lleva el año: "20 dic 2025".
 export function formatearFechaCorta(fecha: string, hoy: string): string {
-  const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
-  const texto = `${dia} ${MESES_CORTOS[mes - 1]}`;
-  return fecha.slice(0, 4) === hoy.slice(0, 4) ? texto : `${texto} ${anio}`;
+  const anio = fecha.slice(0, 4);
+  return anio === hoy.slice(0, 4) ? formatearDiaYMes(fecha) : `${formatearDiaYMes(fecha)} ${anio}`;
+}
+
+// AAAA-MM a "Septiembre 2026", como título de un mes.
+export function formatearMes(periodo: string): string {
+  const [anio, mes] = periodo.split('-').map(Number) as [number, number];
+  const nombre = MESES[mes - 1] ?? '';
+  return `${nombre.charAt(0).toUpperCase()}${nombre.slice(1)} ${anio}`;
 }
 
 export const DIAS_DE_LA_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];

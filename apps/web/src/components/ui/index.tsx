@@ -1,6 +1,7 @@
 import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
+  KeyboardEvent,
   ReactNode,
   Ref,
   SelectHTMLAttributes,
@@ -266,10 +267,69 @@ export function PanelLateral({
     >
       <div className="flex h-12 flex-none items-center gap-2 border-b border-borde px-2">
         <BotonIcono icono="cerrar" etiqueta="Cerrar" onClick={alCerrar} />
-        {acciones !== undefined && <div className="ml-auto flex items-center gap-2 pr-2">{acciones}</div>}
+        {hayAlgo(acciones) && <div className="ml-auto flex items-center gap-2 pr-2">{acciones}</div>}
       </div>
       <div className="min-h-0 flex-1 overflow-auto">{children}</div>
     </aside>
+  );
+}
+
+export type Pestana<T extends string> = { id: T; texto: string; icono: NombreIcono };
+
+const PASO_CON_FLECHA: Record<string, number | undefined> = { ArrowRight: 1, ArrowLeft: -1 };
+
+// Pestañas con el patrón de ARIA: las flechas pasan de una a otra y el lector de pantalla
+// anuncia cuál está elegida. `children` es el contenido de la elegida.
+export function Pestanas<T extends string>({
+  pestanas,
+  activa,
+  alCambiar,
+  children,
+}: {
+  pestanas: readonly Pestana<T>[];
+  activa: T;
+  alCambiar: (id: T) => void;
+  children: ReactNode;
+}) {
+  const base = useId();
+  const idDe = (id: T) => `${base}-${id}`;
+
+  function moverConFlechas(evento: KeyboardEvent) {
+    const paso = PASO_CON_FLECHA[evento.key];
+    if (paso === undefined) return;
+    const actual = pestanas.findIndex((pestana) => pestana.id === activa);
+    const siguiente = pestanas[(actual + paso + pestanas.length) % pestanas.length]!;
+    alCambiar(siguiente.id);
+    document.getElementById(idDe(siguiente.id))?.focus();
+  }
+
+  return (
+    <>
+      <div role="tablist" className="flex gap-1 border-b border-borde px-4" onKeyDown={moverConFlechas}>
+        {pestanas.map((pestana) => {
+          const elegida = pestana.id === activa;
+          return (
+            <button
+              key={pestana.id}
+              id={idDe(pestana.id)}
+              type="button"
+              role="tab"
+              aria-selected={elegida}
+              aria-controls={`${base}-panel`}
+              tabIndex={elegida ? 0 : -1}
+              onClick={() => alCambiar(pestana.id)}
+              className={`-mb-px flex items-center gap-1.5 border-b px-1.5 py-2.5 font-medium ${enfoque} ${elegida ? 'border-texto text-texto' : 'border-transparent text-apagado hover:text-texto'}`}
+            >
+              <Icono nombre={pestana.icono} />
+              {pestana.texto}
+            </button>
+          );
+        })}
+      </div>
+      <div role="tabpanel" id={`${base}-panel`} aria-labelledby={idDe(activa)}>
+        {children}
+      </div>
+    </>
   );
 }
 

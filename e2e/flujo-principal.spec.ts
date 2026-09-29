@@ -72,11 +72,14 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
   await test.step('cobrarle un pack x4 a una alumna', async () => {
     await crearAlumno(page, 'Martina', 'García');
     await page.getByRole('link', { name: 'García, Martina' }).click();
-    await page.getByRole('button', { name: 'Registrar pago' }).click();
+    const ficha = page.getByRole('complementary', { name: 'Ficha de Martina García' });
+    await ficha.getByRole('button', { name: 'Registrar pago' }).click();
     const dialogo = page.getByRole('dialog', { name: 'Registrar pago' });
     await dialogo.getByLabel('Pack').selectOption({ label: 'Pack x4 · $5.200 · 4 clases' });
     await dialogo.getByRole('button', { name: 'Registrar' }).click();
-    await expect(page.getByRole('row', { name: /Pack x4/ })).toContainText('4 de 4');
+    await expect(ficha.getByText('Vigente')).toBeVisible();
+    await ficha.getByRole('tab', { name: 'Pagos' }).click();
+    await expect(ficha.getByRole('row', { name: /Pack x4/ })).toContainText('4 de 4');
   });
 
   await test.step('dar de alta a un alumno sin pack', async () => {
