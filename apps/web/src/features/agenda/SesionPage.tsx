@@ -1,7 +1,18 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import type { SesionDetalle } from '@studio/shared';
-import { Aviso, Boton, Campo, Cargando, Celda, Insignia, Selector, Tabla } from '../../components/ui/index.tsx';
+import {
+  Aviso,
+  Boton,
+  Campo,
+  Cargando,
+  Celda,
+  CeldaDeAcciones,
+  Insignia,
+  Pagina,
+  Selector,
+  Tabla,
+} from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFechaLarga } from '../../lib/formato.ts';
 import { useProfesores } from '../profesores/api.ts';
@@ -18,24 +29,26 @@ export function SesionPage() {
   const cancelada = datos.estado === 'cancelada';
 
   return (
-    <section className="flex flex-col gap-6">
-      <div>
-        <Link to={`/agenda?fecha=${datos.fecha}`} className="text-sm text-violet-400 hover:underline">
-          ← Agenda
-        </Link>
-        <h1 className="text-2xl font-semibold">Asistencia · {datos.estilo}</h1>
-        <p className="capitalize text-stone-400">
-          {formatearFechaLarga(datos.fecha)}, {datos.horaInicio} a {datos.horaFin}
-          {datos.nivel !== null && ` · ${datos.nivel}`}
-        </p>
-        {cancelada && <Insignia tono="rojo">Cancelada</Insignia>}
+    <Pagina
+      volverA={{ ruta: `/agenda?fecha=${datos.fecha}`, texto: 'Agenda' }}
+      titulo={`Asistencia · ${datos.estilo}`}
+      barra={
+        <>
+          <p className="text-tenue first-letter:uppercase">
+            {formatearFechaLarga(datos.fecha)}, {datos.horaInicio} a {datos.horaFin}
+            {datos.nivel !== null && ` · ${datos.nivel}`}
+          </p>
+          {cancelada && <Insignia tono="rojo">Cancelada</Insignia>}
+        </>
+      }
+    >
+      <div className="flex flex-col gap-6">
+        <Suplencia sesion={datos} />
+        {!cancelada && <AnotarAlumno sesionId={id} />}
+        <Asistentes sesionId={id} />
+        {!cancelada && <CancelarClase sesionId={id} />}
       </div>
-
-      <Suplencia sesion={datos} />
-      {!cancelada && <AnotarAlumno sesionId={id} />}
-      <Asistentes sesionId={id} />
-      {!cancelada && <CancelarClase sesionId={id} />}
-    </section>
+    </Pagina>
   );
 }
 
@@ -85,10 +98,10 @@ function Asistentes({ sesionId }: { sesionId: number }) {
 
   return (
     <div>
-      <h2 className="mb-2 text-lg font-semibold">Asistentes</h2>
+      <h2 className="mb-2 text-base font-semibold">Asistentes</h2>
       {asistencias.isPending && <Cargando />}
       {quitar.isError && <Aviso>{mensajeDeError(quitar.error)}</Aviso>}
-      {asistencias.data?.length === 0 && <p className="text-sm text-stone-400">Todavía no hay asistentes.</p>}
+      {asistencias.data?.length === 0 && <p className="text-apagado">Todavía no hay asistentes.</p>}
       {asistencias.data && asistencias.data.length > 0 && (
         <Tabla columnas={['Alumno', 'Pack', '']}>
           {asistencias.data.map((asistencia) => (
@@ -97,11 +110,11 @@ function Asistentes({ sesionId }: { sesionId: number }) {
                 {asistencia.alumno.apellido}, {asistencia.alumno.nombre}
               </Celda>
               <Celda>{asistencia.pack}</Celda>
-              <Celda className="text-right">
+              <CeldaDeAcciones>
                 <Boton variante="secundario" disabled={quitar.isPending} onClick={() => quitar.mutate(asistencia.id)}>
                   Quitar
                 </Boton>
-              </Celda>
+              </CeldaDeAcciones>
             </tr>
           ))}
         </Tabla>

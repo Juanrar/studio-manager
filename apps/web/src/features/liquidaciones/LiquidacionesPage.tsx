@@ -6,11 +6,12 @@ import {
   Boton,
   Cargando,
   Celda,
+  CeldaDeAcciones,
   Dialogo,
   Entrada,
   Insignia,
+  Pagina,
   Tabla,
-  Titulo,
 } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import {
@@ -36,22 +37,23 @@ export function LiquidacionesPage() {
   const periodo = parametros.get('periodo') ?? periodoAnterior(hoyEnEstudio());
 
   return (
-    <section className="flex flex-col gap-6">
-      <Titulo
-        acciones={
-          <Entrada
-            type="month"
-            aria-label="Mes"
-            value={periodo}
-            onChange={(evento) => evento.target.value !== '' && setParametros({ periodo: evento.target.value })}
-          />
-        }
-      >
-        Liquidaciones de {formatearPeriodo(periodo)}
-      </Titulo>
-      <Ingresos periodo={periodo} />
-      <Sueldos periodo={periodo} />
-    </section>
+    <Pagina
+      titulo={`Liquidaciones de ${formatearPeriodo(periodo)}`}
+      acciones={
+        <Entrada
+          type="month"
+          aria-label="Mes"
+          className="w-auto"
+          value={periodo}
+          onChange={(evento) => evento.target.value !== '' && setParametros({ periodo: evento.target.value })}
+        />
+      }
+    >
+      <div className="flex flex-col gap-6">
+        <Ingresos periodo={periodo} />
+        <Sueldos periodo={periodo} />
+      </div>
+    </Pagina>
   );
 }
 
@@ -59,7 +61,7 @@ function Ingresos({ periodo }: { periodo: string }) {
   const ingresos = useIngresos(periodo);
   return (
     <section aria-labelledby="titulo-ingresos">
-      <h2 id="titulo-ingresos" className="mb-2 text-lg font-semibold">
+      <h2 id="titulo-ingresos" className="mb-2 text-base font-semibold">
         Ingresos del mes
       </h2>
       {ingresos.isPending && <Cargando />}
@@ -90,7 +92,7 @@ function Sueldos({ periodo }: { periodo: string }) {
 
   return (
     <section aria-labelledby="titulo-sueldos">
-      <h2 id="titulo-sueldos" className="mb-2 text-lg font-semibold">
+      <h2 id="titulo-sueldos" className="mb-2 text-base font-semibold">
         Sueldos
       </h2>
       {resumen.isPending && <Cargando />}
@@ -111,7 +113,7 @@ function Sueldos({ periodo }: { periodo: string }) {
                   {/* Cerrada, vale el monto guardado; si las asistencias cambiaron después, se avisa. */}
                   {formatearPesos(liquidacion?.monto ?? fila.montoCalculado)}
                   {liquidacion !== null && liquidacion.monto !== fila.montoCalculado && (
-                    <span className="block text-xs text-amber-400">
+                    <span className="block text-xs text-amber-300">
                       Calculado hoy: {formatearPesos(fila.montoCalculado)}
                     </span>
                   )}
@@ -123,7 +125,7 @@ function Sueldos({ periodo }: { periodo: string }) {
                     <Insignia tono="verde">Pagada el {formatearInstante(liquidacion.pagadoEn)}</Insignia>
                   )}
                 </Celda>
-                <Celda className="flex justify-end gap-2">
+                <CeldaDeAcciones>
                   <Boton variante="secundario" onClick={() => setDetalle(fila)}>
                     Detalle
                   </Boton>
@@ -137,7 +139,7 @@ function Sueldos({ periodo }: { periodo: string }) {
                       Marcar pagada
                     </Boton>
                   )}
-                </Celda>
+                </CeldaDeAcciones>
               </tr>
             );
           })}
@@ -164,7 +166,7 @@ function DetalleDeSueldo({ fila, periodo }: { fila: ResumenProfesor; periodo: st
 
   return (
     <div className="flex flex-col gap-3">
-      {detalle.data.length === 0 && <p className="text-sm text-stone-400">No dio clases con asistentes este mes.</p>}
+      {detalle.data.length === 0 && <p className="text-apagado">No dio clases con asistentes este mes.</p>}
       {detalle.data.length > 0 && (
         <Tabla columnas={['Fecha', 'Clase', 'Asistentes', 'Monto']}>
           {detalle.data.map((item) => (

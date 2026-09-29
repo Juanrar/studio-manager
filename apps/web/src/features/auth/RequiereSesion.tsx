@@ -18,6 +18,12 @@ export function RequiereSesion() {
 // La API ya rechaza a recepción en estas rutas; esto evita mostrarle una pantalla que no puede usar.
 export function SoloAdmin() {
   const sesion = useSesion();
-  if (sesion.data?.rol !== 'admin') return <Aviso>No tenés permiso para ver esta pantalla.</Aviso>;
+  if (sesion.data?.rol !== 'admin') {
+    return (
+      <div className="p-4">
+        <Aviso>No tenés permiso para ver esta pantalla.</Aviso>
+      </div>
+    );
+  }
   return <Outlet />;
 }

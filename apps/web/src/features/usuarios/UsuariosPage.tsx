@@ -9,19 +9,19 @@ import {
   Campo,
   Cargando,
   Celda,
+  CeldaDeAcciones,
   Dialogo,
   Entrada,
   Insignia,
+  Pagina,
   Selector,
   Tabla,
-  Titulo,
 } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
+import { NOMBRES_ROL } from '../../lib/formato.ts';
 import { mostrarErrorDeApi } from '../../lib/formularios.ts';
 import { useSesion } from '../auth/api.ts';
 import { useActualizarUsuario, useCrearUsuario, useUsuarios } from './api.ts';
-
-const NOMBRES_ROL: Record<Rol, string> = { admin: 'Administración', recepcion: 'Recepción' };
 
 export function UsuariosPage() {
   const usuarios = useUsuarios();
@@ -30,9 +30,10 @@ export function UsuariosPage() {
   const [editando, setEditando] = useState<UsuarioPublico | 'nuevo' | null>(null);
 
   return (
-    <section>
-      <Titulo acciones={<Boton onClick={() => setEditando('nuevo')}>Nuevo usuario</Boton>}>Usuarios</Titulo>
-
+    <Pagina
+      titulo="Usuarios"
+      acciones={<Boton onClick={() => setEditando('nuevo')}>Nuevo usuario</Boton>}
+    >
       {usuarios.isPending && <Cargando />}
       {usuarios.isError && <Aviso>{mensajeDeError(usuarios.error)}</Aviso>}
       {actualizar.isError && <Aviso>{mensajeDeError(actualizar.error)}</Aviso>}
@@ -46,7 +47,7 @@ export function UsuariosPage() {
                 <Celda>{usuario.email}</Celda>
                 <Celda>{NOMBRES_ROL[usuario.rol]}</Celda>
                 <Celda>{usuario.activo ? <Insignia tono="verde">Activo</Insignia> : <Insignia>Desactivado</Insignia>}</Celda>
-                <Celda className="flex justify-end gap-2">
+                <CeldaDeAcciones>
                   <Boton variante="secundario" onClick={() => setEditando(usuario)}>
                     Editar
                   </Boton>
@@ -59,7 +60,7 @@ export function UsuariosPage() {
                       {usuario.activo ? 'Desactivar' : 'Activar'}
                     </Boton>
                   )}
-                </Celda>
+                </CeldaDeAcciones>
               </tr>
             );
           })}
@@ -76,7 +77,7 @@ export function UsuariosPage() {
           <EditarUsuarioForm usuario={editando} alTerminar={() => setEditando(null)} />
         )}
       </Dialogo>
-    </section>
+    </Pagina>
   );
 }
 
@@ -156,7 +157,7 @@ function EditarUsuarioForm({ usuario, alTerminar }: { usuario: UsuarioPublico; a
   return (
     <form onSubmit={enviar} className="flex flex-col gap-3" noValidate>
       {errors.root?.message !== undefined && <Aviso>{errors.root.message}</Aviso>}
-      <p className="text-sm text-stone-400">{usuario.email}</p>
+      <p className="text-tenue">{usuario.email}</p>
       <Campo etiqueta="Nombre" error={errors.nombre?.message}>
         {(id) => <Entrada id={id} {...formulario.register('nombre')} />}
       </Campo>

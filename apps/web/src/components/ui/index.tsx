@@ -7,6 +7,7 @@ import type {
   TextareaHTMLAttributes,
 } from 'react';
 import { useId } from 'react';
+import { Link } from 'react-router';
 import { Icono, type NombreIcono } from './Icono.tsx';
 
 export { Icono, type NombreIcono } from './Icono.tsx';
@@ -23,7 +24,7 @@ const enfoque = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-vi
 
 // También sirve para que un Link se vea como botón.
 export function claseDeBoton(variante: VarianteBoton = 'primario') {
-  return `inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-3 font-medium whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-50 ${enfoque} ${estilosBoton[variante]}`;
+  return `inline-flex h-8 items-center gap-1.5 rounded-md px-3 font-medium whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-50 ${enfoque} ${estilosBoton[variante]}`;
 }
 
 export function Boton({
@@ -150,7 +151,7 @@ export function Tabla({ columnas, children }: { columnas: string[]; children: Re
   );
 }
 
-const estiloCelda = 'h-8 border-r border-b border-borde px-2 last:border-r-0';
+const estiloCelda = 'h-8 border-r border-b border-borde px-2 whitespace-nowrap last:border-r-0';
 
 export function Celda({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <td className={`${estiloCelda} ${className}`}>{children}</td>;
@@ -196,26 +197,39 @@ export function Dialogo({
   );
 }
 
+// Como en JSX, `false` y `null` no muestran nada: permite pasar `condicion && <Algo />`.
+const hayAlgo = (nodo: ReactNode) => nodo !== undefined && nodo !== null && nodo !== false;
+
 // Una pantalla dentro de la tarjeta de contenido: barra con título y acciones, barra opcional para
-// búsqueda y filtros, y el contenido con scroll propio.
+// búsqueda y filtros, y el contenido con scroll propio. `volverA` pone antes del título la pantalla de la que se vino.
 export function Pagina({
   titulo,
+  volverA,
   acciones,
   barra,
   children,
 }: {
   titulo: ReactNode;
+  volverA?: { ruta: string; texto: string };
   acciones?: ReactNode;
   barra?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <section className="flex min-h-0 flex-1 flex-col">
-      <header className="flex h-12 flex-none items-center gap-3 border-b border-borde px-4">
+      <header className="flex h-12 flex-none items-center gap-2 border-b border-borde px-4">
+        {volverA !== undefined && (
+          <>
+            <Link to={volverA.ruta} className="text-[15px] text-apagado hover:text-texto">
+              {volverA.texto}
+            </Link>
+            <span className="text-apagado">/</span>
+          </>
+        )}
         <h1 className="truncate text-[15px] font-semibold">{titulo}</h1>
-        {acciones !== undefined && <div className="ml-auto flex items-center gap-2">{acciones}</div>}
+        {hayAlgo(acciones) && <div className="ml-auto flex items-center gap-2 pl-2">{acciones}</div>}
       </header>
-      {barra !== undefined && (
+      {hayAlgo(barra) && (
         <div className="flex min-h-11 flex-none flex-wrap items-center gap-x-4 gap-y-2 border-b border-borde px-4 py-1.5">
           {barra}
         </div>
@@ -248,15 +262,6 @@ export function PanelLateral({
       </div>
       <div className="min-h-0 flex-1 overflow-auto">{children}</div>
     </aside>
-  );
-}
-
-export function Titulo({ children, acciones }: { children: ReactNode; acciones?: ReactNode }) {
-  return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-2xl font-semibold">{children}</h1>
-      {acciones !== undefined && <div className="flex gap-2">{acciones}</div>}
-    </div>
   );
 }
 

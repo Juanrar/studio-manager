@@ -8,12 +8,14 @@ import {
   Boton,
   Campo,
   Cargando,
+  Casilla,
   Celda,
+  CeldaDeAcciones,
   Dialogo,
   Entrada,
   Insignia,
+  Pagina,
   Tabla,
-  Titulo,
 } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFecha, formatearPorcentaje, textoAPorcentajeBp } from '../../lib/formato.ts';
@@ -47,13 +49,17 @@ export function ProfesoresPage() {
   const [verPorcentajes, setVerPorcentajes] = useState<Profesor | null>(null);
 
   return (
-    <section>
-      <Titulo acciones={<Boton onClick={() => setEditando('nuevo')}>Nuevo profesor</Boton>}>Profesores</Titulo>
-      <label className="mb-4 flex items-center gap-2 text-sm text-stone-300">
-        <input type="checkbox" checked={incluirInactivos} onChange={(e) => setIncluirInactivos(e.target.checked)} />
-        Mostrar dados de baja
-      </label>
-
+    <Pagina
+      titulo="Profesores"
+      acciones={<Boton onClick={() => setEditando('nuevo')}>Nuevo profesor</Boton>}
+      barra={
+        <Casilla
+          etiqueta="Mostrar dados de baja"
+          checked={incluirInactivos}
+          onChange={(e) => setIncluirInactivos(e.target.checked)}
+        />
+      }
+    >
       {profesores.isPending && <Cargando />}
       {profesores.isError && <Aviso>{mensajeDeError(profesores.error)}</Aviso>}
       {actualizar.isError && <Aviso>{mensajeDeError(actualizar.error)}</Aviso>}
@@ -70,7 +76,7 @@ export function ProfesoresPage() {
                 {profesor.porcentajeVigenteBp === null ? '—' : formatearPorcentaje(profesor.porcentajeVigenteBp)}
               </Celda>
               <Celda>{profesor.activo ? <Insignia tono="verde">Activo</Insignia> : <Insignia>Dado de baja</Insignia>}</Celda>
-              <Celda className="flex justify-end gap-2">
+              <CeldaDeAcciones>
                 <Boton variante="secundario" onClick={() => setVerPorcentajes(profesor)}>
                   Porcentajes
                 </Boton>
@@ -83,7 +89,7 @@ export function ProfesoresPage() {
                 >
                   {profesor.activo ? 'Dar de baja' : 'Reactivar'}
                 </Boton>
-              </Celda>
+              </CeldaDeAcciones>
             </tr>
           ))}
         </Tabla>
@@ -107,7 +113,7 @@ export function ProfesoresPage() {
       >
         {verPorcentajes !== null && <HistorialDePorcentajes profesorId={verPorcentajes.id} />}
       </Dialogo>
-    </section>
+    </Pagina>
   );
 }
 
@@ -240,7 +246,7 @@ function HistorialDePorcentajes({ profesorId }: { profesorId: number }) {
     <div className="flex flex-col gap-4">
       {porcentajes.isPending && <Cargando />}
       {porcentajes.data && (
-        <ul className="text-sm">
+        <ul>
           {porcentajes.data.map((porcentaje) => (
             <li key={porcentaje.id}>
               {formatearPorcentaje(porcentaje.porcentajeBp)} desde el {formatearFecha(porcentaje.vigenteDesde)}

@@ -19,8 +19,13 @@ function nombreDelDia(fecha: string): string {
   return DIAS[diaUtc === 0 ? 6 : diaUtc - 1]!;
 }
 
+// Navega por el menú lateral: otras partes de la pantalla pueden tener un link con el mismo nombre.
+async function irA(page: Page, pantalla: string) {
+  await page.getByRole('navigation', { name: 'Menú' }).getByRole('link', { name: pantalla }).click();
+}
+
 async function crearAlumno(page: Page, nombre: string, apellido: string) {
-  await page.getByRole('link', { name: 'Alumnos', exact: true }).click();
+  await irA(page, 'Alumnos');
   await page.getByRole('button', { name: 'Nuevo alumno' }).click();
   const dialogo = page.getByRole('dialog', { name: 'Nuevo alumno' });
   await dialogo.getByLabel('Nombre', { exact: true }).fill(nombre);
@@ -37,11 +42,11 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
     await page.getByLabel('Email').fill(ADMIN_E2E.email);
     await page.getByLabel('Contraseña').fill(ADMIN_E2E.password);
     await page.getByRole('button', { name: 'Entrar' }).click();
-    await expect(page.getByRole('heading', { name: 'Agenda del día' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Agenda', exact: true })).toBeVisible();
   });
 
   await test.step('dar de alta a un profesor con 50%', async () => {
-    await page.getByRole('link', { name: 'Profesores' }).click();
+    await irA(page, 'Profesores');
     await page.getByRole('button', { name: 'Nuevo profesor' }).click();
     const dialogo = page.getByRole('dialog', { name: 'Nuevo profesor' });
     await dialogo.getByLabel('Nombre', { exact: true }).fill('Erik');
@@ -52,7 +57,7 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
   });
 
   await test.step('armar una clase para hoy', async () => {
-    await page.getByRole('link', { name: 'Clases' }).click();
+    await irA(page, 'Clases');
     await page.getByRole('button', { name: 'Nueva clase' }).click();
     const dialogo = page.getByRole('dialog', { name: 'Nueva clase' });
     await dialogo.getByLabel('Estilo').fill('Hip-Hop');
@@ -79,7 +84,7 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
   });
 
   await test.step('tomar asistencia y cobrar una clase suelta en el acto', async () => {
-    await page.getByRole('link', { name: 'Agenda' }).click();
+    await irA(page, 'Agenda');
     await page.getByRole('article', { name: 'Hip-Hop 19:00' }).getByRole('button', { name: 'Tomar asistencia' }).click();
     await expect(page.getByRole('heading', { name: 'Asistencia · Hip-Hop' })).toBeVisible();
 

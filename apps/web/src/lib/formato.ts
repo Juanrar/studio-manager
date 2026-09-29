@@ -1,3 +1,5 @@
+import type { Rol } from '@studio/shared';
+
 const formateadorPesos = new Intl.NumberFormat('es-AR', {
   style: 'currency',
   currency: 'ARS',
@@ -64,6 +66,8 @@ export function sumarDias(fecha: string, dias: number): string {
   const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
   return new Date(Date.UTC(anio, mes - 1, dia + dias)).toISOString().slice(0, 10);
 }
+
+export const NOMBRES_ROL: Record<Rol, string> = { admin: 'Administración', recepcion: 'Recepción' };
 
 export const NOMBRES_MEDIO_DE_PAGO: Record<string, string> = {
   efectivo: 'Efectivo',

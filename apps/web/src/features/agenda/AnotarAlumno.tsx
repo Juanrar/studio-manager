@@ -37,7 +37,7 @@ export function AnotarAlumno({ sesionId }: { sesionId: number }) {
   const errorComun = registrar.isError && sinClases === null;
 
   return (
-    <div className="flex flex-col gap-3 rounded-md border border-stone-800 bg-stone-900 p-4">
+    <div className="flex flex-col gap-3 rounded-md border border-borde p-4">
       <Entrada
         type="search"
         aria-label="Buscar alumno para anotar"
@@ -54,7 +54,7 @@ export function AnotarAlumno({ sesionId }: { sesionId: number }) {
               </Boton>
             </li>
           ))}
-          {sugerencias.data.items.length === 0 && <li className="text-sm text-stone-400">No hay coincidencias.</li>}
+          {sugerencias.data.items.length === 0 && <li className="text-apagado">No hay coincidencias.</li>}
         </ul>
       )}
       {errorComun && <Aviso>{mensajeDeError(registrar.error)}</Aviso>}
@@ -95,13 +95,13 @@ function CobrarYAnotar({
   return (
     <form
       aria-label="Cobrar y anotar"
-      className="flex flex-col gap-3 rounded-md border border-amber-900 bg-amber-950 p-3"
+      className="flex flex-col gap-3 rounded-md border border-amber-500/30 bg-amber-500/10 p-3"
       onSubmit={(evento) => {
         evento.preventDefault();
         registrar.mutate({ alumnoId: alumno.id, cobrar: { packId: Number(packId), medio } }, { onSuccess: alTerminar });
       }}
     >
-      <p className="text-sm text-amber-200">{mensaje}</p>
+      <p className="text-amber-200">{mensaje}</p>
       {registrar.isError && <Aviso>{mensajeDeError(registrar.error)}</Aviso>}
       <div className="grid gap-3 sm:grid-cols-2">
         <Campo etiqueta="Pack">

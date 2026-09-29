@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router';
-import { Aviso, Boton, Cargando, Dialogo, Insignia, Titulo } from '../../components/ui/index.tsx';
+import { useParams } from 'react-router';
+import { Aviso, Boton, Cargando, Dialogo, Insignia, Pagina } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFecha } from '../../lib/formato.ts';
 import { PagosDelAlumno } from '../pagos/PagosDelAlumno.tsx';
@@ -27,12 +27,10 @@ export function FichaAlumnoPage() {
   ];
 
   return (
-    <section>
-      <Link to="/alumnos" className="text-sm text-violet-400 hover:underline">
-        ← Alumnos
-      </Link>
-      <Titulo
-        acciones={
+    <Pagina
+      volverA={{ ruta: '/alumnos', texto: 'Alumnos' }}
+      titulo={`${datos.nombre} ${datos.apellido}`}
+      acciones={
           <>
             <Boton variante="secundario" onClick={() => setEditando(true)}>
               Editar
@@ -45,17 +43,15 @@ export function FichaAlumnoPage() {
               {datos.activo ? 'Dar de baja' : 'Reactivar'}
             </Boton>
           </>
-        }
-      >
-        {datos.nombre} {datos.apellido} {!datos.activo && <Insignia>Dado de baja</Insignia>}
-      </Titulo>
-
+      }
+      barra={!datos.activo && <Insignia>Dado de baja</Insignia>}
+    >
       {actualizar.isError && <Aviso>{mensajeDeError(actualizar.error)}</Aviso>}
 
-      <dl className="grid gap-x-6 gap-y-2 rounded-md border border-stone-800 bg-stone-900 p-4 text-sm sm:grid-cols-2">
+      <dl className="grid gap-x-6 gap-y-2 rounded-md border border-borde p-4 sm:grid-cols-2">
         {filas.map(([etiqueta, valor]) => (
           <div key={etiqueta}>
-            <dt className="text-stone-400">{etiqueta}</dt>
+            <dt className="text-apagado">{etiqueta}</dt>
             <dd>{valor ?? '—'}</dd>
           </div>
         ))}
@@ -73,6 +69,6 @@ export function FichaAlumnoPage() {
           alCancelar={() => setEditando(false)}
         />
       </Dialogo>
-    </section>
+    </Pagina>
   );
 }

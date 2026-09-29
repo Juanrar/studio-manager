@@ -7,6 +7,7 @@ import {
   Campo,
   Cargando,
   Celda,
+  CeldaDeAcciones,
   Dialogo,
   Insignia,
   Selector,
@@ -38,13 +39,13 @@ export function PagosDelAlumno({ alumnoId, puedeRegistrar }: { alumnoId: number;
   return (
     <section className="mt-8">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Pagos</h2>
+        <h2 className="text-base font-semibold">Pagos</h2>
         {puedeRegistrar && <Boton onClick={() => setRegistrando(true)}>Registrar pago</Boton>}
       </div>
 
       {pagos.isPending && <Cargando />}
       {pagos.isError && <Aviso>{mensajeDeError(pagos.error)}</Aviso>}
-      {pagos.data && pagos.data.length === 0 && <p className="text-sm text-stone-400">Todavía no tiene pagos.</p>}
+      {pagos.data && pagos.data.length === 0 && <p className="text-apagado">Todavía no tiene pagos.</p>}
       {pagos.data && pagos.data.length > 0 && (
         <Tabla columnas={['Pack', 'Compra', 'Vence', 'Clases', 'Monto', 'Medio', 'Estado', '']}>
           {pagos.data.map((pago) => (
@@ -60,16 +61,16 @@ export function PagosDelAlumno({ alumnoId, puedeRegistrar }: { alumnoId: number;
               <Celda>
                 <EstadoDelPago pago={pago} />
                 {pago.motivoAnulacion !== null && (
-                  <span className="ml-2 text-xs text-stone-400">{pago.motivoAnulacion}</span>
+                  <span className="ml-2 text-xs text-apagado">{pago.motivoAnulacion}</span>
                 )}
               </Celda>
-              <Celda>
+              <CeldaDeAcciones>
                 {!pago.anulado && (
                   <Boton variante="secundario" onClick={() => setAnulando(pago)}>
                     Anular
                   </Boton>
                 )}
-              </Celda>
+              </CeldaDeAcciones>
             </tr>
           ))}
         </Tabla>
@@ -151,7 +152,7 @@ function AnularPagoForm({ alumnoId, pago, alTerminar }: { alumnoId: number; pago
         anular.mutate({ pagoId: pago.id, motivo }, { onSuccess: alTerminar });
       }}
     >
-      <p className="text-sm text-stone-400">
+      <p className="text-tenue">
         {pago.pack.nombre} del {formatearInstante(pago.fecha)} por {formatearPesos(pago.monto)}.
       </p>
       {anular.isError && <Aviso>{mensajeDeError(anular.error)}</Aviso>}

@@ -2,14 +2,16 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import {
   Aviso,
+  Avatar,
   Boton,
   Cargando,
+  Casilla,
   Celda,
   Dialogo,
   Entrada,
   Insignia,
+  Pagina,
   Tabla,
-  Titulo,
 } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { useDemorado } from '../../lib/useDemorado.ts';
@@ -29,34 +31,33 @@ export function AlumnosPage() {
   const totalPaginas = alumnos.data ? Math.max(1, Math.ceil(alumnos.data.total / alumnos.data.porPagina)) : 1;
 
   return (
-    <section>
-      <Titulo acciones={<Boton onClick={() => setCreando(true)}>Nuevo alumno</Boton>}>Alumnos</Titulo>
-
-      <div className="mb-4 flex flex-wrap items-center gap-4">
-        <Entrada
-          type="search"
-          aria-label="Buscar alumno"
-          placeholder="Buscar por nombre, apellido o DNI"
-          className="max-w-sm"
-          value={texto}
-          onChange={(evento) => {
-            setTexto(evento.target.value);
-            setPagina(1);
-          }}
-        />
-        <label className="flex items-center gap-2 text-sm text-stone-300">
-          <input
-            type="checkbox"
+    <Pagina
+      titulo="Alumnos"
+      acciones={<Boton onClick={() => setCreando(true)}>Nuevo alumno</Boton>}
+      barra={
+        <>
+          <Entrada
+            type="search"
+            aria-label="Buscar alumno"
+            placeholder="Buscar por nombre, apellido o DNI"
+            className="max-w-xs"
+            value={texto}
+            onChange={(evento) => {
+              setTexto(evento.target.value);
+              setPagina(1);
+            }}
+          />
+          <Casilla
+            etiqueta="Mostrar dados de baja"
             checked={incluirInactivos}
             onChange={(evento) => {
               setIncluirInactivos(evento.target.checked);
               setPagina(1);
             }}
           />
-          Mostrar dados de baja
-        </label>
-      </div>
-
+        </>
+      }
+    >
       {alumnos.isPending && <Cargando />}
       {alumnos.isError && <Aviso>{mensajeDeError(alumnos.error)}</Aviso>}
       {alumnos.data && (
@@ -65,7 +66,11 @@ export function AlumnosPage() {
             {alumnos.data.items.map((alumno) => (
               <tr key={alumno.id}>
                 <Celda>
-                  <Link to={`/alumnos/${alumno.id}`} className="font-medium text-violet-400 hover:underline">
+                  <Link
+                    to={`/alumnos/${alumno.id}`}
+                    className="inline-flex items-center gap-1.5 rounded px-1 py-0.5 font-medium hover:bg-resalte"
+                  >
+                    <Avatar nombre={alumno.nombre} />
                     {alumno.apellido}, {alumno.nombre}
                   </Link>
                 </Celda>
@@ -78,9 +83,9 @@ export function AlumnosPage() {
             ))}
           </Tabla>
           {alumnos.data.items.length === 0 && (
-            <p className="mt-3 text-sm text-stone-400">No hay alumnos que coincidan con la búsqueda.</p>
+            <p className="mt-3 text-apagado">No hay alumnos que coincidan con la búsqueda.</p>
           )}
-          <div className="mt-3 flex items-center justify-between text-sm text-stone-400">
+          <div className="mt-3 flex items-center justify-between text-apagado">
             <span>{alumnos.data.total} alumnos</span>
             <div className="flex items-center gap-2">
               <Boton variante="secundario" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>
@@ -106,6 +111,6 @@ export function AlumnosPage() {
           alCancelar={() => setCreando(false)}
         />
       </Dialogo>
-    </section>
+    </Pagina>
   );
 }

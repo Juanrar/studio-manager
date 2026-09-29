@@ -7,12 +7,14 @@ import {
   Boton,
   Campo,
   Cargando,
+  Casilla,
   Celda,
+  CeldaDeAcciones,
   Dialogo,
   Entrada,
   Insignia,
+  Pagina,
   Tabla,
-  Titulo,
 } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearPesos } from '../../lib/formato.ts';
@@ -27,13 +29,17 @@ export function PacksPage() {
   const [editando, setEditando] = useState<Pack | 'nuevo' | null>(null);
 
   return (
-    <section>
-      <Titulo acciones={<Boton onClick={() => setEditando('nuevo')}>Nuevo pack</Boton>}>Packs</Titulo>
-      <label className="mb-4 flex items-center gap-2 text-sm text-stone-300">
-        <input type="checkbox" checked={incluirInactivos} onChange={(e) => setIncluirInactivos(e.target.checked)} />
-        Mostrar los que ya no se venden
-      </label>
-
+    <Pagina
+      titulo="Packs"
+      acciones={<Boton onClick={() => setEditando('nuevo')}>Nuevo pack</Boton>}
+      barra={
+        <Casilla
+          etiqueta="Mostrar los que ya no se venden"
+          checked={incluirInactivos}
+          onChange={(e) => setIncluirInactivos(e.target.checked)}
+        />
+      }
+    >
       {packs.isPending && <Cargando />}
       {packs.isError && <Aviso>{mensajeDeError(packs.error)}</Aviso>}
       {actualizar.isError && <Aviso>{mensajeDeError(actualizar.error)}</Aviso>}
@@ -45,7 +51,7 @@ export function PacksPage() {
               <Celda>{pack.cantidadClases}</Celda>
               <Celda>{formatearPesos(pack.precio)}</Celda>
               <Celda>{pack.activo ? <Insignia tono="verde">Se vende</Insignia> : <Insignia>No se vende</Insignia>}</Celda>
-              <Celda className="flex justify-end gap-2">
+              <CeldaDeAcciones>
                 <Boton variante="secundario" onClick={() => setEditando(pack)}>
                   Editar
                 </Boton>
@@ -55,7 +61,7 @@ export function PacksPage() {
                 >
                   {pack.activo ? 'Dejar de vender' : 'Volver a vender'}
                 </Boton>
-              </Celda>
+              </CeldaDeAcciones>
             </tr>
           ))}
         </Tabla>
@@ -78,7 +84,7 @@ export function PacksPage() {
           />
         )}
       </Dialogo>
-    </section>
+    </Pagina>
   );
 }
 

@@ -66,10 +66,16 @@ Los cambios puramente visuales (colores, fuente, barra lateral, tablas) no tiene
 - Modificar: `apps/web/src/components/Layout.tsx`, `apps/web/src/features/auth/RequiereSesion.tsx`, `LoginPage.tsx` y todas las páginas que usan `Titulo`
 - Modificar: `e2e/flujo-principal.spec.ts` (el título de la agenda pasa a ser "Agenda")
 
-- [ ] **Paso 1:** rehacer `Layout` con la barra lateral y la tarjeta de contenido.
-- [ ] **Paso 2:** pasar cada página a `Pagina` y borrar `Titulo`. Reemplazar los colores `stone`, `violet` y `amber` sueltos por los nuevos.
-- [ ] **Paso 3:** correr `pnpm --filter @studio/web test`, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
-- [ ] **Paso 4:** commit `feat(web): barra lateral y encabezado de página`.
+- [x] **Paso 1:** rehacer `Layout` con la barra lateral y la tarjeta de contenido.
+- [x] **Paso 2:** pasar cada página a `Pagina` y borrar `Titulo`. Reemplazar los colores `stone`, `violet` y `amber` sueltos por los nuevos.
+- [x] **Paso 3:** correr `pnpm --filter @studio/web test`, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
+- [x] **Paso 4:** commit `feat(web): barra lateral y encabezado de página`.
+
+Cambios al plan:
+- `Pagina` acepta `volverA` para la miga "Agenda /" de la sesión y "Alumnos /" de la ficha. El e2e ahora navega por el menú lateral (`irA`), porque la miga también es un link llamado "Alumnos".
+- `NOMBRES_ROL` pasó a `lib/formato.ts`: lo usan el menú y la pantalla de usuarios.
+- Las fechas largas usaban `capitalize`, que pone en mayúscula cada palabra ("Martes 29 De Septiembre"). Ahora es `first-letter:uppercase`.
+- Las celdas no parten el texto: en el celular la tabla se desplaza de costado.
 
 ### Tarea 3: Ficha del alumno en un panel lateral
 

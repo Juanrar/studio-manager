@@ -21,8 +21,16 @@ export function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
-      <form onSubmit={enviar} className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-stone-800 bg-stone-900 p-6 shadow" noValidate>
-        <h1 className="text-xl font-semibold">Iniciar sesión</h1>
+      <form
+        onSubmit={enviar}
+        className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-borde-fuerte bg-panel p-6 shadow-2xl shadow-black/60"
+        noValidate
+      >
+        <p className="flex items-center gap-2 font-semibold text-tenue">
+          <span className="grid size-5 place-items-center rounded bg-acento text-[11px] text-white">S</span>
+          Studio Manager
+        </p>
+        <h1 className="text-lg font-semibold">Iniciar sesión</h1>
         {login.isError && <Aviso>{mensajeDeError(login.error)}</Aviso>}
         <Campo etiqueta="Email" error={errores.email?.message}>
           {(id) => <Entrada id={id} type="email" autoComplete="username" {...formulario.register('email')} />}
@@ -32,7 +40,7 @@ export function LoginPage() {
             <Entrada id={id} type="password" autoComplete="current-password" {...formulario.register('password')} />
           )}
         </Campo>
-        <Boton type="submit" disabled={login.isPending}>
+        <Boton type="submit" className="justify-center" disabled={login.isPending}>
           Entrar
         </Boton>
       </form>

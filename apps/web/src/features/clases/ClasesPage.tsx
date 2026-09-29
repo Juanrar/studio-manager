@@ -7,13 +7,15 @@ import {
   Boton,
   Campo,
   Cargando,
+  Casilla,
   Celda,
+  CeldaDeAcciones,
   Dialogo,
   Entrada,
   Insignia,
+  Pagina,
   Selector,
   Tabla,
-  Titulo,
 } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { DIAS_DE_LA_SEMANA, nombreDelDia } from '../../lib/formato.ts';
@@ -32,20 +34,24 @@ export function ClasesPage() {
   const porDia = Map.groupBy(clases.data ?? [], (clase) => clase.diaSemana);
 
   return (
-    <section>
-      <Titulo acciones={<Boton onClick={() => setEditando('nueva')}>Nueva clase</Boton>}>Horario de clases</Titulo>
-      <label className="mb-4 flex items-center gap-2 text-sm text-stone-300">
-        <input type="checkbox" checked={incluirInactivas} onChange={(e) => setIncluirInactivas(e.target.checked)} />
-        Mostrar clases dadas de baja
-      </label>
-
+    <Pagina
+      titulo="Horario de clases"
+      acciones={<Boton onClick={() => setEditando('nueva')}>Nueva clase</Boton>}
+      barra={
+        <Casilla
+          etiqueta="Mostrar clases dadas de baja"
+          checked={incluirInactivas}
+          onChange={(e) => setIncluirInactivas(e.target.checked)}
+        />
+      }
+    >
       {clases.isPending && <Cargando />}
       {clases.isError && <Aviso>{mensajeDeError(clases.error)}</Aviso>}
       {actualizar.isError && <Aviso>{mensajeDeError(actualizar.error)}</Aviso>}
-      {clases.data?.length === 0 && <p className="text-stone-400">Todavía no hay clases en el horario.</p>}
+      {clases.data?.length === 0 && <p className="text-apagado">Todavía no hay clases en el horario.</p>}
       {[...porDia.entries()].map(([dia, delDia]) => (
         <div key={dia} className="mb-6">
-          <h2 className="mb-2 text-lg font-semibold">{nombreDelDia(dia)}</h2>
+          <h2 className="mb-2 text-base font-semibold">{nombreDelDia(dia)}</h2>
           <Tabla columnas={['Horario', 'Estilo', 'Nivel', 'Profesor titular', 'Estado', '']}>
             {delDia.map((clase) => (
               <tr key={clase.id}>
@@ -58,7 +64,7 @@ export function ClasesPage() {
                   {clase.profesor.nombre} {clase.profesor.apellido}
                 </Celda>
                 <Celda>{clase.activa ? <Insignia tono="verde">Activa</Insignia> : <Insignia>Dada de baja</Insignia>}</Celda>
-                <Celda className="flex justify-end gap-2">
+                <CeldaDeAcciones>
                   <Boton variante="secundario" onClick={() => setEditando(clase)}>
                     Editar
                   </Boton>
@@ -68,7 +74,7 @@ export function ClasesPage() {
                   >
                     {clase.activa ? 'Dar de baja' : 'Reactivar'}
                   </Boton>
-                </Celda>
+                </CeldaDeAcciones>
               </tr>
             ))}
           </Tabla>
@@ -92,7 +98,7 @@ export function ClasesPage() {
           />
         )}
       </Dialogo>
-    </section>
+    </Pagina>
   );
 }
 
