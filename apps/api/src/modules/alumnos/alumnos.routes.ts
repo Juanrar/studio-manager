@@ -3,7 +3,7 @@ import { actualizarAlumnoSchema, crearAlumnoSchema, listadoQuerySchema } from '@
 import { idParamSchema } from '../../lib/validacion.ts';
 import { requerirRol } from '../../plugins/autenticacion.ts';
 import { actualizarAlumno, crearAlumno } from './alumnos.service.ts';
-import { obtenerFicha } from './ficha.service.ts';
+import { actividadDelAlumno, obtenerFicha } from './ficha.service.ts';
 import { listarAlumnos } from './listado.service.ts';
 
 export async function rutasAlumnos(app: FastifyInstance): Promise<void> {
@@ -14,6 +14,11 @@ export async function rutasAlumnos(app: FastifyInstance): Promise<void> {
   app.get('/api/alumnos/:id', async (request) => {
     const { id } = idParamSchema.parse(request.params);
     return obtenerFicha(id, app.hoy());
+  });
+
+  app.get('/api/alumnos/:id/actividad', async (request) => {
+    const { id } = idParamSchema.parse(request.params);
+    return { items: await actividadDelAlumno(id, app.hoy()) };
   });
 
   app.post('/api/alumnos', async (request, reply) => {

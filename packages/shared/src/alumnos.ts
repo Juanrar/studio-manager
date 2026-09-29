@@ -1,5 +1,7 @@
 import { z } from 'zod';
+import type { PersonaResumen } from './clases.ts';
 import type { Listado } from './comun.ts';
+import type { MedioPago } from './constantes.ts';
 import type { ResumenDelPack } from './pagos.ts';
 import {
   dniOpcional,
@@ -51,6 +53,13 @@ export type AlumnoEnListado = Alumno & ResumenDelPack & { ultimaClase: string | 
 
 // GET /api/alumnos/:id: el alumno, el día de su alta en la zona del estudio y el pack que está usando.
 export type FichaDeAlumno = Alumno & ResumenDelPack & { alta: string };
+
+// Un hecho de la historia del alumno, para la pestaña Actividad de la ficha. `fecha` es un día.
+// En una asistencia, `profesor` es quien dio la clase: el suplente, si hubo.
+export type EventoDeAlumno =
+  | { tipo: 'asistencia'; fecha: string; clase: string; profesor: PersonaResumen }
+  | { tipo: 'pago'; fecha: string; pack: string; monto: number; medio: MedioPago; anulado: boolean }
+  | { tipo: 'alta'; fecha: string };
 
 // `vigentes` cuenta los alumnos activos del filtro con el pack vigente, en todas las páginas.
 // `hoy` es el día del estudio para el que se calcularon los estados.

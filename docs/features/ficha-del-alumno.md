@@ -83,11 +83,13 @@ Reglas:
 - Modificar: `ficha.service.ts`, `alumnos.routes.ts`, `asistencias.repository.ts`, `asistencias.service.ts`, `packages/shared/src/alumnos.ts`
 - Test: `apps/api/src/modules/alumnos/alumnos.test.ts`
 
-- [ ] **Paso 1:** escribir el test de la actividad y el de 404.
-- [ ] **Paso 2:** correrlos y verificar que fallan porque la ruta no existe.
-- [ ] **Paso 3:** implementar la consulta de asistencias, `actividadDelAlumno` y la ruta.
-- [ ] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(alumnos): actividad del alumno`.
+- [x] **Paso 1:** escribir el test de la actividad y el de 404.
+- [x] **Paso 2:** correrlos y verificar que fallan porque la ruta no existe.
+- [x] **Paso 3:** implementar la consulta de asistencias, `actividadDelAlumno` y la ruta.
+- [x] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(alumnos): actividad del alumno`.
+
+Cambio al plan: en la asistencia, `profesor` es `{ id, nombre, apellido }`, igual que en las sesiones y la agenda, y no un texto armado.
 
 ### Tarea 3: La ficha en la web
 

@@ -1,8 +1,17 @@
-import { and, asc, eq, inArray, lte, max, type SQL } from 'drizzle-orm';
-import type { Asistencia } from '@studio/shared';
+import { and, asc, desc, eq, inArray, lte, max, type SQL } from 'drizzle-orm';
+import type { Asistencia, PersonaResumen } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
-import { alumno, asistencia, pack, pago, sesion, type NuevaAsistencia } from '../../db/schema.ts';
+import {
+  alumno,
+  asistencia,
+  clase,
+  pack,
+  pago,
+  profesor,
+  sesion,
+  type NuevaAsistencia,
+} from '../../db/schema.ts';
 
 const columnas = {
   id: asistencia.id,
@@ -51,6 +60,25 @@ export async function ultimasFechas(
     .innerJoin(sesion, eq(sesion.id, asistencia.sesionId))
     .where(and(inArray(asistencia.alumnoId, alumnoIds), lte(sesion.fecha, hasta)))
     .groupBy(asistencia.alumnoId);
+}
+
+export type ClaseDeAlumno = { fecha: FechaDia; clase: string; profesor: PersonaResumen };
+
+// Las clases de un alumno hasta `hasta`, de la más nueva a la más vieja. El profesor es el de la
+// sesión, que cambia si hubo suplencia; el de la clase es el titular.
+export async function listarDeAlumno(ej: Ejecutor, alumnoId: number, hasta: FechaDia): Promise<ClaseDeAlumno[]> {
+  return ej
+    .select({
+      fecha: sesion.fecha,
+      clase: clase.estilo,
+      profesor: { id: profesor.id, nombre: profesor.nombre, apellido: profesor.apellido },
+    })
+    .from(asistencia)
+    .innerJoin(sesion, eq(sesion.id, asistencia.sesionId))
+    .innerJoin(clase, eq(clase.id, sesion.claseId))
+    .innerJoin(profesor, eq(profesor.id, sesion.profesorId))
+    .where(and(eq(asistencia.alumnoId, alumnoId), lte(sesion.fecha, hasta)))
+    .orderBy(desc(sesion.fecha), desc(clase.horaInicio), desc(asistencia.id));
 }
 
 export async function borrar(ej: Ejecutor, id: number): Promise<boolean> {

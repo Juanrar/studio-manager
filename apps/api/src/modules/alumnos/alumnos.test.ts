@@ -10,7 +10,7 @@ import {
   crearProfesorDeTest,
 } from '../../../test/fabricas.ts';
 import { registrarAsistencia } from '../asistencias/asistencias.service.ts';
-import { abrirSesion } from '../clases/sesiones.service.ts';
+import { abrirSesion, actualizarSesion } from '../clases/sesiones.service.ts';
 import { anularPago, registrarPago } from '../pagos/pagos.service.ts';
 import { actualizarAlumno } from './alumnos.service.ts';
 
@@ -215,6 +215,69 @@ describe('GET /api/alumnos/:id', () => {
       estadoPack: 'vigente',
       pagoActual: { pack: 'Pack x8', cantidadClases: 8, clasesRestantes: 8, venceEl: '2026-04-06' },
     });
+  });
+});
+
+describe('GET /api/alumnos/:id/actividad', () => {
+  it('junta las asistencias hasta hoy con quien dio la clase, los pagos (también los anulados) y el alta, del más nuevo al más viejo', async () => {
+    const packX8 = await crearPackDeTest({ nombre: 'Pack x8', cantidadClases: 8, precio: 9600 });
+    const packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
+    const erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata' });
+    const julia = await crearProfesorDeTest({ nombre: 'Julia', apellido: 'Paz' });
+    const hipHop = await crearClaseDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2 });
+    // El 20 de febrero se anotó a las 10:00 y pagó un pack x4 a las 12:00, que después se anuló.
+    const martina = await crearAlumnoDeTest({}, new Date('2026-02-20T13:00:00Z'));
+    const anulado = await pagar(martina, packX4, '2026-02-20');
+    await anularPago(anulado.id, 'Se cargó dos veces', AHORA, HOY);
+    // El x8 se cobró el 2 de marzo a las 22:30 de Buenos Aires, que en UTC ya es el 3.
+    await registrarPago(
+      { alumnoId: martina.id, packId: packX8.id, medio: 'mercado_pago' },
+      recepcion.id,
+      new Date('2026-03-03T01:30:00Z'),
+      '2026-03-02',
+    );
+    // Hoy la clase la da Julia como suplente. La del martes que viene ya está anotada y no tiene que aparecer.
+    for (const martes of ['2026-03-03', HOY, '2026-03-17']) {
+      const { sesion } = await abrirSesion(hipHop.id, martes);
+      if (martes === HOY) await actualizarSesion(sesion.id, { profesorId: julia.id });
+      await registrarAsistencia(sesion.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
+    }
+
+    const respuesta = await app.inject({
+      method: 'GET',
+      url: `/api/alumnos/${martina.id}/actividad`,
+      headers: { cookie },
+    });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json()).toEqual({
+      items: [
+        {
+          tipo: 'asistencia',
+          fecha: HOY,
+          clase: 'Hip-Hop',
+          profesor: { id: julia.id, nombre: 'Julia', apellido: 'Paz' },
+        },
+        {
+          tipo: 'asistencia',
+          fecha: '2026-03-03',
+          clase: 'Hip-Hop',
+          profesor: { id: erik.id, nombre: 'Erik', apellido: 'Zapata' },
+        },
+        { tipo: 'pago', fecha: '2026-03-02', pack: 'Pack x8', monto: 9600, medio: 'mercado_pago', anulado: false },
+        { tipo: 'pago', fecha: '2026-02-20', pack: 'Pack x4', monto: 5200, medio: 'efectivo', anulado: true },
+        { tipo: 'alta', fecha: '2026-02-20' },
+      ],
+    });
+  });
+
+  it('la ficha y la actividad de un alumno que no existe responden 404', async () => {
+    for (const url of ['/api/alumnos/999', '/api/alumnos/999/actividad']) {
+      const respuesta = await app.inject({ method: 'GET', url, headers: { cookie } });
+
+      expect(respuesta.statusCode).toBe(404);
+      expect(respuesta.json()).toEqual({ error: 'No existe el alumno 999' });
+    }
   });
 });
 
