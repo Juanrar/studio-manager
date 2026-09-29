@@ -88,11 +88,13 @@ Cambios al plan:
 - Crear: `apps/api/src/tareas.ts`, `tareas.test.ts`
 - Modificar: `apps/api/src/server.ts`
 
-- [ ] **Paso 1:** escribir el test de las tareas.
-- [ ] **Paso 2:** correrlo y verificar que falla porque `programarTareas` no existe.
-- [ ] **Paso 3:** implementar `programarTareas` y llamarla desde `server.ts`.
-- [ ] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(api): baja automática al arrancar y cada hora`.
+- [x] **Paso 1:** escribir el test de las tareas.
+- [x] **Paso 2:** correrlo y verificar que falla porque `programarTareas` no existe.
+- [x] **Paso 3:** implementar `programarTareas` y llamarla desde `server.ts`.
+- [x] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(api): baja automática al arrancar y cada hora`.
+
+Cambio al plan: `programarTareas` devuelve una función para detenerlas en lugar de usar el hook `onClose`. Fastify no deja agregar hooks a una app que ya arrancó, y `server.ts` la llama después de `listen`.
 
 ## Verificación final
 
