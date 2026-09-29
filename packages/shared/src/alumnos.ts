@@ -56,10 +56,12 @@ export type FichaDeAlumno = Alumno & ResumenDelPack & { alta: string };
 
 // Un hecho de la historia del alumno, para la pestaña Actividad de la ficha. `fecha` es un día.
 // Una clase es `asistencia` hasta hoy y `anotado` si es de un día posterior. `profesor` es quien
-// la da: el suplente, si hubo.
+// la da: el suplente, si hubo. Una baja `automatica` la hizo el sistema por falta de compras.
 export type EventoDeAlumno =
   | { tipo: 'asistencia' | 'anotado'; fecha: string; clase: string; profesor: PersonaResumen }
   | { tipo: 'pago'; fecha: string; pack: string; monto: number; medio: MedioPago; anulado: boolean }
+  | { tipo: 'baja'; fecha: string; automatica: boolean }
+  | { tipo: 'reactivacion'; fecha: string }
   | { tipo: 'alta'; fecha: string };
 
 // `vigentes` cuenta los alumnos activos del filtro con el pack vigente, en todas las páginas.

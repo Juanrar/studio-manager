@@ -1,8 +1,7 @@
+import { MESES_SIN_COMPRAR } from '@studio/shared';
 import { sumarMeses, type FechaDia } from '../../lib/fechas.ts';
 
-// Pedido del estudio: pasa a baja quien lleva 2 meses sin comprar un pack. Desde cuándo se cuenta es
-// una decisión por defecto de v1 (ver el índice de features).
-const MESES_SIN_COMPRAR = 2;
+// Desde cuándo se cuentan los meses sin comprar es una decisión por defecto de v1 (ver el índice de features).
 
 export type AlumnoParaBaja = {
   // El día del alta o de la última reactivación.

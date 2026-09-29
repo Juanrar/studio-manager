@@ -72,11 +72,15 @@ Cambio al plan: la migración se generó con nombre (`pnpm --filter @studio/api 
 - Modificar: `packages/shared/src/alumnos.ts`, `alumnos.repository.ts`, `ficha.service.ts`, `apps/web/src/features/alumnos/FichaAlumnoPage.tsx`, `apps/web/src/components/ui/Icono.tsx`
 - Test: `apps/api/src/modules/alumnos/alumnos.test.ts`, `apps/web/src/features/alumnos/ficha.test.tsx`
 
-- [ ] **Paso 1:** escribir el test HTTP y el test web.
-- [ ] **Paso 2:** correrlos y verificar que fallan porque la actividad no trae los cambios.
-- [ ] **Paso 3:** implementar los tipos nuevos en la API y en la ficha, y el orden por hora dentro de un día.
-- [ ] **Paso 4:** correr los tests de la API y de la web y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(alumnos): bajas y reactivaciones en la actividad`.
+- [x] **Paso 1:** escribir el test HTTP y el test web.
+- [x] **Paso 2:** correrlos y verificar que fallan porque la actividad no trae los cambios.
+- [x] **Paso 3:** implementar los tipos nuevos en la API y en la ficha, y el orden por hora dentro de un día.
+- [x] **Paso 4:** correr los tests de la API y de la web y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(alumnos): bajas y reactivaciones en la actividad`.
+
+Cambios al plan:
+- `MESES_SIN_COMPRAR` pasó a `packages/shared/src/constantes.ts`: la regla de la API y el texto "Baja automática: 2 meses sin comprar un pack" usan el mismo número.
+- El test HTTP incluye una baja a mano a las 18:00 del día de un pago de las 12:00: con el orden fijo por tipo de la ficha, el pago quedaba arriba de la baja.
 
 ### Tarea 4: La API corre la baja automática sola
 

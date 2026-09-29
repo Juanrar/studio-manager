@@ -14,32 +14,48 @@ export async function obtenerFicha(id: number, hoy: FechaDia): Promise<FichaDeAl
   const { creadoEn, ...alumno } = await buscarConAlta(id);
   const packs = await resumenDePacks([id], hoy);
 
-  return { ...alumno, alta: hoyEnEstudio(creadoEn, config.tzEstudio), ...packs.get(id)! };
+  return { ...alumno, alta: diaDe(creadoEn), ...packs.get(id)! };
 }
+
+// Un hecho y el momento en que pasó, para ordenar los de un mismo día. Las clases no tienen hora en la
+// actividad (`null`): van antes que el resto de su día, porque se toman con el alumno ya en el estudio.
+type HechoConHora = { evento: EventoDeAlumno; instante: Date | null };
 
 // Del hecho más nuevo al más viejo. Una clase de un día posterior a hoy todavía no pasó: está anotada.
 export async function actividadDelAlumno(id: number, hoy: FechaDia): Promise<EventoDeAlumno[]> {
   const { creadoEn } = await buscarConAlta(id);
   const asistencias = await asistenciasDeAlumno(id);
   const pagos = await listarPagosDeAlumno(id, hoy);
+  const cambios = await repo.listarCambiosDeEstado(db, id);
 
-  const eventos: EventoDeAlumno[] = [
+  const hechos: HechoConHora[] = [
     ...asistencias.map((asistencia) => ({
-      tipo: asistencia.fecha > hoy ? ('anotado' as const) : ('asistencia' as const),
-      ...asistencia,
+      evento: { tipo: asistencia.fecha > hoy ? ('anotado' as const) : ('asistencia' as const), ...asistencia },
+      instante: null,
     })),
-    ...pagos.map((pago) => ({
-      tipo: 'pago' as const,
-      fecha: hoyEnEstudio(new Date(pago.fecha), config.tzEstudio),
-      pack: pago.pack.nombre,
-      monto: pago.monto,
-      medio: pago.medio,
-      anulado: pago.anulado,
-    })),
-    { tipo: 'alta', fecha: hoyEnEstudio(creadoEn, config.tzEstudio) },
+    ...pagos.map((pago) => {
+      const instante = new Date(pago.fecha);
+      const evento: EventoDeAlumno = {
+        tipo: 'pago',
+        fecha: diaDe(instante),
+        pack: pago.pack.nombre,
+        monto: pago.monto,
+        medio: pago.medio,
+        anulado: pago.anulado,
+      };
+      return { evento, instante };
+    }),
+    ...cambios.map((cambio) => {
+      const fecha = diaDe(cambio.registradoEn);
+      const evento: EventoDeAlumno = cambio.activo
+        ? { tipo: 'reactivacion', fecha }
+        : { tipo: 'baja', fecha, automatica: cambio.registradoPor === null };
+      return { evento, instante: cambio.registradoEn };
+    }),
+    { evento: { tipo: 'alta', fecha: diaDe(creadoEn) }, instante: creadoEn },
   ];
-  // `sort` es estable: en un mismo día y tipo queda el orden de cada consulta, que ya es del más nuevo al más viejo.
-  return eventos.sort(masNuevoPrimero);
+  // `sort` es estable: las clases de un mismo día quedan en el orden de la consulta, de la última a la primera.
+  return hechos.sort(masNuevoPrimero).map((hecho) => hecho.evento);
 }
 
 async function buscarConAlta(id: number) {
@@ -48,10 +64,12 @@ async function buscarConAlta(id: number) {
   return encontrado;
 }
 
-// En un mismo día, al revés de como pasa cuando alguien se anota, paga y toma su primera clase.
-const ORDEN_EN_EL_DIA: Record<EventoDeAlumno['tipo'], number> = { anotado: 0, asistencia: 0, pago: 1, alta: 2 };
+function diaDe(instante: Date): FechaDia {
+  return hoyEnEstudio(instante, config.tzEstudio);
+}
 
-function masNuevoPrimero(a: EventoDeAlumno, b: EventoDeAlumno): number {
-  if (a.fecha !== b.fecha) return a.fecha < b.fecha ? 1 : -1;
-  return ORDEN_EN_EL_DIA[a.tipo] - ORDEN_EN_EL_DIA[b.tipo];
+function masNuevoPrimero(a: HechoConHora, b: HechoConHora): number {
+  if (a.evento.fecha !== b.evento.fecha) return a.evento.fecha < b.evento.fecha ? 1 : -1;
+  if (a.instante === null || b.instante === null) return Number(b.instante === null) - Number(a.instante === null);
+  return b.instante.getTime() - a.instante.getTime();
 }

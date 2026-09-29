@@ -1,4 +1,4 @@
-import { and, asc, count, eq, inArray, max, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, max, or, sql, type SQL } from 'drizzle-orm';
 import type { Alumno, ListadoQuery } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
 import { alumno, cambioEstadoAlumno, type NuevoAlumno, type NuevoCambioEstadoAlumno } from '../../db/schema.ts';
@@ -44,6 +44,22 @@ export async function bloquear(ej: Ejecutor, id: number): Promise<{ activo: bool
 export async function registrarCambiosDeEstado(ej: Ejecutor, cambios: NuevoCambioEstadoAlumno[]): Promise<void> {
   if (cambios.length === 0) return;
   await ej.insert(cambioEstadoAlumno).values(cambios);
+}
+
+// Para la actividad de la ficha, del más nuevo al más viejo.
+export async function listarCambiosDeEstado(
+  ej: Ejecutor,
+  alumnoId: number,
+): Promise<{ activo: boolean; registradoPor: number | null; registradoEn: Date }[]> {
+  return ej
+    .select({
+      activo: cambioEstadoAlumno.activo,
+      registradoPor: cambioEstadoAlumno.registradoPor,
+      registradoEn: cambioEstadoAlumno.registradoEn,
+    })
+    .from(cambioEstadoAlumno)
+    .where(eq(cambioEstadoAlumno.alumnoId, alumnoId))
+    .orderBy(desc(cambioEstadoAlumno.registradoEn), desc(cambioEstadoAlumno.id));
 }
 
 // Los alumnos activos con su alta y su última reactivación: si no compró después, se cuenta desde ahí.

@@ -101,6 +101,26 @@ describe('/alumnos/:id', () => {
     ]);
   });
 
+  it('la actividad distingue la baja automática de la baja a mano, y muestra la reactivación', async () => {
+    fichaDeMartina({
+      ficha: { activo: false },
+      actividad: [
+        { tipo: 'baja', fecha: '2026-03-10', automatica: true },
+        { tipo: 'reactivacion', fecha: '2026-01-08' },
+        { tipo: 'baja', fecha: '2026-01-05', automatica: false },
+        { tipo: 'alta', fecha: '2025-12-01' },
+      ],
+    });
+
+    const actividad = within(await laFicha()).getByRole('tabpanel', { name: 'Actividad' });
+
+    expect(await mesesDe(actividad)).toEqual([
+      ['Marzo 2026', ['Baja automática: 2 meses sin comprar un pack', '10 mar']],
+      ['Enero 2026', ['Reactivación en el estudio', '8 ene'], ['Baja en el estudio', '5 ene']],
+      ['Diciembre 2025', ['Alta en el estudio', '1 dic']],
+    ]);
+  });
+
   it('la pestaña Datos muestra los datos, el pack que está usando y "Vacío" en lo que falta', async () => {
     const { usuario } = fichaDeMartina({
       ficha: {

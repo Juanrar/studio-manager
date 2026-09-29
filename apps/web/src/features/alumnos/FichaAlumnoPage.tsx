@@ -1,6 +1,6 @@
 import { useId, useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import type { EventoDeAlumno, FichaDeAlumno, MedioPago } from '@studio/shared';
+import { MESES_SIN_COMPRAR, type EventoDeAlumno, type FichaDeAlumno, type MedioPago } from '@studio/shared';
 import {
   Aviso,
   Avatar,
@@ -82,6 +82,8 @@ const ICONOS_DE_HECHO: Record<EventoDeAlumno['tipo'], NombreIcono> = {
   anotado: 'calendario',
   asistencia: 'tilde',
   pago: 'billetes',
+  baja: 'personaMenos',
+  reactivacion: 'personaTilde',
   alta: 'personaMas',
 };
 
@@ -183,6 +185,22 @@ function Hecho({ hecho }: { hecho: EventoDeAlumno }) {
         </>
       );
     }
+    case 'baja':
+      return hecho.automatica ? (
+        <>
+          <Resaltado>Baja automática</Resaltado>: {MESES_SIN_COMPRAR} meses sin comprar un pack
+        </>
+      ) : (
+        <>
+          <Resaltado>Baja</Resaltado> en el estudio
+        </>
+      );
+    case 'reactivacion':
+      return (
+        <>
+          <Resaltado>Reactivación</Resaltado> en el estudio
+        </>
+      );
     case 'alta':
       return (
         <>

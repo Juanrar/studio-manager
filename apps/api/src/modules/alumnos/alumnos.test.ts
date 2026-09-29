@@ -13,6 +13,7 @@ import { registrarAsistencia } from '../asistencias/asistencias.service.ts';
 import { abrirSesion, actualizarSesion } from '../clases/sesiones.service.ts';
 import { anularPago, registrarPago } from '../pagos/pagos.service.ts';
 import { actualizarAlumno } from './alumnos.service.ts';
+import { darDeBajaPorNoComprar } from './baja-automatica.service.ts';
 
 let base: BaseDeTest;
 let app: FastifyInstance;
@@ -273,6 +274,35 @@ describe('GET /api/alumnos/:id/actividad', () => {
         { tipo: 'pago', fecha: '2026-03-02', pack: 'Pack x8', monto: 9600, medio: 'mercado_pago', anulado: false },
         { tipo: 'pago', fecha: '2026-02-20', pack: 'Pack x4', monto: 5200, medio: 'efectivo', anulado: true },
         { tipo: 'alta', fecha: '2026-02-20' },
+      ],
+    });
+  });
+
+  it('las bajas y reactivaciones, a mano o automáticas, aparecen en la actividad por hora dentro del día; editar otros datos no registra nada', async () => {
+    const packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
+    const martina = await crearAlumnoDeTest({}, new Date('2025-12-01T15:00:00Z'));
+    // El 5 de enero pagó a las 12:00 y a las 18:00 se la dio de baja. El 8 se la reactivó.
+    await pagar(martina, packX4, '2026-01-05');
+    await actualizarAlumno(martina.id, { activo: false }, recepcion.id, new Date('2026-01-05T21:00:00Z'));
+    await actualizarAlumno(martina.id, { activo: true }, recepcion.id, new Date('2026-01-08T13:00:00Z'));
+    await actualizarAlumno(martina.id, { activo: true, telefono: '11 5555-0000' }, recepcion.id, AHORA);
+    // Dos meses después de la reactivación, sin comprar.
+    await darDeBajaPorNoComprar(AHORA, HOY);
+
+    const respuesta = await app.inject({
+      method: 'GET',
+      url: `/api/alumnos/${martina.id}/actividad`,
+      headers: { cookie },
+    });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json()).toEqual({
+      items: [
+        { tipo: 'baja', fecha: HOY, automatica: true },
+        { tipo: 'reactivacion', fecha: '2026-01-08' },
+        { tipo: 'baja', fecha: '2026-01-05', automatica: false },
+        { tipo: 'pago', fecha: '2026-01-05', pack: 'Pack x4', monto: 5200, medio: 'efectivo', anulado: false },
+        { tipo: 'alta', fecha: '2025-12-01' },
       ],
     });
   });
