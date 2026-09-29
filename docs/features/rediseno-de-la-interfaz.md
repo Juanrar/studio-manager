@@ -1,6 +1,6 @@
 # Rediseño de la interfaz
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** e2e-y-produccion  
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; la app tiene barra lateral, el contenido va en una tarjeta, las tablas son densas, la ficha del alumno se abre en un panel al costado de la lista y la agenda del día es una tabla.
 
@@ -110,5 +110,7 @@ Cambios al plan:
 
 ## Verificación final
 
-- [ ] `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan.
-- [ ] Con `pnpm dev` y la API real, capturas de agenda, alumnos con el panel abierto, sesión, liquidaciones y login: nada se corta ni queda con los colores viejos.
+- [x] `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan: API 108, web 30, e2e 1.
+- [x] Con la API real, capturas de agenda, alumnos con el panel abierto, diálogo encima del panel, sesión, liquidaciones, packs, clases, usuarios y login, en escritorio y en celular: nada se corta ni queda con los colores viejos. Las capturas se sacaron contra la base del e2e con datos cargados por la API, para no tocar la base de desarrollo.
+
+Encontrado durante la verificación, sin arreglar: el listado de profesores muestra el mismo porcentaje para todos. En `profesores.repository.ts`, la subconsulta de `porcentajeVigenteBp` compara con `${profesor.id}` y Drizzle lo escribe como `"id"`, que dentro de la subconsulta es `porcentaje_profesor.id`. El cálculo de sueldos usa `buscarPorcentajeVigente` y no está afectado.

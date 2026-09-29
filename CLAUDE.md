@@ -76,6 +76,9 @@ Estas reglas se rompen fácil y cuestan caro. Están explicadas en [docs/estruct
 - La validación de entrada usa los esquemas Zod de `packages/shared`, los mismos que usa el frontend.
 - Nunca se mockea la base de datos. Los tests de integración corren contra un Postgres real con Testcontainers.
 - Nada de secretos en el repositorio. `.env` está ignorado; se versiona `.env.example`.
+- En la web, los colores salen de las variables de `apps/web/src/index.css` (`bg-panel`, `text-tenue`, `border-borde`). La paleta de Tailwind se usa solo para estados: verde, rojo y ámbar.
+- Cada pantalla usa `Pagina` de `components/ui`, y los botones de una fila van en `CeldaDeAcciones`. Un `<td>` con `display: flex` descuadra los bordes de la tabla.
+- Un ícono nuevo se agrega copiando su trazo de Tabler en `components/ui/Icono.tsx`. No se instala `@tabler/icons-react`: su índice importa miles de archivos y vuelve lentos los tests.
 
 ## Tests de referencia
 
@@ -129,6 +132,9 @@ Los tests de integración necesitan Docker corriendo.
 - **Tests web que pasan por `/agenda`** sin probar la agenda: llamar a `conAgendaVacia()`, si no la agenda hace un pedido que MSW no esperaba.
 - **`pnpm e2e` no corre dentro de `pnpm test`:** necesita Docker, compila el frontend y usa la base `studio_manager_e2e` (se borra y se crea en cada corrida). Usa el reloj real: crea la clase para el día de hoy en Buenos Aires.
 - **Un solo Postgres por corrida de tests**, archivos en serie. Cada archivo llama a `base.limpiar()` en `beforeEach`.
+- **Drizzle escribe las columnas sin la tabla** cuando la consulta es de una sola tabla. En una subconsulta con `sql`, `${profesor.id}` sale como `"id"` y puede apuntar a la tabla de adentro. Para ver el SQL sin ejecutarlo: `.toSQL()`.
+- **Git Bash convierte en ruta de Windows** cualquier argumento que empieza con `/` (`/agenda` pasa a `C:/Program Files/Git/agenda`). Se evita con `MSYS_NO_PATHCONV=1`.
+- **El e2e borra `studio_manager_e2e`** en cada corrida. Sirve para mirar la app con datos sin tocar la base de desarrollo: API con esa base en otro puerto y `WEB_DIST=../web/dist`.
 
 ## Estilo de escritura
 

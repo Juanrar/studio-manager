@@ -30,7 +30,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 15 | [Administración: packs, profesores, clases y usuarios](frontend-administracion.md) | lista | 12 |
 | 16 | [Liquidaciones e ingresos](frontend-liquidaciones.md) | lista | 15 |
 | 17 | [Prueba de punta a punta y build de producción](e2e-y-produccion.md) | lista | 14, 16 |
-| 18 | [Rediseño de la interfaz](rediseno-de-la-interfaz.md) | en curso | 17 |
+| 18 | [Rediseño de la interfaz](rediseno-de-la-interfaz.md) | lista | 17 |
 
 ## Bitácora
 
@@ -38,6 +38,7 @@ Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo s
 
 | Fecha | Feature | Qué pasó |
 |---|---|---|
+| 2026-09-29 | 18. Rediseño de la interfaz | Lista. Aspecto de Twenty CRM en oscuro: colores como variables de Tailwind, Inter empaquetada, barra lateral por rol, `Pagina` con barra superior, tablas densas, ficha del alumno en un panel lateral (ruta hija de `/alumnos`, la búsqueda se conserva) y agenda en tabla con estado. Quedó afuera: buscador Ctrl K, columnas de pack y vencimiento en el listado de alumnos (la API no las da) y modo claro. Encontrado y sin arreglar: el listado de profesores muestra el mismo porcentaje para todos (subconsulta sin correlacionar en `profesores.repository.ts`). API 108, web 30, e2e 1 |
 | 2026-09-25 | 17. Punta a punta y producción | Lista. La API sirve el frontend compilado con fallback de SPA (`WEB_DIST`). `pnpm e2e` crea una base limpia, compila el frontend y recorre con Chromium login, profesor, clase de hoy, pago, asistencia, cobro en el acto y liquidación; pasa en unos 7 segundos. La prueba manual encontró que `@fastify/static` exige ruta absoluta; se agregó el test. Con esto se completan las 17 features de v1. API 108, web 29, e2e 1 |
 | 2026-09-25 | 16. Pantalla de liquidaciones e ingresos | Lista. Mes en la URL (por defecto el anterior), ingresos por medio, sueldos con estado, cerrar, marcar pagada y detalle descargable en CSV con `;` y BOM (reemplaza el Excel de la app original). Ya no quedan pantallas "Próximamente". Web 29 tests |
 | 2026-09-25 | 15. Pantallas de administración | Lista. Packs, profesores con historial de porcentajes (se escriben en % y se mandan en puntos básicos), horario agrupado por día y usuarios. La pantalla de usuarios no ofrece desactivarse a uno mismo; la API todavía lo permite. Web 25 tests |

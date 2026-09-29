@@ -11,7 +11,7 @@ Ubicación: `apps/web`. Panel interno para el personal del estudio, detrás de u
 | Rutas | React Router | Suficiente para unas diez pantallas. TanStack Router da más tipado pero necesita un plugin de generación de código |
 | Datos del servidor | TanStack Query | Caché, recarga después de guardar, estados de carga y error |
 | Formularios | React Hook Form + Zod | Usa los esquemas de `packages/shared`, los mismos que valida la API |
-| Estilos | Tailwind CSS 4 | Con componentes propios chicos en `components/ui`. No se usa shadcn/ui: su CLI es interactivo y la app es casi toda tablas, formularios y diálogos |
+| Estilos | Tailwind CSS 4 | Con componentes propios chicos en `components/ui`. No se usa shadcn/ui: su CLI es interactivo y la app es casi toda tablas, formularios y diálogos. El aspecto sigue a [Twenty CRM](https://github.com/twentyhq/twenty) en oscuro, con la fuente Inter empaquetada |
 | Tests | Vitest + Testing Library + MSW | MSW simula la API a nivel de red. Una prueba de punta a punta con Playwright recorre el flujo real contra la API |
 
 ## Estructura de carpetas
@@ -42,6 +42,7 @@ apps/web/
 - **Toda llamada a la API pasa por `lib/api.ts`.** Los componentes no hacen `fetch` directo. Cada feature expone sus hooks en su `api.ts`.
 - **Los errores de la API llegan como `ErrorDeApi`** con `status`, `mensaje` y `detalles`. Los formularios muestran `detalles` en cada campo y el resto como aviso.
 - **`components/ui` no importa nada de `features/`.**
+- **Los colores salen de las variables de `index.css`** (`bg-panel`, `text-tenue`, `border-borde`), no de la paleta de Tailwind, salvo los estados: verde, rojo y ámbar.
 - **Las reglas de negocio viven en el backend.** El frontend valida formato con los esquemas compartidos, no reglas como "el pack está vencido": esas llegan como 422 y se muestran.
 - **Montos, fechas y porcentajes se muestran solo con `lib/formato.ts`.** El dinero es entero y se muestra como `$9.600`; los porcentajes vienen en puntos básicos y se muestran como `52,5%`.
 - **La sesión viaja en la cookie.** El frontend no guarda tokens. Quién está logueado sale de `GET /api/auth/yo`.
