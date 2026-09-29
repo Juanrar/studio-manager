@@ -85,7 +85,7 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
 
   await test.step('tomar asistencia y cobrar una clase suelta en el acto', async () => {
     await irA(page, 'Agenda');
-    await page.getByRole('article', { name: 'Hip-Hop 19:00' }).getByRole('button', { name: 'Tomar asistencia' }).click();
+    await page.getByRole('row', { name: /Hip-Hop/ }).getByRole('button', { name: 'Tomar asistencia' }).click();
     await expect(page.getByRole('heading', { name: 'Asistencia · Hip-Hop' })).toBeVisible();
 
     const buscador = page.getByRole('searchbox', { name: 'Buscar alumno para anotar' });

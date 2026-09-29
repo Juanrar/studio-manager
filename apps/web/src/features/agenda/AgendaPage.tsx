@@ -1,14 +1,36 @@
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import type { ClaseDelDia } from '@studio/shared';
-import { Aviso, Boton, BotonIcono, Cargando, Insignia, Pagina } from '../../components/ui/index.tsx';
+import type { ClaseDelDia, EstadoSesion } from '@studio/shared';
+import {
+  Aviso,
+  Boton,
+  BotonIcono,
+  Cargando,
+  Celda,
+  CeldaDeAcciones,
+  Insignia,
+  Pagina,
+  Tabla,
+  claseDeBoton,
+} from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFechaLarga, sumarDias } from '../../lib/formato.ts';
 import { useAbrirSesion, useAgenda } from './api.ts';
 
+type Tono = 'gris' | 'verde' | 'rojo';
+
+// Sin sesión, la clase todavía no se abrió. `dictada` existe en el esquema, pero la API aún no la asigna.
+const ESTADOS: Record<EstadoSesion, { texto: string; tono: Tono }> = {
+  programada: { texto: 'Abierta', tono: 'verde' },
+  dictada: { texto: 'Dictada', tono: 'gris' },
+  cancelada: { texto: 'Cancelada', tono: 'rojo' },
+};
+
 export function AgendaPage() {
+  const navegar = useNavigate();
   const [parametros, setParametros] = useSearchParams();
   const fecha = parametros.get('fecha') ?? undefined;
   const agenda = useAgenda(fecha);
+  const abrir = useAbrirSesion();
   const irA = (nueva: string | undefined) => setParametros(nueva === undefined ? {} : { fecha: nueva });
 
   return (
@@ -29,68 +51,69 @@ export function AgendaPage() {
     >
       {agenda.isPending && <Cargando />}
       {agenda.isError && <Aviso>{mensajeDeError(agenda.error)}</Aviso>}
-      {agenda.data && (
-        <>
-          {agenda.data.items.length === 0 && <p className="text-apagado">No hay clases este día.</p>}
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {agenda.data.items.map((clase) => (
-              <TarjetaDeClase key={clase.claseId} clase={clase} fecha={agenda.data.fecha} />
-            ))}
-          </div>
-        </>
+      {abrir.isError && <Aviso>{mensajeDeError(abrir.error)}</Aviso>}
+      {agenda.data && agenda.data.items.length === 0 && <p className="text-apagado">No hay clases este día.</p>}
+      {agenda.data && agenda.data.items.length > 0 && (
+        <Tabla columnas={['Horario', 'Clase', 'Nivel', 'Profesor', 'Asistentes', 'Estado', '']}>
+          {agenda.data.items.map((clase) => (
+            <FilaDeClase
+              key={clase.claseId}
+              clase={clase}
+              abriendo={abrir.isPending}
+              alTomarAsistencia={() =>
+                abrir.mutate(
+                  { claseId: clase.claseId, fecha: agenda.data.fecha },
+                  { onSuccess: (abierta) => navegar(`/sesiones/${abierta.id}`) },
+                )
+              }
+            />
+          ))}
+        </Tabla>
       )}
     </Pagina>
   );
 }
 
-function TarjetaDeClase({ clase, fecha }: { clase: ClaseDelDia; fecha: string }) {
-  const navegar = useNavigate();
-  const abrir = useAbrirSesion();
+function FilaDeClase({
+  clase,
+  abriendo,
+  alTomarAsistencia,
+}: {
+  clase: ClaseDelDia;
+  abriendo: boolean;
+  alTomarAsistencia: () => void;
+}) {
   const { sesion } = clase;
   const profesor = sesion?.profesor ?? clase.profesorTitular;
   const esSuplente = sesion !== null && sesion.profesor.id !== clase.profesorTitular.id;
+  const estado = sesion === null ? { texto: 'Sin abrir', tono: 'gris' as const } : ESTADOS[sesion.estado];
 
   return (
-    <article
-      aria-label={`${clase.estilo} ${clase.horaInicio}`}
-      className="flex flex-col gap-2 rounded-lg border border-borde bg-elevado p-4"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-apagado">
-            {clase.horaInicio} a {clase.horaFin}
-          </p>
-          <h2 className="text-lg font-semibold">{clase.estilo}</h2>
-          {clase.nivel !== null && <p className="text-apagado">{clase.nivel}</p>}
-        </div>
-        {sesion?.estado === 'cancelada' && <Insignia tono="rojo">Cancelada</Insignia>}
-      </div>
-      <p className="text-sm">
+    <tr>
+      <Celda>
+        {clase.horaInicio} a {clase.horaFin}
+      </Celda>
+      <Celda className="font-medium">{clase.estilo}</Celda>
+      <Celda>{clase.nivel ?? '—'}</Celda>
+      <Celda>
         {profesor.nombre} {profesor.apellido}
         {esSuplente && ' (suplente)'}
-      </p>
-      {sesion !== null && (
-        <p className="text-apagado">
-          {sesion.asistentes} {sesion.asistentes === 1 ? 'asistente' : 'asistentes'}
-        </p>
-      )}
-      {abrir.isError && <Aviso>{mensajeDeError(abrir.error)}</Aviso>}
-      <div className="mt-auto">
+      </Celda>
+      <Celda>{sesion === null ? '—' : sesion.asistentes}</Celda>
+      <Celda>
+        <Insignia tono={estado.tono}>{estado.texto}</Insignia>
+      </Celda>
+      <CeldaDeAcciones>
         {sesion === null ? (
-          <Boton
-            disabled={abrir.isPending}
-            onClick={() =>
-              abrir.mutate({ claseId: clase.claseId, fecha }, { onSuccess: (abierta) => navegar(`/sesiones/${abierta.id}`) })
-            }
-          >
+          <Boton disabled={abriendo} onClick={alTomarAsistencia}>
             Tomar asistencia
           </Boton>
         ) : (
-          <Link to={`/sesiones/${sesion.id}`} className="font-medium text-acento hover:underline">
+          <Link to={`/sesiones/${sesion.id}`} className={claseDeBoton('secundario')}>
             Ver asistencia
           </Link>
         )}
-      </div>
-    </article>
+      </CeldaDeAcciones>
+    </tr>
   );
 }

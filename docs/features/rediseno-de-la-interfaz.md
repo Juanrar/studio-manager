@@ -97,11 +97,16 @@ Cambio al plan: la ficha se separó en `FichaAlumnoPage` (carga y panel) y `Fich
 - Modificar: `apps/web/src/features/agenda/AgendaPage.tsx`, `e2e/flujo-principal.spec.ts`
 - Test: `apps/web/src/features/agenda/agenda.test.tsx`
 
-- [ ] **Paso 1:** cambiar los tests de la agenda para que busquen filas en lugar de tarjetas, y agregar la columna de estado.
-- [ ] **Paso 2:** correrlos y verificar que fallan porque no hay filas.
-- [ ] **Paso 3:** implementar la tabla y adaptar el paso de asistencia del e2e.
-- [ ] **Paso 4:** correr los tests web, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): agenda del día en una tabla`.
+- [x] **Paso 1:** cambiar los tests de la agenda para que busquen filas en lugar de tarjetas, y agregar la columna de estado.
+- [x] **Paso 2:** correrlos y verificar que fallan porque no hay filas.
+- [x] **Paso 3:** implementar la tabla y adaptar el paso de asistencia del e2e.
+- [x] **Paso 4:** correr los tests web, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): agenda del día en una tabla`.
+
+Cambios al plan:
+- El test de la agenda compara el texto de todas las celdas de cada fila, en lugar de buscar textos sueltos.
+- La apertura de la sesión pasó a la página: con una sola mutación, el error se muestra arriba de la tabla y los botones "Tomar asistencia" se deshabilitan mientras se abre una.
+- En el celular la tabla se desplaza de costado y "Tomar asistencia" queda a la derecha, fuera de la pantalla hasta desplazarla. La recepción usa computadora; si se usa desde el teléfono, conviene revisarlo.
 
 ## Verificación final
 

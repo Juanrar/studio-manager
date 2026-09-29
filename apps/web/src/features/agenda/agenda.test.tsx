@@ -47,15 +47,18 @@ function agendaDel10() {
 }
 
 describe('/agenda', () => {
-  it('muestra las clases del día con el profesor que la da, el estado y los asistentes', async () => {
+  it('muestra cada clase en una fila con el profesor que la da, los asistentes y el estado', async () => {
     const fechasPedidas = agendaDel10();
     renderizarEn('/agenda?fecha=2026-03-10');
 
-    const hipHop = await screen.findByRole('article', { name: 'Hip-Hop 19:00' });
-    expect(within(hipHop).getByText('Iaru Speroni (suplente)')).toBeInTheDocument();
-    expect(within(hipHop).getByText('4 asistentes')).toBeInTheDocument();
-    expect(within(screen.getByRole('article', { name: 'Salsa 21:00' })).getByText('Cancelada')).toBeInTheDocument();
-    expect(within(screen.getByRole('article', { name: 'Ballet 18:00' })).getByText('Erik Zapata')).toBeInTheDocument();
+    await screen.findByRole('row', { name: /Hip-Hop/ });
+    const [, ...filas] = screen.getAllByRole('row');
+    const celdas = filas.map((fila) => within(fila).getAllByRole('cell').map((celda) => celda.textContent));
+    expect(celdas).toEqual([
+      ['18:00 a 19:00', 'Ballet', '—', 'Erik Zapata', '—', 'Sin abrir', 'Tomar asistencia'],
+      ['19:00 a 20:30', 'Hip-Hop', 'Inicial', 'Iaru Speroni (suplente)', '4', 'Abierta', 'Ver asistencia'],
+      ['21:00 a 22:00', 'Salsa', '—', 'Erik Zapata', '0', 'Cancelada', 'Ver asistencia'],
+    ]);
     expect(fechasPedidas).toEqual(['2026-03-10']);
   });
 
@@ -80,7 +83,7 @@ describe('/agenda', () => {
     );
     const { usuario, router } = renderizarEn('/agenda?fecha=2026-03-10');
 
-    const ballet = await screen.findByRole('article', { name: 'Ballet 18:00' });
+    const ballet = await screen.findByRole('row', { name: /Ballet/ });
     await usuario.click(within(ballet).getByRole('button', { name: 'Tomar asistencia' }));
 
     await screen.findByRole('heading', { name: /Asistencia/ });
