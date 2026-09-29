@@ -32,6 +32,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 17 | [Prueba de punta a punta y build de producción](e2e-y-produccion.md) | lista | 14, 16 |
 | 18 | [Rediseño de la interfaz](rediseno-de-la-interfaz.md) | lista | 17 |
 | 19 | [Estado del pack en el listado de alumnos](estado-del-pack-en-alumnos.md) | lista | 9, 10, 18 |
+| 20 | [Ficha del alumno con actividad](ficha-del-alumno.md) | en curso | 19 |
 
 ## Bitácora
 
