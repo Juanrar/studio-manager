@@ -67,11 +67,13 @@ Un alumno dado de baja conserva el estado de su pack en la respuesta; la pantall
 - Crear: `apps/api/src/modules/pagos/estado-del-pack.ts`, `estado-del-pack.test.ts`
 - Modificar: `apps/api/src/lib/fechas.ts`, `fechas.test.ts`, `packages/shared/src/pagos.ts`
 
-- [ ] **Paso 1:** escribir los tests de `sumarDias` y de la regla.
-- [ ] **Paso 2:** correrlos y verificar que fallan porque las funciones no existen.
-- [ ] **Paso 3:** implementar `sumarDias`, los tipos `EstadoPack` y `PagoActual`, y `estadoDelPack`.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(pagos): regla del estado del pack de un alumno`.
+- [x] **Paso 1:** escribir los tests de `sumarDias` y de la regla.
+- [x] **Paso 2:** correrlos y verificar que fallan porque las funciones no existen.
+- [x] **Paso 3:** implementar `sumarDias`, los tipos `EstadoPack` y `PagoActual`, y `estadoDelPack`.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(pagos): regla del estado del pack de un alumno`.
+
+Cambio al plan: la regla ordena por vencimiento y después por id, no por fecha de cobro. Los ids crecen con la fecha, así que el orden es el mismo que usa la asistencia y la función no necesita la fecha.
 
 ### Tarea 2: El listado de alumnos devuelve el estado del pack
 

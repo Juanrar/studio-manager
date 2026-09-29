@@ -4,6 +4,7 @@ import {
   esFechaDia,
   hoyEnEstudio,
   primerDiaDelMes,
+  sumarDias,
   sumarUnMes,
 } from './fechas.ts';
 
@@ -27,6 +28,17 @@ describe('diaSemanaIso', () => {
 
   it('devuelve 7 para un domingo', () => {
     expect(diaSemanaIso('2026-03-15')).toBe(7);
+  });
+});
+
+describe('sumarDias', () => {
+  it('suma días dentro del mes y cruza al mes siguiente', () => {
+    expect(sumarDias('2026-03-10', 7)).toBe('2026-03-17');
+    expect(sumarDias('2026-03-28', 7)).toBe('2026-04-04');
+  });
+
+  it('cruza el fin de año', () => {
+    expect(sumarDias('2026-12-30', 3)).toBe('2027-01-02');
   });
 });
 

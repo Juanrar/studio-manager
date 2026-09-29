@@ -24,6 +24,17 @@ export const pagosQuerySchema = z.object({
   alumnoId: z.coerce.number().int().positive(),
 });
 
+// Cómo está el pack de un alumno hoy. Las reglas están en `modules/pagos/estado-del-pack.ts` de la API.
+export type EstadoPack = 'vigente' | 'por_vencer' | 'sin_clases' | 'vencido' | 'sin_pack';
+
+// El pago que el alumno está usando, o el último que tuvo si ya no le sirve ninguno.
+export type PagoActual = {
+  pack: string;
+  cantidadClases: number;
+  clasesRestantes: number;
+  venceEl: string;
+};
+
 export type Pago = {
   id: number;
   alumnoId: number;

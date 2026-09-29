@@ -37,6 +37,12 @@ export function sumarUnMes(fecha: FechaDia): FechaDia {
   return formatear(anioDestino, mesDestino, diaDestino);
 }
 
+export function sumarDias(fecha: FechaDia, dias: number): FechaDia {
+  const resultado = aUtc(fecha);
+  resultado.setUTCDate(resultado.getUTCDate() + dias);
+  return formatear(resultado.getUTCFullYear(), resultado.getUTCMonth() + 1, resultado.getUTCDate());
+}
+
 export function primerDiaDelMes(fecha: FechaDia): FechaDia {
   const [anio, mes] = partes(fecha);
   return formatear(anio, mes, 1);
