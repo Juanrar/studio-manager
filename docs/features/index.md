@@ -30,6 +30,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 15 | [Administración: packs, profesores, clases y usuarios](frontend-administracion.md) | lista | 12 |
 | 16 | [Liquidaciones e ingresos](frontend-liquidaciones.md) | lista | 15 |
 | 17 | [Prueba de punta a punta y build de producción](e2e-y-produccion.md) | lista | 14, 16 |
+| 18 | [Rediseño de la interfaz](rediseno-de-la-interfaz.md) | en curso | 17 |
 
 ## Bitácora
 
