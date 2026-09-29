@@ -34,6 +34,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 19 | [Estado del pack en el listado de alumnos](estado-del-pack-en-alumnos.md) | lista | 9, 10, 18 |
 | 20 | [Ficha del alumno con actividad](ficha-del-alumno.md) | lista | 19 |
 | 21 | [Clases anotadas en la actividad](clases-anotadas-en-la-actividad.md) | lista | 20 |
+| 22 | [Baja automática por no comprar](baja-automatica.md) | en curso | 21 |
 
 ## Bitácora
 
@@ -84,3 +85,4 @@ Se tomaron para poder avanzar. Cualquiera se puede cambiar; conviene revisarlas 
 3. **Cupo por clase:** no hay. El estudio tiene una sola sala y no se limita la cantidad de alumnos.
 4. **Egresos que no son sueldos** (alquiler, servicios): fuera de v1. Los reportes muestran ingresos y liquidaciones.
 5. **Pack por vencer:** al alumno le queda una clase o menos, o su pack vence en 7 días o menos. Se muestra en el listado de alumnos para saber a quién cobrarle.
+6. **Baja automática:** los 2 meses sin comprar (pedido del estudio) se cuentan desde el último pago no anulado, o desde el alta o la última reactivación si son posteriores. No se da de baja a quien tiene un pago sin vencer. Corre al arrancar la API y cada una hora.
