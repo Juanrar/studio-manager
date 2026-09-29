@@ -1,7 +1,7 @@
-import { and, asc, count, eq, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, max, or, sql, type SQL } from 'drizzle-orm';
 import type { Alumno, ListadoQuery } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
-import { alumno, type NuevoAlumno } from '../../db/schema.ts';
+import { alumno, cambioEstadoAlumno, type NuevoAlumno, type NuevoCambioEstadoAlumno } from '../../db/schema.ts';
 import { patronContiene } from '../../lib/postgres.ts';
 
 const columnas = {
@@ -33,6 +33,40 @@ export async function buscarConAlta(ej: Ejecutor, id: number): Promise<(Alumno &
     .from(alumno)
     .where(eq(alumno.id, id));
   return fila ?? null;
+}
+
+// Para cambiar `activo` sin que otro pedido lo cambie en el medio.
+export async function bloquear(ej: Ejecutor, id: number): Promise<{ activo: boolean } | null> {
+  const [fila] = await ej.select({ activo: alumno.activo }).from(alumno).where(eq(alumno.id, id)).for('update');
+  return fila ?? null;
+}
+
+export async function registrarCambiosDeEstado(ej: Ejecutor, cambios: NuevoCambioEstadoAlumno[]): Promise<void> {
+  if (cambios.length === 0) return;
+  await ej.insert(cambioEstadoAlumno).values(cambios);
+}
+
+// Los alumnos activos con su alta y su última reactivación: si no compró después, se cuenta desde ahí.
+export async function listarActivosParaBaja(
+  ej: Ejecutor,
+): Promise<{ id: number; creadoEn: Date; reactivadoEn: Date | null }[]> {
+  return ej
+    .select({ id: alumno.id, creadoEn: alumno.creadoEn, reactivadoEn: max(cambioEstadoAlumno.registradoEn) })
+    .from(alumno)
+    .leftJoin(cambioEstadoAlumno, and(eq(cambioEstadoAlumno.alumnoId, alumno.id), eq(cambioEstadoAlumno.activo, true)))
+    .where(eq(alumno.activo, true))
+    .groupBy(alumno.id)
+    .orderBy(alumno.id);
+}
+
+// Solo los que siguen activos: si otro pedido ya dio de baja a alguno, no se registra dos veces.
+export async function darDeBaja(ej: Ejecutor, ids: number[]): Promise<number[]> {
+  const filas = await ej
+    .update(alumno)
+    .set({ activo: false })
+    .where(and(inArray(alumno.id, ids), eq(alumno.activo, true)))
+    .returning({ id: alumno.id });
+  return filas.map((fila) => fila.id).sort((a, b) => a - b);
 }
 
 export async function actualizar(

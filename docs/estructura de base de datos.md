@@ -41,6 +41,8 @@ erDiagram
     pack ||--o{ pago : "se vende en"
     pago ||--o{ asistencia : "se consume en"
     alumno ||--o{ asistencia : asiste
+    alumno ||--o{ cambio_estado_alumno : "se da de baja o se reactiva"
+    usuario ||--o{ cambio_estado_alumno : registra
     profesor ||--o{ clase : "dicta (titular)"
     profesor ||--o{ sesion : "dicta (real)"
     profesor ||--o{ porcentaje_profesor : "tiene"
@@ -67,6 +69,13 @@ erDiagram
         text contacto_emergencia
         text notas
         boolean activo
+    }
+    cambio_estado_alumno {
+        bigint id PK
+        bigint alumno_id FK
+        boolean activo
+        bigint registrado_por FK
+        timestamptz registrado_en
     }
     profesor {
         bigint id PK
@@ -200,6 +209,22 @@ create table alumno (
 );
 
 create index alumno_busqueda_idx on alumno (lower(apellido), lower(nombre));
+```
+
+### cambio_estado_alumno
+
+Cada baja y cada reactivación de un alumno. `alumno.activo` es el estado actual y esta tabla es su historia: se escriben en la misma transacción. `registrado_por` es `null` cuando la baja la hizo el sistema, porque el alumno pasó 2 meses sin comprar un pack. Esos 2 meses se cuentan desde la última reactivación si es posterior a la última compra.
+
+```sql
+create table cambio_estado_alumno (
+  id              bigint generated always as identity primary key,
+  alumno_id       bigint not null references alumno (id),
+  activo          boolean not null,                 -- el estado después del cambio
+  registrado_por  bigint references usuario (id),  -- null: lo hizo el sistema
+  registrado_en   timestamptz not null
+);
+
+create index cambio_estado_alumno_alumno_idx on cambio_estado_alumno (alumno_id, registrado_en);
 ```
 
 ### profesor

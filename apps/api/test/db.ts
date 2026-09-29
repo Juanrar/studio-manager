@@ -2,6 +2,7 @@ import { sql as sqlTag } from 'drizzle-orm';
 import { db, sql } from '../src/db/client.ts';
 
 const TABLAS = [
+  'cambio_estado_alumno',
   'asistencia',
   'liquidacion',
   'sesion',

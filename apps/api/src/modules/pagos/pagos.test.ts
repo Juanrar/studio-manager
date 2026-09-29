@@ -3,6 +3,7 @@ import type { Alumno, Pack, UsuarioPublico } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   ADMIN,
+  AHORA,
   RECEPCION,
   crearAppDeTest,
   crearUsuarioDeTest,
@@ -107,7 +108,7 @@ describe('POST /api/pagos', () => {
   });
 
   it('responde 422 si el alumno está dado de baja', async () => {
-    await actualizarAlumno(martina.id, { activo: false });
+    await actualizarAlumno(martina.id, { activo: false }, recepcion.id, AHORA);
 
     const respuesta = await registrarPago({ alumnoId: martina.id, packId: packX8.id, medio: 'efectivo' });
 

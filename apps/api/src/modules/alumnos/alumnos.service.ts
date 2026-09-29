@@ -24,15 +24,32 @@ export async function crearAlumno(datos: CrearAlumnoInput, ahora: Date): Promise
   }
 }
 
-export async function actualizarAlumno(id: number, datos: ActualizarAlumnoInput): Promise<Alumno> {
-  let actualizado: Alumno | null;
-  try {
-    actualizado = await repo.actualizar(db, id, sinIndefinidos(datos));
-  } catch (error) {
-    throw traducirDniRepetido(error);
-  }
-  if (actualizado === null) throw new NoEncontradoError(`No existe el alumno ${id}`);
-  return actualizado;
+// Si cambia `activo`, queda registrado quién dio de baja o reactivó y cuándo: la actividad lo muestra
+// y la baja automática cuenta los 2 meses sin comprar desde la última reactivación.
+export async function actualizarAlumno(
+  id: number,
+  datos: ActualizarAlumnoInput,
+  usuarioId: number,
+  ahora: Date,
+): Promise<Alumno> {
+  return db.transaction(async (tx) => {
+    const antes = await repo.bloquear(tx, id);
+    if (antes === null) throw new NoEncontradoError(`No existe el alumno ${id}`);
+
+    let actualizado: Alumno | null;
+    try {
+      actualizado = await repo.actualizar(tx, id, sinIndefinidos(datos));
+    } catch (error) {
+      throw traducirDniRepetido(error);
+    }
+    if (datos.activo !== undefined && datos.activo !== antes.activo) {
+      await repo.registrarCambiosDeEstado(tx, [
+        { alumnoId: id, activo: datos.activo, registradoPor: usuarioId, registradoEn: ahora },
+      ]);
+    }
+    // No es null: el alumno existe y quedó bloqueado hasta el final de la transacción.
+    return actualizado!;
+  });
 }
 
 export async function obtenerAlumno(id: number): Promise<Alumno> {

@@ -163,7 +163,7 @@ describe('GET /api/alumnos', () => {
     await pagar(lucia, packX4, '2026-01-10');
     // Paula: tiene el pack vigente, pero está dada de baja.
     await pagar(paula, packX8, '2026-03-05');
-    await actualizarAlumno(paula.id, { activo: false });
+    await actualizarAlumno(paula.id, { activo: false }, recepcion.id, AHORA);
 
     const listado = await listar('incluirInactivos=true');
 

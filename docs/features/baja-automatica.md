@@ -58,11 +58,13 @@ Se pidió que, además de "Dar de baja" a mano, un alumno pase a baja solo cuand
 - Crear: `apps/api/src/modules/alumnos/baja-automatica.service.ts`, `baja-automatica.service.test.ts`, la migración de `cambio_estado_alumno`
 - Modificar: `apps/api/src/db/schema.ts`, `apps/api/test/db.ts`, `alumnos.repository.ts`, `alumnos.service.ts`, `alumnos.routes.ts`, `pagos.repository.ts`, `pagos.service.ts`, los tests que llaman a `actualizarAlumno`, `docs/estructura de base de datos.md`
 
-- [ ] **Paso 1:** escribir el test del service.
-- [ ] **Paso 2:** correrlo y verificar que falla porque el service no existe.
-- [ ] **Paso 3:** agregar la tabla y generar la migración; registrar los cambios en `actualizarAlumno`; implementar `comprasDeAlumnos` y el service.
-- [ ] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(alumnos): baja automática de quien no compra un pack en 2 meses`.
+- [x] **Paso 1:** escribir el test del service.
+- [x] **Paso 2:** correrlo y verificar que falla porque el service no existe.
+- [x] **Paso 3:** agregar la tabla y generar la migración; registrar los cambios en `actualizarAlumno`; implementar `comprasDeAlumnos` y el service.
+- [x] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(alumnos): baja automática de quien no compra un pack en 2 meses`.
+
+Cambio al plan: la migración se generó con nombre (`pnpm --filter @studio/api db:generate --name cambio_estado_alumno`), igual que `0001_unaccent`.
 
 ### Tarea 3: Bajas y reactivaciones en la actividad
 

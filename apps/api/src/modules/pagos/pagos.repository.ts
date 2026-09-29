@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, inArray, isNull, sql, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, isNull, max, sql, type SQL } from 'drizzle-orm';
 import type { Ejecutor } from '../../db/client.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 import { asistencia, pack, pago, usuario, type NuevoPago } from '../../db/schema.ts';
@@ -128,6 +128,24 @@ export async function listarParaEstadoDelPack(
 
   const yaEstan = new Set(sinVencer.map((fila) => fila.id));
   return [...sinVencer, ...ultimos.filter((fila) => !yaEstan.has(fila.id))];
+}
+
+// Para la baja automática: el último cobro no anulado de cada alumno y si le queda algún pago sin vencer.
+export async function listarComprasDeAlumnos(
+  ej: Ejecutor,
+  alumnoIds: number[],
+  hoy: FechaDia,
+): Promise<{ alumnoId: number; ultimaCompra: Date | null; sinVencer: boolean }[]> {
+  if (alumnoIds.length === 0) return [];
+  return ej
+    .select({
+      alumnoId: pago.alumnoId,
+      ultimaCompra: max(pago.fecha),
+      sinVencer: sql<boolean>`bool_or(${pago.venceEl} >= ${hoy})`,
+    })
+    .from(pago)
+    .where(and(inArray(pago.alumnoId, alumnoIds), isNull(pago.anuladoEn)))
+    .groupBy(pago.alumnoId);
 }
 
 export async function contarAsistencias(ej: Ejecutor, pagoId: number): Promise<number> {

@@ -28,6 +28,6 @@ export async function rutasAlumnos(app: FastifyInstance): Promise<void> {
 
   app.patch('/api/alumnos/:id', async (request) => {
     const { id } = idParamSchema.parse(request.params);
-    return actualizarAlumno(id, actualizarAlumnoSchema.parse(request.body));
+    return actualizarAlumno(id, actualizarAlumnoSchema.parse(request.body), request.usuario!.id, app.reloj());
   });
 }

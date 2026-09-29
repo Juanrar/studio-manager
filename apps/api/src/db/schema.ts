@@ -69,6 +69,21 @@ export const alumno = pgTable(
   (t) => [index('alumno_busqueda_idx').on(sql`lower(${t.apellido})`, sql`lower(${t.nombre})`)],
 );
 
+// Cada baja y cada reactivación de un alumno. `registradoPor` es null cuando la baja la hizo el sistema.
+export const cambioEstadoAlumno = pgTable(
+  'cambio_estado_alumno',
+  {
+    id: id(),
+    alumnoId: referencia()
+      .notNull()
+      .references(() => alumno.id),
+    activo: boolean().notNull(),
+    registradoPor: referencia().references(() => usuario.id),
+    registradoEn: instante().notNull(),
+  },
+  (t) => [index('cambio_estado_alumno_alumno_idx').on(t.alumnoId, t.registradoEn)],
+);
+
 export const profesor = pgTable('profesor', {
   id: id(),
   nombre: text().notNull(),
@@ -232,6 +247,7 @@ export type Usuario = typeof usuario.$inferSelect;
 export type NuevoUsuario = typeof usuario.$inferInsert;
 export type Alumno = typeof alumno.$inferSelect;
 export type NuevoAlumno = typeof alumno.$inferInsert;
+export type NuevoCambioEstadoAlumno = typeof cambioEstadoAlumno.$inferInsert;
 export type Profesor = typeof profesor.$inferSelect;
 export type NuevoProfesor = typeof profesor.$inferInsert;
 export type Pack = typeof pack.$inferSelect;

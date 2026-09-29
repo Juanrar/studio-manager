@@ -15,6 +15,13 @@
       "when": 1790298214356,
       "tag": "0001_unaccent",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790702861094,
+      "tag": "0002_cambio_estado_alumno",
+      "breakpoints": true
     }
   ]
 }

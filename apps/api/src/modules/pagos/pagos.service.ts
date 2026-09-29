@@ -101,6 +101,21 @@ export async function resumenDePacks(alumnoIds: number[], hoy: FechaDia): Promis
   return new Map(alumnoIds.map((id) => [id, estadoDelPack(porAlumno.get(id) ?? [], hoy)]));
 }
 
+export type ComprasDelAlumno = { ultimaCompra: FechaDia; tienePackSinVencer: boolean };
+
+// Para la baja automática: el día del último pago no anulado de cada alumno, en la zona del estudio, y si
+// le queda alguno sin vencer. Quien no está en el mapa nunca compró o se le anularon todos los pagos.
+export async function comprasDeAlumnos(alumnoIds: number[], hoy: FechaDia): Promise<Map<number, ComprasDelAlumno>> {
+  const filas = await repo.listarComprasDeAlumnos(db, alumnoIds, hoy);
+  return new Map(
+    filas.map((fila) => [
+      fila.alumnoId,
+      // Cada fila agrupa por lo menos un pago, así que `ultimaCompra` no es null.
+      { ultimaCompra: hoyEnEstudio(fila.ultimaCompra!, config.tzEstudio), tienePackSinVencer: fila.sinVencer },
+    ]),
+  );
+}
+
 // Primero se bloquean los pagos y después se cuentan sus asistencias: así, si otro
 // registro usó la última clase mientras se esperaba el bloqueo, la cuenta ya lo incluye.
 export async function elegirPagoParaAsistencia(
