@@ -31,6 +31,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 16 | [Liquidaciones e ingresos](frontend-liquidaciones.md) | lista | 15 |
 | 17 | [Prueba de punta a punta y build de producción](e2e-y-produccion.md) | lista | 14, 16 |
 | 18 | [Rediseño de la interfaz](rediseno-de-la-interfaz.md) | lista | 17 |
+| 19 | [Estado del pack en el listado de alumnos](estado-del-pack-en-alumnos.md) | en curso | 9, 10, 18 |
 
 ## Bitácora
 
@@ -77,3 +78,4 @@ Se tomaron para poder avanzar. Cualquiera se puede cambiar; conviene revisarlas 
 2. **Monto del pago:** siempre el precio del pack. Descuentos, becas y precios especiales quedan fuera de v1.
 3. **Cupo por clase:** no hay. El estudio tiene una sola sala y no se limita la cantidad de alumnos.
 4. **Egresos que no son sueldos** (alquiler, servicios): fuera de v1. Los reportes muestran ingresos y liquidaciones.
+5. **Pack por vencer:** al alumno le queda una clase o menos, o su pack vence en 7 días o menos. Se muestra en el listado de alumnos para saber a quién cobrarle.
