@@ -5,6 +5,7 @@ import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { hoyEnEstudio, rangoDelPeriodo, sumarUnMes, type FechaDia, type Periodo } from '../../lib/fechas.ts';
 import { obtenerAlumno } from '../alumnos/alumnos.service.ts';
 import { obtenerPack } from '../packs/packs.service.ts';
+import { estadoDelPack, type ResumenDelPack } from './estado-del-pack.ts';
 import * as repo from './pagos.repository.ts';
 
 export async function registrarPago(
@@ -91,6 +92,13 @@ function aPago(fila: repo.FilaPago, hoy: FechaDia): Pago {
     vencido: fila.venceEl < hoy,
     anulado: anuladoEn !== null,
   };
+}
+
+// El estado del pack de varios alumnos con dos consultas, no dos por alumno.
+export async function resumenDePacks(alumnoIds: number[], hoy: FechaDia): Promise<Map<number, ResumenDelPack>> {
+  const filas = await repo.listarParaEstadoDelPack(db, alumnoIds, hoy);
+  const porAlumno = Map.groupBy(filas, (fila) => fila.alumnoId);
+  return new Map(alumnoIds.map((id) => [id, estadoDelPack(porAlumno.get(id) ?? [], hoy)]));
 }
 
 // Primero se bloquean los pagos y después se cuentan sus asistencias: así, si otro

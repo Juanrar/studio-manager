@@ -2,12 +2,13 @@ import type { FastifyInstance } from 'fastify';
 import { actualizarAlumnoSchema, crearAlumnoSchema, listadoQuerySchema } from '@studio/shared';
 import { idParamSchema } from '../../lib/validacion.ts';
 import { requerirRol } from '../../plugins/autenticacion.ts';
-import { actualizarAlumno, crearAlumno, listarAlumnos, obtenerAlumno } from './alumnos.service.ts';
+import { actualizarAlumno, crearAlumno, obtenerAlumno } from './alumnos.service.ts';
+import { listarAlumnos } from './listado.service.ts';
 
 export async function rutasAlumnos(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requerirRol('recepcion'));
 
-  app.get('/api/alumnos', async (request) => listarAlumnos(listadoQuerySchema.parse(request.query)));
+  app.get('/api/alumnos', async (request) => listarAlumnos(listadoQuerySchema.parse(request.query), app.hoy()));
 
   app.get('/api/alumnos/:id', async (request) => {
     const { id } = idParamSchema.parse(request.params);

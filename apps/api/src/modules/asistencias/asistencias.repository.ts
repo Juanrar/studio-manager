@@ -1,6 +1,7 @@
-import { asc, eq, type SQL } from 'drizzle-orm';
+import { and, asc, eq, inArray, lte, max, type SQL } from 'drizzle-orm';
 import type { Asistencia } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
+import type { FechaDia } from '../../lib/fechas.ts';
 import { alumno, asistencia, pack, pago, sesion, type NuevaAsistencia } from '../../db/schema.ts';
 
 const columnas = {
@@ -35,6 +36,21 @@ export async function buscarPorId(ej: Ejecutor, id: number): Promise<Asistencia 
 
 export async function listarDeSesion(ej: Ejecutor, sesionId: number): Promise<Asistencia[]> {
   return seleccionar(ej, eq(asistencia.sesionId, sesionId)).orderBy(asc(alumno.apellido), asc(alumno.nombre));
+}
+
+// El día de la última clase de cada alumno hasta `hasta`: no cuentan las anotadas para más adelante.
+export async function ultimasFechas(
+  ej: Ejecutor,
+  alumnoIds: number[],
+  hasta: FechaDia,
+): Promise<{ alumnoId: number; fecha: FechaDia | null }[]> {
+  if (alumnoIds.length === 0) return [];
+  return ej
+    .select({ alumnoId: asistencia.alumnoId, fecha: max(sesion.fecha) })
+    .from(asistencia)
+    .innerJoin(sesion, eq(sesion.id, asistencia.sesionId))
+    .where(and(inArray(asistencia.alumnoId, alumnoIds), lte(sesion.fecha, hasta)))
+    .groupBy(asistencia.alumnoId);
 }
 
 export async function borrar(ej: Ejecutor, id: number): Promise<boolean> {

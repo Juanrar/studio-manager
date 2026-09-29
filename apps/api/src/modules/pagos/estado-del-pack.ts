@@ -14,11 +14,10 @@ export type PagoDeAlumno = {
   venceEl: FechaDia;
 };
 
+export type ResumenDelPack = { estadoPack: EstadoPack; pagoActual: PagoActual | null };
+
 // Recibe los pagos no anulados del alumno: por lo menos los que no vencieron y el último.
-export function estadoDelPack(
-  pagos: PagoDeAlumno[],
-  hoy: FechaDia,
-): { estadoPack: EstadoPack; pagoActual: PagoActual | null } {
+export function estadoDelPack(pagos: PagoDeAlumno[], hoy: FechaDia): ResumenDelPack {
   // El día del vencimiento todavía vale, igual que al registrar una asistencia.
   const sinVencer = pagos.filter((pago) => pago.venceEl >= hoy);
   // Mismo orden que usa la asistencia para elegir el pago: el que vence primero.

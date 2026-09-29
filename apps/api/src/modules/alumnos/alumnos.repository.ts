@@ -37,10 +37,7 @@ export async function actualizar(
   return fila ?? null;
 }
 
-export async function listar(
-  ej: Ejecutor,
-  filtros: ListadoQuery,
-): Promise<{ items: Alumno[]; total: number }> {
+function filtroDe(filtros: ListadoQuery): SQL | undefined {
   const condiciones: SQL[] = [];
   if (!filtros.incluirInactivos) condiciones.push(eq(alumno.activo, true));
   if (filtros.q) {
@@ -54,8 +51,14 @@ export async function listar(
       )!,
     );
   }
-  const filtro = condiciones.length > 0 ? and(...condiciones) : undefined;
+  return condiciones.length > 0 ? and(...condiciones) : undefined;
+}
 
+export async function listar(
+  ej: Ejecutor,
+  filtros: ListadoQuery,
+): Promise<{ items: Alumno[]; total: number }> {
+  const filtro = filtroDe(filtros);
   const items = await ej
     .select(columnas)
     .from(alumno)
@@ -66,4 +69,9 @@ export async function listar(
   const [conteo] = await ej.select({ total: count() }).from(alumno).where(filtro);
 
   return { items, total: conteo?.total ?? 0 };
+}
+
+// Todos los alumnos del filtro, sin paginar: para contar cuántos tienen el pack vigente.
+export async function listarTodos(ej: Ejecutor, filtros: ListadoQuery): Promise<{ id: number; activo: boolean }[]> {
+  return ej.select({ id: alumno.id, activo: alumno.activo }).from(alumno).where(filtroDe(filtros));
 }

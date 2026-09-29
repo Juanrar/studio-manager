@@ -82,11 +82,13 @@ Cambio al plan: la regla ordena por vencimiento y después por id, no por fecha 
 - Modificar: `alumnos.repository.ts`, `alumnos.service.ts`, `alumnos.routes.ts`, `pagos.repository.ts`, `pagos.service.ts`, `asistencias.repository.ts`, `asistencias.service.ts`, `packages/shared/src/alumnos.ts`
 - Test: `apps/api/src/modules/alumnos/alumnos.test.ts`
 
-- [ ] **Paso 1:** escribir el test HTTP del listado.
-- [ ] **Paso 2:** correrlo y verificar que falla porque la respuesta no trae los campos nuevos.
-- [ ] **Paso 3:** implementar las consultas, los services y el listado.
-- [ ] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(alumnos): estado del pack y última clase en el listado`.
+- [x] **Paso 1:** escribir el test HTTP del listado.
+- [x] **Paso 2:** correrlo y verificar que falla porque la respuesta no trae los campos nuevos.
+- [x] **Paso 3:** implementar las consultas, los services y el listado.
+- [x] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(alumnos): estado del pack y última clase en el listado`.
+
+Cambio al plan: el test "total cuenta todos los resultados" compara la respuesta entera, así que ahora también espera `vigentes` y `hoy`.
 
 ### Tarea 3: La tabla de alumnos
 

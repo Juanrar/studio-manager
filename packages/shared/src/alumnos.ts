@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import type { Listado } from './comun.ts';
+import type { EstadoPack, PagoActual } from './pagos.ts';
 import {
   dniOpcional,
   emailOpcional,
@@ -43,3 +45,14 @@ export type Alumno = {
   notas: string | null;
   activo: boolean;
 };
+
+// Una fila del listado de recepción: el alumno, el pack que está usando y el día de su última clase.
+export type AlumnoEnListado = Alumno & {
+  estadoPack: EstadoPack;
+  pagoActual: PagoActual | null;
+  ultimaClase: string | null;
+};
+
+// `vigentes` cuenta los alumnos activos del filtro con el pack vigente, en todas las páginas.
+// `hoy` es el día del estudio para el que se calcularon los estados.
+export type ListadoDeAlumnos = Listado<AlumnoEnListado> & { vigentes: number; hoy: string };

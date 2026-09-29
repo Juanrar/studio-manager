@@ -1,10 +1,4 @@
-import type {
-  ActualizarAlumnoInput,
-  Alumno,
-  CrearAlumnoInput,
-  Listado,
-  ListadoQuery,
-} from '@studio/shared';
+import type { ActualizarAlumnoInput, Alumno, CrearAlumnoInput } from '@studio/shared';
 import { db } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
@@ -43,11 +37,6 @@ export async function obtenerAlumno(id: number): Promise<Alumno> {
   const encontrado = await repo.buscarPorId(db, id);
   if (encontrado === null) throw new NoEncontradoError(`No existe el alumno ${id}`);
   return encontrado;
-}
-
-export async function listarAlumnos(filtros: ListadoQuery): Promise<Listado<Alumno>> {
-  const { items, total } = await repo.listar(db, filtros);
-  return { items, total, pagina: filtros.pagina, porPagina: filtros.porPagina };
 }
 
 function traducirDniRepetido(error: unknown): unknown {

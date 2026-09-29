@@ -1,7 +1,8 @@
-import { and, asc, count, desc, eq, gte, isNull, sql, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, isNull, sql, type SQL } from 'drizzle-orm';
 import type { Ejecutor } from '../../db/client.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 import { asistencia, pack, pago, usuario, type NuevoPago } from '../../db/schema.ts';
+import type { PagoDeAlumno } from './estado-del-pack.ts';
 
 // Las clases usadas se cuentan cada vez: no hay un contador que se pueda desincronizar.
 export const clasesUsadasSql = sql<number>`(
@@ -92,6 +93,41 @@ export async function bloquearValidos(ej: Ejecutor, alumnoId: number, fecha: Fec
     .where(and(eq(pago.alumnoId, alumnoId), isNull(pago.anuladoEn), gte(pago.venceEl, fecha)))
     .orderBy(asc(pago.venceEl), asc(pago.fecha), asc(pago.id))
     .for('update');
+}
+
+// Lo que necesita el estado del pack: los pagos no anulados que no vencieron y el último de cada alumno.
+// El join con pack también hace que Drizzle escriba `"pago"."id"` en `clasesUsadasSql`: sin join lo
+// escribiría `"id"`, y dentro de la subconsulta sería el id de la asistencia.
+export async function listarParaEstadoDelPack(
+  ej: Ejecutor,
+  alumnoIds: number[],
+  hoy: FechaDia,
+): Promise<(PagoDeAlumno & { alumnoId: number })[]> {
+  if (alumnoIds.length === 0) return [];
+  const columnasDelEstado = {
+    id: pago.id,
+    alumnoId: pago.alumnoId,
+    pack: pack.nombre,
+    cantidadClases: pago.cantidadClases,
+    clasesUsadas: clasesUsadasSql,
+    venceEl: pago.venceEl,
+  };
+  const noAnulados = and(inArray(pago.alumnoId, alumnoIds), isNull(pago.anuladoEn));
+
+  const sinVencer = await ej
+    .select(columnasDelEstado)
+    .from(pago)
+    .innerJoin(pack, eq(pack.id, pago.packId))
+    .where(and(noAnulados, gte(pago.venceEl, hoy)));
+  const ultimos = await ej
+    .selectDistinctOn([pago.alumnoId], columnasDelEstado)
+    .from(pago)
+    .innerJoin(pack, eq(pack.id, pago.packId))
+    .where(noAnulados)
+    .orderBy(pago.alumnoId, desc(pago.venceEl), desc(pago.id));
+
+  const yaEstan = new Set(sinVencer.map((fila) => fila.id));
+  return [...sinVencer, ...ultimos.filter((fila) => !yaEstan.has(fila.id))];
 }
 
 export async function contarAsistencias(ej: Ejecutor, pagoId: number): Promise<number> {
