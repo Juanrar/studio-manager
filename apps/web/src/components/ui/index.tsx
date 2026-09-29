@@ -7,14 +7,24 @@ import type {
   TextareaHTMLAttributes,
 } from 'react';
 import { useId } from 'react';
+import { Icono, type NombreIcono } from './Icono.tsx';
+
+export { Icono, type NombreIcono } from './Icono.tsx';
 
 type VarianteBoton = 'primario' | 'secundario' | 'peligro';
 
 const estilosBoton: Record<VarianteBoton, string> = {
-  primario: 'bg-violet-700 text-white hover:bg-violet-600',
-  secundario: 'border border-stone-700 bg-stone-900 text-stone-200 hover:bg-stone-800',
-  peligro: 'bg-red-700 text-white hover:bg-red-600',
+  primario: 'bg-acento text-white hover:bg-acento/85',
+  secundario: 'border border-borde-fuerte bg-panel text-tenue hover:bg-resalte hover:text-texto',
+  peligro: 'border border-red-500/30 bg-red-500/15 text-red-300 hover:bg-red-500/25',
 };
+
+const enfoque = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento';
+
+// También sirve para que un Link se vea como botón.
+export function claseDeBoton(variante: VarianteBoton = 'primario') {
+  return `inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-3 font-medium whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-50 ${enfoque} ${estilosBoton[variante]}`;
+}
 
 export function Boton({
   variante = 'primario',
@@ -22,17 +32,31 @@ export function Boton({
   type = 'button',
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variante?: VarianteBoton }) {
+  return <button type={type} className={`${claseDeBoton(variante)} ${className}`} {...props} />;
+}
+
+// Botón con solo un ícono: la etiqueta es lo que lee un lector de pantalla y lo que aparece al pasar el mouse.
+export function BotonIcono({
+  icono,
+  etiqueta,
+  className = '',
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { icono: NombreIcono; etiqueta: string }) {
   return (
     <button
-      type={type}
-      className={`rounded-md px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 ${estilosBoton[variante]} ${className}`}
+      type="button"
+      aria-label={etiqueta}
+      title={etiqueta}
+      className={`grid size-8 flex-none place-items-center rounded-md text-tenue hover:bg-resalte hover:text-texto ${enfoque} ${className}`}
       {...props}
-    />
+    >
+      <Icono nombre={icono} />
+    </button>
   );
 }
 
 const estiloEntrada =
-  'w-full rounded-md border border-stone-700 bg-stone-800 px-3 py-2 text-sm placeholder:text-stone-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500';
+  'w-full rounded-md border border-borde-fuerte bg-elevado px-2.5 py-1.5 text-texto placeholder:text-apagado focus:border-acento focus:outline-none focus:ring-1 focus:ring-acento';
 
 // Etiqueta, control y mensaje de error. El control recibe el id para que la etiqueta lo nombre.
 export function Campo({
@@ -47,11 +71,11 @@ export function Campo({
   const id = useId();
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-medium text-stone-300">
+      <label htmlFor={id} className="font-medium text-tenue">
         {etiqueta}
       </label>
       {children(id)}
-      {error !== undefined && <p className="text-sm text-red-400">{error}</p>}
+      {error !== undefined && <p className="text-red-400">{error}</p>}
     </div>
   );
 }
@@ -80,36 +104,65 @@ export function AreaDeTexto({
   return <textarea ref={ref} className={`${estiloEntrada} ${className}`} rows={3} {...props} />;
 }
 
-export function Aviso({ tipo = 'error', children }: { tipo?: 'error' | 'exito'; children: ReactNode }) {
-  const estilo = tipo === 'error' ? 'border-red-900 bg-red-950 text-red-200' : 'border-green-900 bg-green-950 text-green-200';
+export function Casilla({
+  etiqueta,
+  ...props
+}: Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & { etiqueta: string }) {
   return (
-    <div role={tipo === 'error' ? 'alert' : 'status'} className={`rounded-md border px-3 py-2 text-sm ${estilo}`}>
+    <label className="flex items-center gap-2 text-tenue">
+      <input type="checkbox" {...props} />
+      {etiqueta}
+    </label>
+  );
+}
+
+export function Aviso({ tipo = 'error', children }: { tipo?: 'error' | 'exito'; children: ReactNode }) {
+  const estilo =
+    tipo === 'error' ? 'border-red-500/30 bg-red-500/10 text-red-300' : 'border-green-500/30 bg-green-500/10 text-green-300';
+  return (
+    <div role={tipo === 'error' ? 'alert' : 'status'} className={`rounded-md border px-3 py-2 ${estilo}`}>
       {children}
     </div>
   );
 }
 
+// Tabla densa: filas de 32px y bordes finos entre celdas.
 export function Tabla({ columnas, children }: { columnas: string[]; children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-md border border-stone-800 bg-stone-900">
-      <table className="w-full text-left text-sm">
-        <thead className="bg-stone-800 text-stone-400">
+    <div className="overflow-x-auto rounded-md border border-borde">
+      <table className="w-full border-collapse text-left">
+        <thead>
           <tr>
             {columnas.map((columna) => (
-              <th key={columna} scope="col" className="px-3 py-2 font-medium">
+              <th
+                key={columna}
+                scope="col"
+                className="h-8 border-r border-b border-borde px-2 font-medium whitespace-nowrap text-apagado last:border-r-0"
+              >
                 {columna}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-stone-800">{children}</tbody>
+        <tbody className="[&>tr:hover]:bg-elevado [&>tr:last-child>td]:border-b-0">{children}</tbody>
       </table>
     </div>
   );
 }
 
+const estiloCelda = 'h-8 border-r border-b border-borde px-2 last:border-r-0';
+
 export function Celda({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <td className={`px-3 py-2 ${className}`}>{children}</td>;
+  return <td className={`${estiloCelda} ${className}`}>{children}</td>;
+}
+
+// Los botones de una fila son más bajos que los de la página para no agrandar la fila.
+export function CeldaDeAcciones({ children }: { children: ReactNode }) {
+  return (
+    <td className={estiloCelda}>
+      <div className="flex justify-end gap-1.5 [&>a]:h-6 [&>a]:px-2 [&>button]:h-6 [&>button]:px-2">{children}</div>
+    </td>
+  );
 }
 
 export function Dialogo({
@@ -126,20 +179,75 @@ export function Dialogo({
   const idTitulo = useId();
   if (!abierto) return null;
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/60 p-4" onClick={alCerrar}>
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 p-4" onClick={alCerrar}>
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={idTitulo}
-        className="w-full max-w-lg rounded-lg border border-stone-800 bg-stone-900 p-5 shadow-xl"
+        className="w-full max-w-lg rounded-lg border border-borde-fuerte bg-panel p-5 shadow-2xl shadow-black/60"
         onClick={(evento) => evento.stopPropagation()}
       >
-        <h2 id={idTitulo} className="mb-4 text-lg font-semibold">
+        <h2 id={idTitulo} className="mb-4 text-base font-semibold">
           {titulo}
         </h2>
         {children}
       </div>
     </div>
+  );
+}
+
+// Una pantalla dentro de la tarjeta de contenido: barra con título y acciones, barra opcional para
+// búsqueda y filtros, y el contenido con scroll propio.
+export function Pagina({
+  titulo,
+  acciones,
+  barra,
+  children,
+}: {
+  titulo: ReactNode;
+  acciones?: ReactNode;
+  barra?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section className="flex min-h-0 flex-1 flex-col">
+      <header className="flex h-12 flex-none items-center gap-3 border-b border-borde px-4">
+        <h1 className="truncate text-[15px] font-semibold">{titulo}</h1>
+        {acciones !== undefined && <div className="ml-auto flex items-center gap-2">{acciones}</div>}
+      </header>
+      {barra !== undefined && (
+        <div className="flex min-h-11 flex-none flex-wrap items-center gap-x-4 gap-y-2 border-b border-borde px-4 py-1.5">
+          {barra}
+        </div>
+      )}
+      <div className="min-h-0 flex-1 overflow-auto p-4">{children}</div>
+    </section>
+  );
+}
+
+// Panel que se abre a la derecha, encima del contenido de la página.
+export function PanelLateral({
+  etiqueta,
+  alCerrar,
+  acciones,
+  children,
+}: {
+  etiqueta: string;
+  alCerrar: () => void;
+  acciones?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <aside
+      aria-label={etiqueta}
+      className="absolute inset-y-0 right-0 z-10 flex w-full max-w-3xl flex-col border-l border-borde-fuerte bg-panel shadow-2xl shadow-black/60"
+    >
+      <div className="flex h-12 flex-none items-center gap-2 border-b border-borde px-2">
+        <BotonIcono icono="cerrar" etiqueta="Cerrar" onClick={alCerrar} />
+        {acciones !== undefined && <div className="ml-auto flex items-center gap-2 pr-2">{acciones}</div>}
+      </div>
+      <div className="min-h-0 flex-1 overflow-auto">{children}</div>
+    </aside>
   );
 }
 
@@ -153,15 +261,35 @@ export function Titulo({ children, acciones }: { children: ReactNode; acciones?:
 }
 
 export function Cargando() {
-  return <p className="text-sm text-stone-400">Cargando…</p>;
+  return <p className="text-apagado">Cargando…</p>;
 }
 
 export function Insignia({ children, tono = 'gris' }: { children: ReactNode; tono?: 'gris' | 'verde' | 'rojo' | 'ambar' }) {
   const estilos = {
-    gris: 'bg-stone-800 text-stone-300',
-    verde: 'bg-green-950 text-green-300',
-    rojo: 'bg-red-950 text-red-300',
-    ambar: 'bg-amber-950 text-amber-300',
+    gris: 'bg-neutral-500/20 text-neutral-300',
+    verde: 'bg-green-500/15 text-green-300',
+    rojo: 'bg-red-500/15 text-red-300',
+    ambar: 'bg-amber-500/15 text-amber-300',
   };
-  return <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${estilos[tono]}`}>{children}</span>;
+  return (
+    <span className={`inline-flex h-5 items-center rounded px-1.5 text-xs font-medium whitespace-nowrap ${estilos[tono]}`}>
+      {children}
+    </span>
+  );
+}
+
+const COLORES_AVATAR = ['#e5484d', '#f76b15', '#d9a400', '#30a46c', '#12a594', '#0090ff', '#3e63dd', '#8e4ec6', '#d6409f', '#978365'];
+
+// La inicial sobre un color que sale del nombre, así cada persona tiene siempre el mismo.
+export function Avatar({ nombre, grande = false }: { nombre: string; grande?: boolean }) {
+  const indice = [...nombre].reduce((suma, letra) => suma + letra.charCodeAt(0), 0) % COLORES_AVATAR.length;
+  return (
+    <span
+      aria-hidden="true"
+      className={`grid flex-none place-items-center rounded-full font-semibold text-white ${grande ? 'size-11 text-lg' : 'size-4 text-[9px]'}`}
+      style={{ backgroundColor: COLORES_AVATAR[indice] }}
+    >
+      {nombre.charAt(0).toUpperCase()}
+    </span>
+  );
 }

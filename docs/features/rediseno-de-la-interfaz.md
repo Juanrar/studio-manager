@@ -54,11 +54,11 @@ Los cambios puramente visuales (colores, fuente, barra lateral, tablas) no tiene
 - Modificar: `apps/web/package.json`, `apps/web/index.html`, `apps/web/src/index.css`, `apps/web/src/main.tsx`, `apps/web/src/components/ui/index.tsx`
 - Crear: `apps/web/src/components/ui/Icono.tsx`
 
-- [ ] **Paso 1:** instalar `@fontsource-variable/inter` e importarlo en `main.tsx`.
-- [ ] **Paso 2:** definir los colores y la fuente en `index.css`.
-- [ ] **Paso 3:** rehacer `Boton`, las entradas, `Tabla`, `Celda`, `Insignia`, `Aviso` y `Dialogo` con los colores nuevos; agregar `Icono`, `Avatar`, `Pagina` y `PanelLateral`.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): colores, fuente y componentes con el estilo nuevo`.
+- [x] **Paso 1:** instalar `@fontsource-variable/inter` e importarlo en `main.tsx`.
+- [x] **Paso 2:** definir los colores y la fuente en `index.css`.
+- [x] **Paso 3:** rehacer `Boton`, las entradas, `Tabla`, `Celda`, `Insignia`, `Aviso` y `Dialogo` con los colores nuevos; agregar `Icono`, `Avatar`, `Pagina` y `PanelLateral`. Se sumaron `BotonIcono` (botón con solo un ícono y `aria-label`), `Casilla` (la casilla "Mostrar dados de baja" se repetía en cuatro pantallas) y `CeldaDeAcciones`: un `<td>` con `display: flex` pierde el comportamiento de celda y descuadra los bordes nuevos.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(web): colores, fuente y componentes con el estilo nuevo`.
 
 ### Tarea 2: Barra lateral y páginas con `Pagina`
 

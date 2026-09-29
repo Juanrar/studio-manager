@@ -1,6 +1,33 @@
 @import "tailwindcss";
 
-/* Por ahora la app es solo oscura. Así los controles nativos (fechas, selects, scroll) también lo son. */
+/*
+  Colores y tipografía de la app. Se usan como clases de Tailwind: bg-panel, text-tenue, border-borde.
+  Por ahora la app es solo oscura; color-scheme oscurece también los controles nativos (fechas, selects, scroll).
+*/
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  /* Inter se lee bien más chica: el texto base de tablas y formularios queda en 13px. */
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.25rem;
+
+  --color-fondo: #141414; /* página y barra lateral */
+  --color-panel: #1b1b1b; /* tarjeta de contenido, panel lateral y diálogos */
+  --color-elevado: #222222; /* entradas y filas al pasar el mouse */
+  --color-resalte: #2c2c2c; /* opción activa del menú y botones al pasar el mouse */
+  --color-borde: #262626; /* líneas entre celdas */
+  --color-borde-fuerte: #333333; /* bordes de tarjetas, botones y entradas */
+  --color-texto: #ebebeb;
+  --color-tenue: #b3b3b3; /* texto secundario */
+  --color-apagado: #818181; /* etiquetas, encabezados de columna y ayudas */
+  --color-acento: #4a86f7;
+  --color-acento-fondo: #172a4d; /* fila elegida */
+}
+
 :root {
   color-scheme: dark;
+  accent-color: var(--color-acento);
+}
+
+body {
+  @apply bg-fondo font-sans text-sm text-texto antialiased;
 }
