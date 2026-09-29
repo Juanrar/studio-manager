@@ -33,6 +33,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 18 | [Rediseño de la interfaz](rediseno-de-la-interfaz.md) | lista | 17 |
 | 19 | [Estado del pack en el listado de alumnos](estado-del-pack-en-alumnos.md) | lista | 9, 10, 18 |
 | 20 | [Ficha del alumno con actividad](ficha-del-alumno.md) | lista | 19 |
+| 21 | [Clases anotadas en la actividad](clases-anotadas-en-la-actividad.md) | en curso | 20 |
 
 ## Bitácora
 
