@@ -1,6 +1,6 @@
 # Clases anotadas en la actividad
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** ficha-del-alumno  
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; en la actividad de la ficha, una clase anotada para más adelante aparece como "Anotado en..." con el día de la clase.
 
@@ -42,4 +42,4 @@ Cambio al plan: eran dos tareas, la API y la ficha. Quedaron en una porque el ti
 
 ## Verificación final
 
-- [ ] `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan.
+- [x] `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan: API 122, web 33, e2e 1.
