@@ -1,6 +1,6 @@
 # Baja automática por no comprar
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** clases-anotadas-en-la-actividad  
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; la API da de baja sola a los alumnos que pasaron 2 meses sin comprar un pack, y las bajas y reactivaciones, a mano o automáticas, aparecen en la actividad de la ficha.
 
@@ -94,9 +94,13 @@ Cambios al plan:
 - [x] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
 - [x] **Paso 5:** commit `feat(api): baja automática al arrancar y cada hora`.
 
-Cambio al plan: `programarTareas` devuelve una función para detenerlas en lugar de usar el hook `onClose`. Fastify no deja agregar hooks a una app que ya arrancó, y `server.ts` la llama después de `listen`.
+Cambio al plan: `programarTareas` devuelve una función para detenerlas en lugar de usar el hook `onClose`. `server.ts` la llama después de `listen`, y ahí Fastify ya no deja agregar hooks (`FST_ERR_INSTANCE_ALREADY_LISTENING`).
 
 ## Verificación final
 
-- [ ] `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan.
-- [ ] Con la API real (`server.ts`) sobre la base del e2e: un alumno con el alta de hace más de 2 meses y sin compras queda de baja al arrancar, y su ficha muestra la baja automática.
+- [x] `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan: API 131, web 34, e2e 1.
+- [x] Con la API real (`server.ts`) sobre la base del e2e: un alumno con el alta del 1 de julio y sin compras quedó de baja al arrancar (el log dice "Baja automática por no comprar" y el cambio quedó sin usuario), y su ficha muestra "Baja automática: 2 meses sin comprar un pack". Una baja y una reactivación a mano quedaron con el usuario y se ven en la actividad, ordenadas por hora.
+
+Para tener en cuenta:
+- **La base de desarrollo necesita la migración**: `pnpm dev` no la aplica. Sin la tabla, la actividad de la ficha y "Dar de baja" / "Reactivar" responden 500, y la tarea deja un error en el log al arrancar.
+- **Quien quedó de baja no aparece al anotar alumnos en una clase**: el buscador de la sesión muestra solo activos, igual que antes. Si vuelve, recepción lo reactiva desde su ficha (pestaña Datos) y después le cobra.

@@ -138,6 +138,9 @@ Los tests de integración necesitan Docker corriendo.
 - **Un solo Postgres por corrida de tests**, archivos en serie. Cada archivo llama a `base.limpiar()` en `beforeEach`.
 - **Drizzle escribe las columnas sin la tabla** cuando la consulta es de una sola tabla. En una subconsulta con `sql`, `${profesor.id}` sale como `"id"` y puede apuntar a la tabla de adentro. Para ver el SQL sin ejecutarlo: `.toSQL()`.
 - **Git Bash convierte en ruta de Windows** cualquier argumento que empieza con `/` (`/agenda` pasa a `C:/Program Files/Git/agenda`). Se evita con `MSYS_NO_PATHCONV=1`.
+- **`curl -d` en Git Bash manda mal las tildes** y la API responde "Request body size did not match Content-Length". Para cargar datos con acentos, usar un script de Node con `fetch`.
+- **Migraciones:** `pnpm --filter @studio/api db:generate --name <nombre>` la genera desde `schema.ts`. `pnpm dev` no la aplica: en la base de desarrollo hay que correr `pnpm --filter @studio/api db:migrate`. Una tabla nueva también va en `TABLAS` de `apps/api/test/db.ts`.
+- **Tareas que corren solas** (la baja automática): `programarTareas` de `src/tareas.ts`, llamada desde `server.ts` después de `listen`. Ahí Fastify ya no deja agregar hooks, así que devuelve una función para detenerlas. Los tests usan `buildApp` y no las arrancan.
 - **El e2e borra `studio_manager_e2e`** en cada corrida. Sirve para mirar la app con datos sin tocar la base de desarrollo: API con esa base en otro puerto y `WEB_DIST=../web/dist`. Un script de capturas que vive fuera del repo carga Playwright con `createRequire('<repo>/e2e/package.json')`.
 
 ## Estilo de escritura
