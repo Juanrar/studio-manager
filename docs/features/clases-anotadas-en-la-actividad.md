@@ -24,29 +24,21 @@ Decisión: una clase de hoy cuenta como asistida, igual que la última clase del
 
 ---
 
-### Tarea 1: La API devuelve las clases anotadas
+### Tarea 1: Clases anotadas en la API y en la ficha
 
 **Archivos:**
-- Modificar: `packages/shared/src/alumnos.ts`, `apps/api/src/modules/asistencias/asistencias.repository.ts`, `asistencias.service.ts`, `apps/api/src/modules/alumnos/ficha.service.ts`
-- Test: `apps/api/src/modules/alumnos/alumnos.test.ts`
+- Modificar: `packages/shared/src/alumnos.ts`, `apps/api/src/modules/asistencias/asistencias.repository.ts`, `asistencias.service.ts`, `apps/api/src/modules/alumnos/ficha.service.ts`, `apps/web/src/features/alumnos/FichaAlumnoPage.tsx`
+- Test: `apps/api/src/modules/alumnos/alumnos.test.ts`, `apps/web/src/features/alumnos/ficha.test.tsx`
 
-- [ ] **Paso 1:** cambiar el test de la actividad: la clase del martes que viene aparece como anotada.
-- [ ] **Paso 2:** correrlo y verificar que falla porque la clase no aparece.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests de la API y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(alumnos): clases anotadas en la actividad`.
+- [x] **Paso 1:** cambiar el test HTTP de la actividad: la clase del martes que viene aparece como anotada.
+- [x] **Paso 2:** correrlo y verificar que falla porque la clase no aparece.
+- [x] **Paso 3:** implementar el tipo `anotado` en la API.
+- [x] **Paso 4:** sumar una clase anotada al test web de la actividad, correrlo y verificar que falla porque el tipo nuevo no tiene ícono ni texto.
+- [x] **Paso 5:** implementar el texto y el ícono en la ficha.
+- [x] **Paso 6:** correr los tests de la API y de la web y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 7:** commit `feat(alumnos): clases anotadas en la actividad`.
 
-### Tarea 2: La ficha muestra las clases anotadas
-
-**Archivos:**
-- Modificar: `apps/web/src/features/alumnos/FichaAlumnoPage.tsx`
-- Test: `apps/web/src/features/alumnos/ficha.test.tsx`
-
-- [ ] **Paso 1:** sumar una clase anotada al test de la actividad.
-- [ ] **Paso 2:** correrlo y verificar que falla porque el tipo nuevo no se muestra.
-- [ ] **Paso 3:** implementar el texto y el ícono.
-- [ ] **Paso 4:** correr los tests web y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(web): clases anotadas en la actividad de la ficha`.
+Cambio al plan: eran dos tareas, la API y la ficha. Quedaron en una porque el tipo nuevo rompe el typecheck de la web hasta que la ficha tiene su ícono: con dos commits, el primero dejaba el repositorio sin compilar.
 
 ## Verificación final
 

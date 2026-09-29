@@ -23,7 +23,7 @@
 
 Reglas:
 
-- Las asistencias anotadas para más adelante no aparecen hasta ese día, igual que la última clase del listado.
+- Las asistencias anotadas para más adelante no aparecen hasta ese día, igual que la última clase del listado. (Cambió en [Clases anotadas en la actividad](clases-anotadas-en-la-actividad.md): ahora aparecen como anotadas).
 - Los pagos anulados aparecen, marcados: la anulación es parte de la historia del alumno.
 - En un mismo día va primero la asistencia, después el pago y al final el alta. Es el orden inverso al que ocurren cuando alguien se anota, paga y toma su primera clase el mismo día.
 

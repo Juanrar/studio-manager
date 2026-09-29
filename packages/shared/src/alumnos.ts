@@ -55,9 +55,10 @@ export type AlumnoEnListado = Alumno & ResumenDelPack & { ultimaClase: string | 
 export type FichaDeAlumno = Alumno & ResumenDelPack & { alta: string };
 
 // Un hecho de la historia del alumno, para la pestaña Actividad de la ficha. `fecha` es un día.
-// En una asistencia, `profesor` es quien dio la clase: el suplente, si hubo.
+// Una clase es `asistencia` hasta hoy y `anotado` si es de un día posterior. `profesor` es quien
+// la da: el suplente, si hubo.
 export type EventoDeAlumno =
-  | { tipo: 'asistencia'; fecha: string; clase: string; profesor: PersonaResumen }
+  | { tipo: 'asistencia' | 'anotado'; fecha: string; clase: string; profesor: PersonaResumen }
   | { tipo: 'pago'; fecha: string; pack: string; monto: number; medio: MedioPago; anulado: boolean }
   | { tipo: 'alta'; fecha: string };
 

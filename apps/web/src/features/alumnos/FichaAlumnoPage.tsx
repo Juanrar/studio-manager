@@ -79,6 +79,7 @@ function Ficha({ datos, alCerrar }: { datos: FichaDeAlumno; alCerrar: () => void
 }
 
 const ICONOS_DE_HECHO: Record<EventoDeAlumno['tipo'], NombreIcono> = {
+  anotado: 'calendario',
   asistencia: 'tilde',
   pago: 'billetes',
   alta: 'personaMas',
@@ -155,6 +156,12 @@ function Resaltado({ children }: { children: ReactNode }) {
 
 function Hecho({ hecho }: { hecho: EventoDeAlumno }) {
   switch (hecho.tipo) {
+    case 'anotado':
+      return (
+        <>
+          Anotado en <Resaltado>{hecho.clase}</Resaltado> con {hecho.profesor.nombre} {hecho.profesor.apellido}
+        </>
+      );
     case 'asistencia':
       return (
         <>

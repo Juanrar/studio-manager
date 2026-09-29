@@ -219,7 +219,7 @@ describe('GET /api/alumnos/:id', () => {
 });
 
 describe('GET /api/alumnos/:id/actividad', () => {
-  it('junta las asistencias hasta hoy con quien dio la clase, los pagos (también los anulados) y el alta, del más nuevo al más viejo', async () => {
+  it('junta las clases (las futuras como anotadas) con quien las da, los pagos (también los anulados) y el alta, del más nuevo al más viejo', async () => {
     const packX8 = await crearPackDeTest({ nombre: 'Pack x8', cantidadClases: 8, precio: 9600 });
     const packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
     const erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata' });
@@ -236,7 +236,7 @@ describe('GET /api/alumnos/:id/actividad', () => {
       new Date('2026-03-03T01:30:00Z'),
       '2026-03-02',
     );
-    // Hoy la clase la da Julia como suplente. La del martes que viene ya está anotada y no tiene que aparecer.
+    // Hoy la clase la da Julia como suplente. La del martes que viene ya está anotada.
     for (const martes of ['2026-03-03', HOY, '2026-03-17']) {
       const { sesion } = await abrirSesion(hipHop.id, martes);
       if (martes === HOY) await actualizarSesion(sesion.id, { profesorId: julia.id });
@@ -252,6 +252,12 @@ describe('GET /api/alumnos/:id/actividad', () => {
     expect(respuesta.statusCode).toBe(200);
     expect(respuesta.json()).toEqual({
       items: [
+        {
+          tipo: 'anotado',
+          fecha: '2026-03-17',
+          clase: 'Hip-Hop',
+          profesor: { id: erik.id, nombre: 'Erik', apellido: 'Zapata' },
+        },
         {
           tipo: 'asistencia',
           fecha: HOY,

@@ -64,9 +64,9 @@ export async function ultimasFechas(
 
 export type ClaseDeAlumno = { fecha: FechaDia; clase: string; profesor: PersonaResumen };
 
-// Las clases de un alumno hasta `hasta`, de la más nueva a la más vieja. El profesor es el de la
-// sesión, que cambia si hubo suplencia; el de la clase es el titular.
-export async function listarDeAlumno(ej: Ejecutor, alumnoId: number, hasta: FechaDia): Promise<ClaseDeAlumno[]> {
+// Las clases de un alumno, también las anotadas para más adelante, de la más nueva a la más vieja.
+// El profesor es el de la sesión, que cambia si hubo suplencia; el de la clase es el titular.
+export async function listarDeAlumno(ej: Ejecutor, alumnoId: number): Promise<ClaseDeAlumno[]> {
   return ej
     .select({
       fecha: sesion.fecha,
@@ -77,7 +77,7 @@ export async function listarDeAlumno(ej: Ejecutor, alumnoId: number, hasta: Fech
     .innerJoin(sesion, eq(sesion.id, asistencia.sesionId))
     .innerJoin(clase, eq(clase.id, sesion.claseId))
     .innerJoin(profesor, eq(profesor.id, sesion.profesorId))
-    .where(and(eq(asistencia.alumnoId, alumnoId), lte(sesion.fecha, hasta)))
+    .where(eq(asistencia.alumnoId, alumnoId))
     .orderBy(desc(sesion.fecha), desc(clase.horaInicio), desc(asistencia.id));
 }
 

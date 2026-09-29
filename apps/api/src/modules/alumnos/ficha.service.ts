@@ -17,14 +17,17 @@ export async function obtenerFicha(id: number, hoy: FechaDia): Promise<FichaDeAl
   return { ...alumno, alta: hoyEnEstudio(creadoEn, config.tzEstudio), ...packs.get(id)! };
 }
 
-// Del hecho más nuevo al más viejo. Las clases anotadas para más adelante no cuentan hasta ese día.
+// Del hecho más nuevo al más viejo. Una clase de un día posterior a hoy todavía no pasó: está anotada.
 export async function actividadDelAlumno(id: number, hoy: FechaDia): Promise<EventoDeAlumno[]> {
   const { creadoEn } = await buscarConAlta(id);
-  const asistencias = await asistenciasDeAlumno(id, hoy);
+  const asistencias = await asistenciasDeAlumno(id);
   const pagos = await listarPagosDeAlumno(id, hoy);
 
   const eventos: EventoDeAlumno[] = [
-    ...asistencias.map((asistencia) => ({ tipo: 'asistencia' as const, ...asistencia })),
+    ...asistencias.map((asistencia) => ({
+      tipo: asistencia.fecha > hoy ? ('anotado' as const) : ('asistencia' as const),
+      ...asistencia,
+    })),
     ...pagos.map((pago) => ({
       tipo: 'pago' as const,
       fecha: hoyEnEstudio(new Date(pago.fecha), config.tzEstudio),
@@ -46,7 +49,7 @@ async function buscarConAlta(id: number) {
 }
 
 // En un mismo día, al revés de como pasa cuando alguien se anota, paga y toma su primera clase.
-const ORDEN_EN_EL_DIA: Record<EventoDeAlumno['tipo'], number> = { asistencia: 0, pago: 1, alta: 2 };
+const ORDEN_EN_EL_DIA: Record<EventoDeAlumno['tipo'], number> = { anotado: 0, asistencia: 0, pago: 1, alta: 2 };
 
 function masNuevoPrimero(a: EventoDeAlumno, b: EventoDeAlumno): number {
   if (a.fecha !== b.fecha) return a.fecha < b.fecha ? 1 : -1;

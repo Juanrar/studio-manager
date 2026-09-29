@@ -60,9 +60,15 @@ function camposDe(panel: HTMLElement) {
 }
 
 describe('/alumnos/:id', () => {
-  it('la actividad agrupa los hechos por mes, con el año, del más nuevo al más viejo', async () => {
+  it('la actividad agrupa los hechos por mes, con el año, del más nuevo al más viejo, y las clases futuras van como anotadas', async () => {
     fichaDeMartina({
       actividad: [
+        {
+          tipo: 'anotado',
+          fecha: '2026-03-17',
+          clase: 'Hip-Hop',
+          profesor: { id: 1, nombre: 'Erik', apellido: 'Zapata' },
+        },
         {
           tipo: 'asistencia',
           fecha: '2026-03-10',
@@ -84,7 +90,12 @@ describe('/alumnos/:id', () => {
     const actividad = within(await laFicha()).getByRole('tabpanel', { name: 'Actividad' });
 
     expect(await mesesDe(actividad)).toEqual([
-      ['Marzo 2026', ['Asistió a Hip-Hop con Julia Paz', '10 mar'], ['Pagó Pack x8 · $9.600 con Mercado Pago', '2 mar']],
+      [
+        'Marzo 2026',
+        ['Anotado en Hip-Hop con Erik Zapata', '17 mar'],
+        ['Asistió a Hip-Hop con Julia Paz', '10 mar'],
+        ['Pagó Pack x8 · $9.600 con Mercado Pago', '2 mar'],
+      ],
       ['Febrero 2026', ['Pagó Pack x4 · $5.200 en efectivo Anulado', '20 feb']],
       ['Marzo 2025', ['Asistió a Jazz con Erik Zapata', '17 mar'], ['Alta en el estudio', '10 mar']],
     ]);
