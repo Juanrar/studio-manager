@@ -102,6 +102,8 @@ En edición, la fila se convierte en campos en su lugar: hora de inicio, "–", 
 | Test | Tipo | Por qué vale la pena: qué cambio lo rompe |
 |---|---|---|
 | `GET /api/clases?profesorId=N` devuelve solo las de ese profesor, ordenadas por día y hora | Integración HTTP | Si el filtro no se combina con el de activas, la ficha muestra clases dadas de baja o de otro profesor |
+| Con `incluirInactivos=true` el filtro suma las clases dadas de baja de ese profesor y ninguna de otro | Integración HTTP | Si `incluirInactivos` no llega al filtro, la casilla "Mostrar clases dadas de baja" de la ficha no hace nada; si el filtro de profesor se pierde con ella, la ficha muestra las clases de todos |
+| El filtro no valida al profesor: uno dado de baja trae sus clases y uno que no existe, una lista vacía | Integración HTTP | Si el listado verifica al profesor como `crearClase` (`verificarProfesorActivo`), la ficha de un profesor dado de baja responde 422 en vez de mostrar sus clases |
 | El listado de profesores trae `clasesPorSemana` y `diasConClase` sin repetir y ordenados, y en 0 y `[]` para quien no tiene clases | Integración HTTP | Si se cuentan las clases dadas de baja o se repite un día con dos clases, el listado miente sobre la carga del profesor |
 | Las clases dadas de baja no cuentan aunque el listado pida `incluirInactivos=true` | Integración HTTP | Si el parámetro se pasa también a las clases, un profesor dado de baja aparece con clases que ya no da |
 | El selector abre la lista en el horario actual, filtra con lo tipeado y elige con Enter | Web (unitario de componente) | Si la lista no filtra, cargar una clase a las 21:00 obliga a scrollear 52 franjas |
@@ -124,11 +126,11 @@ En edición, la fila se convierte en campos en su lugar: hora de inicio, "–", 
 - Modificar: `packages/shared/src/clases.ts`, `apps/api/src/modules/clases/clases.repository.ts`, `clases.service.ts`, `clases.routes.ts`
 - Test: `apps/api/src/modules/clases/clases.test.ts`
 
-- [ ] **Paso 1:** escribir el test HTTP de `GET /api/clases?profesorId=N`, con dos profesores y una clase dada de baja.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test clases` y verificar que falla porque el filtro no existe y devuelve las clases de los dos.
-- [ ] **Paso 3:** agregar `clasesQuerySchema` en shared (`profesorId` opcional con `z.coerce.number().int().positive()` más lo que ya trae `listadoQuerySchema`), pasar el filtro por el service hasta el repository y usarlo en la ruta.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test clases` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(clases): filtrar el horario por profesor`.
+- [x] **Paso 1:** escribir el test HTTP de `GET /api/clases?profesorId=N`, con dos profesores y una clase dada de baja.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test clases` y verificar que falla porque el filtro no existe y devuelve las clases de los dos.
+- [x] **Paso 3:** agregar `clasesQuerySchema` en shared (`profesorId` opcional con `z.coerce.number().int().positive()` más lo que ya trae `listadoQuerySchema`), pasar el filtro por el service hasta el repository y usarlo en la ruta.
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test clases` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(clases): filtrar el horario por profesor`.
 
 ### Tarea 2: El listado de profesores con sus clases
 

@@ -1,13 +1,13 @@
 import type { FastifyInstance } from 'fastify';
-import { actualizarClaseSchema, crearClaseSchema, listadoQuerySchema } from '@studio/shared';
+import { actualizarClaseSchema, clasesQuerySchema, crearClaseSchema } from '@studio/shared';
 import { idParamSchema } from '../../lib/validacion.ts';
 import { requerirRol } from '../../plugins/autenticacion.ts';
 import { actualizarClase, crearClase, listarClases } from './clases.service.ts';
 
 export async function rutasClases(app: FastifyInstance): Promise<void> {
   app.get('/api/clases', { preHandler: requerirRol('recepcion') }, async (request) => {
-    const { incluirInactivos } = listadoQuerySchema.parse(request.query);
-    return { items: await listarClases(incluirInactivos) };
+    const { incluirInactivos, profesorId } = clasesQuerySchema.parse(request.query);
+    return { items: await listarClases({ incluirInactivas: incluirInactivos, profesorId }) };
   });
 
   app.post('/api/clases', { preHandler: requerirRol('admin') }, async (request, reply) => {

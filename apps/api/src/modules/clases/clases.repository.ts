@@ -44,8 +44,14 @@ export async function actualizar(ej: Ejecutor, id: number, cambios: Partial<Nuev
   return filas.length > 0;
 }
 
-export async function listar(ej: Ejecutor, incluirInactivas: boolean): Promise<Clase[]> {
-  return seleccionar(ej, incluirInactivas ? undefined : eq(clase.activa, true));
+export type FiltrosDeClases = { incluirInactivas: boolean; profesorId?: number | undefined };
+
+export async function listar(ej: Ejecutor, filtros: FiltrosDeClases): Promise<Clase[]> {
+  const condiciones: SQL[] = [];
+  if (!filtros.incluirInactivas) condiciones.push(eq(clase.activa, true));
+  if (filtros.profesorId !== undefined) condiciones.push(eq(clase.profesorId, filtros.profesorId));
+  // Sin condiciones, and() devuelve undefined y la consulta no lleva where.
+  return seleccionar(ej, and(...condiciones));
 }
 
 export async function listarDelDia(ej: Ejecutor, diaSemana: number): Promise<Clase[]> {

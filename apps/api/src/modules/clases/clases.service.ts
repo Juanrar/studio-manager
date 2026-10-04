@@ -34,6 +34,8 @@ export async function obtenerClase(id: number): Promise<Clase> {
   return encontrada;
 }
 
-export async function listarClases(incluirInactivas: boolean): Promise<Clase[]> {
-  return repo.listar(db, incluirInactivas);
+// No verifica al profesor como crear y actualizar: uno que no existe da una lista vacía y uno
+// dado de baja da sus clases, que es lo que muestra su ficha.
+export async function listarClases(filtros: repo.FiltrosDeClases): Promise<Clase[]> {
+  return repo.listar(db, filtros);
 }

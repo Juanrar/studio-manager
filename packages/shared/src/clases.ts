@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { fechaDiaSchema, nombreSchema, textoOpcional } from './comun.ts';
+import { fechaDiaSchema, listadoQuerySchema, nombreSchema, textoOpcional } from './comun.ts';
 
 export const horaSchema = z
   .string()
@@ -41,6 +41,11 @@ export const actualizarClaseSchema = z.object({
 });
 
 export type ActualizarClaseInput = z.infer<typeof actualizarClaseSchema>;
+
+// El listado de clases usa el filtro de inactivas del listado común y suma el de profesor.
+export const clasesQuerySchema = listadoQuerySchema.extend({
+  profesorId: z.coerce.number().int().positive().optional(),
+});
 
 export const abrirSesionSchema = z.object({
   claseId: idSchema,
