@@ -139,11 +139,11 @@ En edición, la fila se convierte en campos en su lugar: hora de inicio, "–", 
 - Modificar: `packages/shared/src/profesores.ts`, `apps/api/src/modules/profesores/profesores.routes.ts`
 - Test: `apps/api/src/modules/profesores/profesores.test.ts`
 
-- [ ] **Paso 1:** escribir el test del listado con `clasesPorSemana` y `diasConClase`: un profesor con dos clases el lunes y una el miércoles, otro sin clases, y una clase dada de baja que no cuenta. Aserciones con los valores escritos a mano.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test profesores` y verificar que falla porque la respuesta no trae los campos.
-- [ ] **Paso 3:** agregar el tipo `ProfesorEnListado` en shared, crear `listado.service.ts` que llame a `listarProfesores` y a `listarClases` pidiendo solo las activas, agrupe por `profesor.id` y apunte la ruta a ese service. `listarClases` cambió de firma en la tarea 1: usá la que quedó, no inventes otra.
-- [ ] **Paso 4:** correr los tests de la API completos (`pnpm --filter @studio/api test`) y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(profesores): el listado trae las clases por semana y los días`.
+- [x] **Paso 1:** escribir el test del listado con `clasesPorSemana` y `diasConClase`: un profesor con dos clases el lunes y una el miércoles, otro sin clases, y una clase dada de baja que no cuenta. Aserciones con los valores escritos a mano.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test profesores` y verificar que falla porque la respuesta no trae los campos.
+- [x] **Paso 3:** agregar el tipo `ProfesorEnListado` en shared, crear `listado.service.ts` que llame a `listarProfesores` y a `listarClases` pidiendo solo las activas, agrupe por `profesor.id` y apunte la ruta a ese service. `listarClases` cambió de firma en la tarea 1: usá la que quedó, no inventes otra.
+- [x] **Paso 4:** correr los tests de la API completos (`pnpm --filter @studio/api test`) y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(profesores): el listado trae las clases por semana y los días`.
 
 ### Tarea 3: El selector de hora
 

@@ -51,6 +51,10 @@ export type Profesor = {
   porcentajeVigenteBp: number | null;
 };
 
+// Una fila del listado de profesores: el profesor y su carga semanal, calculada con sus clases activas.
+// `diasConClase` va de 1 (lunes) a 7 (domingo), ordenado y sin repetir.
+export type ProfesorEnListado = Profesor & { clasesPorSemana: number; diasConClase: number[] };
+
 export type PorcentajeProfesor = {
   id: number;
   porcentajeBp: number;

@@ -7,19 +7,19 @@ import {
 } from '@studio/shared';
 import { idParamSchema } from '../../lib/validacion.ts';
 import { requerirRol } from '../../plugins/autenticacion.ts';
+import { listarProfesoresConClases } from './listado.service.ts';
 import {
   actualizarProfesor,
   agregarPorcentaje,
   crearProfesor,
   listarPorcentajes,
-  listarProfesores,
   obtenerProfesor,
 } from './profesores.service.ts';
 
 export async function rutasProfesores(app: FastifyInstance): Promise<void> {
   app.get('/api/profesores', { preHandler: requerirRol('recepcion') }, async (request) => {
     const { incluirInactivos } = listadoQuerySchema.parse(request.query);
-    return { items: await listarProfesores(incluirInactivos, app.hoy()) };
+    return { items: await listarProfesoresConClases(incluirInactivos, app.hoy()) };
   });
 
   app.get('/api/profesores/:id', { preHandler: requerirRol('recepcion') }, async (request) => {
