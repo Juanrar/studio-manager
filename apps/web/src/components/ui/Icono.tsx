@@ -129,6 +129,7 @@ const TRAZOS = {
     'M17 8v-3a1 1 0 0 0 -1 -1h-10a2 2 0 0 0 0 4h12a1 1 0 0 1 1 1v3m0 4v3a1 1 0 0 1 -1 1h-12a2 2 0 0 1 -2 -2v-12',
     'M20 12v4h-4a2 2 0 0 1 0 -4h4',
   ],
+  reloj: ['M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0', 'M12 7v5l3 3'],
 } as const;
 
 export type NombreIcono = keyof typeof TRAZOS;

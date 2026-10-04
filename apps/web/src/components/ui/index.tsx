@@ -12,6 +12,7 @@ import { Link } from 'react-router';
 import { Icono, type NombreIcono } from './Icono.tsx';
 
 export { Icono, type NombreIcono } from './Icono.tsx';
+export { SelectorDeHora } from './SelectorDeHora.tsx';
 
 type VarianteBoton = 'primario' | 'secundario' | 'peligro';
 

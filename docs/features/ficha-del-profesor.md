@@ -106,8 +106,16 @@ En edición, la fila se convierte en campos en su lugar: hora de inicio, "–", 
 | El filtro no valida al profesor: uno dado de baja trae sus clases y uno que no existe, una lista vacía | Integración HTTP | Si el listado verifica al profesor como `crearClase` (`verificarProfesorActivo`), la ficha de un profesor dado de baja responde 422 en vez de mostrar sus clases |
 | El listado de profesores trae `clasesPorSemana` y `diasConClase` sin repetir y ordenados, y en 0 y `[]` para quien no tiene clases | Integración HTTP | Si se cuentan las clases dadas de baja o se repite un día con dos clases, el listado miente sobre la carga del profesor |
 | Las clases dadas de baja no cuentan aunque el listado pida `incluirInactivos=true` | Integración HTTP | Si el parámetro se pasa también a las clases, un profesor dado de baja aparece con clases que ya no da |
-| El selector abre la lista en el horario actual, filtra con lo tipeado y elige con Enter | Web (unitario de componente) | Si la lista no filtra, cargar una clase a las 21:00 obliga a scrollear 52 franjas |
+| El reloj abre la lista con las 64 franjas de 15 minutos y volver a tocarlo la cierra | Web (unitario de componente) | Si el reloj solo abre, la lista tapa la fila hasta hacer clic afuera. Si las franjas no son de 15 minutos, la grilla no es la que se acordó con el estudio |
+| Tipear "19" deja las cuatro franjas de las 19 y avisa de cada tecla; "193" y "19:3" dejan 19:30; "21" no trae las 12:15; lo que no coincide deja todas | Web (unitario de componente) | Si la lista no filtra, cargar una clase a las 21:00 obliga a scrollear 52 franjas. Si la comparación no ignora los dos puntos, quien tipea la hora completa no la encuentra. Si busca en cualquier parte del texto, una hora trae franjas de otras horas. Si la lista se vacía, no hay cómo elegir sin borrar el campo |
 | Un horario fuera de la grilla aparece en la lista al editar esa clase | Web (unitario de componente) | Si no se agrega, abrir el selector de una clase de las 18:20 la cambia sin que nadie lo pida |
+| Elegir una franja avisa con `alCambiar`, cierra la lista y deja el foco en el campo | Web (unitario de componente) | Si elegir con el mouse saca el foco del campo, el teclado deja de responder después de elegir |
+| Al abrir, el horario actual queda marcado y en el medio de la lista; las flechas lo mantienen a la vista | Web (unitario de componente) | Si la lista abre desde arriba, editar una clase de las 21:00 muestra las 08:00 y obliga a buscar la hora |
+| Flecha abajo abre la lista, las flechas marcan, Enter elige y Escape cierra sin cambiar la hora | Web (unitario de componente) | Si Escape elige la franja marcada, cerrar la lista cambia la hora de la clase. Si Enter sin franja marcada elige la primera, tipear "19" y Enter guarda 19:00 sin que nadie lo pida |
+| Enter con la lista abierta no envía el formulario | Web (unitario de componente) | Si Enter además envía, la fila de la ficha se guarda con la hora vieja al elegir una franja |
+| Un clic fuera o Tab cierran la lista, y ni el reloj ni la lista reciben el foco con Tab | Web (unitario de componente) | Si la lista queda abierta al pasar al campo siguiente, se superponen la de inicio y la de fin. Si Tab para en el reloj o en la lista, llegar al campo de fin cuesta varias pulsaciones |
+| La lista se abre hacia arriba cuando no entra debajo del campo | Web (unitario de componente) | Si siempre abre hacia abajo, en las últimas filas de la semana la lista queda cortada por el borde de la ventana |
+| El campo se nombra con `etiqueta` y, por `id`, con una `<label>` | Web (unitario de componente) | Si el id no llega al campo, los tests de la ficha y los lectores de pantalla no encuentran la hora por su etiqueta |
 | El listado muestra las clases por semana y los días, y el nombre lleva a la ficha | Web | Si la fila deja de ser un enlace, no hay forma de llegar a la ficha |
 | El buscador filtra por nombre, apellido y DNI sin distinguir mayúsculas | Web | Si filtra solo por nombre, no se encuentra a un profesor buscando el apellido |
 | La ficha muestra las siete filas de la semana con las clases de ese profesor en su día | Web | Si se agrupa con los días que vienen de la API, un día sin clases desaparece y no se le puede agregar una |
@@ -154,11 +162,11 @@ En edición, la fila se convierte en campos en su lugar: hora de inicio, "–", 
 
 El componente recibe `valor`, `alCambiar`, `etiqueta` (para `aria-label`) y opcionalmente `id`. La lista son franjas de 15 minutos de 08:00 a 23:45, más `valor` si no está en la lista.
 
-- [ ] **Paso 1:** escribir los tests: abrir con el reloj y ver las opciones, elegir una y que llame a `alCambiar`, tipear "19" y que queden solo las cuatro franjas de las 19, y que un valor fuera de la grilla aparezca en la lista.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/web test selector-de-hora` y verificar que falla porque el componente no existe.
-- [ ] **Paso 3:** implementar el componente con la lista, el filtro, el teclado (flechas, Enter, Escape) y el cierre al hacer clic afuera.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(ui): selector de hora con franjas de 15 minutos`.
+- [x] **Paso 1:** escribir los tests: abrir con el reloj y ver las opciones, elegir una y que llame a `alCambiar`, tipear "19" y que queden solo las cuatro franjas de las 19, y que un valor fuera de la grilla aparezca en la lista.
+- [x] **Paso 2:** correr `pnpm --filter @studio/web test selector-de-hora` y verificar que falla porque el componente no existe.
+- [x] **Paso 3:** implementar el componente con la lista, el filtro, el teclado (flechas, Enter, Escape) y el cierre al hacer clic afuera.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(ui): selector de hora con franjas de 15 minutos`.
 
 ### Tarea 4: El listado de profesores en la web
 
