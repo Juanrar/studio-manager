@@ -35,6 +35,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 20 | [Ficha del alumno con actividad](ficha-del-alumno.md) | lista | 19 |
 | 21 | [Clases anotadas en la actividad](clases-anotadas-en-la-actividad.md) | lista | 20 |
 | 22 | [Baja automática por no comprar](baja-automatica.md) | lista | 21 |
+| 23 | [Ficha del profesor con sus clases](ficha-del-profesor.md) | en curso | 15, 20 |
 
 ## Bitácora
 
