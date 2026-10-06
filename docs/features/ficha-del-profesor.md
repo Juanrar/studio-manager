@@ -181,11 +181,11 @@ La ruta `/profesores/:id` la agrega la tarea 5, junto con la página que la atie
 
 El test que ya existe de cargar un porcentaje nuevo usa el botón "Porcentajes" de la fila, que esta tarea saca. Se borra acá y la tarea 5 lo vuelve a escribir sobre la pestaña Porcentajes de la ficha.
 
-- [ ] **Paso 1:** escribir los tests del listado: las columnas nuevas con sus valores, el nombre como enlace a `/profesores/:id` y el buscador filtrando por apellido y por DNI. Adaptar el test de "crear un profesor con 52,5" que ya existe y borrar el de los porcentajes.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/web test profesores` y verificar que fallan porque la tabla todavía tiene las columnas viejas.
-- [ ] **Paso 3:** rehacer la tabla con avatar, enlace, columnas con ícono y buscador; mover el porcentaje al tipo `ProfesorEnListado`; sacar los botones de la fila; agregar la ruta `/profesores/:id`.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(profesores): listado al estilo del de alumnos`.
+- [x] **Paso 1:** escribir los tests del listado: las columnas nuevas con sus valores, el nombre como enlace a `/profesores/:id` y el buscador filtrando por apellido y por DNI. Adaptar el test de "crear un profesor con 52,5" que ya existe y borrar el de los porcentajes.
+- [x] **Paso 2:** correr `pnpm --filter @studio/web test profesores` y verificar que fallan porque la tabla todavía tiene las columnas viejas.
+- [x] **Paso 3:** rehacer la tabla con avatar, enlace, columnas con ícono y buscador; mover el porcentaje al tipo `ProfesorEnListado`; sacar los botones de la fila. La ruta `/profesores/:id` no se agregó acá: la agrega la tarea 5 con la página, como dice el encabezado de la tarea.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(profesores): listado al estilo del de alumnos`.
 
 ### Tarea 5: La ficha del profesor
 

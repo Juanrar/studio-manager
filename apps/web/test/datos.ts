@@ -4,12 +4,14 @@ import type {
   Alumno,
   AlumnoEnListado,
   Asistencia,
+  Clase,
   FichaDeAlumno,
   Listado,
   ListadoDeAlumnos,
   Pack,
   Pago,
   Profesor,
+  ProfesorEnListado,
 } from '@studio/shared';
 
 export function unAlumno(datos: Partial<Alumno> = {}): Alumno {
@@ -85,6 +87,26 @@ export function unProfesor(datos: Partial<Profesor> = {}): Profesor {
     aliasCbu: null,
     activo: true,
     porcentajeVigenteBp: 5000,
+    ...datos,
+  };
+}
+
+// Una fila de GET /api/profesores. Por defecto, sin clases.
+export function unProfesorEnListado(datos: Partial<ProfesorEnListado> = {}): ProfesorEnListado {
+  return { ...unProfesor(), clasesPorSemana: 0, diasConClase: [], ...datos };
+}
+
+// Una clase de GET /api/clases. Por defecto, la de Erik Zapata los lunes de 18:00 a 19:30.
+export function unaClase(datos: Partial<Clase> = {}): Clase {
+  return {
+    id: 1,
+    estilo: 'Salsa',
+    nivel: null,
+    diaSemana: 1,
+    horaInicio: '18:00',
+    horaFin: '19:30',
+    profesor: { id: 1, nombre: 'Erik', apellido: 'Zapata' },
+    activa: true,
     ...datos,
   };
 }

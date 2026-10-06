@@ -1,12 +1,13 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
-import type { Profesor } from '@studio/shared';
-import { unProfesor } from '../../../test/datos.ts';
+import type { ProfesorEnListado } from '@studio/shared';
+import { unProfesor, unProfesorEnListado } from '../../../test/datos.ts';
 import { ADMIN, conSesion, renderizarEn } from '../../../test/render.tsx';
 import { servidor } from '../../../test/servidor.ts';
+import { celdasDe } from '../../../test/tabla.ts';
 
-function profesoresDelEstudio(profesores: Profesor[]) {
+function profesoresDelEstudio(profesores: ProfesorEnListado[]) {
   conSesion(ADMIN);
   servidor.use(http.get('/api/profesores', () => HttpResponse.json({ items: profesores })));
   return renderizarEn('/profesores');
@@ -35,27 +36,58 @@ describe('/profesores', () => {
     await waitFor(() => expect(cuerpoRecibido).toMatchObject({ nombre: 'Malena', apellido: 'Rosas', porcentajeBp: 5250 }));
   });
 
-  it('cargar un porcentaje nuevo manda puntos básicos y la fecha de vigencia', async () => {
-    let cuerpoRecibido: unknown;
-    servidor.use(
-      http.get('/api/profesores/1/porcentajes', () =>
-        HttpResponse.json({ items: [{ id: 1, porcentajeBp: 5000, vigenteDesde: '2026-01-01' }] }),
-      ),
-      http.post('/api/profesores/1/porcentajes', async ({ request }) => {
-        cuerpoRecibido = await request.json();
-        return HttpResponse.json({ id: 2, porcentajeBp: 6000, vigenteDesde: '2026-04-01' }, { status: 201 });
+  it('muestra cada profesor con su porcentaje, clases por semana, días, teléfono, alias y estado', async () => {
+    profesoresDelEstudio([
+      unProfesorEnListado({
+        id: 1,
+        nombre: 'Erik',
+        apellido: 'Zapata',
+        telefono: '11 4444-0000',
+        aliasCbu: 'erik.zapata',
+        porcentajeVigenteBp: 5000,
+        clasesPorSemana: 4,
+        diasConClase: [1, 3, 5],
       }),
-    );
-    const { usuario } = profesoresDelEstudio([unProfesor({ id: 1, nombre: 'Erik', apellido: 'Zapata', porcentajeVigenteBp: 5000 })]);
+      unProfesorEnListado({ id: 2, nombre: 'Lucía', apellido: 'Núñez', porcentajeVigenteBp: null, activo: false }),
+    ]);
 
     const fila = await screen.findByRole('row', { name: /Zapata/ });
-    expect(within(fila).getByText('50%')).toBeInTheDocument();
-    await usuario.click(within(fila).getByRole('button', { name: 'Porcentajes' }));
-    const dialogo = screen.getByRole('dialog', { name: 'Porcentajes de Erik Zapata' });
-    await usuario.type(within(dialogo).getByLabelText('Nuevo porcentaje (%)'), '60');
-    await usuario.type(within(dialogo).getByLabelText('Vigente desde'), '2026-04-01');
-    await usuario.click(within(dialogo).getByRole('button', { name: 'Agregar' }));
+    expect(celdasDe(fila)).toEqual(['Zapata, Erik', '50%', '4', 'Lun, Mié, Vie', '11 4444-0000', 'erik.zapata', 'Activo']);
+    expect(celdasDe(screen.getByRole('row', { name: /Núñez/ }))).toEqual([
+      'Núñez, Lucía',
+      '—',
+      '—',
+      '—',
+      '—',
+      '—',
+      'Dado de baja',
+    ]);
+    expect(screen.getByText('2 profesores · 1 activos')).toBeInTheDocument();
+  });
 
-    await waitFor(() => expect(cuerpoRecibido).toEqual({ porcentajeBp: 6000, vigenteDesde: '2026-04-01' }));
+  it('el nombre del profesor es un enlace a su ficha', async () => {
+    profesoresDelEstudio([unProfesorEnListado({ id: 7, nombre: 'Erik', apellido: 'Zapata' })]);
+
+    const enlace = await screen.findByRole('link', { name: /Zapata, Erik/ });
+
+    expect(enlace).toHaveAttribute('href', '/profesores/7');
+  });
+
+  it('el buscador filtra por apellido, por DNI y sin distinguir mayúsculas ni tildes', async () => {
+    const { usuario } = profesoresDelEstudio([
+      unProfesorEnListado({ id: 1, nombre: 'Erik', apellido: 'Zapata', dni: '30111222' }),
+      unProfesorEnListado({ id: 2, nombre: 'Lucía', apellido: 'Núñez', dni: '27333444' }),
+    ]);
+    const buscador = await screen.findByRole('searchbox', { name: 'Buscar profesor' });
+
+    await usuario.type(buscador, 'NUNEZ');
+    expect(screen.queryByRole('row', { name: /Zapata/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('row', { name: /Núñez/ })).toBeInTheDocument();
+    expect(screen.getByText('1 profesores · 1 activos')).toBeInTheDocument();
+
+    await usuario.clear(buscador);
+    await usuario.type(buscador, '3011');
+    expect(screen.getByRole('row', { name: /Zapata/ })).toBeInTheDocument();
+    expect(screen.queryByRole('row', { name: /Núñez/ })).not.toBeInTheDocument();
   });
 });

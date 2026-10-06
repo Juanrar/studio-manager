@@ -80,6 +80,12 @@ export function nombreDelDia(diaSemana: number): string {
   return DIAS_DE_LA_SEMANA[diaSemana - 1] ?? '';
 }
 
+const DIAS_ABREVIADOS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+export function abreviaturaDelDia(diaSemana: number): string {
+  return DIAS_ABREVIADOS[diaSemana - 1] ?? '';
+}
+
 export function formatearPeriodo(periodo: string): string {
   const [anio, mes] = periodo.split('-').map(Number) as [number, number];
   const nombre = new Intl.DateTimeFormat('es-AR', { month: 'long', timeZone: 'UTC' }).format(

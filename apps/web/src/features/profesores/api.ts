@@ -5,6 +5,7 @@ import type {
   NuevoPorcentajeInput,
   PorcentajeProfesor,
   Profesor,
+  ProfesorEnListado,
 } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
@@ -12,7 +13,7 @@ export function useProfesores({ incluirInactivos = false }: { incluirInactivos?:
   return useQuery({
     queryKey: ['profesores', { incluirInactivos }],
     queryFn: async () =>
-      (await api.get<{ items: Profesor[] }>(conQuery('/profesores', { incluirInactivos: incluirInactivos || undefined })))
+      (await api.get<{ items: ProfesorEnListado[] }>(conQuery('/profesores', { incluirInactivos: incluirInactivos || undefined })))
         .items,
   });
 }
