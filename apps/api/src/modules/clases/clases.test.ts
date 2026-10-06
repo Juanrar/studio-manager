@@ -220,6 +220,69 @@ describe('GET /api/clases', () => {
     });
   });
 
+  it('sin profesorId trae las activas de todos los profesores, y con incluirInactivos=true también las dadas de baja', async () => {
+    const lucia = await crearProfesorDeTest({ nombre: 'Lucía', apellido: 'Paz' });
+    const hipHopMartes = await crearClaseDeTest(erik.id, HIP_HOP_MARTES);
+    const breakLunes = await crearClaseDeTest(erik.id, {
+      estilo: 'Break',
+      nivel: null,
+      diaSemana: 1,
+      horaInicio: '19:30',
+      horaFin: '21:00',
+    });
+    await actualizarClase(breakLunes.id, { activa: false });
+    const salsaLunes = await crearClaseDeTest(lucia.id, {
+      estilo: 'Salsa',
+      nivel: null,
+      diaSemana: 1,
+      horaInicio: '19:00',
+      horaFin: '20:30',
+    });
+
+    const activas = await app.inject({ method: 'GET', url: '/api/clases', headers: { cookie: cookieRecepcion } });
+    const todas = await pedirClases('incluirInactivos=true');
+
+    const salsa = {
+      id: salsaLunes.id,
+      estilo: 'Salsa',
+      nivel: null,
+      diaSemana: 1,
+      horaInicio: '19:00',
+      horaFin: '20:30',
+      profesor: { id: lucia.id, nombre: 'Lucía', apellido: 'Paz' },
+      activa: true,
+    };
+    const hipHop = {
+      id: hipHopMartes.id,
+      estilo: 'Hip-Hop',
+      nivel: 'Inicial',
+      diaSemana: 2,
+      horaInicio: '19:00',
+      horaFin: '20:30',
+      profesor: { id: erik.id, nombre: 'Erik', apellido: 'Zapata' },
+      activa: true,
+    };
+    expect(activas.statusCode).toBe(200);
+    expect(activas.json()).toEqual({ items: [salsa, hipHop] });
+    expect(todas.statusCode).toBe(200);
+    expect(todas.json()).toEqual({
+      items: [
+        salsa,
+        {
+          id: breakLunes.id,
+          estilo: 'Break',
+          nivel: null,
+          diaSemana: 1,
+          horaInicio: '19:30',
+          horaFin: '21:00',
+          profesor: { id: erik.id, nombre: 'Erik', apellido: 'Zapata' },
+          activa: false,
+        },
+        hipHop,
+      ],
+    });
+  });
+
   it('no valida al profesor: uno dado de baja trae sus clases y uno que no existe, una lista vacía', async () => {
     const hipHopMartes = await crearClaseDeTest(erik.id, HIP_HOP_MARTES);
     await actualizarProfesor(erik.id, { activo: false }, hoyEnEstudio(AHORA));

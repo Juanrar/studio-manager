@@ -49,8 +49,11 @@ export function FilaDeLectura({ clase, alEditar }: { clase: Clase; alEditar: () 
           {clase.nivel === null ? <span className="text-apagado">—</span> : <Insignia tono="violeta">{clase.nivel}</Insignia>}
         </span>
         {!clase.activa && <Insignia>Dada de baja</Insignia>}
-        {/* Aparecen al pasar el mouse o al llegar con el teclado a uno de los botones. */}
-        <div className={`${ACCIONES} opacity-0 group-focus-within:opacity-100 group-hover:opacity-100`}>
+        {/* Aparecen al pasar el mouse o al llegar con el teclado a uno de los botones. Invisibles igual reciben el
+            toque: en una pantalla táctil, sin mouse que las muestre, se ven siempre. */}
+        <div
+          className={`${ACCIONES} opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100`}
+        >
           <BotonIcono icono="lapiz" etiqueta="Editar la clase" onClick={alEditar} />
           {clase.activa ? (
             <BotonIcono icono="tacho" etiqueta="Dar de baja la clase" onClick={() => cambiarEstado(false)} />

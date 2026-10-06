@@ -90,4 +90,22 @@ describe('/profesores', () => {
     expect(screen.getByRole('row', { name: /Zapata/ })).toBeInTheDocument();
     expect(screen.queryByRole('row', { name: /Núñez/ })).not.toBeInTheDocument();
   });
+
+  it.each<[string, string[]]>([
+    ['erik', ['Zapata, Erik']],
+    ['erik zapata', ['Zapata, Erik']],
+    ['zapata erik', ['Zapata, Erik']],
+    ['lucia nunez', ['Núñez, Lucía']],
+  ])('el buscador con "%s" encuentra por nombre y por nombre completo en los dos órdenes', async (busqueda, esperados) => {
+    const { usuario } = profesoresDelEstudio([
+      unProfesorEnListado({ id: 1, nombre: 'Erik', apellido: 'Zapata', dni: '30111222' }),
+      unProfesorEnListado({ id: 2, nombre: 'Lucía', apellido: 'Núñez', dni: '27333444' }),
+    ]);
+
+    await usuario.type(await screen.findByRole('searchbox', { name: 'Buscar profesor' }), busqueda);
+
+    // La primera fila es la de los encabezados.
+    const filas = screen.getAllByRole('row').slice(1);
+    expect(filas.map((fila) => celdasDe(fila)[0])).toEqual(esperados);
+  });
 });

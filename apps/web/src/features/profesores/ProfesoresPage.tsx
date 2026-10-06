@@ -34,9 +34,14 @@ function sinTildes(texto: string): string {
   return texto.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 }
 
+// Nombre completo en los dos órdenes, como el buscador de alumnos: "erik zapata" y "zapata erik" encuentran lo mismo.
 function coincide(profesor: ProfesorEnListado, busqueda: string): boolean {
   const buscado = sinTildes(busqueda.trim());
-  return [profesor.nombre, profesor.apellido, profesor.dni ?? ''].some((campo) => sinTildes(campo).includes(buscado));
+  return [
+    `${profesor.nombre} ${profesor.apellido}`,
+    `${profesor.apellido} ${profesor.nombre}`,
+    profesor.dni ?? '',
+  ].some((campo) => sinTildes(campo).includes(buscado));
 }
 
 export function ProfesoresPage() {

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ActualizarClaseInput, Clase, CrearClaseInput } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
@@ -15,6 +15,9 @@ export function useClases({
           conQuery('/clases', { profesorId, incluirInactivos: incluirInactivas || undefined }),
         )
       ).items,
+    // Al marcar "Mostrar dadas de baja" la clave cambia y todavía no hay datos: sin esto el horario pasa a
+    // "Cargando…" y se desmonta la fila que se estaba editando, con lo que tenía escrito.
+    placeholderData: keepPreviousData,
   });
 }
 

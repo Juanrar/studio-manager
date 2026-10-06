@@ -19,6 +19,13 @@ export function HorarioDelProfesor({ profesorId }: { profesorId: number }) {
   // mientras tanto.
   const terminar = (cual: Edicion) => setEdicion((actual) => (actual === cual ? null : actual));
 
+  // El "+" de un día que ya tiene una fila nueva abierta la conserva, con lo escrito. Tiene que ser el mismo
+  // objeto: si cambiara, un guardado en curso no cerraría la fila y un segundo "Guardar" crearía la clase dos veces.
+  const agregar = (diaSemana: number) =>
+    setEdicion((actual) =>
+      actual?.tipo === 'nueva' && actual.diaSemana === diaSemana ? actual : { tipo: 'nueva', diaSemana },
+    );
+
   return (
     <div className="flex flex-col gap-3 p-4">
       <Casilla
@@ -38,6 +45,7 @@ export function HorarioDelProfesor({ profesorId }: { profesorId: number }) {
               profesorId={profesorId}
               edicion={edicion}
               alEditar={setEdicion}
+              alAgregar={agregar}
               alTerminar={terminar}
             />
           ))}
@@ -53,6 +61,7 @@ function DiaDelHorario({
   profesorId,
   edicion,
   alEditar,
+  alAgregar,
   alTerminar,
 }: {
   diaSemana: number;
@@ -60,6 +69,7 @@ function DiaDelHorario({
   profesorId: number;
   edicion: Edicion;
   alEditar: (edicion: Edicion) => void;
+  alAgregar: (diaSemana: number) => void;
   alTerminar: (edicion: Edicion) => void;
 }) {
   const idTitulo = useId();
@@ -111,7 +121,7 @@ function DiaDelHorario({
       <BotonIcono
         icono="mas"
         etiqueta={`Agregar una clase el ${nombre.toLowerCase()}`}
-        onClick={() => alEditar({ tipo: 'nueva', diaSemana })}
+        onClick={() => alAgregar(diaSemana)}
         className="mt-1.5 border border-borde-fuerte bg-panel"
       />
     </section>

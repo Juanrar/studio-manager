@@ -150,6 +150,18 @@ describe('SelectorDeHora', () => {
     expect(alCambiar.mock.calls).toEqual([['1'], ['19']]);
   });
 
+  it('con una hora cargada, hacer clic en el campo y tipear 19 reemplaza la hora en vez de sumarle el texto', async () => {
+    const usuario = userEvent.setup();
+    render(<CampoDeHora inicial="18:00" />);
+
+    // Un clic deja el cursor al final del texto, como en el navegador.
+    await usuario.click(campo());
+    await usuario.keyboard('19');
+
+    expect(campo()).toHaveValue('19');
+    expect(franjasVisibles()).toEqual(['19:00', '19:15', '19:30', '19:45']);
+  });
+
   it.each(['193', '19:3'])('tipear %s deja solo 19:30 porque la comparación ignora los dos puntos', async (escrito) => {
     const usuario = userEvent.setup();
     render(<CampoDeHora />);

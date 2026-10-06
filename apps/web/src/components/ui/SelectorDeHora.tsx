@@ -201,6 +201,12 @@ export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
     if (!dentro(evento.relatedTarget)) cerrar();
   }
 
+  // El campo casi siempre tiene una hora: un clic deja el cursor al final y tipear "19" daría "18:0019". Al entrar
+  // se selecciona entera, así lo que se tipea la reemplaza.
+  function alEnfocar(evento: FocusEvent<HTMLInputElement>) {
+    evento.currentTarget.select();
+  }
+
   return (
     <div
       ref={raiz}
@@ -218,6 +224,7 @@ export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
         aria-activedescendant={franjaMarcada === null ? undefined : idDeOpcion(franjaMarcada)}
         autoComplete="off"
         value={valor}
+        onFocus={alEnfocar}
         onChange={alEscribir}
         onKeyDown={alTeclear}
         className="w-14 bg-transparent py-1.5 pl-2.5 text-texto tabular-nums outline-none"

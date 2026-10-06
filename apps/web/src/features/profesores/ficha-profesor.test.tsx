@@ -9,8 +9,9 @@ import { servidor } from '../../../test/servidor.ts';
 type Pedido = [metodo: string, ruta: string, cuerpo: unknown];
 
 // Abre la ficha de Erik Zapata (id 1) con sus clases. Los handlers leen y cambian `clases` como lo haría la API,
-// así la recarga después de guardar trae lo guardado. `pedidos` anota lo que la pantalla manda.
-function fichaDeErik(clasesIniciales: Clase[]) {
+// así la recarga después de guardar trae lo guardado. `pedidos` anota lo que la pantalla manda. Con `altaDemorada`,
+// el alta no responde hasta que esa promesa se cumple: sirve para tocar la pantalla mientras se guarda.
+function fichaDeErik(clasesIniciales: Clase[], { altaDemorada }: { altaDemorada?: Promise<void> } = {}) {
   conSesion(ADMIN);
   let clases = clasesIniciales;
   const pedidos: Pedido[] = [];
@@ -27,11 +28,14 @@ function fichaDeErik(clasesIniciales: Clase[]) {
       if (url.searchParams.get('profesorId') !== '1') {
         return HttpResponse.json({ error: `Faltó filtrar por el profesor: ${url.search}` }, { status: 400 });
       }
-      return HttpResponse.json({ items: clases });
+      // Como la API: las dadas de baja vienen solo con incluirInactivos=true.
+      const incluirInactivas = url.searchParams.get('incluirInactivos') === 'true';
+      return HttpResponse.json({ items: clases.filter((clase) => incluirInactivas || clase.activa) });
     }),
     http.post('/api/clases', async ({ request }) => {
       const cuerpo = (await request.json()) as CrearClaseInput;
       pedidos.push(['POST', '/api/clases', cuerpo]);
+      await altaDemorada;
       const nueva = unaClase({
         id: 50,
         estilo: cuerpo.estilo,
@@ -238,6 +242,88 @@ describe('/profesores/:id', () => {
     expect(pedidos).toEqual([]);
   });
 
+  it('dar de baja una clase manda PATCH con solo activa: false y la clase deja de verse', async () => {
+    const { usuario, pedidos } = fichaDeErik([SALSA_DEL_LUNES, BACHATA_DEL_LUNES]);
+    await screen.findByRole('region', { name: 'Lunes' });
+
+    await usuario.click(within(filasDe('Lunes')[0]!).getByRole('button', { name: 'Dar de baja la clase' }));
+
+    await waitFor(() => expect(clasesDe('Lunes')).toEqual([['19:30 – 21:00', '1 h 30 min', 'Bachata', 'Inicial']]));
+    expect(pedidos).toEqual([['PATCH', '/api/clases/1', { activa: false }]]);
+  });
+
+  it('con la casilla marcada se piden las dadas de baja, que dicen "Dada de baja", y "Reactivar" manda PATCH con solo activa: true', async () => {
+    const { usuario, pedidos, consultasDeClases } = fichaDeErik([SALSA_DEL_LUNES, { ...BACHATA_DEL_LUNES, activa: false }]);
+    await screen.findByRole('region', { name: 'Lunes' });
+    expect(clasesDe('Lunes')).toEqual([['18:00 – 19:30', '1 h 30 min', 'Salsa', '—']]);
+
+    await usuario.click(screen.getByRole('checkbox', { name: 'Mostrar clases dadas de baja' }));
+
+    await waitFor(() =>
+      expect(clasesDe('Lunes')).toEqual([
+        ['18:00 – 19:30', '1 h 30 min', 'Salsa', '—'],
+        ['19:30 – 21:00', '1 h 30 min', 'Bachata', 'Inicial', 'Dada de baja', 'Reactivar'],
+      ]),
+    );
+    expect(consultasDeClases).toEqual(['?profesorId=1', '?profesorId=1&incluirInactivos=true']);
+
+    await usuario.click(within(filasDe('Lunes')[1]!).getByRole('button', { name: 'Reactivar' }));
+
+    await waitFor(() =>
+      expect(clasesDe('Lunes')).toEqual([
+        ['18:00 – 19:30', '1 h 30 min', 'Salsa', '—'],
+        ['19:30 – 21:00', '1 h 30 min', 'Bachata', 'Inicial'],
+      ]),
+    );
+    expect(pedidos).toEqual([['PATCH', '/api/clases/2', { activa: true }]]);
+  });
+
+  it('marcar la casilla con una fila en edición no vacía la semana ni pierde lo escrito', async () => {
+    const { usuario } = fichaDeErik([SALSA_DEL_LUNES, { ...BACHATA_DEL_LUNES, activa: false }]);
+    await screen.findByRole('region', { name: 'Jueves' });
+    await usuario.click(within(elDia('Jueves')).getByRole('button', { name: 'Agregar una clase el jueves' }));
+    await usuario.type(within(filasDe('Jueves')[0]!).getByRole('textbox', { name: 'Estilo' }), 'Jazz');
+
+    await usuario.click(screen.getByRole('checkbox', { name: 'Mostrar clases dadas de baja' }));
+
+    await waitFor(() =>
+      expect(clasesDe('Lunes')).toEqual([
+        ['18:00 – 19:30', '1 h 30 min', 'Salsa', '—'],
+        ['19:30 – 21:00', '1 h 30 min', 'Bachata', 'Inicial', 'Dada de baja', 'Reactivar'],
+      ]),
+    );
+    expect(filasDe('Jueves')).toHaveLength(1);
+    expect(within(filasDe('Jueves')[0]!).getByRole('textbox', { name: 'Estilo' })).toHaveValue('Jazz');
+  });
+
+  it('el "+" del mismo día mientras se guarda conserva la fila, que se cierra al guardar sin mandar la clase dos veces', async () => {
+    let responderElAlta!: () => void;
+    const { usuario, pedidos } = fichaDeErik([], {
+      altaDemorada: new Promise((resolver) => {
+        responderElAlta = resolver;
+      }),
+    });
+    await screen.findByRole('region', { name: 'Jueves' });
+    const agregarElJueves = () => within(elDia('Jueves')).getByRole('button', { name: 'Agregar una clase el jueves' });
+
+    await usuario.click(agregarElJueves());
+    await usuario.type(within(filasDe('Jueves')[0]!).getByRole('textbox', { name: 'Estilo' }), 'Jazz');
+    await usuario.click(within(filasDe('Jueves')[0]!).getByRole('button', { name: 'Guardar' }));
+    await waitFor(() => expect(pedidos).toHaveLength(1));
+    await usuario.click(agregarElJueves());
+    expect(within(filasDe('Jueves')[0]!).getByRole('textbox', { name: 'Estilo' })).toHaveValue('Jazz');
+    responderElAlta();
+
+    await waitFor(() => expect(clasesDe('Jueves')).toEqual([['18:00 – 19:30', '1 h 30 min', 'Jazz', '—']]));
+    expect(pedidos).toEqual([
+      [
+        'POST',
+        '/api/clases',
+        { estilo: 'Jazz', nivel: null, diaSemana: 4, horaInicio: '18:00', horaFin: '19:30', profesorId: 1 },
+      ],
+    ]);
+  });
+
   it('cargar un porcentaje nuevo desde la pestaña Porcentajes manda puntos básicos y la fecha', async () => {
     let porcentajes: PorcentajeProfesor[] = [{ id: 1, porcentajeBp: 5000, vigenteDesde: '2026-01-01' }];
     let cuerpoRecibido: unknown;
@@ -246,7 +332,8 @@ describe('/profesores/:id', () => {
       http.post('/api/profesores/1/porcentajes', async ({ request }) => {
         cuerpoRecibido = await request.json();
         const nuevo = { id: 2, porcentajeBp: 6000, vigenteDesde: '2026-04-01' };
-        porcentajes = [...porcentajes, nuevo];
+        // Como la API, que ordena del más nuevo al más viejo.
+        porcentajes = [nuevo, ...porcentajes];
         return HttpResponse.json(nuevo, { status: 201 });
       }),
     );
@@ -261,8 +348,8 @@ describe('/profesores/:id', () => {
 
     await waitFor(() =>
       expect(within(pestana).getAllByRole('listitem').map((porcentaje) => porcentaje.textContent)).toEqual([
-        '50% desde el 01/01/2026',
         '60% desde el 01/04/2026',
+        '50% desde el 01/01/2026',
       ]),
     );
     expect(cuerpoRecibido).toEqual({ porcentajeBp: 6000, vigenteDesde: '2026-04-01' });
