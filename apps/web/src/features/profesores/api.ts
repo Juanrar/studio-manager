@@ -18,6 +18,13 @@ export function useProfesores({ incluirInactivos = false }: { incluirInactivos?:
   });
 }
 
+export function useProfesor(id: number) {
+  return useQuery({
+    queryKey: ['profesores', id],
+    queryFn: () => api.get<Profesor>(`/profesores/${id}`),
+  });
+}
+
 export function useCrearProfesor() {
   const clienteQuery = useQueryClient();
   return useMutation({

@@ -122,7 +122,8 @@ En edición, la fila se convierte en campos en su lugar: hora de inicio, "–", 
 | Editar una fila manda `PATCH /api/clases/:id` con las horas y el estilo, y la fila vuelve a lectura | Web | Si manda el día o el profesor cuando no cambiaron, un PATCH puede mudar la clase de día sin querer |
 | El "+" de un día agrega una fila en edición y guardarla manda `POST /api/clases` con ese `diaSemana` | Web | Si el día sale de otro lado, la clase nueva cae en el día equivocado |
 | "Cancelar" en una fila nueva la descarta y no manda nada | Web | Si la fila queda, el horario muestra una clase que no existe |
-| El error de la API aparece debajo de la fila | Web | Si no se muestra, guardar una hora de fin anterior falla en silencio |
+| El error de la API aparece debajo de la fila y la fila sigue en edición | Web | Si no se muestra, un rechazo de la API (agregarle una clase a un profesor dado de baja) falla en silencio. Si la fila vuelve a lectura, se pierde lo que se escribió |
+| Una hora de fin anterior a la de inicio muestra el error debajo de la fila y no manda nada | Web | Si la fila no valida con `crearClaseSchema` antes de mandar, una clase nueva con la hora de fin anterior llega a la API y la fila solo dice "Datos inválidos", sin decir qué está mal |
 | Cargar un porcentaje nuevo desde la pestaña Porcentajes manda puntos básicos y la fecha | Web (se muda del listado) | Si el historial se pierde al sacar el diálogo de la fila, no hay forma de cambiarle el porcentaje a un profesor |
 | Recorrido de punta a punta | E2E (sin cambios) | El e2e crea el profesor desde el diálogo y la clase en `/clases`: las dos cosas siguen igual |
 
@@ -196,11 +197,11 @@ El test que ya existe de cargar un porcentaje nuevo usa el botón "Porcentajes" 
 
 `ProfesorForm.tsx` lo crea la tarea 4; acá solo se importa para el diálogo de "Editar" de la pestaña Datos. Esta tarea agrega la ruta `/profesores/:id` a `rutas.tsx`, hermana de `/profesores` y dentro de `SoloAdmin`.
 
-- [ ] **Paso 1:** escribir los tests de la ficha: las siete filas de la semana con las clases en su día, editar una fila y ver el `PATCH`, el "+" de un día y el `POST` con ese `diaSemana`, "Cancelar" en una fila nueva, el error de la API debajo de la fila, y el de cargar un porcentaje nuevo desde la pestaña Porcentajes que la tarea 4 sacó del listado.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/web test ficha-profesor` y verificar que fallan porque la página no existe.
-- [ ] **Paso 3:** implementar la página con sus tres pestañas, el horario por día y la fila que se edita en su lugar.
-- [ ] **Paso 4:** correr `pnpm test` y `pnpm typecheck` completos, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(profesores): ficha con las clases de la semana`.
+- [x] **Paso 1:** escribir los tests de la ficha: las siete filas de la semana con las clases en su día, editar una fila y ver el `PATCH`, el "+" de un día y el `POST` con ese `diaSemana`, "Cancelar" en una fila nueva, el error de la API debajo de la fila, y el de cargar un porcentaje nuevo desde la pestaña Porcentajes que la tarea 4 sacó del listado.
+- [x] **Paso 2:** correr `pnpm --filter @studio/web test ficha-profesor` y verificar que fallan porque la página no existe.
+- [x] **Paso 3:** implementar la página con sus tres pestañas, el horario por día y la fila que se edita en su lugar. Se sumó un test que el plan no tenía: la validación con `crearClaseSchema` antes de mandar. La fila del plan sobre el error de la API daba como motivo una hora de fin anterior, pero ese caso no llega a la API porque la fila lo frena antes; ahora son dos filas en la tabla de tests.
+- [x] **Paso 4:** correr `pnpm test` y `pnpm typecheck` completos, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(profesores): ficha con las clases de la semana`.
 
 ## Verificación final
 

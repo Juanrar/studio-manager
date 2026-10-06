@@ -2,22 +2,30 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ActualizarClaseInput, Clase, CrearClaseInput } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
-export function useClases({ incluirInactivas = false }: { incluirInactivas?: boolean } = {}) {
+// Sin `profesorId` trae el horario de todo el estudio; con él, solo las clases de ese profesor.
+export function useClases({
+  incluirInactivas = false,
+  profesorId,
+}: { incluirInactivas?: boolean; profesorId?: number | undefined } = {}) {
   return useQuery({
-    queryKey: ['clases', { incluirInactivas }],
+    queryKey: ['clases', { incluirInactivas, profesorId }],
     queryFn: async () =>
-      (await api.get<{ items: Clase[] }>(conQuery('/clases', { incluirInactivos: incluirInactivas || undefined })))
-        .items,
+      (
+        await api.get<{ items: Clase[] }>(
+          conQuery('/clases', { profesorId, incluirInactivos: incluirInactivas || undefined }),
+        )
+      ).items,
   });
 }
 
-// El horario cambia la agenda: se recargan las dos.
+// El horario cambia la agenda y el listado de profesores, que cuenta sus clases por semana: se recargan los tres.
 function useRecargarHorario() {
   const clienteQuery = useQueryClient();
   return () =>
     Promise.all([
       clienteQuery.invalidateQueries({ queryKey: ['clases'] }),
       clienteQuery.invalidateQueries({ queryKey: ['agenda'] }),
+      clienteQuery.invalidateQueries({ queryKey: ['profesores'] }),
     ]);
 }
 

@@ -131,6 +131,15 @@ const TRAZOS = {
   ],
   porcentaje: ['M17 17m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0', 'M7 7m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0', 'M6 18l12 -12'],
   reloj: ['M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0', 'M12 7v5l3 3'],
+  mas: ['M12 5l0 14', 'M5 12l14 0'],
+  lapiz: ['M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4', 'M13.5 6.5l4 4'],
+  tacho: [
+    'M4 7l16 0',
+    'M10 11l0 6',
+    'M14 11l0 6',
+    'M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12',
+    'M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3',
+  ],
 } as const;
 
 export type NombreIcono = keyof typeof TRAZOS;
