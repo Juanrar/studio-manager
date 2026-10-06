@@ -142,6 +142,10 @@ Los tests de integración necesitan Docker corriendo.
 - **Migraciones:** `pnpm --filter @studio/api db:generate --name <nombre>` la genera desde `schema.ts`. `pnpm dev` no la aplica: en la base de desarrollo hay que correr `pnpm --filter @studio/api db:migrate`. Una tabla nueva también va en `TABLAS` de `apps/api/test/db.ts`.
 - **Tareas que corren solas** (la baja automática): `programarTareas` de `src/tareas.ts`, llamada desde `server.ts` después de `listen`. Ahí Fastify ya no deja agregar hooks, así que devuelve una función para detenerlas. Los tests usan `buildApp` y no las arrancan.
 - **El e2e borra `studio_manager_e2e`** en cada corrida. Sirve para mirar la app con datos sin tocar la base de desarrollo: API con esa base en otro puerto y `WEB_DIST=../web/dist`. Un script de capturas que vive fuera del repo carga Playwright con `createRequire('<repo>/e2e/package.json')`.
+- **`pnpm e2e` usa el puerto fijo 3100** (`PUERTO_E2E` en `e2e/entorno.ts`). Si otro proceso lo ocupa, Playwright no levanta la API. Se cambia el número para esa corrida y se vuelve atrás con `git checkout -- e2e/entorno.ts`. No se cierra un proceso que no es de este proyecto.
+- **jsdom no calcula el diseño** ni evalúa media queries como `pointer-coarse`. La posición de una lista flotante o lo que se ve en una pantalla táctil se verifica en Chromium con un script de Playwright, como en la nota anterior.
+- **Tests web del `SelectorDeHora`:** el campo es un combobox (`getByRole('combobox', { name: 'Empieza' })`) y la lista se abre en un portal sobre `document.body`, así que `screen` la encuentra y `within(fila)` no.
+- **`vitest run --reporter=json`** escribe `.vitest/json/output.json` dentro del paquete, que git no ignora. Se pasa `--outputFile` con una ruta fuera del repositorio.
 
 ## Estilo de escritura
 

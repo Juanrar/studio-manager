@@ -1,6 +1,6 @@
 # Ficha del profesor con sus clases
 
-**Estado:** en curso
+**Estado:** lista
 **Depende de:** ficha-del-alumno (20), frontend-administracion (15)
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; el listado de profesores se ve como el de alumnos, cada nombre abre la ficha del profesor en `/profesores/:id`, y ahí se ven las clases de la semana agrupadas por día, se editan en la misma fila y se agregan nuevas con el botón de cada día.
 
