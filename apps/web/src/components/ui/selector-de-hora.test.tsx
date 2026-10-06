@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SelectorDeHora } from './SelectorDeHora.tsx';
 
 // Las franjas de la lista, escritas a mano: de 08:00 a 23:45 cada 15 minutos, 64 en total.
@@ -57,7 +57,7 @@ function CampoDeHora({
 }
 
 const campo = () => screen.getByRole('combobox', { name: 'Hora de inicio' });
-const reloj = () => screen.getByRole('button', { name: 'Elegir el horario' });
+const reloj = () => screen.getByRole('button', { name: 'Elegir el horario (Hora de inicio)' });
 const franjasVisibles = () => screen.getAllByRole('option').map((franja) => franja.textContent);
 const franjaMarcada = () => screen.getByRole('option', { selected: true }).textContent;
 
@@ -74,7 +74,20 @@ function simularMedidas() {
   vi.spyOn(Element.prototype, 'clientHeight', 'get').mockReturnValue(ALTO_DE_LA_LISTA);
 }
 
+// La ventana de jsdom no tiene alto: se simula una baja, de 500px, para que la lista (256px) no entre en cualquier lado.
+const ALTO_DE_VENTANA = 500;
+
+// Tampoco sabe dónde está el campo: se lo simula de 34px de alto y 90 de ancho, a 100px del borde izquierdo y a `arriba`
+// del borde de arriba, con una lista que mide ahora `altoDeLaLista` (256px es lo que da el max-h-64 de una lista llena).
+function simularCampoEn(arriba: number, altoDeLaLista = 256) {
+  vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, arriba, 90, 34));
+  vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(altoDeLaLista);
+}
+
 describe('SelectorDeHora', () => {
+  beforeEach(() => {
+    vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(ALTO_DE_VENTANA);
+  });
   afterEach(() => vi.restoreAllMocks());
 
   it('el reloj abre la lista con las 64 franjas de 15 minutos, de 08:00 a 23:45', async () => {
@@ -114,6 +127,17 @@ describe('SelectorDeHora', () => {
     expect(campo()).toHaveFocus();
   });
 
+  it('tocar el reloj enfoca el campo sin desplazar el área, porque el scroll cerraría la lista recién abierta', async () => {
+    const enfocar = vi.spyOn(HTMLElement.prototype, 'focus');
+    const usuario = userEvent.setup();
+    render(<CampoDeHora inicial="18:00" />);
+
+    await usuario.click(reloj());
+
+    expect(enfocar).toHaveBeenCalledWith({ preventScroll: true });
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+
   it('tipear 19 deja solo las cuatro franjas de las 19 y avisa de cada tecla', async () => {
     const usuario = userEvent.setup();
     const alCambiar = vi.fn();
@@ -142,6 +166,20 @@ describe('SelectorDeHora', () => {
     await usuario.type(campo(), '21');
 
     expect(franjasVisibles()).toEqual(['21:00', '21:15', '21:30', '21:45']);
+  });
+
+  it.each<[string, string[]]>([
+    ['9', ['09:00', '09:15', '09:30', '09:45']],
+    ['8', ['08:00', '08:15', '08:30', '08:45']],
+    ['9:30', ['09:30']],
+    ['930', ['09:30']],
+  ])('tipear %s encuentra las franjas de la mañana aunque falte el cero de adelante', async (escrito, esperadas) => {
+    const usuario = userEvent.setup();
+    render(<CampoDeHora />);
+
+    await usuario.type(campo(), escrito);
+
+    expect(franjasVisibles()).toEqual(esperadas);
   });
 
   it('si lo tipeado no coincide con ninguna franja, la lista muestra todas', async () => {
@@ -269,6 +307,51 @@ describe('SelectorDeHora', () => {
     expect(alEnviar).toHaveBeenCalledTimes(1);
   });
 
+  it('el campo apunta a la lista con aria-controls y a la franja marcada con aria-activedescendant', async () => {
+    const usuario = userEvent.setup();
+    render(<CampoDeHora inicial="18:00" />);
+    await usuario.click(campo());
+    expect(campo()).toHaveAttribute('aria-expanded', 'false');
+    expect(campo()).not.toHaveAttribute('aria-controls');
+    expect(campo()).not.toHaveAttribute('aria-activedescendant');
+
+    await usuario.keyboard('{ArrowDown}');
+    const lista = screen.getByRole('listbox');
+    let marcada = screen.getByRole('option', { selected: true });
+    expect(campo()).toHaveAttribute('aria-expanded', 'true');
+    expect(lista.id).not.toBe('');
+    expect(campo()).toHaveAttribute('aria-controls', lista.id);
+    expect(marcada).toHaveTextContent('18:00');
+    expect(marcada.id).not.toBe('');
+    expect(campo()).toHaveAttribute('aria-activedescendant', marcada.id);
+
+    await usuario.keyboard('{ArrowDown}');
+    marcada = screen.getByRole('option', { selected: true });
+    expect(marcada).toHaveTextContent('18:15');
+    expect(campo()).toHaveAttribute('aria-activedescendant', marcada.id);
+
+    await usuario.keyboard('{Escape}');
+    expect(campo()).toHaveAttribute('aria-expanded', 'false');
+    expect(campo()).not.toHaveAttribute('aria-controls');
+    expect(campo()).not.toHaveAttribute('aria-activedescendant');
+  });
+
+  it.each([
+    ['08:00', 'ArrowUp'],
+    ['23:45', 'ArrowDown'],
+  ])('en la franja %s, la flecha %s no da la vuelta', async (hora, flecha) => {
+    const usuario = userEvent.setup();
+    render(<CampoDeHora inicial={hora} />);
+    await usuario.click(campo());
+
+    // La primera flecha abre la lista con la franja del valor actual marcada.
+    await usuario.keyboard('{ArrowDown}');
+    expect(franjaMarcada()).toBe(hora);
+    await usuario.keyboard(`{${flecha}}`);
+
+    expect(franjaMarcada()).toBe(hora);
+  });
+
   it('un clic fuera del selector cierra la lista y uno adentro no', async () => {
     const usuario = userEvent.setup();
     render(
@@ -306,26 +389,136 @@ describe('SelectorDeHora', () => {
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 
-  it('la lista se abre debajo del campo si entra', async () => {
+  it('la lista se monta en el body y no dentro del campo, así ningún contenedor con scroll la recorta', async () => {
     const usuario = userEvent.setup();
-    render(<CampoDeHora inicial="18:00" />);
+    const { container } = render(<CampoDeHora inicial="18:00" />);
 
     await usuario.click(reloj());
 
-    expect(screen.getByRole('listbox')).toHaveClass('top-full');
+    const lista = screen.getByRole('listbox');
+    expect(lista.parentElement).toBe(document.body);
+    expect(container).not.toContainElement(lista);
   });
 
-  it('la lista se abre hacia arriba si no entra debajo del campo', async () => {
-    // El campo está pegado al borde de abajo de la ventana: debajo quedan 6px y arriba, todo lo demás.
-    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(
-      new DOMRect(0, window.innerHeight - 40, 90, 34),
-    );
+  it('la lista va debajo del campo, con su ancho y a su altura, si entra', async () => {
+    simularCampoEn(100);
     const usuario = userEvent.setup();
     render(<CampoDeHora inicial="18:00" />);
 
     await usuario.click(reloj());
 
-    expect(screen.getByRole('listbox')).toHaveClass('bottom-full');
+    const lista = screen.getByRole('listbox');
+    expect(lista).toHaveClass('fixed');
+    expect(lista).toHaveStyle({ top: '138px', left: '100px', width: '90px' });
+    expect(lista.style.bottom).toBe('');
+    expect(lista.style.maxHeight).toBe('');
+  });
+
+  it('si no entra debajo del campo pero sí encima, la lista va encima', async () => {
+    simularCampoEn(400);
+    const usuario = userEvent.setup();
+    render(<CampoDeHora inicial="18:00" />);
+
+    await usuario.click(reloj());
+
+    const lista = screen.getByRole('listbox');
+    expect(lista).toHaveStyle({ bottom: '104px', left: '100px', width: '90px' });
+    expect(lista.style.top).toBe('');
+    expect(lista.style.maxHeight).toBe('');
+  });
+
+  // Con el campo en 250 quedan 204px abajo y 238px arriba; con el campo en 200, 254px abajo y 188px arriba.
+  it.each<[string, number, Record<string, string>]>([
+    ['encima', 250, { bottom: '254px', maxHeight: '238px' }],
+    ['debajo', 200, { top: '238px', maxHeight: '254px' }],
+  ])('si no entra ni debajo ni encima, va %s, del lado con más lugar, y se achica a lo que hay', async (lado, arriba, estilo) => {
+    simularCampoEn(arriba);
+    const usuario = userEvent.setup();
+    render(<CampoDeHora inicial="18:00" />);
+
+    await usuario.click(reloj());
+
+    const lista = screen.getByRole('listbox');
+    expect(lista).toHaveStyle(estilo);
+    expect(lado === 'encima' ? lista.style.top : lista.style.bottom).toBe('');
+  });
+
+  it('cuenta lo que la lista puede llegar a medir según su max-height, no un alto copiado ni el de ahora', async () => {
+    // El max-h-64 de la lista pasa a medir 300px. Con el campo en 174 quedan 280px debajo: ya no entra,
+    // aunque ahora la lista mida solo 122px, como si estuviera filtrada.
+    const estilo = document.createElement('style');
+    estilo.textContent = '.max-h-64 { max-height: 300px; }';
+    document.head.append(estilo);
+    try {
+      simularCampoEn(174, 122);
+      const usuario = userEvent.setup();
+      render(<CampoDeHora inicial="18:00" />);
+
+      await usuario.click(reloj());
+
+      expect(screen.getByRole('listbox')).toHaveStyle({ top: '212px', maxHeight: '280px' });
+    } finally {
+      estilo.remove();
+    }
+  });
+
+  it.each(['el área con scroll que contiene al campo', 'la página'])('si se desplaza %s, la lista se cierra', async (que) => {
+    const usuario = userEvent.setup();
+    render(
+      <div role="region" aria-label="Área con scroll" style={{ overflow: 'auto' }}>
+        <CampoDeHora inicial="18:00" />
+      </div>,
+    );
+    await usuario.click(reloj());
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+
+    fireEvent.scroll(que === 'la página' ? document : screen.getByRole('region', { name: 'Área con scroll' }));
+
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('si se desplaza la lista o algo que no contiene al campo, la lista sigue abierta', async () => {
+    const usuario = userEvent.setup();
+    render(
+      <>
+        <div role="region" aria-label="Menú lateral" />
+        <CampoDeHora inicial="18:00" />
+      </>,
+    );
+    await usuario.click(reloj());
+
+    fireEvent.scroll(screen.getByRole('listbox'));
+    fireEvent.scroll(screen.getByRole('region', { name: 'Menú lateral' }));
+
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+
+  it('si cambia el tamaño de la ventana, la lista se cierra', async () => {
+    const usuario = userEvent.setup();
+    render(<CampoDeHora inicial="18:00" />);
+    await usuario.click(reloj());
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+
+    fireEvent(window, new Event('resize'));
+
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('cada reloj se llama con la etiqueta de su campo, así el de fin se distingue del de inicio', async () => {
+    const usuario = userEvent.setup();
+    render(
+      <>
+        <SelectorDeHora etiqueta="Hora de inicio" valor="18:00" alCambiar={() => {}} />
+        <SelectorDeHora etiqueta="Hora de fin" valor="19:30" alCambiar={() => {}} />
+      </>,
+    );
+
+    await usuario.click(screen.getByRole('button', { name: 'Elegir el horario (Hora de fin)' }));
+
+    expect(screen.getAllByRole('listbox')).toHaveLength(1);
+    expect(franjaMarcada()).toBe('19:30');
+    expect(screen.getByRole('combobox', { name: 'Hora de fin' })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('combobox', { name: 'Hora de inicio' })).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('se nombra con la etiqueta y, por el id, con una label', () => {
