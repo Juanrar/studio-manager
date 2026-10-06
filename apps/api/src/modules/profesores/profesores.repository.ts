@@ -4,6 +4,11 @@ import type { Ejecutor } from '../../db/client.ts';
 import { porcentajeProfesor, profesor, type NuevoProfesor } from '../../db/schema.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 
+// La consulta del profesor es de una sola tabla, y ahí Drizzle escribe las columnas sin la tabla: `${profesor.id}`
+// saldría "id", que dentro de la subconsulta es el id del porcentaje, y todos los profesores tendrían el mismo.
+// Con la tabla escrita, la subconsulta mira al profesor de afuera.
+const idDelProfesor = sql`${profesor}.${sql.identifier(profesor.id.name)}`;
+
 function columnas(hoy: FechaDia) {
   return {
     id: profesor.id,
@@ -16,7 +21,7 @@ function columnas(hoy: FechaDia) {
     activo: profesor.activo,
     porcentajeVigenteBp: sql<number | null>`(
       select ${porcentajeProfesor.porcentajeBp} from ${porcentajeProfesor}
-      where ${porcentajeProfesor.profesorId} = ${profesor.id}
+      where ${porcentajeProfesor.profesorId} = ${idDelProfesor}
         and ${porcentajeProfesor.vigenteDesde} <= ${hoy}
       order by ${porcentajeProfesor.vigenteDesde} desc
       limit 1

@@ -75,6 +75,51 @@ describe('/api/profesores', () => {
     });
   });
 
+  it('cada profesor trae su propio porcentaje vigente, en el listado y en GET /api/profesores/:id', async () => {
+    const erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata', porcentajeBp: 5000 });
+    // Malena entra por la API, con el reloj de la app: su porcentaje es más nuevo que el de Erik.
+    const malena = (await crearProfesor(cookieAdmin, MALENA)).json();
+
+    const listado = await pedirProfesores();
+    const fichaDeErik = await app.inject({
+      method: 'GET',
+      url: `/api/profesores/${erik.id}`,
+      headers: { cookie: cookieRecepcion },
+    });
+
+    const datosDeErik = {
+      id: erik.id,
+      nombre: 'Erik',
+      apellido: 'Zapata',
+      dni: null,
+      email: null,
+      telefono: null,
+      aliasCbu: null,
+      activo: true,
+      porcentajeVigenteBp: 5000,
+    };
+    expect(listado.json()).toEqual({
+      items: [
+        {
+          id: malena.id,
+          nombre: 'Malena',
+          apellido: 'Rosas',
+          dni: null,
+          email: null,
+          telefono: null,
+          aliasCbu: 'malena.rosas.mp',
+          activo: true,
+          porcentajeVigenteBp: 5250,
+          clasesPorSemana: 0,
+          diasConClase: [],
+        },
+        { ...datosDeErik, clasesPorSemana: 0, diasConClase: [] },
+      ],
+    });
+    expect(fichaDeErik.statusCode).toBe(200);
+    expect(fichaDeErik.json()).toEqual(datosDeErik);
+  });
+
   it('recepción puede listar profesores pero no crearlos', async () => {
     const listado = await app.inject({ method: 'GET', url: '/api/profesores', headers: { cookie: cookieRecepcion } });
     const alta = await crearProfesor(cookieRecepcion, MALENA);
