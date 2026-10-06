@@ -28,7 +28,7 @@
 
 | Método y ruta | Rol | Cuerpo o query | Respuesta |
 |---|---|---|---|
-| `GET /api/clases` | recepcion | `?incluirInactivos=true` | `200 { items: Clase[] }`, por día y hora |
+| `GET /api/clases` | recepcion | `?incluirInactivos=true`; desde la feature 23 también `?profesorId=N`, para las clases de un solo profesor | `200 { items: Clase[] }`, por día y hora |
 | `POST /api/clases` | admin | `{ estilo, nivel?, diaSemana, horaInicio, horaFin, profesorId }` | `201` clase; `422` profesor inválido |
 | `PATCH /api/clases/:id` | admin | campos opcionales y `activa?` | `200` clase; `404`; `422` |
 | `GET /api/sesiones/dia` | recepcion | `?fecha=AAAA-MM-DD` (por defecto hoy) | `200 { fecha, items: ClaseDelDia[] }` |
@@ -54,7 +54,7 @@ Formas:
 | Abrir una sesión en una fecha de otro día de la semana responde 422 | Integración | Si no se compara el día, se crean sesiones de una clase en días que no se dicta |
 | Una suplencia cambia el profesor de la sesión y no el titular de la clase | Integración | Si el `PATCH` de sesión actualiza la clase, la suplencia de un día cambia al titular para siempre |
 
-**No se testea:** el filtro de inactivos de `GET /api/clases` (mismo patrón que packs); cancelar una sesión sin asistencias (es un cambio de campo; la regla interesante se prueba en asistencias).
+**No se testea:** cancelar una sesión sin asistencias (es un cambio de campo; la regla interesante se prueba en asistencias). El filtro de inactivos de `GET /api/clases` no tenía test porque seguía el mismo patrón que packs; la feature 23 lo reescribió con el filtro por profesor y desde entonces tiene test, con `profesorId` y sin él, en `clases.test.ts`.
 
 ---
 

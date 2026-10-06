@@ -6,7 +6,7 @@
 
 > **Para el agente:** leé primero [CLAUDE.md](../../CLAUDE.md) y [el índice de features](index.md). Trabajá una tarea por vez y marcá cada checkbox recién cuando corriste el comando y lo viste pasar.
 
-**Referencia:** las maquetas de `.superpowers/brainstorm/`, elegidas con quien administra el estudio. La ficha sigue el diseño "fila con diálogo" con edición en la misma fila, y el horario se elige de una lista simple de franjas de 15 minutos.
+**Diseño elegido:** con quien administra el estudio se eligió una ficha de página entera; cada clase es una fila de lectura que el lápiz vuelve editable en su lugar, y la hora se elige de un selector con una lista simple de franjas de 15 minutos. Las maquetas con las que se eligió eran locales y no se versionaron.
 
 ## Qué devuelve la API
 
@@ -56,7 +56,7 @@ Se parece al de alumnos:
 - En la barra: un buscador por nombre, apellido o DNI y la casilla "Mostrar dados de baja" que ya existe.
 - Al pie: "N profesores · M activos".
 
-**El buscador filtra en el navegador.** `GET /api/profesores` devuelve todos los profesores sin paginar y un estudio tiene decenas, no miles. Compara sin distinguir mayúsculas contra nombre, apellido y DNI. No se toca la API.
+**El buscador filtra en el navegador.** `GET /api/profesores` devuelve todos los profesores sin paginar y un estudio tiene decenas, no miles. Compara sin distinguir mayúsculas ni tildes contra el nombre completo en los dos órdenes ("erik zapata" y "zapata erik" encuentran lo mismo, como en el buscador de alumnos) y contra el DNI. No se toca la API.
 
 ### Ficha del profesor (`/profesores/:id`)
 
@@ -70,23 +70,27 @@ Se parece al de alumnos:
 
 ### La fila de una clase
 
-En lectura: `18:00 – 19:30`, la duración en gris, el estilo en negrita, el nivel como insignia violeta. Al pasar el mouse aparecen a la derecha el lápiz y el tacho.
+En lectura: `18:00 – 19:30`, la duración en gris, el estilo en negrita, el nivel como insignia violeta. Al pasar el mouse aparecen a la derecha el lápiz y el tacho. En una pantalla táctil se ven siempre: no hay mouse que las muestre, y escondidas igual recibirían el toque.
+
+Una clase dada de baja, cuando la casilla la muestra, lleva la insignia "Dada de baja" y "Reactivar" en lugar del tacho.
 
 En edición, la fila se convierte en campos en su lugar: hora de inicio, "–", hora de fin, estilo, nivel, y a la derecha "Cancelar" y "Guardar". Las columnas miden lo mismo en los dos estados para que nada se corra al entrar a editar.
 
 - Solo una fila se edita a la vez.
-- El "+" de un día agrega una fila nueva ya en edición, con 18:00 a 19:30 y los textos vacíos.
+- El "+" de un día agrega una fila nueva ya en edición, con 18:00 a 19:30 y los textos vacíos. Si ese día ya tiene una fila nueva abierta, el "+" la conserva con lo escrito.
 - "Cancelar" en una fila nueva la descarta; en una existente deja todo como estaba.
-- "Dar de baja" es `PATCH /api/clases/:id` con `activa: false`. Nada se borra, como en todo el sistema.
+- "Dar de baja" es `PATCH /api/clases/:id` con `activa: false`, y "Reactivar", con `activa: true`. Nada se borra, como en todo el sistema.
+- Marcar o desmarcar la casilla no vacía la semana: mientras llegan las clases se siguen viendo las de antes, y la fila en edición conserva lo escrito.
 - El error de la API se muestra debajo de la fila que se está editando, en rojo.
 
 ### El selector de hora
 
 - Campo de texto angosto con la hora y un botón de reloj al lado.
 - El reloj abre una lista de 08:00 a 23:45 cada 15 minutos, ya posicionada en el horario que tiene la clase.
-- Lo que se tipea filtra la lista: escribir "19" deja las cuatro franjas de las 19.
-- Flecha abajo y flecha arriba se mueven por la lista, Enter elige, Escape cierra. Un clic afuera también cierra.
-- La lista se abre hacia arriba si no entra abajo.
+- Al entrar al campo, la hora queda seleccionada entera: lo que se tipea la reemplaza.
+- Lo que se tipea filtra la lista: escribir "19" deja las cuatro franjas de las 19, y "9" las de las 09.
+- Flecha abajo y flecha arriba se mueven por la lista sin dar la vuelta, Enter elige, Escape cierra. Un clic afuera también cierra.
+- La lista va en el body, por encima de todo. Se abre hacia arriba si no entra abajo, y se cierra si se desplaza lo que contiene al campo o cambia el tamaño de la ventana.
 
 ## Qué no se implementa
 
@@ -104,27 +108,46 @@ En edición, la fila se convierte en campos en su lugar: hora de inicio, "–", 
 | `GET /api/clases?profesorId=N` devuelve solo las de ese profesor, ordenadas por día y hora | Integración HTTP | Si el filtro no se combina con el de activas, la ficha muestra clases dadas de baja o de otro profesor |
 | Con `incluirInactivos=true` el filtro suma las clases dadas de baja de ese profesor y ninguna de otro | Integración HTTP | Si `incluirInactivos` no llega al filtro, la casilla "Mostrar clases dadas de baja" de la ficha no hace nada; si el filtro de profesor se pierde con ella, la ficha muestra las clases de todos |
 | El filtro no valida al profesor: uno dado de baja trae sus clases y uno que no existe, una lista vacía | Integración HTTP | Si el listado verifica al profesor como `crearClase` (`verificarProfesorActivo`), la ficha de un profesor dado de baja responde 422 en vez de mostrar sus clases |
+| Sin `profesorId` trae las activas de todos los profesores, y con `incluirInactivos=true` también las dadas de baja | Integración HTTP | Es el camino de la pantalla `/clases`, que la tarea 1 reescribió con `and(...condiciones)`. Si el filtro de activas queda atado al de profesor, `/clases` muestra las clases dadas de baja sin que nadie marque la casilla. Verificado con esa mutación |
 | El listado de profesores trae `clasesPorSemana` y `diasConClase` sin repetir y ordenados, y en 0 y `[]` para quien no tiene clases | Integración HTTP | Si se cuentan las clases dadas de baja o se repite un día con dos clases, el listado miente sobre la carga del profesor |
 | Las clases dadas de baja no cuentan aunque el listado pida `incluirInactivos=true` | Integración HTTP | Si el parámetro se pasa también a las clases, un profesor dado de baja aparece con clases que ya no da |
 | El reloj abre la lista con las 64 franjas de 15 minutos y volver a tocarlo la cierra | Web (unitario de componente) | Si el reloj solo abre, la lista tapa la fila hasta hacer clic afuera. Si las franjas no son de 15 minutos, la grilla no es la que se acordó con el estudio |
+| Tocar el reloj enfoca el campo sin desplazar el área | Web (unitario de componente) | Si el reloj enfoca con un `focus()` común, el navegador desplaza el área para mostrar un campo cortado por el borde, ese scroll cierra la lista recién abierta y el reloj parece no hacer nada |
+| Con una hora cargada, un clic en el campo y tipear "19" reemplaza la hora y deja las cuatro franjas de las 19 | Web (unitario de componente) | Si el campo no selecciona la hora al recibir el foco, el clic deja el cursor al final y tipear "19" sobre 18:00 da "18:0019", que no es una hora ni filtra la lista |
 | Tipear "19" deja las cuatro franjas de las 19 y avisa de cada tecla; "193" y "19:3" dejan 19:30; "21" no trae las 12:15; lo que no coincide deja todas | Web (unitario de componente) | Si la lista no filtra, cargar una clase a las 21:00 obliga a scrollear 52 franjas. Si la comparación no ignora los dos puntos, quien tipea la hora completa no la encuentra. Si busca en cualquier parte del texto, una hora trae franjas de otras horas. Si la lista se vacía, no hay cómo elegir sin borrar el campo |
+| Tipear "9", "8", "9:30" o "930" encuentra las franjas de la mañana | Web (unitario de componente) | Si la comparación no le agrega el cero de adelante a una cifra de 3 a 9, "9" no coincide con ninguna franja y la lista queda entera, y "930" no encuentra las 09:30 |
 | Un horario fuera de la grilla aparece en la lista al editar esa clase | Web (unitario de componente) | Si no se agrega, abrir el selector de una clase de las 18:20 la cambia sin que nadie lo pida |
 | Elegir una franja avisa con `alCambiar`, cierra la lista y deja el foco en el campo | Web (unitario de componente) | Si elegir con el mouse saca el foco del campo, el teclado deja de responder después de elegir |
 | Al abrir, el horario actual queda marcado y en el medio de la lista; las flechas lo mantienen a la vista | Web (unitario de componente) | Si la lista abre desde arriba, editar una clase de las 21:00 muestra las 08:00 y obliga a buscar la hora |
 | Flecha abajo abre la lista, las flechas marcan, Enter elige y Escape cierra sin cambiar la hora | Web (unitario de componente) | Si Escape elige la franja marcada, cerrar la lista cambia la hora de la clase. Si Enter sin franja marcada elige la primera, tipear "19" y Enter guarda 19:00 sin que nadie lo pida |
+| En 08:00 la flecha arriba y en 23:45 la flecha abajo no se mueven | Web (unitario de componente) | Si se saca el tope del índice, la flecha en una punta de la lista desmarca la franja y la siguiente salta a la otra punta |
+| El campo apunta a la lista con `aria-controls` y a la franja marcada con `aria-activedescendant`, y los saca al cerrar | Web (unitario de componente) | El foco nunca sale del campo: sin esos atributos, un lector de pantalla no anuncia la franja al moverse con las flechas. Si quedan al cerrar, apuntan a una lista que ya no existe |
 | Enter con la lista abierta no envía el formulario | Web (unitario de componente) | Si Enter además envía, la fila de la ficha se guarda con la hora vieja al elegir una franja |
 | Un clic fuera o Tab cierran la lista, y ni el reloj ni la lista reciben el foco con Tab | Web (unitario de componente) | Si la lista queda abierta al pasar al campo siguiente, se superponen la de inicio y la de fin. Si Tab para en el reloj o en la lista, llegar al campo de fin cuesta varias pulsaciones |
-| La lista se abre hacia arriba cuando no entra debajo del campo | Web (unitario de componente) | Si siempre abre hacia abajo, en las últimas filas de la semana la lista queda cortada por el borde de la ventana |
-| El campo se nombra con `etiqueta` y, por `id`, con una `<label>` | Web (unitario de componente) | Si el id no llega al campo, los tests de la ficha y los lectores de pantalla no encuentran la hora por su etiqueta |
+| La lista se monta en el body y no dentro del campo | Web (unitario de componente) | Si la lista se dibuja dentro del campo, el scroll de `Pagina` y el `overflow-hidden` de la tarjeta la recortan |
+| La lista va debajo del campo, con su ancho y a su altura, si entra | Web (unitario de componente) | La lista es `fixed` y está en el body: si no toma la posición y el ancho del campo, aparece en cualquier lugar de la ventana |
+| Si no entra debajo del campo pero sí encima, la lista va encima | Web (unitario de componente) | Si siempre abre hacia abajo, en las últimas filas de la semana la lista queda cortada por el borde de la ventana |
+| Si no entra ni debajo ni encima, va del lado con más lugar y se achica a lo que hay | Web (unitario de componente) | Si en una ventana baja la lista va igual con su alto completo, se sale de la ventana y las franjas de la punta no se pueden elegir |
+| La ubicación cuenta lo que la lista puede llegar a medir según su `max-height`, no el alto de ahora ni uno copiado | Web (unitario de componente) | Si se mide con el alto de ahora, una lista filtrada se ubica en un lado donde después, al borrar el filtro, no entra. Si el alto está copiado en el código, cambiar el `max-h-64` desacomoda la ubicación |
+| Si se desplaza el área que contiene al campo o la página, la lista se cierra | Web (unitario de componente) | La lista es `fixed`: si no se cierra, queda flotando lejos de su campo |
+| Si se desplaza la lista o algo que no contiene al campo, la lista sigue abierta | Web (unitario de componente) | Si cualquier scroll la cierra, desplazar la lista para buscar una franja la cierra |
+| Si cambia el tamaño de la ventana, la lista se cierra | Web (unitario de componente) | Si no se cierra, queda donde se calculó para la ventana anterior, separada del campo |
+| Cada reloj se llama con la etiqueta de su campo | Web (unitario de componente) | Si los dos relojes de una fila se llaman igual, un lector de pantalla no distingue el de inicio del de fin y los tests de la ficha no pueden tocar uno |
+| El campo se nombra con `etiqueta` y, por `id`, con una `<label>` | Web (unitario de componente) | El nombre accesible lo da `aria-label`: si se pierde, los lectores de pantalla y los tests de la ficha no encuentran la hora por "Empieza". Si el `id` no llega al campo, un clic en la `<label>` no le pasa el foco |
 | El listado muestra las clases por semana y los días, y el nombre lleva a la ficha | Web | Si la fila deja de ser un enlace, no hay forma de llegar a la ficha |
-| El buscador filtra por nombre, apellido y DNI sin distinguir mayúsculas | Web | Si filtra solo por nombre, no se encuentra a un profesor buscando el apellido |
+| El buscador filtra por apellido y por DNI, sin distinguir mayúsculas ni tildes | Web | Si filtra solo por nombre, no se encuentra a un profesor buscando el apellido. Si no saca las tildes, "NUNEZ" no encuentra a Núñez |
+| El buscador encuentra por el nombre solo y por el nombre completo en los dos órdenes: "erik", "erik zapata", "zapata erik", "lucia nunez" | Web | Si compara campo por campo, quien tipea el nombre completo, como en el buscador de alumnos, no encuentra a nadie |
 | La ficha muestra las siete filas de la semana con las clases de ese profesor en su día | Web | Si se agrupa con los días que vienen de la API, un día sin clases desaparece y no se le puede agregar una |
 | Editar una fila manda `PATCH /api/clases/:id` con las horas y el estilo, y la fila vuelve a lectura | Web | Si manda el día o el profesor cuando no cambiaron, un PATCH puede mudar la clase de día sin querer |
 | El "+" de un día agrega una fila en edición y guardarla manda `POST /api/clases` con ese `diaSemana` | Web | Si el día sale de otro lado, la clase nueva cae en el día equivocado |
 | "Cancelar" en una fila nueva la descarta y no manda nada | Web | Si la fila queda, el horario muestra una clase que no existe |
 | El error de la API aparece debajo de la fila y la fila sigue en edición | Web | Si no se muestra, un rechazo de la API (agregarle una clase a un profesor dado de baja) falla en silencio. Si la fila vuelve a lectura, se pierde lo que se escribió |
 | Una hora de fin anterior a la de inicio muestra el error debajo de la fila y no manda nada | Web | Si la fila no valida con `crearClaseSchema` antes de mandar, una clase nueva con la hora de fin anterior llega a la API y la fila solo dice "Datos inválidos", sin decir qué está mal |
-| Cargar un porcentaje nuevo desde la pestaña Porcentajes manda puntos básicos y la fecha | Web (se muda del listado) | Si el historial se pierde al sacar el diálogo de la fila, no hay forma de cambiarle el porcentaje a un profesor |
+| Tocar el tacho manda `PATCH /api/clases/:id` con solo `{ activa: false }` y la clase deja de verse | Web | Si el PATCH lleva otros campos de la fila, dar de baja puede pisar la clase con datos viejos. Si el horario no se recarga, la clase dada de baja sigue en la semana. Verificado con la mutación de mandar también el estilo |
+| Con la casilla marcada se piden las dadas de baja (`incluirInactivos=true`), que dicen "Dada de baja", y "Reactivar" manda `PATCH` con solo `{ activa: true }` | Web | Si la casilla no llega a la consulta, una clase dada de baja no se puede ver ni reactivar desde la ficha. Verificado con esa mutación |
+| Marcar la casilla con una fila en edición no vacía la semana ni pierde lo escrito | Web | Sin `placeholderData: keepPreviousData` en `useClases`, la clave nueva no tiene datos: la semana pasa a "Cargando…" y la fila en edición vuelve a montarse vacía |
+| El "+" del mismo día mientras se guarda conserva la fila, que se cierra al terminar sin mandar la clase dos veces | Web | Si el "+" reemplaza la edición por un objeto nuevo, `terminar` no la reconoce: la fila sigue abierta después de guardar y un segundo "Guardar" crea la clase dos veces |
+| Cargar un porcentaje nuevo desde la pestaña Porcentajes manda puntos básicos y la fecha; el historial queda del más nuevo al más viejo, como lo ordena la API | Web (se muda del listado) | Si el historial se pierde al sacar el diálogo de la fila, no hay forma de cambiarle el porcentaje a un profesor |
 | Recorrido de punta a punta | E2E (sin cambios) | El e2e crea el profesor desde el diálogo y la clase en `/clases`: las dos cosas siguen igual |
 
 ---
@@ -172,11 +195,11 @@ El componente recibe `valor`, `alCambiar`, `etiqueta` (para `aria-label`) y opci
 ### Tarea 4: El listado de profesores en la web
 
 **Archivos:**
-- Crear: `apps/web/src/features/profesores/ProfesorForm.tsx`
+- Crear: `apps/web/src/features/profesores/ProfesorForm.tsx`, `PorcentajesDelProfesor.tsx`
 - Modificar: `apps/web/src/features/profesores/ProfesoresPage.tsx`, `profesores/api.ts`, `apps/web/test/datos.ts` (`unProfesorEnListado` y `unaClase`)
 - Test: `apps/web/src/features/profesores/profesores.test.tsx`
 
-El formulario de alta y el de edición se sacan de `ProfesoresPage` y pasan a `ProfesorForm.tsx` para que los use también la ficha. "Nuevo profesor" sigue en la barra del listado.
+El formulario de alta y el de edición se sacan de `ProfesoresPage` y pasan a `ProfesorForm.tsx` para que los use también la ficha. "Nuevo profesor" sigue en la barra del listado. El historial de porcentajes sale del diálogo de la fila y pasa a `PorcentajesDelProfesor.tsx`, para la pestaña Porcentajes de la ficha.
 
 La ruta `/profesores/:id` la agrega la tarea 5, junto con la página que la atiende. Hasta entonces el enlace del nombre existe pero no lleva a ninguna parte: el test de esta tarea mira el `href`, no la navegación.
 
@@ -205,6 +228,6 @@ El test que ya existe de cargar un porcentaje nuevo usa el botón "Porcentajes" 
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
-- [ ] `pnpm e2e` pasa sin cambios en el recorrido.
+- [x] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
+- [x] `pnpm e2e` pasa sin cambios en el recorrido.
 - [ ] A mano contra la API real: crear un profesor, abrir su ficha, agregarle una clase con el "+" del miércoles, editarle la hora con el selector, darla de baja y verificar que el listado muestra "Clases por semana" y "Días" al día.

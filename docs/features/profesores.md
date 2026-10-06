@@ -25,7 +25,7 @@
 
 | Método y ruta | Rol | Cuerpo o query | Respuesta |
 |---|---|---|---|
-| `GET /api/profesores` | recepcion | `?incluirInactivos=true` | `200 { items: Profesor[] }` |
+| `GET /api/profesores` | recepcion | `?incluirInactivos=true` | `200 { items: Profesor[] }`. Desde la feature 23, cada ítem es `ProfesorEnListado`: `Profesor` más `clasesPorSemana` y `diasConClase` |
 | `GET /api/profesores/:id` | recepcion | — | `200` profesor; `404` |
 | `POST /api/profesores` | admin | `{ nombre, apellido, dni?, email?, telefono?, aliasCbu?, porcentajeBp }` | `201` profesor |
 | `PATCH /api/profesores/:id` | admin | datos personales opcionales y `activo?` | `200` profesor; `404` |
