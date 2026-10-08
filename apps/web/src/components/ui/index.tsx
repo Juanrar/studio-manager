@@ -359,14 +359,20 @@ export function Insignia({ children, tono = 'gris' }: { children: ReactNode; ton
 
 const COLORES_AVATAR = ['#e5484d', '#f76b15', '#d9a400', '#30a46c', '#12a594', '#0090ff', '#3e63dd', '#8e4ec6', '#d6409f', '#978365'];
 
+// Un color que sale del texto: el mismo nombre da siempre el mismo color. Es un color de dato, como el
+// del avatar o el de un estilo en la grilla, no un color de estado.
+export function colorDeNombre(nombre: string): string {
+  const indice = [...nombre].reduce((suma, letra) => suma + letra.charCodeAt(0), 0) % COLORES_AVATAR.length;
+  return COLORES_AVATAR[indice]!;
+}
+
 // La inicial sobre un color que sale del nombre, así cada persona tiene siempre el mismo.
 export function Avatar({ nombre, grande = false }: { nombre: string; grande?: boolean }) {
-  const indice = [...nombre].reduce((suma, letra) => suma + letra.charCodeAt(0), 0) % COLORES_AVATAR.length;
   return (
     <span
       aria-hidden="true"
       className={`grid flex-none place-items-center rounded-full font-semibold text-white ${grande ? 'size-11 text-lg' : 'size-4 text-[9px]'}`}
-      style={{ backgroundColor: COLORES_AVATAR[indice] }}
+      style={{ backgroundColor: colorDeNombre(nombre) }}
     >
       {nombre.charAt(0).toUpperCase()}
     </span>

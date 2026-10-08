@@ -23,6 +23,7 @@ const SECCIONES: { titulo: string; rol: Rol; opciones: Opcion[] }[] = [
       { ruta: '/packs', texto: 'Packs', icono: 'packs' },
       { ruta: '/profesores', texto: 'Profesores', icono: 'profesores' },
       { ruta: '/horarios', texto: 'Horarios', icono: 'horarios' },
+      { ruta: '/grilla', texto: 'Grilla', icono: 'grilla' },
       { ruta: '/usuarios', texto: 'Usuarios', icono: 'usuarios' },
       { ruta: '/liquidaciones', texto: 'Liquidaciones', icono: 'liquidaciones' },
     ],

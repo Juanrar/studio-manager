@@ -156,11 +156,11 @@ jsdom no calcula posiciones: la cascada, la línea de ahora y el editor flotante
 
 **Archivos:** `features/grilla/GrillaPage.tsx`, `api.ts`, `rutas.tsx`, `Layout.tsx`, `Icono.tsx` (ícono de grilla de Tabler), `test/datos.ts`, su test
 
-- [ ] **Paso 1:** escribir los tests de la semana, la navegación y el tope del horizonte.
-- [ ] **Paso 2:** correr los tests y verificar que fallan.
-- [ ] **Paso 3:** implementar la página, la ruta y el menú.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(grilla): la semana de clases en la grilla`.
+- [x] **Paso 1:** escribir los tests de la semana, la navegación y el tope del horizonte.
+- [x] **Paso 2:** correr los tests y verificar que fallan.
+- [x] **Paso 3:** implementar la página, la ruta y el menú.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(grilla): la semana de clases en la grilla`.
 
 ### Tarea 6: Arrastrar, editar y el aviso
 

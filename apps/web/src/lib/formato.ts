@@ -109,6 +109,17 @@ export function sumarDias(fecha: string, dias: number): string {
   return new Date(Date.UTC(anio, mes - 1, dia + dias)).toISOString().slice(0, 10);
 }
 
+// 1 es lunes, 7 es domingo (ISO), igual que la API.
+export function diaDeLaSemana(fecha: string): number {
+  const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
+  return ((new Date(Date.UTC(anio, mes - 1, dia)).getUTCDay() + 6) % 7) + 1;
+}
+
+// La semana del estudio va de lunes a domingo.
+export function lunesDe(fecha: string): string {
+  return sumarDias(fecha, 1 - diaDeLaSemana(fecha));
+}
+
 export const NOMBRES_ROL: Record<Rol, string> = { admin: 'Administración', recepcion: 'Recepción' };
 
 export const NOMBRES_MEDIO_DE_PAGO: Record<string, string> = {
