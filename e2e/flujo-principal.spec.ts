@@ -69,6 +69,27 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
     await expect(page.getByRole('heading', { name: nombreDelDia(hoy) })).toBeVisible();
   });
 
+  await test.step('correr la clase de hoy una hora en la grilla y aplicarlo a todas las semanas', async () => {
+    await irA(page, 'Grilla');
+    const clase = page.getByRole('button', { name: /^Hip-Hop, 19:00 a 20:30/ });
+    await clase.scrollIntoViewIfNeeded();
+    const caja = (await clase.boundingBox())!;
+    // Una hora son 63 px en la grilla. Se arrastra dentro del mismo día: el reloj es el real y un domingo
+    // no tiene día siguiente en su semana.
+    await page.mouse.move(caja.x + caja.width / 2, caja.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(caja.x + caja.width / 2, caja.y + 40, { steps: 5 });
+    await page.mouse.move(caja.x + caja.width / 2, caja.y + 10 + 63, { steps: 5 });
+    await page.mouse.up();
+    const aviso = page.getByRole('status');
+    await expect(aviso).toContainText('Hip-Hop pasa al');
+    await aviso.getByRole('button', { name: 'Aplicar a todas las semanas' }).click();
+    await expect(page.getByRole('button', { name: /^Hip-Hop, 20:00 a 21:30/ })).toBeVisible();
+
+    await irA(page, 'Horarios');
+    await expect(page.getByRole('row', { name: /Hip-Hop/ })).toContainText('20:00 a 21:30');
+  });
+
   await test.step('cobrarle un pack x4 a una alumna', async () => {
     await crearAlumno(page, 'Martina', 'García');
     await page.getByRole('link', { name: 'García, Martina' }).click();
@@ -88,6 +109,7 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
 
   await test.step('tomar asistencia y cobrar una clase suelta en el acto', async () => {
     await irA(page, 'Agenda');
+    await expect(page.getByRole('row', { name: /Hip-Hop/ })).toContainText('20:00 a 21:30');
     await page.getByRole('row', { name: /Hip-Hop/ }).getByRole('link', { name: 'Tomar asistencia' }).click();
     await expect(page.getByRole('heading', { name: 'Asistencia · Hip-Hop' })).toBeVisible();
 
