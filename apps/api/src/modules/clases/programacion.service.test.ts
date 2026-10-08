@@ -1,12 +1,16 @@
 import { asc, eq } from 'drizzle-orm';
 import type { Profesor } from '@studio/shared';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { ADMIN, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../test/app.ts';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import type { FastifyInstance } from 'fastify';
+import { ADMIN, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
-import { crearHorarioDeTest, crearProfesorDeTest } from '../../../test/fabricas.ts';
+import { crearAlumnoDeTest, crearHorarioDeTest, crearPackDeTest, crearProfesorDeTest } from '../../../test/fabricas.ts';
 import { db } from '../../db/client.ts';
 import { clase } from '../../db/schema.ts';
+import { registrarAsistencia } from '../asistencias/asistencias.service.ts';
 import { actualizarHorario } from '../horarios/horarios.service.ts';
+import { registrarPago } from '../pagos/pagos.service.ts';
+import { abrirClase, actualizarClase } from './clases.service.ts';
 import { generarClases } from './programacion.service.ts';
 
 let base: BaseDeTest;
@@ -156,5 +160,132 @@ describe('POST /api/horarios', () => {
       '2026-04-21',
       '2026-04-28',
     ]);
+  });
+});
+
+describe('PATCH /api/horarios/:id', () => {
+  // El reloj de los tests marca el martes 10 de marzo: hoy hay clase, y el horizonte llega al 28 de abril.
+  const MARTES = '2026-03-10';
+  const MARTES_DEL_HORIZONTE = [
+    '2026-03-10',
+    '2026-03-17',
+    '2026-03-24',
+    '2026-03-31',
+    '2026-04-07',
+    '2026-04-14',
+    '2026-04-21',
+    '2026-04-28',
+  ];
+  let app: FastifyInstance;
+  let cookie: string;
+  let hipHop: { id: number };
+
+  beforeEach(async () => {
+    app = await crearAppDeTest();
+    await crearUsuarioDeTest(ADMIN);
+    cookie = await loguear(app, ADMIN.email, ADMIN.password);
+    hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' });
+    // La semana pasada ya tuvo su clase; desde esta semana las crea el generador.
+    await abrirClase(hipHop.id, '2026-03-03');
+    await generarClases(db, MARTES);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  function cambiarHorario(cambios: Record<string, unknown>) {
+    return app.inject({ method: 'PATCH', url: `/api/horarios/${hipHop.id}`, payload: cambios, headers: { cookie } });
+  }
+
+  async function claseDel(fecha: string) {
+    const [encontrada] = await db.select().from(clase).where(eq(clase.fecha, fecha));
+    return encontrada!;
+  }
+
+  // Martina compra un pack x4 hoy (vence el 10 de abril) y se anota en la clase de `fecha`.
+  async function anotarAMartinaEl(fecha: string) {
+    const recepcion = await crearUsuarioDeTest(RECEPCION);
+    const martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García' });
+    const pack = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
+    const ahora = new Date(`${MARTES}T15:00:00Z`);
+    await registrarPago({ alumnoId: martina.id, packId: pack.id, medio: 'efectivo' }, recepcion.id, ahora, MARTES);
+    await registrarAsistencia((await claseDel(fecha)).id, { alumnoId: martina.id }, recepcion.id, ahora, MARTES);
+  }
+
+  it('cambiar la hora cambia las clases desde hoy, salvo la que tiene suplente y la de la semana pasada', async () => {
+    const iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni' });
+    await actualizarClase((await claseDel('2026-03-17')).id, { profesorId: iaru.id });
+
+    const respuesta = await cambiarHorario({ horaInicio: '20:00', horaFin: '21:30' });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect((await clasesGuardadas()).map((c) => `${c.fecha} ${c.horaInicio}`)).toEqual([
+      '2026-03-03 19:00:00',
+      '2026-03-10 20:00:00',
+      '2026-03-17 19:00:00',
+      ...MARTES_DEL_HORIZONTE.slice(2).map((fecha) => `${fecha} 20:00:00`),
+    ]);
+  });
+
+  it('cambiar el día mueve cada clase a ese día de su semana, sin pasar a días que ya pasaron', async () => {
+    const respuesta = await cambiarHorario({ diaSemana: 1 });
+
+    // El lunes de esta semana ya pasó: la clase de hoy se queda el martes.
+    expect(respuesta.statusCode).toBe(200);
+    expect((await clasesGuardadas()).map((c) => c.fecha)).toEqual([
+      '2026-03-03',
+      '2026-03-10',
+      '2026-03-16',
+      '2026-03-23',
+      '2026-03-30',
+      '2026-04-06',
+      '2026-04-13',
+      '2026-04-20',
+      '2026-04-27',
+    ]);
+  });
+
+  it('cambiar el día con un alumno anotado cuyo pack vence antes de la fecha nueva da 422 y no cambia nada', async () => {
+    await anotarAMartinaEl('2026-04-07');
+
+    const respuesta = await cambiarHorario({ diaSemana: 6 });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({
+      error: 'La clase del 2026-04-07 tiene alumnos anotados con un pack que vence antes del 2026-04-11',
+    });
+    expect((await clasesGuardadas()).map((c) => c.fecha)).toEqual(['2026-03-03', ...MARTES_DEL_HORIZONTE]);
+    const horarios = await app.inject({ method: 'GET', url: '/api/horarios', headers: { cookie } });
+    expect(horarios.json().items[0].diaSemana).toBe(2);
+  });
+
+  it('dar de baja un horario borra sus clases desde hoy sin asistencias y conserva la de la semana pasada', async () => {
+    const respuesta = await cambiarHorario({ activo: false });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json().activo).toBe(false);
+    expect((await clasesGuardadas()).map((c) => c.fecha)).toEqual(['2026-03-03']);
+  });
+
+  it('dar de baja un horario con un alumno anotado en una clase futura da 422 y no borra nada', async () => {
+    await anotarAMartinaEl('2026-03-24');
+
+    const respuesta = await cambiarHorario({ activo: false });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({
+      error: 'El horario de Hip-Hop tiene alumnos anotados el 2026-03-24. Quitalos antes de darlo de baja',
+    });
+    expect((await clasesGuardadas()).map((c) => c.fecha)).toEqual(['2026-03-03', ...MARTES_DEL_HORIZONTE]);
+  });
+
+  it('reactivar un horario vuelve a crear sus clases desde esta semana', async () => {
+    await cambiarHorario({ activo: false });
+
+    const respuesta = await cambiarHorario({ activo: true });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect((await clasesGuardadas()).map((c) => c.fecha)).toEqual(['2026-03-03', ...MARTES_DEL_HORIZONTE]);
   });
 });

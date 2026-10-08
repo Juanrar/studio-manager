@@ -2,8 +2,8 @@ import type { FastifyInstance } from 'fastify';
 import { actualizarHorarioSchema, horariosQuerySchema, crearHorarioSchema } from '@studio/shared';
 import { idParamSchema } from '../../lib/validacion.ts';
 import { requerirRol } from '../../plugins/autenticacion.ts';
-import { crearHorarioConSusClases } from '../clases/programacion.service.ts';
-import { actualizarHorario, listarHorarios } from './horarios.service.ts';
+import { actualizarHorarioYSusClases, crearHorarioConSusClases } from '../clases/programacion.service.ts';
+import { listarHorarios } from './horarios.service.ts';
 
 export async function rutasHorarios(app: FastifyInstance): Promise<void> {
   app.get('/api/horarios', { preHandler: requerirRol('recepcion') }, async (request) => {
@@ -18,6 +18,6 @@ export async function rutasHorarios(app: FastifyInstance): Promise<void> {
 
   app.patch('/api/horarios/:id', { preHandler: requerirRol('admin') }, async (request) => {
     const { id } = idParamSchema.parse(request.params);
-    return actualizarHorario(id, actualizarHorarioSchema.parse(request.body));
+    return actualizarHorarioYSusClases(id, actualizarHorarioSchema.parse(request.body), app.hoy());
   });
 }

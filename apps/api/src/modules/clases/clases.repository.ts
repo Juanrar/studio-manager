@@ -1,8 +1,8 @@
-import { and, asc, count, eq, gte, lte, sql, type SQL } from 'drizzle-orm';
+import { and, asc, count, eq, gte, isNull, lte, sql, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { Clase, EstadoClase } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
-import { asistencia, clase, horario, profesor, type NuevaClase } from '../../db/schema.ts';
+import { asistencia, clase, horario, pago, profesor, type NuevaClase } from '../../db/schema.ts';
 import { horaHHMM } from '../../lib/postgres.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 
@@ -129,4 +129,78 @@ export async function actualizarPorcentajeDeAsistencias(
   porcentajeBp: number,
 ): Promise<void> {
   await ej.update(asistencia).set({ porcentajeBp }).where(eq(asistencia.claseId, claseId));
+}
+
+// Lo que una clase copia de su horario: con esto se compara si sigue igual y se la actualiza.
+export type DatosDeHorario = {
+  diaSemana: number;
+  horaInicio: string;
+  horaFin: string;
+  estilo: string;
+  nivel: string | null;
+  profesorId: number;
+};
+
+// Las clases de un horario desde `desde` que todavía son iguales a él: las que no tienen cambios propios.
+export async function igualesAlHorario(
+  ej: Ejecutor,
+  horarioId: number,
+  datos: DatosDeHorario,
+  desde: FechaDia,
+): Promise<{ id: number; semana: FechaDia; fecha: FechaDia }[]> {
+  return ej
+    .select({ id: clase.id, semana: clase.semana, fecha: clase.fecha })
+    .from(clase)
+    .where(
+      and(
+        eq(clase.horarioId, horarioId),
+        gte(clase.fecha, desde),
+        sql`extract(isodow from ${clase.fecha}) = ${datos.diaSemana}`,
+        eq(clase.horaInicio, datos.horaInicio),
+        eq(clase.horaFin, datos.horaFin),
+        eq(clase.estilo, datos.estilo),
+        datos.nivel === null ? isNull(clase.nivel) : eq(clase.nivel, datos.nivel),
+        eq(clase.profesorId, datos.profesorId),
+        eq(clase.estado, 'programada'),
+      ),
+    )
+    .orderBy(asc(clase.fecha));
+}
+
+export async function copiarDelHorario(
+  ej: Ejecutor,
+  id: number,
+  fecha: FechaDia,
+  datos: Omit<DatosDeHorario, 'diaSemana'>,
+): Promise<void> {
+  await ej.update(clase).set({ fecha, ...datos }).where(eq(clase.id, id));
+}
+
+// Si algún anotado pagó con un pack que vence antes de `fecha`, la clase no puede pasar a ese día.
+export async function hayAnotadosConPackQueVenceAntes(ej: Ejecutor, claseId: number, fecha: FechaDia): Promise<boolean> {
+  const [fila] = await ej
+    .select({ id: asistencia.id })
+    .from(asistencia)
+    .innerJoin(pago, eq(pago.id, asistencia.pagoId))
+    .where(and(eq(asistencia.claseId, claseId), sql`${pago.venceEl} < ${fecha}::date`))
+    .limit(1);
+  return fila !== undefined;
+}
+
+// La primera clase de un horario desde `desde` con alguien anotado, o null.
+export async function primeraConAsistenciasDesde(ej: Ejecutor, horarioId: number, desde: FechaDia): Promise<FechaDia | null> {
+  const [fila] = await ej
+    .select({ fecha: clase.fecha })
+    .from(clase)
+    .innerJoin(asistencia, eq(asistencia.claseId, clase.id))
+    .where(and(eq(clase.horarioId, horarioId), gte(clase.fecha, desde)))
+    .orderBy(asc(clase.fecha))
+    .limit(1);
+  return fila?.fecha ?? null;
+}
+
+// Borra las clases de un horario desde `desde`. Quien la llama ya verificó que no tienen asistencias:
+// una clase futura sin asistencias no tiene historial.
+export async function borrarDesde(ej: Ejecutor, horarioId: number, desde: FechaDia): Promise<void> {
+  await ej.delete(clase).where(and(eq(clase.horarioId, horarioId), gte(clase.fecha, desde)));
 }

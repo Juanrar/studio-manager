@@ -179,11 +179,11 @@ La migración de datos se prueba a mano contra la base de desarrollo, que tiene 
 
 **Archivos:** `programacion.service.ts`, `horarios.routes.ts`, sus tests
 
-- [ ] **Paso 1:** escribir los tests de cambiar la hora, cambiar el día con un anotado, dar de baja con y sin asistencias.
-- [ ] **Paso 2:** correr los tests y verificar que fallan porque el horario se cambia solo.
-- [ ] **Paso 3:** implementar `actualizarHorarioYSusClases` y `darDeBajaHorario` y apuntar las rutas.
-- [ ] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(horarios): cambiar un horario cambia sus clases desde esta semana`.
+- [x] **Paso 1:** escribir los tests de cambiar la hora, cambiar el día con un anotado, dar de baja con y sin asistencias. Se sumaron dos: cambiar el día mueve cada clase a ese día de su semana sin pasar a un día que ya pasó (la de esta semana se queda donde estaba), y reactivar vuelve a crear las clases.
+- [x] **Paso 2:** correr los tests y verificar que fallan porque el horario se cambia solo.
+- [x] **Paso 3:** implementar `actualizarHorarioYSusClases` (con la baja y la reactivación adentro) y apuntar la ruta. Una clase de esta semana cuyo día nuevo ya pasó se queda donde estaba: no se mueve una clase al pasado. `actualizarHorario` recibe un `Ejecutor` opcional y se suma `reactivarHorario`, que pone `vigente_desde` en el lunes de la semana actual.
+- [x] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(horarios): cambiar un horario cambia sus clases desde esta semana`.
 
 ### Tarea 6: Leer de la clase
 

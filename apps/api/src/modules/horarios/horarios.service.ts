@@ -14,11 +14,13 @@ export async function crearHorario(datos: CrearHorarioInput, hoy: FechaDia, ej: 
   return obtenerHorario(id, ej);
 }
 
-export async function actualizarHorario(id: number, datos: ActualizarHorarioInput): Promise<Horario> {
-  if (datos.profesorId !== undefined) await verificarProfesorActivo(db, datos.profesorId);
+// Cambia solo la fila del horario. Para que sus clases sigan el cambio, la ruta usa
+// programacion.service.actualizarHorarioYSusClases.
+export async function actualizarHorario(id: number, datos: ActualizarHorarioInput, ej: Ejecutor = db): Promise<Horario> {
+  if (datos.profesorId !== undefined) await verificarProfesorActivo(ej, datos.profesorId);
   let existe: boolean;
   try {
-    existe = await repo.actualizar(db, id, sinIndefinidos(datos));
+    existe = await repo.actualizar(ej, id, sinIndefinidos(datos));
   } catch (error) {
     // En un PATCH el esquema no ve la otra hora; la base la controla con su check.
     if (esViolacionCheck(error, 'horario_horas_validas')) {
@@ -27,7 +29,12 @@ export async function actualizarHorario(id: number, datos: ActualizarHorarioInpu
     throw error;
   }
   if (!existe) throw new NoEncontradoError(`No existe el horario ${id}`);
-  return obtenerHorario(id);
+  return obtenerHorario(id, ej);
+}
+
+// Vuelve a dictarse desde la semana `desde`: las anteriores no tienen sus clases.
+export async function reactivarHorario(id: number, desde: FechaDia, ej: Ejecutor = db): Promise<void> {
+  await repo.actualizar(ej, id, { activo: true, vigenteDesde: desde });
 }
 
 export async function obtenerHorario(id: number, ej: Ejecutor = db): Promise<Horario> {
