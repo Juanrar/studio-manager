@@ -19,7 +19,7 @@ export async function actualizarClase(id: number, datos: ActualizarClaseInput): 
     existe = await repo.actualizar(db, id, sinIndefinidos(datos));
   } catch (error) {
     // En un PATCH el esquema no ve la otra hora; la base la controla con su check.
-    if (esViolacionCheck(error, 'clase_horario_valido')) {
+    if (esViolacionCheck(error, 'horario_horas_validas')) {
       throw new ReglaDeNegocioError('La hora de fin tiene que ser posterior a la de inicio');
     }
     throw error;

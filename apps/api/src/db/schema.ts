@@ -26,7 +26,7 @@ export const medioPagoEnum = pgEnum('medio_pago', [
   'mercado_pago',
   'otro',
 ]);
-export const estadoSesionEnum = pgEnum('estado_sesion', ['programada', 'dictada', 'cancelada']);
+export const estadoSesionEnum = pgEnum('estado_clase', ['programada', 'dictada', 'cancelada']);
 
 export const usuario = pgTable('usuario', {
   id: id(),
@@ -155,8 +155,10 @@ export const pago = pgTable(
   ],
 );
 
+// Las claves de TypeScript conservan los nombres viejos hasta las tareas 2 y 3 de la feature 24:
+// las columnas renombradas llevan su nombre explícito.
 export const clase = pgTable(
-  'clase',
+  'horario',
   {
     id: id(),
     estilo: text().notNull(),
@@ -167,19 +169,19 @@ export const clase = pgTable(
     profesorId: referencia()
       .notNull()
       .references(() => profesor.id),
-    activa: boolean().notNull().default(true),
+    activa: boolean('activo').notNull().default(true),
   },
   (t) => [
-    check('clase_dia_valido', sql`${t.diaSemana} between 1 and 7`),
-    check('clase_horario_valido', sql`${t.horaFin} > ${t.horaInicio}`),
+    check('horario_dia_valido', sql`${t.diaSemana} between 1 and 7`),
+    check('horario_horas_validas', sql`${t.horaFin} > ${t.horaInicio}`),
   ],
 );
 
 export const sesion = pgTable(
-  'sesion',
+  'clase',
   {
     id: id(),
-    claseId: referencia()
+    claseId: bigint('horario_id', { mode: 'number' })
       .notNull()
       .references(() => clase.id),
     fecha: date().notNull(),
@@ -189,8 +191,8 @@ export const sesion = pgTable(
     estado: estadoSesionEnum().notNull().default('programada'),
   },
   (t) => [
-    unique('sesion_clase_fecha_uq').on(t.claseId, t.fecha),
-    index('sesion_profesor_fecha_idx').on(t.profesorId, t.fecha),
+    unique('clase_horario_fecha_uq').on(t.claseId, t.fecha),
+    index('clase_profesor_fecha_idx').on(t.profesorId, t.fecha),
   ],
 );
 
@@ -198,7 +200,7 @@ export const asistencia = pgTable(
   'asistencia',
   {
     id: id(),
-    sesionId: referencia()
+    sesionId: bigint('clase_id', { mode: 'number' })
       .notNull()
       .references(() => sesion.id),
     alumnoId: referencia()
@@ -215,7 +217,7 @@ export const asistencia = pgTable(
     registradoEn: instante().notNull().defaultNow(),
   },
   (t) => [
-    unique('asistencia_sesion_alumno_uq').on(t.sesionId, t.alumnoId),
+    unique('asistencia_clase_alumno_uq').on(t.sesionId, t.alumnoId),
     index('asistencia_pago_idx').on(t.pagoId),
     check('asistencia_valor_no_negativo', sql`${t.valorClase} >= 0`),
     check('asistencia_porcentaje_rango', sql`${t.porcentajeBp} > 0 and ${t.porcentajeBp} <= 10000`),

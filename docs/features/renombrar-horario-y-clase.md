@@ -120,14 +120,14 @@ No hay tests nuevos: esta feature no cambia lo que hace el sistema. Los que exis
 
 **Archivos:**
 - Crear: `apps/api/src/db/migrations/0003_renombrar_horario_y_clase.sql` y su snapshot
-- Modificar: `apps/api/src/db/schema.ts` (solo los nombres dentro de `pgTable`, columnas, checks, índices y el enum), `apps/api/test/db.ts` (`TABLAS`), `apps/api/src/modules/clases/clases.service.ts` (el nombre del check en `esViolacionCheck`)
+- Modificar: `apps/api/src/db/schema.ts` (solo los nombres dentro de `pgTable`, columnas, checks, índices y el enum), `apps/api/test/db.ts` (`TABLAS`), `apps/api/src/modules/clases/clases.service.ts` (el nombre del check en `esViolacionCheck`), `apps/api/src/modules/asistencias/asistencias.service.ts` (el nombre del `unique` en `esViolacionUnica`)
 - Test: los tests de la API que existen
 
-- [ ] **Paso 1:** cambiar `TABLAS` a `horario` y `clase` y el nombre del check que espera `clases.service.ts`.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test` y verificar que falla porque la tabla `horario` no existe.
-- [ ] **Paso 3:** escribir la migración a mano y cambiar los nombres en `schema.ts`. Los identificadores de TypeScript (`export const clase`, `export const sesion`, `claseId`, `sesionId`, `activa`) quedan igual en esta tarea: solo cambia lo que va a la base. Con `casing: 'snake_case'` el nombre de la columna sale de la clave de TypeScript, así que las tres columnas renombradas llevan el nombre explícito (`referencia('horario_id')`, `referencia('clase_id')`, `boolean('activo')`). Las tareas 2 y 3 renombran las claves y sacan esos nombres explícitos.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan. Correr `pnpm --filter @studio/api db:generate` y verificar que no genera cambios.
-- [ ] **Paso 5:** commit `refactor(db): renombrar clase a horario y sesion a clase`.
+- [x] **Paso 1:** cambiar `TABLAS` a `horario` y `clase` y el nombre del check que espera `clases.service.ts`.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test` y verificar que falla porque la tabla `horario` no existe.
+- [x] **Paso 3:** escribir la migración a mano y cambiar los nombres en `schema.ts`. Los identificadores de TypeScript (`export const clase`, `export const sesion`, `claseId`, `sesionId`, `activa`) quedan igual en esta tarea: solo cambia lo que va a la base. Con `casing: 'snake_case'` el nombre de la columna sale de la clave de TypeScript, así que las tres columnas renombradas llevan el nombre explícito (`referencia('horario_id')`, `referencia('clase_id')`, `boolean('activo')`). Las tareas 2 y 3 renombran las claves y sacan esos nombres explícitos.
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan. Correr `pnpm --filter @studio/api db:generate` y verificar que no genera cambios. El plan no nombraba `asistencia_sesion_alumno_uq`, que `asistencias.service` usa para avisar de una asistencia repetida: lo encontró el test de esa regla.
+- [x] **Paso 5:** commit `refactor(db): renombrar clase a horario y sesion a clase`.
 
 ### Tarea 2: El horario en todas las capas
 

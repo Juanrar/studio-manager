@@ -49,7 +49,7 @@ export async function registrarAsistencia(
         registradoEn: ahora,
       });
     } catch (error) {
-      if (esViolacionUnica(error, 'asistencia_sesion_alumno_uq')) {
+      if (esViolacionUnica(error, 'asistencia_clase_alumno_uq')) {
         throw new ReglaDeNegocioError(`${nombreCompleto} ya tiene la asistencia registrada en esta clase`);
       }
       throw error;
