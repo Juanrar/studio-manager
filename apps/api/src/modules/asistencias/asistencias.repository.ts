@@ -9,13 +9,13 @@ import {
   pack,
   pago,
   profesor,
-  sesion,
+  clase,
   type NuevaAsistencia,
 } from '../../db/schema.ts';
 
 const columnas = {
   id: asistencia.id,
-  sesionId: asistencia.sesionId,
+  claseId: asistencia.claseId,
   alumno: { id: alumno.id, nombre: alumno.nombre, apellido: alumno.apellido },
   pagoId: asistencia.pagoId,
   pack: pack.nombre,
@@ -43,8 +43,8 @@ export async function buscarPorId(ej: Ejecutor, id: number): Promise<Asistencia 
   return fila ?? null;
 }
 
-export async function listarDeSesion(ej: Ejecutor, sesionId: number): Promise<Asistencia[]> {
-  return seleccionar(ej, eq(asistencia.sesionId, sesionId)).orderBy(asc(alumno.apellido), asc(alumno.nombre));
+export async function listarDeClase(ej: Ejecutor, claseId: number): Promise<Asistencia[]> {
+  return seleccionar(ej, eq(asistencia.claseId, claseId)).orderBy(asc(alumno.apellido), asc(alumno.nombre));
 }
 
 // El día de la última clase de cada alumno hasta `hasta`: no cuentan las anotadas para más adelante.
@@ -55,30 +55,30 @@ export async function ultimasFechas(
 ): Promise<{ alumnoId: number; fecha: FechaDia | null }[]> {
   if (alumnoIds.length === 0) return [];
   return ej
-    .select({ alumnoId: asistencia.alumnoId, fecha: max(sesion.fecha) })
+    .select({ alumnoId: asistencia.alumnoId, fecha: max(clase.fecha) })
     .from(asistencia)
-    .innerJoin(sesion, eq(sesion.id, asistencia.sesionId))
-    .where(and(inArray(asistencia.alumnoId, alumnoIds), lte(sesion.fecha, hasta)))
+    .innerJoin(clase, eq(clase.id, asistencia.claseId))
+    .where(and(inArray(asistencia.alumnoId, alumnoIds), lte(clase.fecha, hasta)))
     .groupBy(asistencia.alumnoId);
 }
 
 export type ClaseDeAlumno = { fecha: FechaDia; clase: string; profesor: PersonaResumen };
 
 // Las clases de un alumno, también las anotadas para más adelante, de la más nueva a la más vieja.
-// El profesor es el de la sesión, que cambia si hubo suplencia; el de la clase es el titular.
+// El profesor es el de la clase, que cambia si hubo suplencia; el del horario es el titular.
 export async function listarDeAlumno(ej: Ejecutor, alumnoId: number): Promise<ClaseDeAlumno[]> {
   return ej
     .select({
-      fecha: sesion.fecha,
+      fecha: clase.fecha,
       clase: horario.estilo,
       profesor: { id: profesor.id, nombre: profesor.nombre, apellido: profesor.apellido },
     })
     .from(asistencia)
-    .innerJoin(sesion, eq(sesion.id, asistencia.sesionId))
-    .innerJoin(horario, eq(horario.id, sesion.horarioId))
-    .innerJoin(profesor, eq(profesor.id, sesion.profesorId))
+    .innerJoin(clase, eq(clase.id, asistencia.claseId))
+    .innerJoin(horario, eq(horario.id, clase.horarioId))
+    .innerJoin(profesor, eq(profesor.id, clase.profesorId))
     .where(eq(asistencia.alumnoId, alumnoId))
-    .orderBy(desc(sesion.fecha), desc(horario.horaInicio), desc(asistencia.id));
+    .orderBy(desc(clase.fecha), desc(horario.horaInicio), desc(asistencia.id));
 }
 
 export async function borrar(ej: Ejecutor, id: number): Promise<boolean> {
@@ -86,14 +86,14 @@ export async function borrar(ej: Ejecutor, id: number): Promise<boolean> {
   return filas.length > 0;
 }
 
-export async function buscarSesionDe(
+export async function buscarClaseDe(
   ej: Ejecutor,
   asistenciaId: number,
 ): Promise<{ profesorId: number; fecha: string } | null> {
   const [fila] = await ej
-    .select({ profesorId: sesion.profesorId, fecha: sesion.fecha })
+    .select({ profesorId: clase.profesorId, fecha: clase.fecha })
     .from(asistencia)
-    .innerJoin(sesion, eq(sesion.id, asistencia.sesionId))
+    .innerJoin(clase, eq(clase.id, asistencia.claseId))
     .where(eq(asistencia.id, asistenciaId));
   return fila ?? null;
 }

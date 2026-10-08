@@ -152,11 +152,11 @@ No hay tests nuevos: esta feature no cambia lo que hace el sistema. Los que exis
 - Mover: `apps/api/src/modules/clases/sesiones.*` a `clases.*`, `apps/web/src/features/agenda/SesionPage.tsx` a `ClasePage.tsx` y `sesion.test.tsx` a `clase.test.tsx`
 - Modificar: `schema.ts` (`export const clase`, `asistencia.claseId`), asistencias, liquidaciones, `packages/shared` (`clases.ts`, `asistencias.ts`, `liquidaciones.ts`), la agenda y la liquidación en la web, `apps/web/test/datos.ts`, el recorrido de `e2e`
 
-- [ ] **Paso 1:** cambiar los tests a los nombres nuevos: `/api/clases/:id`, `/api/clases/:id/asistencias`, `claseId` en las asistencias, la ruta `/clases/:id` de la web.
-- [ ] **Paso 2:** correr `pnpm test` y verificar que falla por las rutas y los campos que no existen.
-- [ ] **Paso 3:** renombrar en la API, en shared y en la web.
-- [ ] **Paso 4:** correr `pnpm test`, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan. Correr `grep -ri sesion apps packages e2e --include=*.ts --include=*.tsx` y verificar que solo aparece el login.
-- [ ] **Paso 5:** commit `refactor(clases): la clase de una fecha deja de llamarse sesión`.
+- [x] **Paso 1:** cambiar los tests a los nombres nuevos: `/api/clases/:id`, `/api/clases/:id/asistencias`, `claseId` en las asistencias, la ruta `/clases/:id` de la web.
+- [x] **Paso 2:** correr `pnpm test` y verificar que falla por las rutas y los campos que no existen.
+- [x] **Paso 3:** renombrar en la API, en shared y en la web. También los nombres compuestos que el plan no listaba: `DetalleSesion` pasa a `DetalleDeClase`, `listarAsistenciasDeSesion` a `listarAsistenciasDeClase`, y en `AgendaPage` cada fila recibe `horario` (un `HorarioDelDia`) con su `clase` adentro. Las claves de consulta de la web pasan de `['sesiones', id]` a `['clases', id]`; las del horario ya eran `['horarios']`.
+- [x] **Paso 4:** correr `pnpm test`, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan. Correr `grep -ri sesion apps packages e2e --include=*.ts --include=*.tsx` y verificar que solo aparece el login.
+- [x] **Paso 5:** commit `refactor(clases): la clase de una fecha deja de llamarse sesión`.
 
 ### Tarea 4: La documentación
 

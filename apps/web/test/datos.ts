@@ -114,7 +114,7 @@ export function unHorario(datos: Partial<Horario> = {}): Horario {
 export function unaAsistencia(datos: Partial<Asistencia> = {}): Asistencia {
   return {
     id: 900,
-    sesionId: 50,
+    claseId: 50,
     alumno: { id: 10, nombre: 'Martina', apellido: 'García' },
     pagoId: 100,
     pack: 'Pack x8',

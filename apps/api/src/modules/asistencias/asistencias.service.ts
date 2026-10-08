@@ -5,14 +5,14 @@ import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 import { esViolacionUnica } from '../../lib/postgres.ts';
 import { obtenerAlumno } from '../alumnos/alumnos.service.ts';
-import { bloquearSesion } from '../clases/sesiones.service.ts';
+import { bloquearClase } from '../clases/clases.service.ts';
 import { verificarMesAbierto } from '../liquidaciones/liquidaciones.service.ts';
 import { elegirPagoParaAsistencia, registrarPagoEn } from '../pagos/pagos.service.ts';
 import { porcentajeVigente } from '../profesores/profesores.service.ts';
 import * as repo from './asistencias.repository.ts';
 
 export async function registrarAsistencia(
-  sesionId: number,
+  claseId: number,
   datos: RegistrarAsistenciaInput,
   usuarioId: number,
   ahora: Date,
@@ -22,25 +22,25 @@ export async function registrarAsistencia(
   const nombreCompleto = `${alumno.nombre} ${alumno.apellido}`;
 
   const id = await db.transaction(async (tx) => {
-    const sesion = await bloquearSesion(tx, sesionId);
-    if (sesion.estado === 'cancelada') throw new ReglaDeNegocioError('La clase está cancelada');
-    await verificarMesAbierto(tx, sesion.profesorId, sesion.fecha);
+    const clase = await bloquearClase(tx, claseId);
+    if (clase.estado === 'cancelada') throw new ReglaDeNegocioError('La clase está cancelada');
+    await verificarMesAbierto(tx, clase.profesorId, clase.fecha);
 
-    let pago = await elegirPagoParaAsistencia(tx, alumno.id, sesion.fecha);
+    let pago = await elegirPagoParaAsistencia(tx, alumno.id, clase.fecha);
     if (pago === null) {
       if (datos.cobrar === undefined) {
         throw new ReglaDeNegocioError(
-          `${nombreCompleto} no tiene clases disponibles para el ${sesion.fecha}`,
+          `${nombreCompleto} no tiene clases disponibles para el ${clase.fecha}`,
           SIN_CLASES_DISPONIBLES,
         );
       }
       pago = await registrarPagoEn(tx, { alumnoId: alumno.id, ...datos.cobrar }, usuarioId, ahora, hoy);
     }
 
-    const porcentajeBp = await porcentajeVigente(tx, sesion.profesorId, sesion.fecha);
+    const porcentajeBp = await porcentajeVigente(tx, clase.profesorId, clase.fecha);
     try {
       return await repo.insertar(tx, {
-        sesionId: sesion.id,
+        claseId: clase.id,
         alumnoId: alumno.id,
         pagoId: pago.id,
         valorClase: dividirEnPartes(pago.monto, pago.cantidadClases),
@@ -65,8 +65,8 @@ export async function obtenerAsistencia(id: number): Promise<Asistencia> {
   return encontrada;
 }
 
-export async function listarAsistenciasDeSesion(sesionId: number): Promise<Asistencia[]> {
-  return repo.listarDeSesion(db, sesionId);
+export async function listarAsistenciasDeClase(claseId: number): Promise<Asistencia[]> {
+  return repo.listarDeClase(db, claseId);
 }
 
 // Para el listado de alumnos: el día de la última clase de cada uno hasta hoy.
@@ -86,9 +86,9 @@ export async function asistenciasDeAlumno(alumnoId: number): Promise<repo.ClaseD
 // Borrarla devuelve la clase al pack: las clases restantes se calculan contando asistencias.
 export async function borrarAsistencia(id: number): Promise<void> {
   await db.transaction(async (tx) => {
-    const sesion = await repo.buscarSesionDe(tx, id);
-    if (sesion === null) throw new NoEncontradoError(`No existe la asistencia ${id}`);
-    await verificarMesAbierto(tx, sesion.profesorId, sesion.fecha);
+    const clase = await repo.buscarClaseDe(tx, id);
+    if (clase === null) throw new NoEncontradoError(`No existe la asistencia ${id}`);
+    await verificarMesAbierto(tx, clase.profesorId, clase.fecha);
     await repo.borrar(tx, id);
   });
 }

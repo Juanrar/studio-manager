@@ -21,7 +21,7 @@ export type RegistrarAsistenciaInput = z.infer<typeof registrarAsistenciaSchema>
 
 export type Asistencia = {
   id: number;
-  sesionId: number;
+  claseId: number;
   alumno: { id: number; nombre: string; apellido: string };
   pagoId: number;
   pack: string;

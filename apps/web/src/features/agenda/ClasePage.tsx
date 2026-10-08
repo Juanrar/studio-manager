@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import type { SesionDetalle } from '@studio/shared';
+import type { ClaseDetalle } from '@studio/shared';
 import {
   Aviso,
   Boton,
@@ -17,15 +17,15 @@ import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFechaLarga } from '../../lib/formato.ts';
 import { useProfesores } from '../profesores/api.ts';
 import { AnotarAlumno } from './AnotarAlumno.tsx';
-import { useActualizarSesion, useAsistencias, useQuitarAsistencia, useSesionDeClase } from './api.ts';
+import { useActualizarClase, useAsistencias, useQuitarAsistencia, useDetalleDeClase } from './api.ts';
 
-export function SesionPage() {
+export function ClasePage() {
   const id = Number(useParams().id);
-  const sesion = useSesionDeClase(id);
+  const clase = useDetalleDeClase(id);
 
-  if (sesion.isPending) return <Cargando />;
-  if (sesion.isError) return <Aviso>{mensajeDeError(sesion.error)}</Aviso>;
-  const datos = sesion.data;
+  if (clase.isPending) return <Cargando />;
+  if (clase.isError) return <Aviso>{mensajeDeError(clase.error)}</Aviso>;
+  const datos = clase.data;
   const cancelada = datos.estado === 'cancelada';
 
   return (
@@ -43,22 +43,22 @@ export function SesionPage() {
       }
     >
       <div className="flex flex-col gap-6">
-        <Suplencia sesion={datos} />
-        {!cancelada && <AnotarAlumno sesionId={id} />}
-        <Asistentes sesionId={id} />
-        {!cancelada && <CancelarClase sesionId={id} />}
+        <Suplencia clase={datos} />
+        {!cancelada && <AnotarAlumno claseId={id} />}
+        <Asistentes claseId={id} />
+        {!cancelada && <CancelarClase claseId={id} />}
       </div>
     </Pagina>
   );
 }
 
-function Suplencia({ sesion }: { sesion: SesionDetalle }) {
+function Suplencia({ clase }: { clase: ClaseDetalle }) {
   const profesores = useProfesores();
-  const actualizar = useActualizarSesion(sesion.id);
-  const [elegido, setElegido] = useState(String(sesion.profesor.id));
+  const actualizar = useActualizarClase(clase.id);
+  const [elegido, setElegido] = useState(String(clase.profesor.id));
   const opciones = profesores.data ?? [];
   // El profesor actual siempre aparece, aunque esté dado de baja.
-  const incluyeActual = opciones.some((profesor) => profesor.id === sesion.profesor.id);
+  const incluyeActual = opciones.some((profesor) => profesor.id === clase.profesor.id);
 
   return (
     <div className="flex flex-wrap items-end gap-3">
@@ -67,8 +67,8 @@ function Suplencia({ sesion }: { sesion: SesionDetalle }) {
           {(id) => (
             <Selector id={id} value={elegido} onChange={(evento) => setElegido(evento.target.value)}>
               {!incluyeActual && (
-                <option value={sesion.profesor.id}>
-                  {sesion.profesor.nombre} {sesion.profesor.apellido}
+                <option value={clase.profesor.id}>
+                  {clase.profesor.nombre} {clase.profesor.apellido}
                 </option>
               )}
               {opciones.map((profesor) => (
@@ -82,7 +82,7 @@ function Suplencia({ sesion }: { sesion: SesionDetalle }) {
       </div>
       <Boton
         variante="secundario"
-        disabled={elegido === String(sesion.profesor.id) || actualizar.isPending}
+        disabled={elegido === String(clase.profesor.id) || actualizar.isPending}
         onClick={() => actualizar.mutate({ profesorId: Number(elegido) })}
       >
         Registrar suplencia
@@ -92,9 +92,9 @@ function Suplencia({ sesion }: { sesion: SesionDetalle }) {
   );
 }
 
-function Asistentes({ sesionId }: { sesionId: number }) {
-  const asistencias = useAsistencias(sesionId);
-  const quitar = useQuitarAsistencia(sesionId);
+function Asistentes({ claseId }: { claseId: number }) {
+  const asistencias = useAsistencias(claseId);
+  const quitar = useQuitarAsistencia(claseId);
 
   return (
     <div>
@@ -123,8 +123,8 @@ function Asistentes({ sesionId }: { sesionId: number }) {
   );
 }
 
-function CancelarClase({ sesionId }: { sesionId: number }) {
-  const actualizar = useActualizarSesion(sesionId);
+function CancelarClase({ claseId }: { claseId: number }) {
+  const actualizar = useActualizarClase(claseId);
   return (
     <div className="flex flex-col items-start gap-2">
       {actualizar.isError && <Aviso>{mensajeDeError(actualizar.error)}</Aviso>}

@@ -1,4 +1,4 @@
-import type { DetalleSesion } from '@studio/shared';
+import type { DetalleDeClase } from '@studio/shared';
 import { formatearFecha } from '../../lib/formato.ts';
 
 // Excel en español usa la coma como separador decimal: el CSV va separado por punto y coma.
@@ -13,7 +13,7 @@ function fila(valores: (string | number)[]): string {
   return valores.map(celda).join(SEPARADOR);
 }
 
-export function detalleACsv(items: DetalleSesion[]): string {
+export function detalleACsv(items: DetalleDeClase[]): string {
   const asistentes = items.reduce((suma, item) => suma + item.asistentes, 0);
   const total = items.reduce((suma, item) => suma + item.monto, 0);
   return [

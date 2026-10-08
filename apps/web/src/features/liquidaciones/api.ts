@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { DetalleSesion, IngresosDelPeriodo, Liquidacion, ResumenDelPeriodo } from '@studio/shared';
+import type { DetalleDeClase, IngresosDelPeriodo, Liquidacion, ResumenDelPeriodo } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
 export function useResumenDeSueldos(periodo: string) {
@@ -20,7 +20,7 @@ export function useDetalleDeSueldo(profesorId: number, periodo: string) {
   return useQuery({
     queryKey: ['liquidaciones', periodo, 'detalle', profesorId],
     queryFn: async () =>
-      (await api.get<{ items: DetalleSesion[] }>(conQuery('/liquidaciones/detalle', { profesorId, periodo }))).items,
+      (await api.get<{ items: DetalleDeClase[] }>(conQuery('/liquidaciones/detalle', { profesorId, periodo }))).items,
   });
 }
 

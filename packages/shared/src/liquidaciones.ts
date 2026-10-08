@@ -35,8 +35,8 @@ export type ResumenProfesor = {
 
 export type ResumenDelPeriodo = { periodo: string; items: ResumenProfesor[] };
 
-export type DetalleSesion = {
-  sesionId: number;
+export type DetalleDeClase = {
+  claseId: number;
   fecha: string;
   estilo: string;
   asistentes: number;

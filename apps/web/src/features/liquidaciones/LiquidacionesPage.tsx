@@ -170,7 +170,7 @@ function DetalleDeSueldo({ fila, periodo }: { fila: ResumenProfesor; periodo: st
       {detalle.data.length > 0 && (
         <Tabla columnas={['Fecha', 'Clase', 'Asistentes', 'Monto']}>
           {detalle.data.map((item) => (
-            <tr key={item.sesionId}>
+            <tr key={item.claseId}>
               <Celda>{formatearFecha(item.fecha)}</Celda>
               <Celda>{item.estilo}</Celda>
               <Celda>{item.asistentes}</Celda>

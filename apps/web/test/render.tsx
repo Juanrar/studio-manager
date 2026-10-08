@@ -48,5 +48,5 @@ export function renderizarEn(ruta: string) {
 
 // Para tests que pasan por /agenda sin que la agenda sea lo que prueban.
 export function conAgendaVacia(fecha = '2026-03-10') {
-  servidor.use(http.get('/api/sesiones/dia', () => HttpResponse.json({ fecha, items: [] })));
+  servidor.use(http.get('/api/clases/dia', () => HttpResponse.json({ fecha, items: [] })));
 }

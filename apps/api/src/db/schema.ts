@@ -26,7 +26,7 @@ export const medioPagoEnum = pgEnum('medio_pago', [
   'mercado_pago',
   'otro',
 ]);
-export const estadoSesionEnum = pgEnum('estado_clase', ['programada', 'dictada', 'cancelada']);
+export const estadoClaseEnum = pgEnum('estado_clase', ['programada', 'dictada', 'cancelada']);
 
 export const usuario = pgTable('usuario', {
   id: id(),
@@ -175,9 +175,7 @@ export const horario = pgTable(
   ],
 );
 
-// `sesion` y `asistencia.sesionId` conservan sus nombres de TypeScript hasta la tarea 3 de la feature 24:
-// la columna renombrada de asistencia lleva su nombre explícito.
-export const sesion = pgTable(
+export const clase = pgTable(
   'clase',
   {
     id: id(),
@@ -188,7 +186,7 @@ export const sesion = pgTable(
     profesorId: referencia()
       .notNull()
       .references(() => profesor.id),
-    estado: estadoSesionEnum().notNull().default('programada'),
+    estado: estadoClaseEnum().notNull().default('programada'),
   },
   (t) => [
     unique('clase_horario_fecha_uq').on(t.horarioId, t.fecha),
@@ -200,9 +198,9 @@ export const asistencia = pgTable(
   'asistencia',
   {
     id: id(),
-    sesionId: bigint('clase_id', { mode: 'number' })
+    claseId: referencia()
       .notNull()
-      .references(() => sesion.id),
+      .references(() => clase.id),
     alumnoId: referencia()
       .notNull()
       .references(() => alumno.id),
@@ -217,7 +215,7 @@ export const asistencia = pgTable(
     registradoEn: instante().notNull().defaultNow(),
   },
   (t) => [
-    unique('asistencia_clase_alumno_uq').on(t.sesionId, t.alumnoId),
+    unique('asistencia_clase_alumno_uq').on(t.claseId, t.alumnoId),
     index('asistencia_pago_idx').on(t.pagoId),
     check('asistencia_valor_no_negativo', sql`${t.valorClase} >= 0`),
     check('asistencia_porcentaje_rango', sql`${t.porcentajeBp} > 0 and ${t.porcentajeBp} <= 10000`),
@@ -258,8 +256,8 @@ export type Pago = typeof pago.$inferSelect;
 export type NuevoPago = typeof pago.$inferInsert;
 export type Horario = typeof horario.$inferSelect;
 export type NuevoHorario = typeof horario.$inferInsert;
-export type Sesion = typeof sesion.$inferSelect;
-export type NuevaSesion = typeof sesion.$inferInsert;
+export type Clase = typeof clase.$inferSelect;
+export type NuevaClase = typeof clase.$inferInsert;
 export type Asistencia = typeof asistencia.$inferSelect;
 export type NuevaAsistencia = typeof asistencia.$inferInsert;
 export type Liquidacion = typeof liquidacion.$inferSelect;

@@ -1,13 +1,13 @@
 import { and, asc, eq, gte, lt, type SQL } from 'drizzle-orm';
 import type { Liquidacion } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
-import { asistencia, horario, liquidacion, profesor, sesion, type NuevaLiquidacion } from '../../db/schema.ts';
+import { asistencia, horario, liquidacion, profesor, clase, type NuevaLiquidacion } from '../../db/schema.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 
-// Este módulo es de reportes: lee asistencias y sesiones para sumar, nunca las modifica.
+// Este módulo es de reportes: lee asistencias y clases para sumar, nunca las modifica.
 export type AsistenciaLiquidable = {
   profesorId: number;
-  sesionId: number;
+  claseId: number;
   fecha: FechaDia;
   estilo: string;
   valorClase: number;
@@ -20,22 +20,22 @@ export async function listarAsistenciasDelPeriodo(
   hasta: FechaDia,
   profesorId?: number,
 ): Promise<AsistenciaLiquidable[]> {
-  const filtros: SQL[] = [gte(sesion.fecha, desde), lt(sesion.fecha, hasta)];
-  if (profesorId !== undefined) filtros.push(eq(sesion.profesorId, profesorId));
+  const filtros: SQL[] = [gte(clase.fecha, desde), lt(clase.fecha, hasta)];
+  if (profesorId !== undefined) filtros.push(eq(clase.profesorId, profesorId));
   return ej
     .select({
-      profesorId: sesion.profesorId,
-      sesionId: sesion.id,
-      fecha: sesion.fecha,
+      profesorId: clase.profesorId,
+      claseId: clase.id,
+      fecha: clase.fecha,
       estilo: horario.estilo,
       valorClase: asistencia.valorClase,
       porcentajeBp: asistencia.porcentajeBp,
     })
     .from(asistencia)
-    .innerJoin(sesion, eq(sesion.id, asistencia.sesionId))
-    .innerJoin(horario, eq(horario.id, sesion.horarioId))
+    .innerJoin(clase, eq(clase.id, asistencia.claseId))
+    .innerJoin(horario, eq(horario.id, clase.horarioId))
     .where(and(...filtros))
-    .orderBy(asc(sesion.fecha), asc(sesion.id));
+    .orderBy(asc(clase.fecha), asc(clase.id));
 }
 
 const columnas = {

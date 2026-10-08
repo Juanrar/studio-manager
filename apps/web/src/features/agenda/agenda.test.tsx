@@ -1,7 +1,7 @@
 import { screen, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
-import type { AgendaDelDia, Sesion } from '@studio/shared';
+import type { AgendaDelDia, Clase } from '@studio/shared';
 import { RECEPCION, conSesion, renderizarEn } from '../../../test/render.tsx';
 import { servidor } from '../../../test/servidor.ts';
 
@@ -12,7 +12,7 @@ const IARU = { id: 2, nombre: 'Iaru', apellido: 'Speroni' };
 const AGENDA_DEL_10: AgendaDelDia = {
   fecha: '2026-03-10',
   items: [
-    { horarioId: 1, estilo: 'Ballet', nivel: null, horaInicio: '18:00', horaFin: '19:00', profesorTitular: ERIK, sesion: null },
+    { horarioId: 1, estilo: 'Ballet', nivel: null, horaInicio: '18:00', horaFin: '19:00', profesorTitular: ERIK, clase: null },
     {
       horarioId: 2,
       estilo: 'Hip-Hop',
@@ -20,7 +20,7 @@ const AGENDA_DEL_10: AgendaDelDia = {
       horaInicio: '19:00',
       horaFin: '20:30',
       profesorTitular: ERIK,
-      sesion: { id: 50, horarioId: 2, fecha: '2026-03-10', estado: 'programada', profesor: IARU, asistentes: 4 },
+      clase: { id: 50, horarioId: 2, fecha: '2026-03-10', estado: 'programada', profesor: IARU, asistentes: 4 },
     },
     {
       horarioId: 3,
@@ -29,7 +29,7 @@ const AGENDA_DEL_10: AgendaDelDia = {
       horaInicio: '21:00',
       horaFin: '22:00',
       profesorTitular: ERIK,
-      sesion: { id: 51, horarioId: 3, fecha: '2026-03-10', estado: 'cancelada', profesor: ERIK, asistentes: 0 },
+      clase: { id: 51, horarioId: 3, fecha: '2026-03-10', estado: 'cancelada', profesor: ERIK, asistentes: 0 },
     },
   ],
 };
@@ -38,7 +38,7 @@ function agendaDel10() {
   conSesion(RECEPCION);
   const fechasPedidas: (string | null)[] = [];
   servidor.use(
-    http.get('/api/sesiones/dia', ({ request }) => {
+    http.get('/api/clases/dia', ({ request }) => {
       fechasPedidas.push(new URL(request.url).searchParams.get('fecha'));
       return HttpResponse.json(AGENDA_DEL_10);
     }),
@@ -62,23 +62,23 @@ describe('/agenda', () => {
     expect(fechasPedidas).toEqual(['2026-03-10']);
   });
 
-  it('"Tomar asistencia" abre la sesión de esa clase y esa fecha, y lleva a su pantalla', async () => {
+  it('"Tomar asistencia" abre la clase de ese horario y esa fecha, y lleva a su pantalla', async () => {
     agendaDel10();
     let cuerpoRecibido: unknown;
     servidor.use(
-      http.post('/api/sesiones', async ({ request }) => {
+      http.post('/api/clases', async ({ request }) => {
         cuerpoRecibido = await request.json();
-        const sesion: Sesion = { id: 52, horarioId: 1, fecha: '2026-03-10', estado: 'programada', profesor: ERIK, asistentes: 0 };
-        return HttpResponse.json(sesion, { status: 201 });
+        const clase: Clase = { id: 52, horarioId: 1, fecha: '2026-03-10', estado: 'programada', profesor: ERIK, asistentes: 0 };
+        return HttpResponse.json(clase, { status: 201 });
       }),
-      // La pantalla de la sesión carga sus datos al llegar.
-      http.get('/api/sesiones/52', () =>
+      // La pantalla de la clase carga sus datos al llegar.
+      http.get('/api/clases/52', () =>
         HttpResponse.json({
           id: 52, horarioId: 1, fecha: '2026-03-10', estado: 'programada', profesor: ERIK, asistentes: 0,
           estilo: 'Ballet', nivel: null, horaInicio: '18:00', horaFin: '19:00',
         }),
       ),
-      http.get('/api/sesiones/52/asistencias', () => HttpResponse.json({ items: [] })),
+      http.get('/api/clases/52/asistencias', () => HttpResponse.json({ items: [] })),
       http.get('/api/profesores', () => HttpResponse.json({ items: [] })),
     );
     const { usuario, router } = renderizarEn('/agenda?fecha=2026-03-10');
@@ -88,6 +88,6 @@ describe('/agenda', () => {
 
     await screen.findByRole('heading', { name: /Asistencia/ });
     expect(cuerpoRecibido).toEqual({ horarioId: 1, fecha: '2026-03-10' });
-    expect(router.state.location.pathname).toBe('/sesiones/52');
+    expect(router.state.location.pathname).toBe('/clases/52');
   });
 });

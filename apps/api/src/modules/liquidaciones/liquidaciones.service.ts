@@ -1,4 +1,4 @@
-import type { DetalleSesion, Liquidacion, ResumenDelPeriodo } from '@studio/shared';
+import type { DetalleDeClase, Liquidacion, ResumenDelPeriodo } from '@studio/shared';
 import { db, type Ejecutor } from '../../db/client.ts';
 import { aplicarPorcentaje } from '../../lib/dinero.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
@@ -39,18 +39,18 @@ export async function resumenDelPeriodo(periodo: Periodo, hoy: FechaDia): Promis
   };
 }
 
-export async function detalleDelPeriodo(profesorId: number, periodo: Periodo): Promise<DetalleSesion[]> {
+export async function detalleDelPeriodo(profesorId: number, periodo: Periodo): Promise<DetalleDeClase[]> {
   const { desde, hasta } = rangoDelPeriodo(periodo);
   const asistencias = await repo.listarAsistenciasDelPeriodo(db, desde, hasta, profesorId);
-  const porSesion = Map.groupBy(asistencias, (a) => a.sesionId);
-  return [...porSesion.values()].map((deLaSesion) => {
-    const primera = deLaSesion[0]!;
+  const porClase = Map.groupBy(asistencias, (a) => a.claseId);
+  return [...porClase.values()].map((deLaClase) => {
+    const primera = deLaClase[0]!;
     return {
-      sesionId: primera.sesionId,
+      claseId: primera.claseId,
       fecha: primera.fecha,
       estilo: primera.estilo,
-      asistentes: deLaSesion.length,
-      monto: montoDe(deLaSesion),
+      asistentes: deLaClase.length,
+      monto: montoDe(deLaClase),
     };
   });
 }
@@ -89,7 +89,7 @@ export async function marcarPagada(id: number, ahora: Date): Promise<Liquidacion
   return liquidacion;
 }
 
-// Asistencias y sesiones la llaman antes de tocar algo que cambia el sueldo de un profesor.
+// Asistencias y clases la llaman antes de tocar algo que cambia el sueldo de un profesor.
 export async function verificarMesAbierto(ej: Ejecutor, profesorId: number, fecha: FechaDia): Promise<void> {
   const periodo = periodoDe(fecha);
   const cerrada = await repo.buscarCerrada(ej, profesorId, `${periodo}-01`);

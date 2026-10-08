@@ -1,40 +1,40 @@
 import { z } from 'zod';
 import { fechaDiaSchema, type PersonaResumen } from './comun.ts';
 
-// La clase de una fecha. Todavía se llama sesión: la tarea 3 de la feature 24 la renombra.
+// La clase de una fecha: "Hip-Hop del martes 10". Sale de un horario y guarda quién la dio de verdad.
 
 const idSchema = z.number().int().positive();
 
-export const abrirSesionSchema = z.object({
+export const abrirClaseSchema = z.object({
   horarioId: idSchema,
   fecha: fechaDiaSchema,
 });
 
-export type AbrirSesionInput = z.infer<typeof abrirSesionSchema>;
+export type AbrirClaseInput = z.infer<typeof abrirClaseSchema>;
 
-export const actualizarSesionSchema = z.object({
+export const actualizarClaseSchema = z.object({
   profesorId: idSchema.optional(),
   estado: z.enum(['programada', 'cancelada']).optional(),
 });
 
-export type ActualizarSesionInput = z.infer<typeof actualizarSesionSchema>;
+export type ActualizarClaseInput = z.infer<typeof actualizarClaseSchema>;
 
 export const agendaQuerySchema = z.object({
   fecha: fechaDiaSchema.optional(),
 });
 
-export type EstadoSesion = 'programada' | 'dictada' | 'cancelada';
+export type EstadoClase = 'programada' | 'dictada' | 'cancelada';
 
-export type Sesion = {
+export type Clase = {
   id: number;
   horarioId: number;
   fecha: string;
-  estado: EstadoSesion;
+  estado: EstadoClase;
   profesor: PersonaResumen;
   asistentes: number;
 };
 
-export type SesionDetalle = Sesion & {
+export type ClaseDetalle = Clase & {
   estilo: string;
   nivel: string | null;
   horaInicio: string;
@@ -48,7 +48,7 @@ export type HorarioDelDia = {
   horaInicio: string;
   horaFin: string;
   profesorTitular: PersonaResumen;
-  sesion: Sesion | null;
+  clase: Clase | null;
 };
 
 export type AgendaDelDia = {

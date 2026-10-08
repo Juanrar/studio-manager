@@ -4,19 +4,19 @@ import { idParamSchema } from '../../lib/validacion.ts';
 import { requerirRol } from '../../plugins/autenticacion.ts';
 import {
   borrarAsistencia,
-  listarAsistenciasDeSesion,
+  listarAsistenciasDeClase,
   registrarAsistencia,
 } from './asistencias.service.ts';
 
 export async function rutasAsistencias(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requerirRol('recepcion'));
 
-  app.get('/api/sesiones/:id/asistencias', async (request) => {
+  app.get('/api/clases/:id/asistencias', async (request) => {
     const { id } = idParamSchema.parse(request.params);
-    return { items: await listarAsistenciasDeSesion(id) };
+    return { items: await listarAsistenciasDeClase(id) };
   });
 
-  app.post('/api/sesiones/:id/asistencias', async (request, reply) => {
+  app.post('/api/clases/:id/asistencias', async (request, reply) => {
     const { id } = idParamSchema.parse(request.params);
     const datos = registrarAsistenciaSchema.parse(request.body);
     const asistencia = await registrarAsistencia(id, datos, request.usuario!.id, app.reloj(), app.hoy());

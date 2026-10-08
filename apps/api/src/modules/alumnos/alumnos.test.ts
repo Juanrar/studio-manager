@@ -10,7 +10,7 @@ import {
   crearProfesorDeTest,
 } from '../../../test/fabricas.ts';
 import { registrarAsistencia } from '../asistencias/asistencias.service.ts';
-import { abrirSesion, actualizarSesion } from '../clases/sesiones.service.ts';
+import { abrirClase, actualizarClase } from '../clases/clases.service.ts';
 import { anularPago, registrarPago } from '../pagos/pagos.service.ts';
 import { actualizarAlumno } from './alumnos.service.ts';
 import { darDeBajaPorNoComprar } from './baja-automatica.service.ts';
@@ -157,8 +157,8 @@ describe('GET /api/alumnos', () => {
     await anularPago(anulado.id, 'Se cargó dos veces', AHORA, HOY);
     await pagar(martina, packX8, '2026-03-01');
     for (const martes of ['2026-03-03', '2026-03-17']) {
-      const { sesion } = await abrirSesion(hipHop.id, martes);
-      await registrarAsistencia(sesion.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
+      const { clase } = await abrirClase(hipHop.id, martes);
+      await registrarAsistencia(clase.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
     }
     // Lucía: el pack venció el 10 de febrero sin que lo usara.
     await pagar(lucia, packX4, '2026-01-10');
@@ -239,9 +239,9 @@ describe('GET /api/alumnos/:id/actividad', () => {
     );
     // Hoy la clase la da Julia como suplente. La del martes que viene ya está anotada.
     for (const martes of ['2026-03-03', HOY, '2026-03-17']) {
-      const { sesion } = await abrirSesion(hipHop.id, martes);
-      if (martes === HOY) await actualizarSesion(sesion.id, { profesorId: julia.id });
-      await registrarAsistencia(sesion.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
+      const { clase } = await abrirClase(hipHop.id, martes);
+      if (martes === HOY) await actualizarClase(clase.id, { profesorId: julia.id });
+      await registrarAsistencia(clase.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
     }
 
     const respuesta = await app.inject({

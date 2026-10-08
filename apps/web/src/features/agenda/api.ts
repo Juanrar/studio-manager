@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
-  AbrirSesionInput,
-  ActualizarSesionInput,
+  AbrirClaseInput,
+  ActualizarClaseInput,
   AgendaDelDia,
   Asistencia,
   RegistrarAsistenciaInput,
-  Sesion,
-  SesionDetalle,
+  Clase,
+  ClaseDetalle,
 } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
@@ -14,62 +14,62 @@ import { api, conQuery } from '../../lib/api.ts';
 export function useAgenda(fecha: string | undefined) {
   return useQuery({
     queryKey: ['agenda', fecha ?? 'hoy'],
-    queryFn: () => api.get<AgendaDelDia>(conQuery('/sesiones/dia', { fecha })),
+    queryFn: () => api.get<AgendaDelDia>(conQuery('/clases/dia', { fecha })),
   });
 }
 
-export function useAbrirSesion() {
+export function useAbrirClase() {
   const clienteQuery = useQueryClient();
   return useMutation({
-    mutationFn: (datos: AbrirSesionInput) => api.post<Sesion>('/sesiones', datos),
+    mutationFn: (datos: AbrirClaseInput) => api.post<Clase>('/clases', datos),
     onSuccess: () => clienteQuery.invalidateQueries({ queryKey: ['agenda'] }),
   });
 }
 
-export function useSesionDeClase(id: number) {
-  return useQuery({ queryKey: ['sesiones', id], queryFn: () => api.get<SesionDetalle>(`/sesiones/${id}`) });
+export function useDetalleDeClase(id: number) {
+  return useQuery({ queryKey: ['clases', id], queryFn: () => api.get<ClaseDetalle>(`/clases/${id}`) });
 }
 
-export function useAsistencias(sesionId: number) {
+export function useAsistencias(claseId: number) {
   return useQuery({
-    queryKey: ['asistencias', sesionId],
-    queryFn: async () => (await api.get<{ items: Asistencia[] }>(`/sesiones/${sesionId}/asistencias`)).items,
+    queryKey: ['asistencias', claseId],
+    queryFn: async () => (await api.get<{ items: Asistencia[] }>(`/clases/${claseId}/asistencias`)).items,
   });
 }
 
-// Una asistencia cambia la sesión (asistentes), la agenda y los pagos del alumno.
-function useRecargarSesion(sesionId: number) {
+// Una asistencia cambia la clase (asistentes), la agenda y los pagos del alumno.
+function useRecargarClase(claseId: number) {
   const clienteQuery = useQueryClient();
   return () =>
     Promise.all([
-      clienteQuery.invalidateQueries({ queryKey: ['asistencias', sesionId] }),
-      clienteQuery.invalidateQueries({ queryKey: ['sesiones', sesionId] }),
+      clienteQuery.invalidateQueries({ queryKey: ['asistencias', claseId] }),
+      clienteQuery.invalidateQueries({ queryKey: ['clases', claseId] }),
       clienteQuery.invalidateQueries({ queryKey: ['agenda'] }),
       clienteQuery.invalidateQueries({ queryKey: ['pagos'] }),
     ]);
 }
 
-export function useRegistrarAsistencia(sesionId: number) {
-  const recargar = useRecargarSesion(sesionId);
+export function useRegistrarAsistencia(claseId: number) {
+  const recargar = useRecargarClase(claseId);
   return useMutation({
     mutationFn: (datos: RegistrarAsistenciaInput) =>
-      api.post<Asistencia>(`/sesiones/${sesionId}/asistencias`, datos),
+      api.post<Asistencia>(`/clases/${claseId}/asistencias`, datos),
     onSuccess: recargar,
   });
 }
 
-export function useQuitarAsistencia(sesionId: number) {
-  const recargar = useRecargarSesion(sesionId);
+export function useQuitarAsistencia(claseId: number) {
+  const recargar = useRecargarClase(claseId);
   return useMutation({
     mutationFn: (asistenciaId: number) => api.delete(`/asistencias/${asistenciaId}`),
     onSuccess: recargar,
   });
 }
 
-export function useActualizarSesion(sesionId: number) {
-  const recargar = useRecargarSesion(sesionId);
+export function useActualizarClase(claseId: number) {
+  const recargar = useRecargarClase(claseId);
   return useMutation({
-    mutationFn: (datos: ActualizarSesionInput) => api.patch<Sesion>(`/sesiones/${sesionId}`, datos),
+    mutationFn: (datos: ActualizarClaseInput) => api.patch<Clase>(`/clases/${claseId}`, datos),
     onSuccess: recargar,
   });
 }

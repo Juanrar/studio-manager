@@ -1,12 +1,12 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
-import { SIN_CLASES_DISPONIBLES, type Asistencia, type SesionDetalle } from '@studio/shared';
+import { SIN_CLASES_DISPONIBLES, type Asistencia, type ClaseDetalle } from '@studio/shared';
 import { unAlumnoEnListado, unaAsistencia, unListadoDeAlumnos, unPack, unProfesor } from '../../../test/datos.ts';
 import { RECEPCION, conSesion, renderizarEn } from '../../../test/render.tsx';
 import { servidor } from '../../../test/servidor.ts';
 
-const HIP_HOP_DEL_10: SesionDetalle = {
+const HIP_HOP_DEL_10: ClaseDetalle = {
   id: 50,
   horarioId: 2,
   fecha: '2026-03-10',
@@ -19,12 +19,12 @@ const HIP_HOP_DEL_10: SesionDetalle = {
   horaFin: '20:30',
 };
 
-// La sesión de Hip-Hop del martes 10, con la lista de asistencias que el test va cambiando.
-function sesionDeHipHop(asistencias: Asistencia[]) {
+// La clase de Hip-Hop del martes 10, con la lista de asistencias que el test va cambiando.
+function claseDeHipHop(asistencias: Asistencia[]) {
   conSesion(RECEPCION);
   servidor.use(
-    http.get('/api/sesiones/50', () => HttpResponse.json(HIP_HOP_DEL_10)),
-    http.get('/api/sesiones/50/asistencias', () => HttpResponse.json({ items: asistencias })),
+    http.get('/api/clases/50', () => HttpResponse.json(HIP_HOP_DEL_10)),
+    http.get('/api/clases/50/asistencias', () => HttpResponse.json({ items: asistencias })),
     http.get('/api/profesores', () =>
       HttpResponse.json({
         items: [unProfesor({ id: 1, nombre: 'Erik', apellido: 'Zapata' }), unProfesor({ id: 2, nombre: 'Iaru', apellido: 'Speroni' })],
@@ -42,7 +42,7 @@ function sesionDeHipHop(asistencias: Asistencia[]) {
       }),
     ),
   );
-  return renderizarEn('/sesiones/50');
+  return renderizarEn('/clases/50');
 }
 
 async function buscarYElegirAMartina(usuario: ReturnType<typeof renderizarEn>['usuario']) {
@@ -50,18 +50,18 @@ async function buscarYElegirAMartina(usuario: ReturnType<typeof renderizarEn>['u
   await usuario.click(await screen.findByRole('button', { name: 'García, Martina' }));
 }
 
-describe('/sesiones/:id', () => {
+describe('/clases/:id', () => {
   it('anotar a un alumno buscado manda su id y lo muestra entre los asistentes', async () => {
     const asistencias: Asistencia[] = [];
     let cuerpoRecibido: unknown;
     servidor.use(
-      http.post('/api/sesiones/50/asistencias', async ({ request }) => {
+      http.post('/api/clases/50/asistencias', async ({ request }) => {
         cuerpoRecibido = await request.json();
         asistencias.push(unaAsistencia({ id: 901, pack: 'Pack x8' }));
         return HttpResponse.json(asistencias[0], { status: 201 });
       }),
     );
-    const { usuario } = sesionDeHipHop(asistencias);
+    const { usuario } = claseDeHipHop(asistencias);
 
     await buscarYElegirAMartina(usuario);
 
@@ -72,7 +72,7 @@ describe('/sesiones/:id', () => {
 
   it('la búsqueda para anotar incluye a los alumnos dados de baja, para que puedan comprar y volver', async () => {
     let consulta = '';
-    const { usuario } = sesionDeHipHop([]);
+    const { usuario } = claseDeHipHop([]);
     servidor.use(
       http.get('/api/alumnos', ({ request }) => {
         consulta = new URL(request.url).search;
@@ -89,7 +89,7 @@ describe('/sesiones/:id', () => {
   it('sin clases disponibles ofrece cobrar, y "Cobrar y anotar" manda el pack y el medio', async () => {
     const cuerpos: unknown[] = [];
     servidor.use(
-      http.post('/api/sesiones/50/asistencias', async ({ request }) => {
+      http.post('/api/clases/50/asistencias', async ({ request }) => {
         const cuerpo = (await request.json()) as { cobrar?: unknown };
         cuerpos.push(cuerpo);
         if (cuerpo.cobrar === undefined) {
@@ -101,7 +101,7 @@ describe('/sesiones/:id', () => {
         return HttpResponse.json(unaAsistencia({ pack: 'Clase suelta' }), { status: 201 });
       }),
     );
-    const { usuario } = sesionDeHipHop([]);
+    const { usuario } = claseDeHipHop([]);
 
     await buscarYElegirAMartina(usuario);
     const cobro = await screen.findByRole('form', { name: 'Cobrar y anotar' });
@@ -124,7 +124,7 @@ describe('/sesiones/:id', () => {
         return new HttpResponse(null, { status: 204 });
       }),
     );
-    const { usuario } = sesionDeHipHop(asistencias);
+    const { usuario } = claseDeHipHop(asistencias);
 
     const fila = await screen.findByRole('row', { name: /García, Martina/ });
     await usuario.click(within(fila).getByRole('button', { name: 'Quitar' }));
@@ -136,12 +136,12 @@ describe('/sesiones/:id', () => {
   it('una suplencia manda el profesor nuevo', async () => {
     let cuerpoRecibido: unknown;
     servidor.use(
-      http.patch('/api/sesiones/50', async ({ request }) => {
+      http.patch('/api/clases/50', async ({ request }) => {
         cuerpoRecibido = await request.json();
         return HttpResponse.json({ ...HIP_HOP_DEL_10, profesor: { id: 2, nombre: 'Iaru', apellido: 'Speroni' } });
       }),
     );
-    const { usuario } = sesionDeHipHop([]);
+    const { usuario } = claseDeHipHop([]);
 
     await screen.findByRole('option', { name: 'Iaru Speroni' });
     await usuario.selectOptions(screen.getByLabelText('Profesor que da la clase'), 'Iaru Speroni');

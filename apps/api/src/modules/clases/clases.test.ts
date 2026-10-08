@@ -37,12 +37,12 @@ afterEach(async () => {
   await app.close();
 });
 
-function abrirSesion(horarioId: number, fecha: string) {
-  return app.inject({ method: 'POST', url: '/api/sesiones', payload: { horarioId, fecha }, headers: { cookie } });
+function abrirClase(horarioId: number, fecha: string) {
+  return app.inject({ method: 'POST', url: '/api/clases', payload: { horarioId, fecha }, headers: { cookie } });
 }
 
-describe('GET /api/sesiones/dia', () => {
-  it('trae solo las clases activas de ese día de la semana, ordenadas por hora y sin sesión', async () => {
+describe('GET /api/clases/dia', () => {
+  it('trae solo los horarios activos de ese día de la semana, ordenados por hora y sin clase abierta', async () => {
     const ballet = await crearHorarioDeTest(erik.id, {
       estilo: 'Ballet',
       nivel: null,
@@ -54,7 +54,7 @@ describe('GET /api/sesiones/dia', () => {
     const salsa = await crearHorarioDeTest(erik.id, { estilo: 'Salsa', diaSemana: 2, horaInicio: '21:00', horaFin: '22:00' });
     await actualizarHorario(salsa.id, { activo: false });
 
-    const respuesta = await app.inject({ method: 'GET', url: `/api/sesiones/dia?fecha=${MARTES}`, headers: { cookie } });
+    const respuesta = await app.inject({ method: 'GET', url: `/api/clases/dia?fecha=${MARTES}`, headers: { cookie } });
 
     const erikResumen = { id: erik.id, nombre: 'Erik', apellido: 'Zapata' };
     expect(respuesta.json()).toEqual({
@@ -67,7 +67,7 @@ describe('GET /api/sesiones/dia', () => {
           horaInicio: '18:00',
           horaFin: '19:00',
           profesorTitular: erikResumen,
-          sesion: null,
+          clase: null,
         },
         {
           horarioId: hipHopMartes.id,
@@ -76,17 +76,17 @@ describe('GET /api/sesiones/dia', () => {
           horaInicio: '19:00',
           horaFin: '20:30',
           profesorTitular: erikResumen,
-          sesion: null,
+          clase: null,
         },
       ],
     });
   });
 });
 
-describe('POST /api/sesiones', () => {
-  it('abrir la misma sesión dos veces devuelve la misma sesión', async () => {
-    const primera = await abrirSesion(hipHopMartes.id, MARTES);
-    const segunda = await abrirSesion(hipHopMartes.id, MARTES);
+describe('POST /api/clases', () => {
+  it('abrir la misma clase dos veces devuelve la misma clase', async () => {
+    const primera = await abrirClase(hipHopMartes.id, MARTES);
+    const segunda = await abrirClase(hipHopMartes.id, MARTES);
 
     expect(primera.statusCode).toBe(201);
     expect(primera.json()).toEqual({
@@ -102,21 +102,21 @@ describe('POST /api/sesiones', () => {
   });
 
   it('responde 422 si la fecha no cae en el día de la semana de la clase', async () => {
-    const respuesta = await abrirSesion(hipHopMartes.id, MIERCOLES);
+    const respuesta = await abrirClase(hipHopMartes.id, MIERCOLES);
 
     expect(respuesta.statusCode).toBe(422);
     expect(respuesta.json()).toEqual({ error: 'El horario de Hip-Hop no se dicta el 2026-03-11' });
   });
 });
 
-describe('PATCH /api/sesiones/:id', () => {
-  it('una suplencia cambia el profesor de la sesión y no el titular de la clase', async () => {
+describe('PATCH /api/clases/:id', () => {
+  it('una suplencia cambia el profesor de la clase y no el titular del horario', async () => {
     const iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni' });
-    const sesion = (await abrirSesion(hipHopMartes.id, MARTES)).json();
+    const clase = (await abrirClase(hipHopMartes.id, MARTES)).json();
 
     const respuesta = await app.inject({
       method: 'PATCH',
-      url: `/api/sesiones/${sesion.id}`,
+      url: `/api/clases/${clase.id}`,
       payload: { profesorId: iaru.id },
       headers: { cookie },
     });
@@ -128,11 +128,11 @@ describe('PATCH /api/sesiones/:id', () => {
   });
 });
 
-describe('GET /api/sesiones/:id', () => {
-  it('devuelve la sesión con los datos de su clase', async () => {
-    const abierta = (await abrirSesion(hipHopMartes.id, MARTES)).json();
+describe('GET /api/clases/:id', () => {
+  it('devuelve la clase con los datos de su horario', async () => {
+    const abierta = (await abrirClase(hipHopMartes.id, MARTES)).json();
 
-    const respuesta = await app.inject({ method: 'GET', url: `/api/sesiones/${abierta.id}`, headers: { cookie } });
+    const respuesta = await app.inject({ method: 'GET', url: `/api/clases/${abierta.id}`, headers: { cookie } });
 
     expect(respuesta.json()).toEqual({
       ...abierta,

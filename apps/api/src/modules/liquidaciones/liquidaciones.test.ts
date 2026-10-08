@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import type { Alumno, Asistencia, Pack, Profesor, Sesion, UsuarioPublico } from '@studio/shared';
+import type { Alumno, Asistencia, Pack, Profesor, Clase, UsuarioPublico } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   ADMIN,
@@ -18,7 +18,7 @@ import {
   crearProfesorDeTest,
 } from '../../../test/fabricas.ts';
 import { registrarAsistencia } from '../asistencias/asistencias.service.ts';
-import { abrirSesion } from '../clases/sesiones.service.ts';
+import { abrirClase } from '../clases/clases.service.ts';
 import { registrarPago } from '../pagos/pagos.service.ts';
 
 // Los tests corren el 5 de abril de 2026, con marzo ya terminado.
@@ -34,8 +34,8 @@ let martina: Alumno;
 let joaquin: Alumno;
 let packX4: Pack;
 let claseSuelta: Pack;
-let sesion3DeMarzo: Sesion;
-let sesion10DeMarzo: Sesion;
+let clase3DeMarzo: Clase;
+let clase10DeMarzo: Clase;
 let asistenciaDeMartinaEl10: Asistencia;
 
 beforeAll(async () => {
@@ -50,8 +50,8 @@ async function pagar(alumno: Alumno, pack: Pack, dia: string, medio: 'efectivo' 
   return registrarPago({ alumnoId: alumno.id, packId: pack.id, medio }, recepcion.id, new Date(`${dia}T15:00:00Z`), dia);
 }
 
-async function asistir(sesion: Sesion, alumno: Alumno) {
-  return registrarAsistencia(sesion.id, { alumnoId: alumno.id }, recepcion.id, AHORA, '2026-03-10');
+async function asistir(clase: Clase, alumno: Alumno) {
+  return registrarAsistencia(clase.id, { alumnoId: alumno.id }, recepcion.id, AHORA, '2026-03-10');
 }
 
 // Erik (50%) da Hip-Hop los martes. Martina usa un pack x4 ($1300 la clase) el 24/2, el 3/3 y el 10/3.
@@ -67,9 +67,9 @@ beforeEach(async () => {
   erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata', porcentajeBp: 5000 });
   iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni', porcentajeBp: 6000 });
   const hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2 });
-  const sesion24DeFebrero = (await abrirSesion(hipHop.id, '2026-02-24')).sesion;
-  sesion3DeMarzo = (await abrirSesion(hipHop.id, '2026-03-03')).sesion;
-  sesion10DeMarzo = (await abrirSesion(hipHop.id, '2026-03-10')).sesion;
+  const clase24DeFebrero = (await abrirClase(hipHop.id, '2026-02-24')).clase;
+  clase3DeMarzo = (await abrirClase(hipHop.id, '2026-03-03')).clase;
+  clase10DeMarzo = (await abrirClase(hipHop.id, '2026-03-10')).clase;
 
   martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García' });
   joaquin = await crearAlumnoDeTest({ nombre: 'Joaquín', apellido: 'Pérez' });
@@ -78,10 +78,10 @@ beforeEach(async () => {
 
   await pagar(martina, packX4, '2026-02-20');
   await pagar(joaquin, claseSuelta, '2026-03-10');
-  await asistir(sesion24DeFebrero, martina);
-  await asistir(sesion3DeMarzo, martina);
-  asistenciaDeMartinaEl10 = await asistir(sesion10DeMarzo, martina);
-  await asistir(sesion10DeMarzo, joaquin);
+  await asistir(clase24DeFebrero, martina);
+  await asistir(clase3DeMarzo, martina);
+  asistenciaDeMartinaEl10 = await asistir(clase10DeMarzo, martina);
+  await asistir(clase10DeMarzo, joaquin);
 });
 
 afterEach(async () => {
@@ -124,13 +124,13 @@ describe('GET /api/liquidaciones', () => {
     });
   });
 
-  it('el detalle agrupa por sesión con su monto', async () => {
+  it('el detalle agrupa por clase con su monto', async () => {
     const respuesta = await get(`/api/liquidaciones/detalle?profesorId=${erik.id}&periodo=2026-03`);
 
     expect(respuesta.json()).toEqual({
       items: [
-        { sesionId: sesion3DeMarzo.id, fecha: '2026-03-03', estilo: 'Hip-Hop', asistentes: 1, monto: 650 },
-        { sesionId: sesion10DeMarzo.id, fecha: '2026-03-10', estilo: 'Hip-Hop', asistentes: 2, monto: 1400 },
+        { claseId: clase3DeMarzo.id, fecha: '2026-03-03', estilo: 'Hip-Hop', asistentes: 1, monto: 650 },
+        { claseId: clase10DeMarzo.id, fecha: '2026-03-10', estilo: 'Hip-Hop', asistentes: 2, monto: 1400 },
       ],
     });
   });
@@ -186,7 +186,7 @@ describe('con el mes liquidado', () => {
   it('no se registran asistencias de ese profesor', async () => {
     const respuesta = await app.inject({
       method: 'POST',
-      url: `/api/sesiones/${sesion3DeMarzo.id}/asistencias`,
+      url: `/api/clases/${clase3DeMarzo.id}/asistencias`,
       payload: { alumnoId: joaquin.id, cobrar: { packId: claseSuelta.id, medio: 'efectivo' } },
       headers: { cookie: cookieRecepcion },
     });
@@ -206,10 +206,10 @@ describe('con el mes liquidado', () => {
     expect(respuesta.json()).toEqual(MENSAJE);
   });
 
-  it('no se cambia el profesor de una sesión', async () => {
+  it('no se cambia el profesor de una clase', async () => {
     const respuesta = await app.inject({
       method: 'PATCH',
-      url: `/api/sesiones/${sesion10DeMarzo.id}`,
+      url: `/api/clases/${clase10DeMarzo.id}`,
       payload: { profesorId: iaru.id },
       headers: { cookie: cookieRecepcion },
     });

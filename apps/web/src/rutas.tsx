@@ -1,6 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router';
 import { AgendaPage } from './features/agenda/AgendaPage.tsx';
-import { SesionPage } from './features/agenda/SesionPage.tsx';
+import { ClasePage } from './features/agenda/ClasePage.tsx';
 import { AlumnosPage } from './features/alumnos/AlumnosPage.tsx';
 import { FichaAlumnoPage } from './features/alumnos/FichaAlumnoPage.tsx';
 import { LoginPage } from './features/auth/LoginPage.tsx';
@@ -20,7 +20,7 @@ export const rutas: RouteObject[] = [
     children: [
       { index: true, element: <Navigate to="/agenda" replace /> },
       { path: 'agenda', element: <AgendaPage /> },
-      { path: 'sesiones/:id', element: <SesionPage /> },
+      { path: 'clases/:id', element: <ClasePage /> },
       // La ficha se abre en un panel encima de la lista, que sigue montada con su búsqueda.
       { path: 'alumnos', element: <AlumnosPage />, children: [{ path: ':id', element: <FichaAlumnoPage /> }] },
       {

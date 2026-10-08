@@ -1,5 +1,5 @@
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import type { HorarioDelDia, EstadoSesion } from '@studio/shared';
+import type { HorarioDelDia, EstadoClase } from '@studio/shared';
 import {
   Aviso,
   Boton,
@@ -14,12 +14,12 @@ import {
 } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFechaLarga, sumarDias } from '../../lib/formato.ts';
-import { useAbrirSesion, useAgenda } from './api.ts';
+import { useAbrirClase, useAgenda } from './api.ts';
 
 type Tono = 'gris' | 'verde' | 'rojo';
 
-// Sin sesión, la clase todavía no se abrió. `dictada` existe en el esquema, pero la API aún no la asigna.
-const ESTADOS: Record<EstadoSesion, { texto: string; tono: Tono }> = {
+// Sin clase, el horario todavía no se abrió ese día. `dictada` existe en el esquema, pero la API aún no la asigna.
+const ESTADOS: Record<EstadoClase, { texto: string; tono: Tono }> = {
   programada: { texto: 'Abierta', tono: 'verde' },
   dictada: { texto: 'Dictada', tono: 'gris' },
   cancelada: { texto: 'Cancelada', tono: 'rojo' },
@@ -30,7 +30,7 @@ export function AgendaPage() {
   const [parametros, setParametros] = useSearchParams();
   const fecha = parametros.get('fecha') ?? undefined;
   const agenda = useAgenda(fecha);
-  const abrir = useAbrirSesion();
+  const abrir = useAbrirClase();
   const irA = (nueva: string | undefined) => setParametros(nueva === undefined ? {} : { fecha: nueva });
 
   return (
@@ -55,15 +55,15 @@ export function AgendaPage() {
       {agenda.data && agenda.data.items.length === 0 && <p className="text-apagado">No hay clases este día.</p>}
       {agenda.data && agenda.data.items.length > 0 && (
         <Tabla columnas={['Horario', 'Clase', 'Nivel', 'Profesor', 'Asistentes', 'Estado', '']}>
-          {agenda.data.items.map((clase) => (
+          {agenda.data.items.map((horario) => (
             <FilaDeClase
-              key={clase.horarioId}
-              clase={clase}
+              key={horario.horarioId}
+              horario={horario}
               abriendo={abrir.isPending}
               alTomarAsistencia={() =>
                 abrir.mutate(
-                  { horarioId: clase.horarioId, fecha: agenda.data.fecha },
-                  { onSuccess: (abierta) => navegar(`/sesiones/${abierta.id}`) },
+                  { horarioId: horario.horarioId, fecha: agenda.data.fecha },
+                  { onSuccess: (abierta) => navegar(`/clases/${abierta.id}`) },
                 )
               }
             />
@@ -75,41 +75,41 @@ export function AgendaPage() {
 }
 
 function FilaDeClase({
-  clase,
+  horario,
   abriendo,
   alTomarAsistencia,
 }: {
-  clase: HorarioDelDia;
+  horario: HorarioDelDia;
   abriendo: boolean;
   alTomarAsistencia: () => void;
 }) {
-  const { sesion } = clase;
-  const profesor = sesion?.profesor ?? clase.profesorTitular;
-  const esSuplente = sesion !== null && sesion.profesor.id !== clase.profesorTitular.id;
-  const estado = sesion === null ? { texto: 'Sin abrir', tono: 'gris' as const } : ESTADOS[sesion.estado];
+  const { clase } = horario;
+  const profesor = clase?.profesor ?? horario.profesorTitular;
+  const esSuplente = clase !== null && clase.profesor.id !== horario.profesorTitular.id;
+  const estado = clase === null ? { texto: 'Sin abrir', tono: 'gris' as const } : ESTADOS[clase.estado];
 
   return (
     <tr>
       <Celda>
-        {clase.horaInicio} a {clase.horaFin}
+        {horario.horaInicio} a {horario.horaFin}
       </Celda>
-      <Celda className="font-medium">{clase.estilo}</Celda>
-      <Celda>{clase.nivel ?? '—'}</Celda>
+      <Celda className="font-medium">{horario.estilo}</Celda>
+      <Celda>{horario.nivel ?? '—'}</Celda>
       <Celda>
         {profesor.nombre} {profesor.apellido}
         {esSuplente && ' (suplente)'}
       </Celda>
-      <Celda>{sesion === null ? '—' : sesion.asistentes}</Celda>
+      <Celda>{clase === null ? '—' : clase.asistentes}</Celda>
       <Celda>
         <Insignia tono={estado.tono}>{estado.texto}</Insignia>
       </Celda>
       <CeldaDeAcciones>
-        {sesion === null ? (
+        {clase === null ? (
           <Boton disabled={abriendo} onClick={alTomarAsistencia}>
             Tomar asistencia
           </Boton>
         ) : (
-          <Link to={`/sesiones/${sesion.id}`} className={claseDeBoton('secundario')}>
+          <Link to={`/clases/${clase.id}`} className={claseDeBoton('secundario')}>
             Ver asistencia
           </Link>
         )}

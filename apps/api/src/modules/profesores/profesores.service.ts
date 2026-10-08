@@ -79,7 +79,7 @@ export async function porcentajeVigente(ej: Ejecutor, profesorId: number, fecha:
   return porcentaje;
 }
 
-// Para clases y sesiones: el profesor tiene que existir y estar activo.
+// Para horarios y clases: el profesor tiene que existir y estar activo.
 export async function verificarProfesorActivo(ej: Ejecutor, id: number): Promise<PersonaResumen> {
   const encontrado = await repo.buscarResumen(ej, id);
   if (encontrado === null) throw new ReglaDeNegocioError(`No existe el profesor ${id}`);
