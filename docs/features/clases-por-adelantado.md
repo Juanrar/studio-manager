@@ -1,6 +1,6 @@
 # Clases generadas por adelantado
 
-**Estado:** en curso
+**Estado:** lista
 **Depende de:** renombrar-horario-y-clase (24)
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; cada horario activo tiene sus clases creadas desde la semana actual hasta el fin del mes siguiente, la agenda del día lista esas clases sin el paso de "abrir", y cambiar un horario cambia sus clases de esta semana en adelante sin tocar las que ya pasaron.
 
@@ -197,7 +197,7 @@ La migración de datos se prueba a mano contra la base de desarrollo, que tiene 
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
-- [ ] `pnpm e2e` pasa.
-- [ ] Contra la base de desarrollo: `db:migrate` completa las clases existentes, y al arrancar la API se crean las clases del horizonte de los 3 horarios.
-- [ ] `docs/estructura de base de datos.md` describe las columnas nuevas y cierra la pregunta abierta 3.
+- [x] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
+- [x] `pnpm e2e` pasa.
+- [x] Sobre una copia de la base de desarrollo (no sobre la base misma: `pnpm dev` la usa con la rama del prototipo), `db:migrate` completó las 2 clases existentes y `server.ts` real, en el puerto 3201, creó al arrancar 27 clases: 9 semanas por 3 horarios, del 5 de octubre al 6 de diciembre.
+- [x] `docs/estructura de base de datos.md` describe las columnas nuevas y las reglas de las clases por adelantado, y cierra la pregunta abierta 3. CLAUDE.md suma cómo se crean clases en los tests.

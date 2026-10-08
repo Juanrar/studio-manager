@@ -121,11 +121,17 @@ erDiagram
         time hora_fin
         bigint profesor_id FK
         boolean activo
+        date vigente_desde
     }
     clase {
         bigint id PK
         bigint horario_id FK
+        date semana
         date fecha
+        time hora_inicio
+        time hora_fin
+        text estilo
+        text nivel
         bigint profesor_id FK
         estado_clase estado
     }
@@ -295,7 +301,7 @@ create index pago_alumno_idx on pago (alumno_id, vence_el);
 
 ### horario
 
-Lo que se repite cada semana. `dia_semana` sigue ISO 8601: 1 = lunes, 7 = domingo. `profesor_id` es el titular.
+Lo que se repite cada semana. `dia_semana` sigue ISO 8601: 1 = lunes, 7 = domingo. `profesor_id` es el titular. `vigente_desde` es el lunes de la primera semana en que se dicta: un horario nuevo no aparece en las semanas anteriores.
 
 ```sql
 create table horario (
@@ -306,22 +312,28 @@ create table horario (
   hora_inicio  time not null,
   hora_fin     time not null check (hora_fin > hora_inicio),
   profesor_id  bigint not null references profesor (id),
-  activo       boolean not null default true
+  activo       boolean not null default true,
+  vigente_desde date   not null check (extract(isodow from vigente_desde) = 1)
 );
 ```
 
 ### clase
 
-La clase de un horario en una fecha concreta. Se crea cuando recepción la abre para tomar asistencia. `profesor_id` arranca con el titular y se cambia si hay una suplencia.
+La clase de un horario en una fecha concreta. Se crea por adelantado, desde la semana actual hasta la que contiene el último día del mes siguiente (ver *Clases por adelantado* en las reglas). Copia la hora, el estilo y el nivel de su horario: si el horario cambia, las semanas que ya pasaron siguen mostrando lo que pasó. `profesor_id` arranca con el titular y se cambia si hay una suplencia. `semana` es el lunes de su semana: un horario tiene una sola clase por semana aunque se mueva de día. `horario_id` es nulo en una clase única, que no sale de ningún horario.
 
 ```sql
 create table clase (
   id           bigint generated always as identity primary key,
-  horario_id   bigint not null references horario (id),
-  fecha        date   not null,
+  horario_id   bigint references horario (id),
+  semana       date   not null check (extract(isodow from semana) = 1),
+  fecha        date   not null check (fecha between semana and semana + 6),
+  hora_inicio  time   not null,
+  hora_fin     time   not null check (hora_fin > hora_inicio),
+  estilo       text   not null,
+  nivel        text,
   profesor_id  bigint not null references profesor (id),
   estado       estado_clase not null default 'programada',
-  unique (horario_id, fecha)
+  unique (horario_id, semana)
 );
 
 create index clase_profesor_fecha_idx on clase (profesor_id, fecha);
@@ -381,6 +393,13 @@ La base no puede validar todas las reglas con `check`. Estas quedan en el backen
 **Anular un pago**
 
 - No se puede anular un pago con asistencias. Primero hay que borrar o mover esas asistencias.
+
+**Clases por adelantado**
+
+1. Cada horario activo tiene su clase en cada semana del horizonte, desde su `vigente_desde`: de la semana actual a la que contiene el último día del mes siguiente. La API las crea al arrancar, cada hora y al crear o reactivar un horario. Nunca pisa una clase que ya existe.
+2. Una clase tiene cambios propios si su día, sus horas, su estilo, su nivel, su profesor o su estado difieren de su horario. Se calcula, no se guarda, y solo de la semana actual en adelante.
+3. Cambiar un horario cambia sus clases desde hoy que todavía son iguales a él. Una clase de esta semana no pasa a un día que ya pasó. Si un alumno anotado tiene un pack que vence antes de la fecha nueva, no cambia nada.
+4. Dar de baja un horario borra sus clases desde hoy. Si alguna tiene un alumno anotado, no se puede.
 
 **Cancelar una clase**
 
