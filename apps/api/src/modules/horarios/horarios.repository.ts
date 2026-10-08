@@ -53,3 +53,31 @@ export async function listar(ej: Ejecutor, filtros: FiltrosDeHorarios): Promise<
 export async function listarDelDia(ej: Ejecutor, diaSemana: number): Promise<Horario[]> {
   return seleccionar(ej, and(eq(horario.activo, true), eq(horario.diaSemana, diaSemana)));
 }
+
+// Lo que el generador copia en cada clase, de los horarios activos.
+export type HorarioParaGenerar = {
+  id: number;
+  diaSemana: number;
+  horaInicio: string;
+  horaFin: string;
+  estilo: string;
+  nivel: string | null;
+  profesorId: number;
+  vigenteDesde: string;
+};
+
+export async function listarParaGenerar(ej: Ejecutor, horarioId?: number): Promise<HorarioParaGenerar[]> {
+  return ej
+    .select({
+      id: horario.id,
+      diaSemana: horario.diaSemana,
+      horaInicio: horaHHMM(horario.horaInicio),
+      horaFin: horaHHMM(horario.horaFin),
+      estilo: horario.estilo,
+      nivel: horario.nivel,
+      profesorId: horario.profesorId,
+      vigenteDesde: horario.vigenteDesde,
+    })
+    .from(horario)
+    .where(and(eq(horario.activo, true), horarioId === undefined ? undefined : eq(horario.id, horarioId)));
+}

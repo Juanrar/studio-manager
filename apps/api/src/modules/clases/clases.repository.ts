@@ -32,6 +32,17 @@ export async function listarDeFecha(ej: Ejecutor, fecha: FechaDia): Promise<Clas
   return seleccionar(ej, eq(clase.fecha, fecha));
 }
 
+// Las que ya existían para ese horario y esa semana no se tocan. Devuelve cuántas se crearon.
+export async function insertarLasQueFaltan(ej: Ejecutor, filas: NuevaClase[]): Promise<number> {
+  if (filas.length === 0) return 0;
+  const creadas = await ej
+    .insert(clase)
+    .values(filas)
+    .onConflictDoNothing({ target: [clase.horarioId, clase.semana] })
+    .returning({ id: clase.id });
+  return creadas.length;
+}
+
 // Devuelve null si ya existía una clase para ese horario y fecha (dos pedidos a la vez).
 export async function insertarSiNoExiste(ej: Ejecutor, datos: NuevaClase): Promise<number | null> {
   const [fila] = await ej.insert(clase).values(datos).onConflictDoNothing().returning({ id: clase.id });

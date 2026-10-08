@@ -153,11 +153,11 @@ La migración de datos se prueba a mano contra la base de desarrollo, que tiene 
 
 **Archivos:** `apps/api/src/modules/clases/programacion.service.ts`, su test, `apps/api/src/tareas.ts`, `horarios.routes.ts` (crear y reactivar)
 
-- [ ] **Paso 1:** escribir los tests del generador de la tabla y el de crear un horario por HTTP.
-- [ ] **Paso 2:** correr los tests y verificar que fallan porque el generador no existe.
-- [ ] **Paso 3:** implementar `generarClases`, llamarlo en `programarTareas` y al crear o reactivar un horario.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(clases): crear las clases del horizonte por adelantado`.
+- [x] **Paso 1:** escribir los tests del generador de la tabla y el de crear un horario por HTTP.
+- [x] **Paso 2:** correr los tests y verificar que fallan porque el generador no existe.
+- [x] **Paso 3:** implementar `generarClases`, llamarlo en `programarTareas` y al crear un horario (`crearHorarioConSusClases`, en una transacción). Reactivar pasa a la tarea 5, que reescribe todo el `PATCH` del horario. El generador toma los horarios de `horarios.service.horariosParaGenerar` y no lee la tabla `horario` desde el módulo de clases. `crearHorario` y `obtenerHorario` reciben un `Ejecutor` opcional para correr dentro de la transacción. Se sumó el test de generar un solo horario.
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(clases): crear las clases del horizonte por adelantado`.
 
 ### Tarea 4: Las clases de un rango y la agenda
 
