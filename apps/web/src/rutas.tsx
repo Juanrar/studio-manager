@@ -5,7 +5,7 @@ import { AlumnosPage } from './features/alumnos/AlumnosPage.tsx';
 import { FichaAlumnoPage } from './features/alumnos/FichaAlumnoPage.tsx';
 import { LoginPage } from './features/auth/LoginPage.tsx';
 import { RequiereSesion, SoloAdmin } from './features/auth/RequiereSesion.tsx';
-import { ClasesPage } from './features/clases/ClasesPage.tsx';
+import { HorariosPage } from './features/horarios/HorariosPage.tsx';
 import { LiquidacionesPage } from './features/liquidaciones/LiquidacionesPage.tsx';
 import { PacksPage } from './features/packs/PacksPage.tsx';
 import { FichaProfesorPage } from './features/profesores/FichaProfesorPage.tsx';
@@ -30,7 +30,7 @@ export const rutas: RouteObject[] = [
           { path: 'profesores', element: <ProfesoresPage /> },
           // Hermana y no hija del listado: la ficha es una página entera, no un panel encima de la lista.
           { path: 'profesores/:id', element: <FichaProfesorPage /> },
-          { path: 'clases', element: <ClasesPage /> },
+          { path: 'horarios', element: <HorariosPage /> },
           { path: 'usuarios', element: <UsuariosPage /> },
           { path: 'liquidaciones', element: <LiquidacionesPage /> },
         ],

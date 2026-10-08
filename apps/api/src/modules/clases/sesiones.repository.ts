@@ -1,13 +1,13 @@
 import { and, count, eq, sql, type SQL } from 'drizzle-orm';
 import type { EstadoSesion, Sesion, SesionDetalle } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
-import { asistencia, clase, profesor, sesion, type NuevaSesion } from '../../db/schema.ts';
-import { horaHHMM } from './clases.repository.ts';
+import { asistencia, horario, profesor, sesion, type NuevaSesion } from '../../db/schema.ts';
+import { horaHHMM } from '../../lib/postgres.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 
 const columnas = {
   id: sesion.id,
-  claseId: sesion.claseId,
+  horarioId: sesion.horarioId,
   fecha: sesion.fecha,
   estado: sesion.estado,
   profesor: { id: profesor.id, nombre: profesor.nombre, apellido: profesor.apellido },
@@ -23,8 +23,8 @@ export async function buscarPorId(ej: Ejecutor, id: number): Promise<Sesion | nu
   return fila ?? null;
 }
 
-export async function buscarPorClaseYFecha(ej: Ejecutor, claseId: number, fecha: FechaDia): Promise<Sesion | null> {
-  const [fila] = await seleccionar(ej, and(eq(sesion.claseId, claseId), eq(sesion.fecha, fecha)));
+export async function buscarPorHorarioYFecha(ej: Ejecutor, horarioId: number, fecha: FechaDia): Promise<Sesion | null> {
+  const [fila] = await seleccionar(ej, and(eq(sesion.horarioId, horarioId), eq(sesion.fecha, fecha)));
   return fila ?? null;
 }
 
@@ -50,7 +50,7 @@ export async function actualizar(
 
 export type SesionBloqueada = {
   id: number;
-  claseId: number;
+  horarioId: number;
   fecha: FechaDia;
   estado: EstadoSesion;
   profesorId: number;
@@ -61,7 +61,7 @@ export async function bloquear(ej: Ejecutor, id: number): Promise<SesionBloquead
   const [fila] = await ej
     .select({
       id: sesion.id,
-      claseId: sesion.claseId,
+      horarioId: sesion.horarioId,
       fecha: sesion.fecha,
       estado: sesion.estado,
       profesorId: sesion.profesorId,
@@ -90,14 +90,14 @@ export async function buscarDetalle(ej: Ejecutor, id: number): Promise<SesionDet
   const [fila] = await ej
     .select({
       ...columnas,
-      estilo: clase.estilo,
-      nivel: clase.nivel,
-      horaInicio: horaHHMM(clase.horaInicio),
-      horaFin: horaHHMM(clase.horaFin),
+      estilo: horario.estilo,
+      nivel: horario.nivel,
+      horaInicio: horaHHMM(horario.horaInicio),
+      horaFin: horaHHMM(horario.horaFin),
     })
     .from(sesion)
     .innerJoin(profesor, eq(profesor.id, sesion.profesorId))
-    .innerJoin(clase, eq(clase.id, sesion.claseId))
+    .innerJoin(horario, eq(horario.id, sesion.horarioId))
     .where(eq(sesion.id, id));
   return fila ?? null;
 }

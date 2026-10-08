@@ -8,7 +8,7 @@ import { servidor } from '../../../test/servidor.ts';
 
 const HIP_HOP_DEL_10: SesionDetalle = {
   id: 50,
-  claseId: 2,
+  horarioId: 2,
   fecha: '2026-03-10',
   estado: 'programada',
   profesor: { id: 1, nombre: 'Erik', apellido: 'Zapata' },

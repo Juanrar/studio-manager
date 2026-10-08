@@ -155,9 +155,7 @@ export const pago = pgTable(
   ],
 );
 
-// Las claves de TypeScript conservan los nombres viejos hasta las tareas 2 y 3 de la feature 24:
-// las columnas renombradas llevan su nombre explícito.
-export const clase = pgTable(
+export const horario = pgTable(
   'horario',
   {
     id: id(),
@@ -169,7 +167,7 @@ export const clase = pgTable(
     profesorId: referencia()
       .notNull()
       .references(() => profesor.id),
-    activa: boolean('activo').notNull().default(true),
+    activo: boolean().notNull().default(true),
   },
   (t) => [
     check('horario_dia_valido', sql`${t.diaSemana} between 1 and 7`),
@@ -177,13 +175,15 @@ export const clase = pgTable(
   ],
 );
 
+// `sesion` y `asistencia.sesionId` conservan sus nombres de TypeScript hasta la tarea 3 de la feature 24:
+// la columna renombrada de asistencia lleva su nombre explícito.
 export const sesion = pgTable(
   'clase',
   {
     id: id(),
-    claseId: bigint('horario_id', { mode: 'number' })
+    horarioId: referencia()
       .notNull()
-      .references(() => clase.id),
+      .references(() => horario.id),
     fecha: date().notNull(),
     profesorId: referencia()
       .notNull()
@@ -191,7 +191,7 @@ export const sesion = pgTable(
     estado: estadoSesionEnum().notNull().default('programada'),
   },
   (t) => [
-    unique('clase_horario_fecha_uq').on(t.claseId, t.fecha),
+    unique('clase_horario_fecha_uq').on(t.horarioId, t.fecha),
     index('clase_profesor_fecha_idx').on(t.profesorId, t.fecha),
   ],
 );
@@ -256,8 +256,8 @@ export type Pack = typeof pack.$inferSelect;
 export type NuevoPack = typeof pack.$inferInsert;
 export type Pago = typeof pago.$inferSelect;
 export type NuevoPago = typeof pago.$inferInsert;
-export type Clase = typeof clase.$inferSelect;
-export type NuevaClase = typeof clase.$inferInsert;
+export type Horario = typeof horario.$inferSelect;
+export type NuevoHorario = typeof horario.$inferInsert;
 export type Sesion = typeof sesion.$inferSelect;
 export type NuevaSesion = typeof sesion.$inferInsert;
 export type Asistencia = typeof asistencia.$inferSelect;

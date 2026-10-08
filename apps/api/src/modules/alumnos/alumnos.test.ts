@@ -5,7 +5,7 @@ import { AHORA, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '.
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
 import {
   crearAlumnoDeTest,
-  crearClaseDeTest,
+  crearHorarioDeTest,
   crearPackDeTest,
   crearProfesorDeTest,
 } from '../../../test/fabricas.ts';
@@ -146,7 +146,7 @@ describe('GET /api/alumnos', () => {
   it('trae el estado del pack, el pago en uso y la última clase, sin pagos anulados ni clases futuras, y cuenta vigentes entre los activos', async () => {
     const packX8 = await crearPackDeTest({ nombre: 'Pack x8', cantidadClases: 8, precio: 9600 });
     const packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
-    const hipHop = await crearClaseDeTest((await crearProfesorDeTest()).id, { diaSemana: 2 });
+    const hipHop = await crearHorarioDeTest((await crearProfesorDeTest()).id, { diaSemana: 2 });
     const martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García', dni: '38555666' });
     const lucia = await crearAlumnoDeTest({ nombre: 'Lucía', apellido: 'Fernández' });
     const joaquin = await crearAlumnoDeTest({ nombre: 'Joaquín', apellido: 'Pérez' });
@@ -225,7 +225,7 @@ describe('GET /api/alumnos/:id/actividad', () => {
     const packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
     const erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata' });
     const julia = await crearProfesorDeTest({ nombre: 'Julia', apellido: 'Paz' });
-    const hipHop = await crearClaseDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2 });
+    const hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2 });
     // El 20 de febrero se anotó a las 10:00 y pagó un pack x4 a las 12:00, que después se anuló.
     const martina = await crearAlumnoDeTest({}, new Date('2026-02-20T13:00:00Z'));
     const anulado = await pagar(martina, packX4, '2026-02-20');

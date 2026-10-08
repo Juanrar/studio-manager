@@ -3,14 +3,14 @@
 import type {
   Alumno,
   CrearAlumnoInput,
-  CrearClaseInput,
+  CrearHorarioInput,
   CrearPackInput,
   CrearProfesorInput,
   Pack,
   Profesor,
 } from '@studio/shared';
 import { crearAlumno } from '../src/modules/alumnos/alumnos.service.ts';
-import { crearClase } from '../src/modules/clases/clases.service.ts';
+import { crearHorario } from '../src/modules/horarios/horarios.service.ts';
 import { crearPack } from '../src/modules/packs/packs.service.ts';
 import { crearProfesor } from '../src/modules/profesores/profesores.service.ts';
 import { AHORA } from './app.ts';
@@ -22,8 +22,8 @@ export async function crearProfesorDeTest(datos: Partial<CrearProfesorInput> = {
   return crearProfesor({ nombre: 'Erik', apellido: 'Zapata', porcentajeBp: 5000, ...datos }, ALTA_PROFESORES);
 }
 
-export async function crearClaseDeTest(profesorId: number, datos: Partial<CrearClaseInput> = {}) {
-  return crearClase({
+export async function crearHorarioDeTest(profesorId: number, datos: Partial<CrearHorarioInput> = {}) {
+  return crearHorario({
     estilo: 'Hip-Hop',
     nivel: 'Inicial',
     diaSemana: 2,

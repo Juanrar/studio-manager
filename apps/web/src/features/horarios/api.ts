@@ -1,18 +1,18 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ActualizarClaseInput, Clase, CrearClaseInput } from '@studio/shared';
+import type { ActualizarHorarioInput, Horario, CrearHorarioInput } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
-// Sin `profesorId` trae el horario de todo el estudio; con él, solo las clases de ese profesor.
-export function useClases({
-  incluirInactivas = false,
+// Sin `profesorId` trae el horario de todo el estudio; con él, solo los horarios de ese profesor.
+export function useHorarios({
+  incluirInactivos = false,
   profesorId,
-}: { incluirInactivas?: boolean; profesorId?: number | undefined } = {}) {
+}: { incluirInactivos?: boolean; profesorId?: number | undefined } = {}) {
   return useQuery({
-    queryKey: ['clases', { incluirInactivas, profesorId }],
+    queryKey: ['horarios', { incluirInactivos, profesorId }],
     queryFn: async () =>
       (
-        await api.get<{ items: Clase[] }>(
-          conQuery('/clases', { profesorId, incluirInactivos: incluirInactivas || undefined }),
+        await api.get<{ items: Horario[] }>(
+          conQuery('/horarios', { profesorId, incluirInactivos: incluirInactivos || undefined }),
         )
       ).items,
     // Al marcar "Mostrar dadas de baja" la clave cambia y todavía no hay datos: sin esto el horario pasa a
@@ -26,21 +26,21 @@ function useRecargarHorario() {
   const clienteQuery = useQueryClient();
   return () =>
     Promise.all([
-      clienteQuery.invalidateQueries({ queryKey: ['clases'] }),
+      clienteQuery.invalidateQueries({ queryKey: ['horarios'] }),
       clienteQuery.invalidateQueries({ queryKey: ['agenda'] }),
       clienteQuery.invalidateQueries({ queryKey: ['profesores'] }),
     ]);
 }
 
-export function useCrearClase() {
+export function useCrearHorario() {
   const recargar = useRecargarHorario();
-  return useMutation({ mutationFn: (datos: CrearClaseInput) => api.post<Clase>('/clases', datos), onSuccess: recargar });
+  return useMutation({ mutationFn: (datos: CrearHorarioInput) => api.post<Horario>('/horarios', datos), onSuccess: recargar });
 }
 
-export function useActualizarClase() {
+export function useActualizarHorario() {
   const recargar = useRecargarHorario();
   return useMutation({
-    mutationFn: ({ id, datos }: { id: number; datos: ActualizarClaseInput }) => api.patch<Clase>(`/clases/${id}`, datos),
+    mutationFn: ({ id, datos }: { id: number; datos: ActualizarHorarioInput }) => api.patch<Horario>(`/horarios/${id}`, datos),
     onSuccess: recargar,
   });
 }

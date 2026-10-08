@@ -4,45 +4,44 @@ import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { diaSemanaIso, type FechaDia } from '../../lib/fechas.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
 import { verificarMesAbierto } from '../liquidaciones/liquidaciones.service.ts';
+import { listarHorariosDelDia, obtenerHorario } from '../horarios/horarios.service.ts';
 import { porcentajeVigente, verificarProfesorActivo } from '../profesores/profesores.service.ts';
-import * as clasesRepo from './clases.repository.ts';
 import * as repo from './sesiones.repository.ts';
 
 export async function agendaDelDia(fecha: FechaDia): Promise<AgendaDelDia> {
-  const [clases, sesiones] = await Promise.all([
-    clasesRepo.listarDelDia(db, diaSemanaIso(fecha)),
+  const [horarios, sesiones] = await Promise.all([
+    listarHorariosDelDia(diaSemanaIso(fecha)),
     repo.listarDeFecha(db, fecha),
   ]);
-  const sesionPorClase = new Map(sesiones.map((s) => [s.claseId, s]));
+  const sesionPorHorario = new Map(sesiones.map((s) => [s.horarioId, s]));
 
   return {
     fecha,
-    items: clases.map((clase) => ({
-      claseId: clase.id,
-      estilo: clase.estilo,
-      nivel: clase.nivel,
-      horaInicio: clase.horaInicio,
-      horaFin: clase.horaFin,
-      profesorTitular: clase.profesor,
-      sesion: sesionPorClase.get(clase.id) ?? null,
+    items: horarios.map((horario) => ({
+      horarioId: horario.id,
+      estilo: horario.estilo,
+      nivel: horario.nivel,
+      horaInicio: horario.horaInicio,
+      horaFin: horario.horaFin,
+      profesorTitular: horario.profesor,
+      sesion: sesionPorHorario.get(horario.id) ?? null,
     })),
   };
 }
 
 // Abrir dos veces la misma sesión devuelve la existente: un doble clic no es un error.
-export async function abrirSesion(claseId: number, fecha: FechaDia): Promise<{ sesion: Sesion; creada: boolean }> {
-  const clase = await clasesRepo.buscarPorId(db, claseId);
-  if (clase === null) throw new NoEncontradoError(`No existe la clase ${claseId}`);
-  if (!clase.activa) throw new ReglaDeNegocioError(`La clase ${clase.estilo} está dada de baja`);
-  if (diaSemanaIso(fecha) !== clase.diaSemana) {
-    throw new ReglaDeNegocioError(`La clase ${clase.estilo} no se dicta el ${fecha}`);
+export async function abrirSesion(horarioId: number, fecha: FechaDia): Promise<{ sesion: Sesion; creada: boolean }> {
+  const horario = await obtenerHorario(horarioId);
+  if (!horario.activo) throw new ReglaDeNegocioError(`El horario de ${horario.estilo} está dado de baja`);
+  if (diaSemanaIso(fecha) !== horario.diaSemana) {
+    throw new ReglaDeNegocioError(`El horario de ${horario.estilo} no se dicta el ${fecha}`);
   }
 
-  const existente = await repo.buscarPorClaseYFecha(db, claseId, fecha);
+  const existente = await repo.buscarPorHorarioYFecha(db, horarioId, fecha);
   if (existente !== null) return { sesion: existente, creada: false };
 
-  const id = await repo.insertarSiNoExiste(db, { claseId, fecha, profesorId: clase.profesor.id });
-  const sesion = await repo.buscarPorClaseYFecha(db, claseId, fecha);
+  const id = await repo.insertarSiNoExiste(db, { horarioId, fecha, profesorId: horario.profesor.id });
+  const sesion = await repo.buscarPorHorarioYFecha(db, horarioId, fecha);
   return { sesion: sesion!, creada: id !== null };
 }
 

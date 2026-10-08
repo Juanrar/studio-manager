@@ -1,18 +1,18 @@
 import { useId, useState } from 'react';
-import type { Clase } from '@studio/shared';
+import type { Horario } from '@studio/shared';
 import { Aviso, BotonIcono, Cargando, Casilla } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { DIAS_DE_LA_SEMANA, nombreDelDia } from '../../lib/formato.ts';
-import { useClases } from '../clases/api.ts';
-import { FilaDeLectura, FilaEnEdicion } from './FilaDeClase.tsx';
+import { useHorarios } from '../horarios/api.ts';
+import { FilaDeLectura, FilaEnEdicion } from './FilaDeHorario.tsx';
 
 // La fila que se está editando: una clase que ya existe o una nueva en un día. Hay una sola a la vez.
-type Edicion = { tipo: 'existente'; claseId: number } | { tipo: 'nueva'; diaSemana: number } | null;
+type Edicion = { tipo: 'existente'; horarioId: number } | { tipo: 'nueva'; diaSemana: number } | null;
 
 // La pestaña Clases de la ficha: los siete días de la semana, siempre los siete, con las clases del profesor.
 export function HorarioDelProfesor({ profesorId }: { profesorId: number }) {
-  const [incluirInactivas, setIncluirInactivas] = useState(false);
-  const clases = useClases({ profesorId, incluirInactivas });
+  const [incluirInactivos, setIncluirInactivos] = useState(false);
+  const horarios = useHorarios({ profesorId, incluirInactivos });
   const [edicion, setEdicion] = useState<Edicion>(null);
 
   // Cierra la edición solo si sigue siendo esa: un guardado que tarda no tiene que cerrar la fila que se abrió
@@ -30,18 +30,18 @@ export function HorarioDelProfesor({ profesorId }: { profesorId: number }) {
     <div className="flex flex-col gap-3 p-4">
       <Casilla
         etiqueta="Mostrar clases dadas de baja"
-        checked={incluirInactivas}
-        onChange={(evento) => setIncluirInactivas(evento.target.checked)}
+        checked={incluirInactivos}
+        onChange={(evento) => setIncluirInactivos(evento.target.checked)}
       />
-      {clases.isPending && <Cargando />}
-      {clases.isError && <Aviso>{mensajeDeError(clases.error)}</Aviso>}
-      {clases.data && (
+      {horarios.isPending && <Cargando />}
+      {horarios.isError && <Aviso>{mensajeDeError(horarios.error)}</Aviso>}
+      {horarios.data && (
         <div className="rounded-md border border-borde">
           {DIAS_DE_LA_SEMANA.map((_, indice) => (
             <DiaDelHorario
               key={indice}
               diaSemana={indice + 1}
-              clases={clases.data.filter((clase) => clase.diaSemana === indice + 1)}
+              horarios={horarios.data.filter((horario) => horario.diaSemana === indice + 1)}
               profesorId={profesorId}
               edicion={edicion}
               alEditar={setEdicion}
@@ -57,7 +57,7 @@ export function HorarioDelProfesor({ profesorId }: { profesorId: number }) {
 
 function DiaDelHorario({
   diaSemana,
-  clases,
+  horarios,
   profesorId,
   edicion,
   alEditar,
@@ -65,7 +65,7 @@ function DiaDelHorario({
   alTerminar,
 }: {
   diaSemana: number;
-  clases: Clase[];
+  horarios: Horario[];
   profesorId: number;
   edicion: Edicion;
   alEditar: (edicion: Edicion) => void;
@@ -86,24 +86,24 @@ function DiaDelHorario({
         {nombre}
       </h3>
       <div className="min-w-0 flex-1">
-        {clases.length === 0 && !hayNueva ? (
+        {horarios.length === 0 && !hayNueva ? (
           <p className="flex min-h-11 items-center px-2 text-apagado">Sin clases</p>
         ) : (
           <ul className="flex flex-col gap-1">
-            {clases.map((clase) =>
-              edicion?.tipo === 'existente' && edicion.claseId === clase.id ? (
+            {horarios.map((horario) =>
+              edicion?.tipo === 'existente' && edicion.horarioId === horario.id ? (
                 <FilaEnEdicion
-                  key={clase.id}
-                  clase={clase}
+                  key={horario.id}
+                  horario={horario}
                   diaSemana={diaSemana}
                   profesorId={profesorId}
                   alTerminar={() => alTerminar(edicion)}
                 />
               ) : (
                 <FilaDeLectura
-                  key={clase.id}
-                  clase={clase}
-                  alEditar={() => alEditar({ tipo: 'existente', claseId: clase.id })}
+                  key={horario.id}
+                  horario={horario}
+                  alEditar={() => alEditar({ tipo: 'existente', horarioId: horario.id })}
                 />
               ),
             )}

@@ -1,8 +1,8 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { crearClaseSchema, type Clase } from '@studio/shared';
+import { crearHorarioSchema, type Horario } from '@studio/shared';
 import { Boton, BotonIcono, Entrada, Insignia, SelectorDeHora } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
-import { useActualizarClase, useCrearClase } from '../clases/api.ts';
+import { useActualizarHorario, useCrearHorario } from '../horarios/api.ts';
 
 // La fila en lectura y en edición comparten el alto y el ancho de cada columna, así nada se corre al entrar a
 // editar. El borde está en las dos: en lectura es transparente.
@@ -30,32 +30,32 @@ function ErrorDeLaFila({ children }: { children: ReactNode }) {
   );
 }
 
-export function FilaDeLectura({ clase, alEditar }: { clase: Clase; alEditar: () => void }) {
-  const actualizar = useActualizarClase();
+export function FilaDeLectura({ horario, alEditar }: { horario: Horario; alEditar: () => void }) {
+  const actualizar = useActualizarHorario();
   // Dar de baja no pide confirmación: se deshace con "Reactivar".
-  const cambiarEstado = (activa: boolean) => actualizar.mutate({ id: clase.id, datos: { activa } });
+  const cambiarEstado = (activo: boolean) => actualizar.mutate({ id: horario.id, datos: { activo } });
 
   return (
     <li>
       <div className={`group ${FILA} border-transparent hover:bg-elevado`}>
         <span className={`${COLUMNA_HORARIO} gap-2 tabular-nums`}>
           <span>
-            {clase.horaInicio} – {clase.horaFin}
+            {horario.horaInicio} – {horario.horaFin}
           </span>
-          <span className="text-apagado">{duracion(clase.horaInicio, clase.horaFin)}</span>
+          <span className="text-apagado">{duracion(horario.horaInicio, horario.horaFin)}</span>
         </span>
-        <span className={`${COLUMNA_ESTILO} truncate font-medium`}>{clase.estilo}</span>
+        <span className={`${COLUMNA_ESTILO} truncate font-medium`}>{horario.estilo}</span>
         <span className={`${COLUMNA_NIVEL} truncate`}>
-          {clase.nivel === null ? <span className="text-apagado">—</span> : <Insignia tono="violeta">{clase.nivel}</Insignia>}
+          {horario.nivel === null ? <span className="text-apagado">—</span> : <Insignia tono="violeta">{horario.nivel}</Insignia>}
         </span>
-        {!clase.activa && <Insignia>Dada de baja</Insignia>}
+        {!horario.activo && <Insignia>Dada de baja</Insignia>}
         {/* Aparecen al pasar el mouse o al llegar con el teclado a uno de los botones. Invisibles igual reciben el
             toque: en una pantalla táctil, sin mouse que las muestre, se ven siempre. */}
         <div
           className={`${ACCIONES} opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100`}
         >
           <BotonIcono icono="lapiz" etiqueta="Editar la clase" onClick={alEditar} />
-          {clase.activa ? (
+          {horario.activo ? (
             <BotonIcono icono="tacho" etiqueta="Dar de baja la clase" onClick={() => cambiarEstado(false)} />
           ) : (
             <Boton variante="secundario" onClick={() => cambiarEstado(true)}>
@@ -72,29 +72,29 @@ export function FilaDeLectura({ clase, alEditar }: { clase: Clase; alEditar: () 
 // Una clase que se edita en su lugar, o una nueva si no hay `clase`. El día y el profesor no se editan acá: salen
 // de la fila y de la ficha.
 export function FilaEnEdicion({
-  clase,
+  horario,
   diaSemana,
   profesorId,
   alTerminar,
 }: {
-  clase?: Clase | undefined;
+  horario?: Horario | undefined;
   diaSemana: number;
   profesorId: number;
   alTerminar: () => void;
 }) {
-  const crear = useCrearClase();
-  const actualizar = useActualizarClase();
-  const [horaInicio, setHoraInicio] = useState(clase?.horaInicio ?? '18:00');
-  const [horaFin, setHoraFin] = useState(clase?.horaFin ?? '19:30');
-  const [estilo, setEstilo] = useState(clase?.estilo ?? '');
-  const [nivel, setNivel] = useState(clase?.nivel ?? '');
+  const crear = useCrearHorario();
+  const actualizar = useActualizarHorario();
+  const [horaInicio, setHoraInicio] = useState(horario?.horaInicio ?? '18:00');
+  const [horaFin, setHoraFin] = useState(horario?.horaFin ?? '19:30');
+  const [estilo, setEstilo] = useState(horario?.estilo ?? '');
+  const [nivel, setNivel] = useState(horario?.nivel ?? '');
   const [error, setError] = useState<string | null>(null);
 
   async function guardar(evento: FormEvent) {
     evento.preventDefault();
     // Se valida como una clase entera, con el día de la fila y el profesor de la ficha, para que la hora de fin
     // se compare con la de inicio también al editar.
-    const validada = crearClaseSchema.safeParse({ estilo, nivel, diaSemana, horaInicio, horaFin, profesorId });
+    const validada = crearHorarioSchema.safeParse({ estilo, nivel, diaSemana, horaInicio, horaFin, profesorId });
     if (!validada.success) {
       setError(validada.error.issues[0]?.message ?? 'Revisá los datos de la clase');
       return;
@@ -102,12 +102,12 @@ export function FilaEnEdicion({
     setError(null);
     const datos = validada.data;
     try {
-      if (clase === undefined) {
+      if (horario === undefined) {
         await crear.mutateAsync(datos);
       } else {
         // Sin el día ni el profesor: un PATCH con ellos podría mudar la clase sin querer.
         await actualizar.mutateAsync({
-          id: clase.id,
+          id: horario.id,
           datos: { horaInicio: datos.horaInicio, horaFin: datos.horaFin, estilo: datos.estilo, nivel: datos.nivel },
         });
       }

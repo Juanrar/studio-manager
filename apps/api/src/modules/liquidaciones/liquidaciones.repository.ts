@@ -1,7 +1,7 @@
 import { and, asc, eq, gte, lt, type SQL } from 'drizzle-orm';
 import type { Liquidacion } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
-import { asistencia, clase, liquidacion, profesor, sesion, type NuevaLiquidacion } from '../../db/schema.ts';
+import { asistencia, horario, liquidacion, profesor, sesion, type NuevaLiquidacion } from '../../db/schema.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 
 // Este módulo es de reportes: lee asistencias y sesiones para sumar, nunca las modifica.
@@ -27,13 +27,13 @@ export async function listarAsistenciasDelPeriodo(
       profesorId: sesion.profesorId,
       sesionId: sesion.id,
       fecha: sesion.fecha,
-      estilo: clase.estilo,
+      estilo: horario.estilo,
       valorClase: asistencia.valorClase,
       porcentajeBp: asistencia.porcentajeBp,
     })
     .from(asistencia)
     .innerJoin(sesion, eq(sesion.id, asistencia.sesionId))
-    .innerJoin(clase, eq(clase.id, sesion.claseId))
+    .innerJoin(horario, eq(horario.id, sesion.horarioId))
     .where(and(...filtros))
     .orderBy(asc(sesion.fecha), asc(sesion.id));
 }

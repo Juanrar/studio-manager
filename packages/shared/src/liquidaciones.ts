@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { PersonaResumen } from './clases.ts';
+import type { PersonaResumen } from './comun.ts';
 import type { MedioPago } from './constantes.ts';
 
 export const periodoSchema = z

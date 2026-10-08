@@ -4,8 +4,8 @@ import type {
   Alumno,
   AlumnoEnListado,
   Asistencia,
-  Clase,
   FichaDeAlumno,
+  Horario,
   Listado,
   ListadoDeAlumnos,
   Pack,
@@ -96,8 +96,8 @@ export function unProfesorEnListado(datos: Partial<ProfesorEnListado> = {}): Pro
   return { ...unProfesor(), clasesPorSemana: 0, diasConClase: [], ...datos };
 }
 
-// Una clase de GET /api/clases. Por defecto, la de Erik Zapata los lunes de 18:00 a 19:30.
-export function unaClase(datos: Partial<Clase> = {}): Clase {
+// Un horario de GET /api/horarios. Por defecto, el de Erik Zapata los lunes de 18:00 a 19:30.
+export function unHorario(datos: Partial<Horario> = {}): Horario {
   return {
     id: 1,
     estilo: 'Salsa',
@@ -106,7 +106,7 @@ export function unaClase(datos: Partial<Clase> = {}): Clase {
     horaInicio: '18:00',
     horaFin: '19:30',
     profesor: { id: 1, nombre: 'Erik', apellido: 'Zapata' },
-    activa: true,
+    activo: true,
     ...datos,
   };
 }

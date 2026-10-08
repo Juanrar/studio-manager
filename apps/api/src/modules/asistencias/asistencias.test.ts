@@ -1,12 +1,12 @@
 import { eq } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
-import type { Alumno, Clase, Pack, Profesor, Sesion, UsuarioPublico } from '@studio/shared';
+import type { Alumno, Horario, Pack, Profesor, Sesion, UsuarioPublico } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { AHORA, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
 import {
   crearAlumnoDeTest,
-  crearClaseDeTest,
+  crearHorarioDeTest,
   crearPackDeTest,
   crearProfesorDeTest,
 } from '../../../test/fabricas.ts';
@@ -20,7 +20,7 @@ let app: FastifyInstance;
 let cookie: string;
 let recepcion: UsuarioPublico;
 let erik: Profesor;
-let hipHop: Clase;
+let hipHop: Horario;
 let sesion: Sesion;
 let martina: Alumno;
 let packX4: Pack;
@@ -43,7 +43,7 @@ beforeEach(async () => {
   recepcion = await crearUsuarioDeTest(RECEPCION);
   cookie = await loguear(app, RECEPCION.email, RECEPCION.password);
   erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata', porcentajeBp: 5000 });
-  hipHop = await crearClaseDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' });
+  hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' });
   sesion = (await abrirSesion(hipHop.id, MARTES)).sesion;
   martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García' });
   packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
@@ -78,7 +78,7 @@ async function restantes(pagoId: number) {
 }
 
 async function otraSesionDelMartes() {
-  const ballet = await crearClaseDeTest(erik.id, { estilo: 'Ballet', diaSemana: 2, horaInicio: '18:00', horaFin: '19:00' });
+  const ballet = await crearHorarioDeTest(erik.id, { estilo: 'Ballet', diaSemana: 2, horaInicio: '18:00', horaFin: '19:00' });
   return (await abrirSesion(ballet.id, MARTES)).sesion;
 }
 
@@ -175,8 +175,8 @@ describe('POST /api/sesiones/:id/asistencias', () => {
     // Seis clases del martes, una por hora, y un intento de asistencia en cada una a la vez.
     const sesiones = [sesion];
     for (const hora of ['10', '11', '12', '13', '14']) {
-      const clase = await crearClaseDeTest(erik.id, { estilo: `Clase ${hora}`, horaInicio: `${hora}:00`, horaFin: `${hora}:50` });
-      sesiones.push((await abrirSesion(clase.id, MARTES)).sesion);
+      const horario = await crearHorarioDeTest(erik.id, { estilo: `Clase ${hora}`, horaInicio: `${hora}:00`, horaFin: `${hora}:50` });
+      sesiones.push((await abrirSesion(horario.id, MARTES)).sesion);
     }
 
     const respuestas = await Promise.all(sesiones.map((s) => registrar(s.id, { alumnoId: martina.id })));

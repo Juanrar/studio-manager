@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { crearClaseSchema, type Clase, type CrearClaseInput } from '@studio/shared';
+import { crearHorarioSchema, type Horario, type CrearHorarioInput } from '@studio/shared';
 import {
   Aviso,
   Boton,
@@ -21,17 +21,17 @@ import { mensajeDeError } from '../../lib/api.ts';
 import { DIAS_DE_LA_SEMANA, nombreDelDia } from '../../lib/formato.ts';
 import { mostrarErrorDeApi } from '../../lib/formularios.ts';
 import { useProfesores } from '../profesores/api.ts';
-import { useActualizarClase, useClases, useCrearClase } from './api.ts';
+import { useActualizarHorario, useHorarios, useCrearHorario } from './api.ts';
 
-export function ClasesPage() {
-  const [incluirInactivas, setIncluirInactivas] = useState(false);
-  const clases = useClases({ incluirInactivas });
-  const crear = useCrearClase();
-  const actualizar = useActualizarClase();
-  const [editando, setEditando] = useState<Clase | 'nueva' | null>(null);
+export function HorariosPage() {
+  const [incluirInactivos, setIncluirInactivos] = useState(false);
+  const horarios = useHorarios({ incluirInactivos });
+  const crear = useCrearHorario();
+  const actualizar = useActualizarHorario();
+  const [editando, setEditando] = useState<Horario | 'nueva' | null>(null);
 
   // La API ya las devuelve ordenadas por día y hora; acá solo se agrupan por día.
-  const porDia = Map.groupBy(clases.data ?? [], (clase) => clase.diaSemana);
+  const porDia = Map.groupBy(horarios.data ?? [], (horario) => horario.diaSemana);
 
   return (
     <Pagina
@@ -40,39 +40,39 @@ export function ClasesPage() {
       barra={
         <Casilla
           etiqueta="Mostrar clases dadas de baja"
-          checked={incluirInactivas}
-          onChange={(e) => setIncluirInactivas(e.target.checked)}
+          checked={incluirInactivos}
+          onChange={(e) => setIncluirInactivos(e.target.checked)}
         />
       }
     >
-      {clases.isPending && <Cargando />}
-      {clases.isError && <Aviso>{mensajeDeError(clases.error)}</Aviso>}
+      {horarios.isPending && <Cargando />}
+      {horarios.isError && <Aviso>{mensajeDeError(horarios.error)}</Aviso>}
       {actualizar.isError && <Aviso>{mensajeDeError(actualizar.error)}</Aviso>}
-      {clases.data?.length === 0 && <p className="text-apagado">Todavía no hay clases en el horario.</p>}
+      {horarios.data?.length === 0 && <p className="text-apagado">Todavía no hay clases en el horario.</p>}
       {[...porDia.entries()].map(([dia, delDia]) => (
         <div key={dia} className="mb-6">
           <h2 className="mb-2 text-base font-semibold">{nombreDelDia(dia)}</h2>
           <Tabla columnas={['Horario', 'Estilo', 'Nivel', 'Profesor titular', 'Estado', '']}>
-            {delDia.map((clase) => (
-              <tr key={clase.id}>
+            {delDia.map((horario) => (
+              <tr key={horario.id}>
                 <Celda>
-                  {clase.horaInicio} a {clase.horaFin}
+                  {horario.horaInicio} a {horario.horaFin}
                 </Celda>
-                <Celda>{clase.estilo}</Celda>
-                <Celda>{clase.nivel ?? '—'}</Celda>
+                <Celda>{horario.estilo}</Celda>
+                <Celda>{horario.nivel ?? '—'}</Celda>
                 <Celda>
-                  {clase.profesor.nombre} {clase.profesor.apellido}
+                  {horario.profesor.nombre} {horario.profesor.apellido}
                 </Celda>
-                <Celda>{clase.activa ? <Insignia tono="verde">Activa</Insignia> : <Insignia>Dada de baja</Insignia>}</Celda>
+                <Celda>{horario.activo ? <Insignia tono="verde">Activa</Insignia> : <Insignia>Dada de baja</Insignia>}</Celda>
                 <CeldaDeAcciones>
-                  <Boton variante="secundario" onClick={() => setEditando(clase)}>
+                  <Boton variante="secundario" onClick={() => setEditando(horario)}>
                     Editar
                   </Boton>
                   <Boton
                     variante="secundario"
-                    onClick={() => actualizar.mutate({ id: clase.id, datos: { activa: !clase.activa } })}
+                    onClick={() => actualizar.mutate({ id: horario.id, datos: { activo: !horario.activo } })}
                   >
-                    {clase.activa ? 'Dar de baja' : 'Reactivar'}
+                    {horario.activo ? 'Dar de baja' : 'Reactivar'}
                   </Boton>
                 </CeldaDeAcciones>
               </tr>
@@ -87,7 +87,7 @@ export function ClasesPage() {
         alCerrar={() => setEditando(null)}
       >
         {editando !== null && (
-          <ClaseForm
+          <HorarioForm
             inicial={editando === 'nueva' ? undefined : editando}
             alGuardar={async (datos) => {
               if (editando === 'nueva') await crear.mutateAsync(datos);
@@ -102,18 +102,18 @@ export function ClasesPage() {
   );
 }
 
-function ClaseForm({
+function HorarioForm({
   inicial,
   alGuardar,
   alCancelar,
 }: {
-  inicial: Clase | undefined;
-  alGuardar: (datos: CrearClaseInput) => Promise<unknown>;
+  inicial: Horario | undefined;
+  alGuardar: (datos: CrearHorarioInput) => Promise<unknown>;
   alCancelar: () => void;
 }) {
   const profesores = useProfesores();
   const formulario = useForm({
-    resolver: zodResolver(crearClaseSchema),
+    resolver: zodResolver(crearHorarioSchema),
     defaultValues: {
       estilo: inicial?.estilo ?? '',
       nivel: inicial?.nivel ?? '',

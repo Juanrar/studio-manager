@@ -1,5 +1,5 @@
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import type { ClaseDelDia, EstadoSesion } from '@studio/shared';
+import type { HorarioDelDia, EstadoSesion } from '@studio/shared';
 import {
   Aviso,
   Boton,
@@ -57,12 +57,12 @@ export function AgendaPage() {
         <Tabla columnas={['Horario', 'Clase', 'Nivel', 'Profesor', 'Asistentes', 'Estado', '']}>
           {agenda.data.items.map((clase) => (
             <FilaDeClase
-              key={clase.claseId}
+              key={clase.horarioId}
               clase={clase}
               abriendo={abrir.isPending}
               alTomarAsistencia={() =>
                 abrir.mutate(
-                  { claseId: clase.claseId, fecha: agenda.data.fecha },
+                  { horarioId: clase.horarioId, fecha: agenda.data.fecha },
                   { onSuccess: (abierta) => navegar(`/sesiones/${abierta.id}`) },
                 )
               }
@@ -79,7 +79,7 @@ function FilaDeClase({
   abriendo,
   alTomarAsistencia,
 }: {
-  clase: ClaseDelDia;
+  clase: HorarioDelDia;
   abriendo: boolean;
   alTomarAsistencia: () => void;
 }) {

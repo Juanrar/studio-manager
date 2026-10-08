@@ -1,16 +1,16 @@
 import type { FastifyInstance } from 'fastify';
-import type { Clase, Profesor } from '@studio/shared';
+import type { Horario, Profesor } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
-import { crearClaseDeTest, crearProfesorDeTest } from '../../../test/fabricas.ts';
-import { actualizarClase } from './clases.service.ts';
+import { crearHorarioDeTest, crearProfesorDeTest } from '../../../test/fabricas.ts';
+import { actualizarHorario } from '../horarios/horarios.service.ts';
 
 let base: BaseDeTest;
 let app: FastifyInstance;
 let cookie: string;
 let erik: Profesor;
-let hipHopMartes: Clase;
+let hipHopMartes: Horario;
 
 // 2026-03-10 es martes; 2026-03-11, miércoles.
 const MARTES = '2026-03-10';
@@ -30,29 +30,29 @@ beforeEach(async () => {
   await crearUsuarioDeTest(RECEPCION);
   cookie = await loguear(app, RECEPCION.email, RECEPCION.password);
   erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata' });
-  hipHopMartes = await crearClaseDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' });
+  hipHopMartes = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' });
 });
 
 afterEach(async () => {
   await app.close();
 });
 
-function abrirSesion(claseId: number, fecha: string) {
-  return app.inject({ method: 'POST', url: '/api/sesiones', payload: { claseId, fecha }, headers: { cookie } });
+function abrirSesion(horarioId: number, fecha: string) {
+  return app.inject({ method: 'POST', url: '/api/sesiones', payload: { horarioId, fecha }, headers: { cookie } });
 }
 
 describe('GET /api/sesiones/dia', () => {
   it('trae solo las clases activas de ese día de la semana, ordenadas por hora y sin sesión', async () => {
-    const ballet = await crearClaseDeTest(erik.id, {
+    const ballet = await crearHorarioDeTest(erik.id, {
       estilo: 'Ballet',
       nivel: null,
       diaSemana: 2,
       horaInicio: '18:00',
       horaFin: '19:00',
     });
-    await crearClaseDeTest(erik.id, { estilo: 'Jazz', diaSemana: 3 });
-    const salsa = await crearClaseDeTest(erik.id, { estilo: 'Salsa', diaSemana: 2, horaInicio: '21:00', horaFin: '22:00' });
-    await actualizarClase(salsa.id, { activa: false });
+    await crearHorarioDeTest(erik.id, { estilo: 'Jazz', diaSemana: 3 });
+    const salsa = await crearHorarioDeTest(erik.id, { estilo: 'Salsa', diaSemana: 2, horaInicio: '21:00', horaFin: '22:00' });
+    await actualizarHorario(salsa.id, { activo: false });
 
     const respuesta = await app.inject({ method: 'GET', url: `/api/sesiones/dia?fecha=${MARTES}`, headers: { cookie } });
 
@@ -61,7 +61,7 @@ describe('GET /api/sesiones/dia', () => {
       fecha: MARTES,
       items: [
         {
-          claseId: ballet.id,
+          horarioId: ballet.id,
           estilo: 'Ballet',
           nivel: null,
           horaInicio: '18:00',
@@ -70,7 +70,7 @@ describe('GET /api/sesiones/dia', () => {
           sesion: null,
         },
         {
-          claseId: hipHopMartes.id,
+          horarioId: hipHopMartes.id,
           estilo: 'Hip-Hop',
           nivel: 'Inicial',
           horaInicio: '19:00',
@@ -91,7 +91,7 @@ describe('POST /api/sesiones', () => {
     expect(primera.statusCode).toBe(201);
     expect(primera.json()).toEqual({
       id: expect.any(Number),
-      claseId: hipHopMartes.id,
+      horarioId: hipHopMartes.id,
       fecha: MARTES,
       estado: 'programada',
       profesor: { id: erik.id, nombre: 'Erik', apellido: 'Zapata' },
@@ -105,7 +105,7 @@ describe('POST /api/sesiones', () => {
     const respuesta = await abrirSesion(hipHopMartes.id, MIERCOLES);
 
     expect(respuesta.statusCode).toBe(422);
-    expect(respuesta.json()).toEqual({ error: 'La clase Hip-Hop no se dicta el 2026-03-11' });
+    expect(respuesta.json()).toEqual({ error: 'El horario de Hip-Hop no se dicta el 2026-03-11' });
   });
 });
 
@@ -120,11 +120,11 @@ describe('PATCH /api/sesiones/:id', () => {
       payload: { profesorId: iaru.id },
       headers: { cookie },
     });
-    const clases = await app.inject({ method: 'GET', url: '/api/clases', headers: { cookie } });
+    const horarios = await app.inject({ method: 'GET', url: '/api/horarios', headers: { cookie } });
 
     expect(respuesta.statusCode).toBe(200);
     expect(respuesta.json().profesor).toEqual({ id: iaru.id, nombre: 'Iaru', apellido: 'Speroni' });
-    expect(clases.json().items[0].profesor).toEqual({ id: erik.id, nombre: 'Erik', apellido: 'Zapata' });
+    expect(horarios.json().items[0].profesor).toEqual({ id: erik.id, nombre: 'Erik', apellido: 'Zapata' });
   });
 });
 

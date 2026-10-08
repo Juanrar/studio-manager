@@ -5,7 +5,7 @@ import type { FechaDia } from '../../lib/fechas.ts';
 import {
   alumno,
   asistencia,
-  clase,
+  horario,
   pack,
   pago,
   profesor,
@@ -70,15 +70,15 @@ export async function listarDeAlumno(ej: Ejecutor, alumnoId: number): Promise<Cl
   return ej
     .select({
       fecha: sesion.fecha,
-      clase: clase.estilo,
+      clase: horario.estilo,
       profesor: { id: profesor.id, nombre: profesor.nombre, apellido: profesor.apellido },
     })
     .from(asistencia)
     .innerJoin(sesion, eq(sesion.id, asistencia.sesionId))
-    .innerJoin(clase, eq(clase.id, sesion.claseId))
+    .innerJoin(horario, eq(horario.id, sesion.horarioId))
     .innerJoin(profesor, eq(profesor.id, sesion.profesorId))
     .where(eq(asistencia.alumnoId, alumnoId))
-    .orderBy(desc(sesion.fecha), desc(clase.horaInicio), desc(asistencia.id));
+    .orderBy(desc(sesion.fecha), desc(horario.horaInicio), desc(asistencia.id));
 }
 
 export async function borrar(ej: Ejecutor, id: number): Promise<boolean> {

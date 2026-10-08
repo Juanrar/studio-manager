@@ -135,11 +135,16 @@ No hay tests nuevos: esta feature no cambia lo que hace el sistema. Los que exis
 - Mover: `apps/api/src/modules/clases/clases.{repository,service,routes,test}.ts` a `apps/api/src/modules/horarios/horarios.*`, `packages/shared/src/clases.ts` (la parte del horario) a `horarios.ts`, `apps/web/src/features/clases` a `features/horarios`
 - Modificar: `apps/api/src/app.ts`, `schema.ts` (`export const horario`), los services que usan el horario (sesiones, profesores, listado de profesores), `apps/web/src/rutas.tsx`, `components/Layout.tsx`, la ficha del profesor, `apps/web/test/datos.ts`, el recorrido de `e2e`
 
-- [ ] **Paso 1:** cambiar los tests a los nombres nuevos: las rutas `/api/horarios`, los tipos `Horario`, la pantalla `/horarios` con el menú "Horarios" y la pestaña "Horario" de la ficha.
-- [ ] **Paso 2:** correr `pnpm test` y verificar que falla por las rutas y los tipos que no existen.
-- [ ] **Paso 3:** renombrar en la API, en shared y en la web.
-- [ ] **Paso 4:** correr `pnpm test`, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
-- [ ] **Paso 5:** commit `refactor(horarios): lo que se repite cada semana pasa a llamarse horario`.
+- [x] **Paso 1:** cambiar los tests a los nombres nuevos: las rutas `/api/horarios`, los tipos `Horario`, la pantalla `/horarios` con el menú "Horarios" y la pestaña "Horario" de la ficha.
+- [x] **Paso 2:** correr `pnpm test` y verificar que falla por las rutas y los tipos que no existen.
+- [x] **Paso 3:** renombrar en la API, en shared y en la web. Además de los nombres:
+  - `sesiones.service` usaba el repository de horarios, que con el módulo aparte rompía la regla "un módulo usa el service de otro". Ahora llama a `obtenerHorario` y a `listarHorariosDelDia` de `horarios.service`.
+  - `horaHHMM` pasó de `clases.repository` a `lib/postgres.ts`, porque la usan los dos módulos.
+  - `PersonaResumen` pasó a `comun.ts`: la usan horarios, clases, alumnos y liquidaciones.
+  - Los textos de la pantalla de horarios no cambian ("Horario de clases", "Nueva clase", "Mostrar clases dadas de baja"): así habla el estudio. Cambian la ruta, el menú ("Horarios"), la pestaña de la ficha ("Horario") y el nombre del ícono.
+  - Se sumaron dos aserciones: el menú "Horarios" marcado en `/horarios` y la pestaña "Horario" elegida al abrir la ficha.
+- [x] **Paso 4:** correr `pnpm test`, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan.
+- [x] **Paso 5:** commit `refactor(horarios): lo que se repite cada semana pasa a llamarse horario`.
 
 ### Tarea 3: La clase en todas las capas
 

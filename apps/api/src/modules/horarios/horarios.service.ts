@@ -1,18 +1,18 @@
-import type { ActualizarClaseInput, Clase, CrearClaseInput } from '@studio/shared';
+import type { ActualizarHorarioInput, CrearHorarioInput, Horario } from '@studio/shared';
 import { db } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
 import { esViolacionCheck } from '../../lib/postgres.ts';
 import { verificarProfesorActivo } from '../profesores/profesores.service.ts';
-import * as repo from './clases.repository.ts';
+import * as repo from './horarios.repository.ts';
 
-export async function crearClase(datos: CrearClaseInput): Promise<Clase> {
+export async function crearHorario(datos: CrearHorarioInput): Promise<Horario> {
   await verificarProfesorActivo(db, datos.profesorId);
   const id = await repo.insertar(db, { ...datos, nivel: datos.nivel ?? null });
-  return obtenerClase(id);
+  return obtenerHorario(id);
 }
 
-export async function actualizarClase(id: number, datos: ActualizarClaseInput): Promise<Clase> {
+export async function actualizarHorario(id: number, datos: ActualizarHorarioInput): Promise<Horario> {
   if (datos.profesorId !== undefined) await verificarProfesorActivo(db, datos.profesorId);
   let existe: boolean;
   try {
@@ -24,18 +24,23 @@ export async function actualizarClase(id: number, datos: ActualizarClaseInput): 
     }
     throw error;
   }
-  if (!existe) throw new NoEncontradoError(`No existe la clase ${id}`);
-  return obtenerClase(id);
+  if (!existe) throw new NoEncontradoError(`No existe el horario ${id}`);
+  return obtenerHorario(id);
 }
 
-export async function obtenerClase(id: number): Promise<Clase> {
-  const encontrada = await repo.buscarPorId(db, id);
-  if (encontrada === null) throw new NoEncontradoError(`No existe la clase ${id}`);
-  return encontrada;
+export async function obtenerHorario(id: number): Promise<Horario> {
+  const encontrado = await repo.buscarPorId(db, id);
+  if (encontrado === null) throw new NoEncontradoError(`No existe el horario ${id}`);
+  return encontrado;
 }
 
 // No verifica al profesor como crear y actualizar: uno que no existe da una lista vacía y uno
-// dado de baja da sus clases, que es lo que muestra su ficha.
-export async function listarClases(filtros: repo.FiltrosDeClases): Promise<Clase[]> {
+// dado de baja da sus horarios, que es lo que muestra su ficha.
+export async function listarHorarios(filtros: repo.FiltrosDeHorarios): Promise<Horario[]> {
   return repo.listar(db, filtros);
+}
+
+// Los horarios activos de un día de la semana, para la agenda.
+export async function listarHorariosDelDia(diaSemana: number): Promise<Horario[]> {
+  return repo.listarDelDia(db, diaSemana);
 }

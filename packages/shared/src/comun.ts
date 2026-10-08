@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+// Una persona nombrada dentro de otro dato: el profesor de un horario o de una clase.
+export type PersonaResumen = { id: number; nombre: string; apellido: string };
+
 export type Listado<T> = {
   items: T[];
   total: number;

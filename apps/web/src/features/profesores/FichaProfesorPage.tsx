@@ -16,16 +16,16 @@ import {
 } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearPorcentaje } from '../../lib/formato.ts';
-import { useClases } from '../clases/api.ts';
+import { useHorarios } from '../horarios/api.ts';
 import { useActualizarProfesor, useProfesor } from './api.ts';
 import { HorarioDelProfesor } from './HorarioDelProfesor.tsx';
 import { HistorialDePorcentajes } from './PorcentajesDelProfesor.tsx';
 import { EditarProfesorForm } from './ProfesorForm.tsx';
 
-type IdPestana = 'clases' | 'datos' | 'porcentajes';
+type IdPestana = 'horario' | 'datos' | 'porcentajes';
 
 const PESTANAS: Pestana<IdPestana>[] = [
-  { id: 'clases', texto: 'Clases', icono: 'clases' },
+  { id: 'horario', texto: 'Horario', icono: 'horarios' },
   { id: 'datos', texto: 'Datos', icono: 'lista' },
   { id: 'porcentajes', texto: 'Porcentajes', icono: 'porcentaje' },
 ];
@@ -49,11 +49,11 @@ export function FichaProfesorPage() {
 }
 
 function Ficha({ profesor }: { profesor: Profesor }) {
-  const [pestana, setPestana] = useState<IdPestana>('clases');
-  // La misma consulta que la pestaña Clases con la casilla sin marcar: se pide una sola vez.
-  const clases = useClases({ profesorId: profesor.id });
+  const [pestana, setPestana] = useState<IdPestana>('horario');
+  // La misma consulta que la pestaña Horario con la casilla sin marcar: se pide una sola vez.
+  const horarios = useHorarios({ profesorId: profesor.id });
   const nombre = `${profesor.nombre} ${profesor.apellido}`;
-  const porSemana = clases.data?.filter((clase) => clase.activa).length;
+  const porSemana = horarios.data?.filter((horario) => horario.activo).length;
 
   return (
     <Pagina titulo={nombre} volverA={VOLVER}>
@@ -79,7 +79,7 @@ function Ficha({ profesor }: { profesor: Profesor }) {
         </div>
 
         <Pestanas pestanas={PESTANAS} activa={pestana} alCambiar={setPestana}>
-          {pestana === 'clases' && <HorarioDelProfesor profesorId={profesor.id} />}
+          {pestana === 'horario' && <HorarioDelProfesor profesorId={profesor.id} />}
           {pestana === 'datos' && <Datos profesor={profesor} />}
           {/* El formulario venía de un diálogo angosto: a todo el ancho los dos campos quedan demasiado largos. */}
           {pestana === 'porcentajes' && (

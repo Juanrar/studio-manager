@@ -12,24 +12,24 @@ const IARU = { id: 2, nombre: 'Iaru', apellido: 'Speroni' };
 const AGENDA_DEL_10: AgendaDelDia = {
   fecha: '2026-03-10',
   items: [
-    { claseId: 1, estilo: 'Ballet', nivel: null, horaInicio: '18:00', horaFin: '19:00', profesorTitular: ERIK, sesion: null },
+    { horarioId: 1, estilo: 'Ballet', nivel: null, horaInicio: '18:00', horaFin: '19:00', profesorTitular: ERIK, sesion: null },
     {
-      claseId: 2,
+      horarioId: 2,
       estilo: 'Hip-Hop',
       nivel: 'Inicial',
       horaInicio: '19:00',
       horaFin: '20:30',
       profesorTitular: ERIK,
-      sesion: { id: 50, claseId: 2, fecha: '2026-03-10', estado: 'programada', profesor: IARU, asistentes: 4 },
+      sesion: { id: 50, horarioId: 2, fecha: '2026-03-10', estado: 'programada', profesor: IARU, asistentes: 4 },
     },
     {
-      claseId: 3,
+      horarioId: 3,
       estilo: 'Salsa',
       nivel: null,
       horaInicio: '21:00',
       horaFin: '22:00',
       profesorTitular: ERIK,
-      sesion: { id: 51, claseId: 3, fecha: '2026-03-10', estado: 'cancelada', profesor: ERIK, asistentes: 0 },
+      sesion: { id: 51, horarioId: 3, fecha: '2026-03-10', estado: 'cancelada', profesor: ERIK, asistentes: 0 },
     },
   ],
 };
@@ -68,13 +68,13 @@ describe('/agenda', () => {
     servidor.use(
       http.post('/api/sesiones', async ({ request }) => {
         cuerpoRecibido = await request.json();
-        const sesion: Sesion = { id: 52, claseId: 1, fecha: '2026-03-10', estado: 'programada', profesor: ERIK, asistentes: 0 };
+        const sesion: Sesion = { id: 52, horarioId: 1, fecha: '2026-03-10', estado: 'programada', profesor: ERIK, asistentes: 0 };
         return HttpResponse.json(sesion, { status: 201 });
       }),
       // La pantalla de la sesión carga sus datos al llegar.
       http.get('/api/sesiones/52', () =>
         HttpResponse.json({
-          id: 52, claseId: 1, fecha: '2026-03-10', estado: 'programada', profesor: ERIK, asistentes: 0,
+          id: 52, horarioId: 1, fecha: '2026-03-10', estado: 'programada', profesor: ERIK, asistentes: 0,
           estilo: 'Ballet', nivel: null, horaInicio: '18:00', horaFin: '19:00',
         }),
       ),
@@ -87,7 +87,7 @@ describe('/agenda', () => {
     await usuario.click(within(ballet).getByRole('button', { name: 'Tomar asistencia' }));
 
     await screen.findByRole('heading', { name: /Asistencia/ });
-    expect(cuerpoRecibido).toEqual({ claseId: 1, fecha: '2026-03-10' });
+    expect(cuerpoRecibido).toEqual({ horarioId: 1, fecha: '2026-03-10' });
     expect(router.state.location.pathname).toBe('/sesiones/52');
   });
 });

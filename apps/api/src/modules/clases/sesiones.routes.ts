@@ -18,8 +18,8 @@ export async function rutasSesiones(app: FastifyInstance): Promise<void> {
   });
 
   app.post('/api/sesiones', async (request, reply) => {
-    const { claseId, fecha } = abrirSesionSchema.parse(request.body);
-    const { sesion, creada } = await abrirSesion(claseId, fecha);
+    const { horarioId, fecha } = abrirSesionSchema.parse(request.body);
+    const { sesion, creada } = await abrirSesion(horarioId, fecha);
     return reply.status(creada ? 201 : 200).send(sesion);
   });
 

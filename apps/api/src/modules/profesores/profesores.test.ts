@@ -9,9 +9,9 @@ import {
   loguear,
 } from '../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
-import { crearClaseDeTest, crearProfesorDeTest } from '../../../test/fabricas.ts';
+import { crearHorarioDeTest, crearProfesorDeTest } from '../../../test/fabricas.ts';
 import { hoyEnEstudio } from '../../lib/fechas.ts';
-import { actualizarClase } from '../clases/clases.service.ts';
+import { actualizarHorario } from '../horarios/horarios.service.ts';
 import { actualizarProfesor } from './profesores.service.ts';
 
 let base: BaseDeTest;
@@ -159,22 +159,22 @@ describe('GET /api/profesores con las clases de la semana', () => {
     const erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata' });
     const lucia = await crearProfesorDeTest({ nombre: 'Lucía', apellido: 'Paz' });
     // Las de Erik se crean fuera de orden: el listado no puede depender del orden de los ids.
-    await crearClaseDeTest(erik.id, {
+    await crearHorarioDeTest(erik.id, {
       estilo: 'Contemporáneo',
       diaSemana: 3,
       horaInicio: '20:00',
       horaFin: '21:30',
     });
-    await crearClaseDeTest(erik.id, { estilo: 'Jazz', diaSemana: 1, horaInicio: '21:00', horaFin: '22:30' });
-    await crearClaseDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 1, horaInicio: '18:00', horaFin: '19:30' });
+    await crearHorarioDeTest(erik.id, { estilo: 'Jazz', diaSemana: 1, horaInicio: '21:00', horaFin: '22:30' });
+    await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 1, horaInicio: '18:00', horaFin: '19:30' });
     // Un viernes dado de baja: no suma una clase ni agrega el día.
-    const breakViernes = await crearClaseDeTest(erik.id, {
+    const breakViernes = await crearHorarioDeTest(erik.id, {
       estilo: 'Break',
       diaSemana: 5,
       horaInicio: '19:00',
       horaFin: '20:30',
     });
-    await actualizarClase(breakViernes.id, { activa: false });
+    await actualizarHorario(breakViernes.id, { activo: false });
 
     const respuesta = await pedirProfesores();
 
@@ -214,22 +214,22 @@ describe('GET /api/profesores con las clases de la semana', () => {
   it('no cuenta las clases dadas de baja aunque el listado pida incluirInactivos=true', async () => {
     const erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata' });
     const lucia = await crearProfesorDeTest({ nombre: 'Lucía', apellido: 'Paz' });
-    await crearClaseDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' });
-    const breakLunes = await crearClaseDeTest(erik.id, {
+    await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' });
+    const breakLunes = await crearHorarioDeTest(erik.id, {
       estilo: 'Break',
       diaSemana: 1,
       horaInicio: '19:30',
       horaFin: '21:00',
     });
-    await actualizarClase(breakLunes.id, { activa: false });
+    await actualizarHorario(breakLunes.id, { activo: false });
     // Lucía se fue y sus clases se dieron de baja: el listado la muestra, pero sin carga semanal.
-    const salsaViernes = await crearClaseDeTest(lucia.id, {
+    const salsaViernes = await crearHorarioDeTest(lucia.id, {
       estilo: 'Salsa',
       diaSemana: 5,
       horaInicio: '19:00',
       horaFin: '20:30',
     });
-    await actualizarClase(salsaViernes.id, { activa: false });
+    await actualizarHorario(salsaViernes.id, { activo: false });
     await actualizarProfesor(lucia.id, { activo: false }, hoyEnEstudio(AHORA));
 
     const respuesta = await pedirProfesores('?incluirInactivos=true');

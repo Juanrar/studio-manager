@@ -13,7 +13,7 @@ import {
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
 import {
   crearAlumnoDeTest,
-  crearClaseDeTest,
+  crearHorarioDeTest,
   crearPackDeTest,
   crearProfesorDeTest,
 } from '../../../test/fabricas.ts';
@@ -66,7 +66,7 @@ beforeEach(async () => {
 
   erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata', porcentajeBp: 5000 });
   iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni', porcentajeBp: 6000 });
-  const hipHop = await crearClaseDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2 });
+  const hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2 });
   const sesion24DeFebrero = (await abrirSesion(hipHop.id, '2026-02-24')).sesion;
   sesion3DeMarzo = (await abrirSesion(hipHop.id, '2026-03-03')).sesion;
   sesion10DeMarzo = (await abrirSesion(hipHop.id, '2026-03-10')).sesion;

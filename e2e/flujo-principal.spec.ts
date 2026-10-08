@@ -57,7 +57,7 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
   });
 
   await test.step('armar una clase para hoy', async () => {
-    await irA(page, 'Clases');
+    await irA(page, 'Horarios');
     await page.getByRole('button', { name: 'Nueva clase' }).click();
     const dialogo = page.getByRole('dialog', { name: 'Nueva clase' });
     await dialogo.getByLabel('Estilo').fill('Hip-Hop');
