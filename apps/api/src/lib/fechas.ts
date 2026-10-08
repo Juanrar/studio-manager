@@ -53,6 +53,26 @@ export function primerDiaDelMes(fecha: FechaDia): FechaDia {
   return formatear(anio, mes, 1);
 }
 
+// La semana del estudio va de lunes a domingo, como `dia_semana`.
+export function lunesDe(fecha: FechaDia): FechaDia {
+  return sumarDias(fecha, 1 - diaSemanaIso(fecha));
+}
+
+// Las clases se crean por adelantado hasta el domingo de la semana que contiene el último día del mes
+// siguiente: el estudio arma la grilla, como mucho, hasta el mes que viene.
+export function finDelHorizonte(hoy: FechaDia): FechaDia {
+  const ultimoDelMesSiguiente = sumarDias(sumarMeses(primerDiaDelMes(hoy), 2), -1);
+  return sumarDias(lunesDe(ultimoDelMesSiguiente), 6);
+}
+
+// El lunes de cada semana del horizonte, desde la semana de hoy.
+export function semanasDelHorizonte(hoy: FechaDia): FechaDia[] {
+  const semanas: FechaDia[] = [];
+  const fin = finDelHorizonte(hoy);
+  for (let lunes = lunesDe(hoy); lunes <= fin; lunes = sumarDias(lunes, 7)) semanas.push(lunes);
+  return semanas;
+}
+
 function partes(fecha: FechaDia): [number, number, number] {
   if (!esFechaDia(fecha)) {
     throw new Error(`Fecha inválida: ${fecha}. Se espera YYYY-MM-DD`);

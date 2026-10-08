@@ -1,6 +1,6 @@
 # Clases generadas por adelantado
 
-**Estado:** pendiente
+**Estado:** en curso
 **Depende de:** renombrar-horario-y-clase (24)
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; cada horario activo tiene sus clases creadas desde la semana actual hasta el fin del mes siguiente, la agenda del día lista esas clases sin el paso de "abrir", y cambiar un horario cambia sus clases de esta semana en adelante sin tocar las que ya pasaron.
 
@@ -133,11 +133,11 @@ La migración de datos se prueba a mano contra la base de desarrollo, que tiene 
 
 **Archivos:** `apps/api/src/lib/fechas.ts`, `apps/api/src/lib/fechas.test.ts`
 
-- [ ] **Paso 1:** escribir los tests de `lunesDe` y `finDelHorizonte`.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test fechas` y verificar que fallan porque las funciones no existen.
-- [ ] **Paso 3:** implementarlas.
-- [ ] **Paso 4:** correr el test y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(fechas): semana y horizonte de la grilla`.
+- [x] **Paso 1:** escribir los tests de `lunesDe` y `finDelHorizonte`.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test fechas` y verificar que fallan porque las funciones no existen.
+- [x] **Paso 3:** implementarlas. Se sumó `semanasDelHorizonte`, la lista de lunes que recorre el generador, con su test.
+- [x] **Paso 4:** correr el test y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(fechas): semana y horizonte de la grilla`.
 
 ### Tarea 2: Esquema y migración
 
