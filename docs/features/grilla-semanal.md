@@ -1,6 +1,6 @@
 # Grilla semanal
 
-**Estado:** en curso
+**Estado:** lista
 **Depende de:** clases-por-adelantado (25)
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; un administrador abre "Grilla", ve las clases de la semana, del día o del mes, arrastra una clase a otro día u horario de la misma semana, la estira o crea una nueva, y el cambio vale solo para esa semana salvo que elija "Aplicar a todas las semanas".
 
@@ -186,14 +186,14 @@ jsdom no calcula posiciones: la cascada, la línea de ahora y el editor flotante
 
 **Archivos:** `e2e/`
 
-- [ ] **Paso 1:** sumar el tramo de la grilla al recorrido.
-- [ ] **Paso 2:** correr `pnpm e2e` y verificar que falla en el tramo nuevo si la grilla no guarda el cambio.
-- [ ] **Paso 3:** ajustar lo que haga falta.
-- [ ] **Paso 4:** correr `pnpm e2e`, `pnpm test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `test(e2e): mover una clase en la grilla y verla en la agenda`.
+- [x] **Paso 1:** sumar el tramo de la grilla al recorrido.
+- [x] **Paso 2:** correr `pnpm e2e` y verificar que falla en el tramo nuevo si la grilla no guarda el cambio. El tramo pasó a la primera; se verificó con una mutación: con "Aplicar a todas" sin mandar nada, el e2e falla en la pantalla Horarios, que sigue mostrando 19:00 a 20:30.
+- [x] **Paso 3:** ajustar lo que haga falta. Además de la agenda, el tramo mira la pantalla Horarios: así prueba que "Aplicar a todas" llegó al horario y no solo a la clase de hoy.
+- [x] **Paso 4:** correr `pnpm e2e`, `pnpm test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `test(e2e): mover una clase en la grilla y verla en la agenda`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
-- [ ] `pnpm e2e` pasa.
-- [ ] A mano contra la API real: mover una clase solo esta semana, aplicar otra a todas, crear un workshop y tomarle asistencia, cancelar una y volver a dictarla, y ver todo en la agenda de recepción.
+- [x] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
+- [x] `pnpm e2e` pasa.
+- [x] A mano contra la API real, en una base aparte con la semana del prototipo (32 horarios), con Playwright en Chromium: mover una clase solo esta semana (el punto ámbar y el aviso), abrir el editor, cancelar una y volver a dictarla, crear un workshop tocando un hueco, verlo en la agenda de recepción y abrir su toma de asistencia. "Aplicar a todas" lo recorre el e2e. La asistencia y la liquidación de una clase única las prueban los tests de la API.
