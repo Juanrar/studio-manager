@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
-import type { Alumno, Horario, Pack, Profesor, Clase, UsuarioPublico } from '@studio/shared';
+import type { Alumno, Horario, Pack, Profesor, UsuarioPublico } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { AHORA, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
@@ -12,7 +12,7 @@ import {
 } from '../../../test/fabricas.ts';
 import { alumno } from '../../db/schema.ts';
 import { actualizarAlumno } from '../alumnos/alumnos.service.ts';
-import { abrirClase, actualizarClase } from '../clases/clases.service.ts';
+import { abrirClase, actualizarClase, type ClaseAbierta } from '../clases/clases.service.ts';
 import { anularPago, obtenerPago, registrarPago } from '../pagos/pagos.service.ts';
 
 let base: BaseDeTest;
@@ -21,7 +21,7 @@ let cookie: string;
 let recepcion: UsuarioPublico;
 let erik: Profesor;
 let hipHop: Horario;
-let clase: Clase;
+let clase: ClaseAbierta;
 let martina: Alumno;
 let packX4: Pack;
 let claseSuelta: Pack;

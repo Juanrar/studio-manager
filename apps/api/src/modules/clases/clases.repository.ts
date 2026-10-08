@@ -1,35 +1,69 @@
-import { and, count, eq, sql, type SQL } from 'drizzle-orm';
-import type { EstadoClase, Clase, ClaseDetalle } from '@studio/shared';
+import { and, asc, count, eq, gte, lte, sql, type SQL } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
+import type { Clase, EstadoClase } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
-import { asistencia, horario, profesor, clase, type NuevaClase } from '../../db/schema.ts';
+import { asistencia, clase, horario, profesor, type NuevaClase } from '../../db/schema.ts';
 import { horaHHMM } from '../../lib/postgres.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 
-const columnas = {
+const titular = alias(profesor, 'titular');
+
+// Una clase tiene cambios propios si difiere de su horario. Solo se mira de la semana actual en
+// adelante: una clase pasada se compararía con el horario de hoy. Una clase única, sin horario, existe
+// solo esa semana.
+const tieneCambios = (lunesActual: FechaDia) => sql<boolean>`case
+  when ${clase.horarioId} is null then true
+  when ${clase.semana} < ${lunesActual}::date then false
+  else extract(isodow from ${clase.fecha}) <> ${horario.diaSemana}
+    or ${clase.horaInicio} <> ${horario.horaInicio}
+    or ${clase.horaFin} <> ${horario.horaFin}
+    or ${clase.estilo} <> ${horario.estilo}
+    or ${clase.nivel} is distinct from ${horario.nivel}
+    or ${clase.profesorId} <> ${horario.profesorId}
+    or ${clase.estado} <> 'programada'
+end`;
+
+const columnas = (lunesActual: FechaDia) => ({
   id: clase.id,
   horarioId: clase.horarioId,
   fecha: clase.fecha,
+  horaInicio: horaHHMM(clase.horaInicio),
+  horaFin: horaHHMM(clase.horaFin),
+  estilo: clase.estilo,
+  nivel: clase.nivel,
   estado: clase.estado,
   profesor: { id: profesor.id, nombre: profesor.nombre, apellido: profesor.apellido },
+  profesorTitular: { id: titular.id, nombre: titular.nombre, apellido: titular.apellido },
+  tieneCambios: tieneCambios(lunesActual),
   asistentes: sql<number>`(select count(*) from ${asistencia} where ${asistencia.claseId} = ${clase.id})`.mapWith(Number),
-};
+});
 
-function seleccionar(ej: Ejecutor, filtro: SQL | undefined) {
-  return ej.select(columnas).from(clase).innerJoin(profesor, eq(profesor.id, clase.profesorId)).where(filtro);
+function seleccionar(ej: Ejecutor, lunesActual: FechaDia, filtro: SQL | undefined) {
+  return ej
+    .select(columnas(lunesActual))
+    .from(clase)
+    .innerJoin(profesor, eq(profesor.id, clase.profesorId))
+    .leftJoin(horario, eq(horario.id, clase.horarioId))
+    .leftJoin(titular, eq(titular.id, horario.profesorId))
+    .where(filtro)
+    .orderBy(asc(clase.fecha), asc(clase.horaInicio), asc(clase.id));
 }
 
-export async function buscarPorId(ej: Ejecutor, id: number): Promise<Clase | null> {
-  const [fila] = await seleccionar(ej, eq(clase.id, id));
+export async function buscarPorId(ej: Ejecutor, id: number, lunesActual: FechaDia): Promise<Clase | null> {
+  const [fila] = await seleccionar(ej, lunesActual, eq(clase.id, id));
   return fila ?? null;
 }
 
-export async function buscarPorHorarioYFecha(ej: Ejecutor, horarioId: number, fecha: FechaDia): Promise<Clase | null> {
-  const [fila] = await seleccionar(ej, and(eq(clase.horarioId, horarioId), eq(clase.fecha, fecha)));
-  return fila ?? null;
+export async function listarRango(ej: Ejecutor, desde: FechaDia, hasta: FechaDia, lunesActual: FechaDia): Promise<Clase[]> {
+  return seleccionar(ej, lunesActual, and(gte(clase.fecha, desde), lte(clase.fecha, hasta)));
 }
 
-export async function listarDeFecha(ej: Ejecutor, fecha: FechaDia): Promise<Clase[]> {
-  return seleccionar(ej, eq(clase.fecha, fecha));
+export async function buscarIdPorHorarioYFecha(ej: Ejecutor, horarioId: number, fecha: FechaDia): Promise<number | null> {
+  const [fila] = await ej
+    .select({ id: clase.id })
+    .from(clase)
+    .where(and(eq(clase.horarioId, horarioId), eq(clase.fecha, fecha)));
+  return fila?.id ?? null;
 }
 
 // Las que ya existían para ese horario y esa semana no se tocan. Devuelve cuántas se crearon.
@@ -54,7 +88,7 @@ export async function actualizar(
   id: number,
   cambios: { profesorId?: number; estado?: EstadoClase },
 ): Promise<boolean> {
-  if (Object.keys(cambios).length === 0) return (await buscarPorId(ej, id)) !== null;
+  if (Object.keys(cambios).length === 0) return (await bloquear(ej, id)) !== null;
   const filas = await ej.update(clase).set(cambios).where(eq(clase.id, id)).returning({ id: clase.id });
   return filas.length > 0;
 }
@@ -95,20 +129,4 @@ export async function actualizarPorcentajeDeAsistencias(
   porcentajeBp: number,
 ): Promise<void> {
   await ej.update(asistencia).set({ porcentajeBp }).where(eq(asistencia.claseId, claseId));
-}
-
-export async function buscarDetalle(ej: Ejecutor, id: number): Promise<ClaseDetalle | null> {
-  const [fila] = await ej
-    .select({
-      ...columnas,
-      estilo: horario.estilo,
-      nivel: horario.nivel,
-      horaInicio: horaHHMM(horario.horaInicio),
-      horaFin: horaHHMM(horario.horaFin),
-    })
-    .from(clase)
-    .innerJoin(profesor, eq(profesor.id, clase.profesorId))
-    .innerJoin(horario, eq(horario.id, clase.horarioId))
-    .where(eq(clase.id, id));
-  return fila ?? null;
 }

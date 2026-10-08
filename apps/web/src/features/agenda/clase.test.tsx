@@ -1,23 +1,12 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
-import { SIN_CLASES_DISPONIBLES, type Asistencia, type ClaseDetalle } from '@studio/shared';
-import { unAlumnoEnListado, unaAsistencia, unListadoDeAlumnos, unPack, unProfesor } from '../../../test/datos.ts';
+import { SIN_CLASES_DISPONIBLES, type Asistencia } from '@studio/shared';
+import { unAlumnoEnListado, unaAsistencia, unaClase, unListadoDeAlumnos, unPack, unProfesor } from '../../../test/datos.ts';
 import { RECEPCION, conSesion, renderizarEn } from '../../../test/render.tsx';
 import { servidor } from '../../../test/servidor.ts';
 
-const HIP_HOP_DEL_10: ClaseDetalle = {
-  id: 50,
-  horarioId: 2,
-  fecha: '2026-03-10',
-  estado: 'programada',
-  profesor: { id: 1, nombre: 'Erik', apellido: 'Zapata' },
-  asistentes: 0,
-  estilo: 'Hip-Hop',
-  nivel: 'Inicial',
-  horaInicio: '19:00',
-  horaFin: '20:30',
-};
+const HIP_HOP_DEL_10 = unaClase();
 
 // La clase de Hip-Hop del martes 10, con la lista de asistencias que el test va cambiando.
 function claseDeHipHop(asistencias: Asistencia[]) {

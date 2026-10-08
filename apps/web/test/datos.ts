@@ -4,6 +4,7 @@ import type {
   Alumno,
   AlumnoEnListado,
   Asistencia,
+  Clase,
   FichaDeAlumno,
   Horario,
   Listado,
@@ -107,6 +108,26 @@ export function unHorario(datos: Partial<Horario> = {}): Horario {
     horaFin: '19:30',
     profesor: { id: 1, nombre: 'Erik', apellido: 'Zapata' },
     activo: true,
+    ...datos,
+  };
+}
+
+// Una clase de GET /api/clases. Por defecto, Hip-Hop del martes 10 de marzo con Erik, sin cambios ni asistentes.
+export function unaClase(datos: Partial<Clase> = {}): Clase {
+  const erik = { id: 1, nombre: 'Erik', apellido: 'Zapata' };
+  return {
+    id: 50,
+    horarioId: 2,
+    fecha: '2026-03-10',
+    horaInicio: '19:00',
+    horaFin: '20:30',
+    estilo: 'Hip-Hop',
+    nivel: 'Inicial',
+    estado: 'programada',
+    profesor: erik,
+    profesorTitular: erik,
+    tieneCambios: false,
+    asistentes: 0,
     ...datos,
   };
 }

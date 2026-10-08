@@ -1,5 +1,5 @@
-import { Link, useNavigate, useSearchParams } from 'react-router';
-import type { HorarioDelDia, EstadoClase } from '@studio/shared';
+import { Link, useSearchParams } from 'react-router';
+import type { Clase, EstadoClase } from '@studio/shared';
 import {
   Aviso,
   Boton,
@@ -14,59 +14,52 @@ import {
 } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFechaLarga, sumarDias } from '../../lib/formato.ts';
-import { useAbrirClase, useAgenda } from './api.ts';
+import { useAgenda } from './api.ts';
 
-type Tono = 'gris' | 'verde' | 'rojo';
+type Tono = 'gris' | 'rojo';
 
-// Sin clase, el horario todavía no se abrió ese día. `dictada` existe en el esquema, pero la API aún no la asigna.
+// Toda clase ya existe: se crea por adelantado. `dictada` existe en el esquema, pero la API aún no la asigna.
 const ESTADOS: Record<EstadoClase, { texto: string; tono: Tono }> = {
-  programada: { texto: 'Abierta', tono: 'verde' },
+  programada: { texto: 'Programada', tono: 'gris' },
   dictada: { texto: 'Dictada', tono: 'gris' },
   cancelada: { texto: 'Cancelada', tono: 'rojo' },
 };
 
 export function AgendaPage() {
-  const navegar = useNavigate();
   const [parametros, setParametros] = useSearchParams();
   const fecha = parametros.get('fecha') ?? undefined;
   const agenda = useAgenda(fecha);
-  const abrir = useAbrirClase();
   const irA = (nueva: string | undefined) => setParametros(nueva === undefined ? {} : { fecha: nueva });
+  // La API decide cuál es el día cuando la dirección no trae fecha: el de hoy en el estudio.
+  const dia = agenda.data?.desde;
+  const fueraDelHorizonte = agenda.data !== undefined && agenda.data.desde > agenda.data.finDelHorizonte;
 
   return (
     <Pagina
       titulo="Agenda"
       acciones={
-        agenda.data && (
+        dia !== undefined && (
           <>
-            <BotonIcono icono="anterior" etiqueta="Día anterior" onClick={() => irA(sumarDias(agenda.data.fecha, -1))} />
+            <BotonIcono icono="anterior" etiqueta="Día anterior" onClick={() => irA(sumarDias(dia, -1))} />
             <Boton variante="secundario" onClick={() => irA(undefined)}>
               Hoy
             </Boton>
-            <BotonIcono icono="siguiente" etiqueta="Día siguiente" onClick={() => irA(sumarDias(agenda.data.fecha, 1))} />
+            <BotonIcono icono="siguiente" etiqueta="Día siguiente" onClick={() => irA(sumarDias(dia, 1))} />
           </>
         )
       }
-      barra={agenda.data && <p className="font-medium first-letter:uppercase">{formatearFechaLarga(agenda.data.fecha)}</p>}
+      barra={dia !== undefined && <p className="font-medium first-letter:uppercase">{formatearFechaLarga(dia)}</p>}
     >
       {agenda.isPending && <Cargando />}
       {agenda.isError && <Aviso>{mensajeDeError(agenda.error)}</Aviso>}
-      {abrir.isError && <Aviso>{mensajeDeError(abrir.error)}</Aviso>}
-      {agenda.data && agenda.data.items.length === 0 && <p className="text-apagado">No hay clases este día.</p>}
+      {fueraDelHorizonte && <p className="text-apagado">La grilla de ese día todavía no está armada.</p>}
+      {agenda.data && !fueraDelHorizonte && agenda.data.items.length === 0 && (
+        <p className="text-apagado">No hay clases este día.</p>
+      )}
       {agenda.data && agenda.data.items.length > 0 && (
         <Tabla columnas={['Horario', 'Clase', 'Nivel', 'Profesor', 'Asistentes', 'Estado', '']}>
-          {agenda.data.items.map((horario) => (
-            <FilaDeClase
-              key={horario.horarioId}
-              horario={horario}
-              abriendo={abrir.isPending}
-              alTomarAsistencia={() =>
-                abrir.mutate(
-                  { horarioId: horario.horarioId, fecha: agenda.data.fecha },
-                  { onSuccess: (abierta) => navegar(`/clases/${abierta.id}`) },
-                )
-              }
-            />
+          {agenda.data.items.map((clase) => (
+            <FilaDeClase key={clase.id} clase={clase} />
           ))}
         </Tabla>
       )}
@@ -74,45 +67,31 @@ export function AgendaPage() {
   );
 }
 
-function FilaDeClase({
-  horario,
-  abriendo,
-  alTomarAsistencia,
-}: {
-  horario: HorarioDelDia;
-  abriendo: boolean;
-  alTomarAsistencia: () => void;
-}) {
-  const { clase } = horario;
-  const profesor = clase?.profesor ?? horario.profesorTitular;
-  const esSuplente = clase !== null && clase.profesor.id !== horario.profesorTitular.id;
-  const estado = clase === null ? { texto: 'Sin abrir', tono: 'gris' as const } : ESTADOS[clase.estado];
+function FilaDeClase({ clase }: { clase: Clase }) {
+  const esSuplente = clase.profesorTitular !== null && clase.profesor.id !== clase.profesorTitular.id;
+  const estado = ESTADOS[clase.estado];
+  // Una clase sin nadie anotado todavía espera la asistencia; con asistentes o cancelada, se va a mirar.
+  const porTomar = clase.estado === 'programada' && clase.asistentes === 0;
 
   return (
     <tr>
       <Celda>
-        {horario.horaInicio} a {horario.horaFin}
+        {clase.horaInicio} a {clase.horaFin}
       </Celda>
-      <Celda className="font-medium">{horario.estilo}</Celda>
-      <Celda>{horario.nivel ?? '—'}</Celda>
+      <Celda className="font-medium">{clase.estilo}</Celda>
+      <Celda>{clase.nivel ?? '—'}</Celda>
       <Celda>
-        {profesor.nombre} {profesor.apellido}
+        {clase.profesor.nombre} {clase.profesor.apellido}
         {esSuplente && ' (suplente)'}
       </Celda>
-      <Celda>{clase === null ? '—' : clase.asistentes}</Celda>
+      <Celda>{clase.asistentes}</Celda>
       <Celda>
         <Insignia tono={estado.tono}>{estado.texto}</Insignia>
       </Celda>
       <CeldaDeAcciones>
-        {clase === null ? (
-          <Boton disabled={abriendo} onClick={alTomarAsistencia}>
-            Tomar asistencia
-          </Boton>
-        ) : (
-          <Link to={`/clases/${clase.id}`} className={claseDeBoton('secundario')}>
-            Ver asistencia
-          </Link>
-        )}
+        <Link to={`/clases/${clase.id}`} className={claseDeBoton(porTomar ? 'primario' : 'secundario')}>
+          {porTomar ? 'Tomar asistencia' : 'Ver asistencia'}
+        </Link>
       </CeldaDeAcciones>
     </tr>
   );

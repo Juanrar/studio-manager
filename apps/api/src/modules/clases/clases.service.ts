@@ -1,44 +1,39 @@
-import type { ActualizarClaseInput, AgendaDelDia, Clase, ClaseDetalle } from '@studio/shared';
+import type { ActualizarClaseInput, Clase, ClasesDelRango } from '@studio/shared';
 import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
-import { diaSemanaIso, lunesDe, type FechaDia } from '../../lib/fechas.ts';
+import { diaSemanaIso, finDelHorizonte, lunesDe, type FechaDia } from '../../lib/fechas.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
 import { verificarMesAbierto } from '../liquidaciones/liquidaciones.service.ts';
-import { listarHorariosDelDia, obtenerHorario } from '../horarios/horarios.service.ts';
+import { obtenerHorario } from '../horarios/horarios.service.ts';
 import { porcentajeVigente, verificarProfesorActivo } from '../profesores/profesores.service.ts';
 import * as repo from './clases.repository.ts';
 
-export async function agendaDelDia(fecha: FechaDia): Promise<AgendaDelDia> {
-  const [horarios, clases] = await Promise.all([
-    listarHorariosDelDia(diaSemanaIso(fecha)),
-    repo.listarDeFecha(db, fecha),
-  ]);
-  const clasePorHorario = new Map(clases.map((s) => [s.horarioId, s]));
-
-  return {
-    fecha,
-    items: horarios.map((horario) => ({
-      horarioId: horario.id,
-      estilo: horario.estilo,
-      nivel: horario.nivel,
-      horaInicio: horario.horaInicio,
-      horaFin: horario.horaFin,
-      profesorTitular: horario.profesor,
-      clase: clasePorHorario.get(horario.id) ?? null,
-    })),
-  };
+// Las clases de un rango de días, también las canceladas. La agenda lo usa con un solo día.
+export async function listarClases(desde: FechaDia, hasta: FechaDia, hoy: FechaDia): Promise<ClasesDelRango> {
+  const items = await repo.listarRango(db, desde, hasta, lunesDe(hoy));
+  return { desde, hasta, finDelHorizonte: finDelHorizonte(hoy), items };
 }
 
-// Abrir dos veces la misma clase devuelve la existente: un doble clic no es un error.
-export async function abrirClase(horarioId: number, fecha: FechaDia): Promise<{ clase: Clase; creada: boolean }> {
+export async function obtenerClase(id: number, hoy: FechaDia): Promise<Clase> {
+  const encontrada = await repo.buscarPorId(db, id, lunesDe(hoy));
+  if (encontrada === null) throw new NoEncontradoError(`No existe la clase ${id}`);
+  return encontrada;
+}
+
+export type ClaseAbierta = { id: number; fecha: FechaDia };
+
+// Crea la clase de un horario en una fecha si todavía no existe. La API ya no la expone: las clases
+// se crean por adelantado con programacion.service. La usan los tests para armar semanas pasadas,
+// que el generador no crea.
+export async function abrirClase(horarioId: number, fecha: FechaDia): Promise<{ clase: ClaseAbierta; creada: boolean }> {
   const horario = await obtenerHorario(horarioId);
   if (!horario.activo) throw new ReglaDeNegocioError(`El horario de ${horario.estilo} está dado de baja`);
   if (diaSemanaIso(fecha) !== horario.diaSemana) {
     throw new ReglaDeNegocioError(`El horario de ${horario.estilo} no se dicta el ${fecha}`);
   }
 
-  const existente = await repo.buscarPorHorarioYFecha(db, horarioId, fecha);
-  if (existente !== null) return { clase: existente, creada: false };
+  const existente = await repo.buscarIdPorHorarioYFecha(db, horarioId, fecha);
+  if (existente !== null) return { clase: { id: existente, fecha }, creada: false };
 
   const id = await repo.insertarSiNoExiste(db, {
     horarioId,
@@ -50,11 +45,11 @@ export async function abrirClase(horarioId: number, fecha: FechaDia): Promise<{ 
     nivel: horario.nivel,
     profesorId: horario.profesor.id,
   });
-  const clase = await repo.buscarPorHorarioYFecha(db, horarioId, fecha);
-  return { clase: clase!, creada: id !== null };
+  const clase = await repo.buscarIdPorHorarioYFecha(db, horarioId, fecha);
+  return { clase: { id: clase!, fecha }, creada: id !== null };
 }
 
-export async function actualizarClase(id: number, datos: ActualizarClaseInput): Promise<Clase> {
+export async function actualizarClase(id: number, datos: ActualizarClaseInput): Promise<void> {
   await db.transaction(async (tx) => {
     const actual = await bloquearClase(tx, id);
 
@@ -73,24 +68,11 @@ export async function actualizarClase(id: number, datos: ActualizarClaseInput): 
 
     await repo.actualizar(tx, id, sinIndefinidos(datos));
   });
-  return obtenerClase(id);
-}
-
-export async function obtenerClase(id: number): Promise<Clase> {
-  const encontrada = await repo.buscarPorId(db, id);
-  if (encontrada === null) throw new NoEncontradoError(`No existe la clase ${id}`);
-  return encontrada;
 }
 
 // La usa asistencias dentro de su transacción.
 export async function bloquearClase(ej: Ejecutor, id: number): Promise<repo.ClaseBloqueada> {
   const encontrada = await repo.bloquear(ej, id);
-  if (encontrada === null) throw new NoEncontradoError(`No existe la clase ${id}`);
-  return encontrada;
-}
-
-export async function obtenerDetalleDeClase(id: number): Promise<ClaseDetalle> {
-  const encontrada = await repo.buscarDetalle(db, id);
   if (encontrada === null) throw new NoEncontradoError(`No existe la clase ${id}`);
   return encontrada;
 }

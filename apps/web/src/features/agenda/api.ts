@@ -1,33 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  AbrirClaseInput,
-  ActualizarClaseInput,
-  AgendaDelDia,
-  Asistencia,
-  RegistrarAsistenciaInput,
-  Clase,
-  ClaseDetalle,
-} from '@studio/shared';
+import type { ActualizarClaseInput, Asistencia, Clase, ClasesDelRango, RegistrarAsistenciaInput } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
-// Sin fecha, la API devuelve la agenda de hoy en la zona del estudio.
+// Las clases de un día, ya creadas por adelantado. Sin fecha, la API usa el día de hoy en el estudio.
 export function useAgenda(fecha: string | undefined) {
   return useQuery({
     queryKey: ['agenda', fecha ?? 'hoy'],
-    queryFn: () => api.get<AgendaDelDia>(conQuery('/clases/dia', { fecha })),
-  });
-}
-
-export function useAbrirClase() {
-  const clienteQuery = useQueryClient();
-  return useMutation({
-    mutationFn: (datos: AbrirClaseInput) => api.post<Clase>('/clases', datos),
-    onSuccess: () => clienteQuery.invalidateQueries({ queryKey: ['agenda'] }),
+    queryFn: () => api.get<ClasesDelRango>(conQuery('/clases', { desde: fecha, hasta: fecha })),
   });
 }
 
 export function useDetalleDeClase(id: number) {
-  return useQuery({ queryKey: ['clases', id], queryFn: () => api.get<ClaseDetalle>(`/clases/${id}`) });
+  return useQuery({ queryKey: ['clases', id], queryFn: () => api.get<Clase>(`/clases/${id}`) });
 }
 
 export function useAsistencias(claseId: number) {

@@ -163,11 +163,17 @@ La migración de datos se prueba a mano contra la base de desarrollo, que tiene 
 
 **Archivos:** `packages/shared/src/clases.ts`, `clases.routes.ts`, `clases.repository.ts`, `clases.service.ts`, la agenda de la web y su test
 
-- [ ] **Paso 1:** escribir los tests de `GET /api/clases?desde=&hasta=` (con `tieneCambios`) y los de la agenda en la web.
-- [ ] **Paso 2:** correr los tests y verificar que fallan.
-- [ ] **Paso 3:** implementar la consulta, sacar `GET /api/clases/dia` y `POST /api/clases`, y cambiar la agenda de la web.
-- [ ] **Paso 4:** correr `pnpm test`, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan. El e2e ya no abre la clase: la toma de asistencia empieza en el enlace.
-- [ ] **Paso 5:** commit `feat(agenda): la agenda lista las clases ya creadas`.
+- [x] **Paso 1:** escribir los tests de `GET /api/clases?desde=&hasta=` (con `tieneCambios`) y los de la agenda en la web.
+- [x] **Paso 2:** correr los tests y verificar que fallan.
+- [x] **Paso 3:** implementar la consulta, sacar `GET /api/clases/dia` y `POST /api/clases`, y cambiar la agenda de la web. Decisiones que el plan no cerraba:
+  - `Clase` es un solo tipo completo (fecha, horas, estilo, nivel, profesor, titular, `tieneCambios`, asistentes); desaparecen `ClaseDetalle`, `HorarioDelDia` y `AgendaDelDia`.
+  - Sin fechas, `GET /api/clases` usa el día de hoy en el estudio, y la respuesta trae `desde`, `hasta` y `finDelHorizonte`: la agenda sigue sin calcular "hoy" en el navegador y sabe cuándo una fecha está fuera del horizonte.
+  - `abrirClase` queda como service interno, sin ruta: los tests la usan para armar clases de semanas pasadas, que el generador no crea. Devuelve solo `{ id, fecha }` (`ClaseAbierta`).
+  - `PATCH /api/clases/:id` responde la clase completa: el service actualiza y la ruta la vuelve a leer con el día de hoy, que hace falta para `tieneCambios`.
+  - Una clase única cuenta como con cambios propios: existe solo esa semana.
+  - En la agenda el estado "Abierta" pasa a "Programada", y la acción es un enlace: "Tomar asistencia" si no tiene asistentes ni está cancelada, "Ver asistencia" si no.
+- [x] **Paso 4:** correr `pnpm test`, `pnpm typecheck` y `pnpm e2e`, y verificar que pasan. El e2e ya no abre la clase: la toma de asistencia empieza en el enlace.
+- [x] **Paso 5:** commit `feat(agenda): la agenda lista las clases ya creadas`.
 
 ### Tarea 5: Cambiar y dar de baja un horario
 

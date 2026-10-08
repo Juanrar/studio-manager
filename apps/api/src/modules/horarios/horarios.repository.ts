@@ -50,10 +50,6 @@ export async function listar(ej: Ejecutor, filtros: FiltrosDeHorarios): Promise<
   return seleccionar(ej, and(...condiciones));
 }
 
-export async function listarDelDia(ej: Ejecutor, diaSemana: number): Promise<Horario[]> {
-  return seleccionar(ej, and(eq(horario.activo, true), eq(horario.diaSemana, diaSemana)));
-}
-
 // Lo que el generador copia en cada clase, de los horarios activos.
 export type HorarioParaGenerar = {
   id: number;

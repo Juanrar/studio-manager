@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import type { Alumno, Asistencia, Pack, Profesor, Clase, UsuarioPublico } from '@studio/shared';
+import type { Alumno, Asistencia, Pack, Profesor, UsuarioPublico } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   ADMIN,
@@ -18,7 +18,7 @@ import {
   crearProfesorDeTest,
 } from '../../../test/fabricas.ts';
 import { registrarAsistencia } from '../asistencias/asistencias.service.ts';
-import { abrirClase } from '../clases/clases.service.ts';
+import { abrirClase, type ClaseAbierta } from '../clases/clases.service.ts';
 import { registrarPago } from '../pagos/pagos.service.ts';
 
 // Los tests corren el 5 de abril de 2026, con marzo ya terminado.
@@ -34,8 +34,8 @@ let martina: Alumno;
 let joaquin: Alumno;
 let packX4: Pack;
 let claseSuelta: Pack;
-let clase3DeMarzo: Clase;
-let clase10DeMarzo: Clase;
+let clase3DeMarzo: ClaseAbierta;
+let clase10DeMarzo: ClaseAbierta;
 let asistenciaDeMartinaEl10: Asistencia;
 
 beforeAll(async () => {
@@ -50,7 +50,7 @@ async function pagar(alumno: Alumno, pack: Pack, dia: string, medio: 'efectivo' 
   return registrarPago({ alumnoId: alumno.id, packId: pack.id, medio }, recepcion.id, new Date(`${dia}T15:00:00Z`), dia);
 }
 
-async function asistir(clase: Clase, alumno: Alumno) {
+async function asistir(clase: ClaseAbierta, alumno: Alumno) {
   return registrarAsistencia(clase.id, { alumnoId: alumno.id }, recepcion.id, AHORA, '2026-03-10');
 }
 

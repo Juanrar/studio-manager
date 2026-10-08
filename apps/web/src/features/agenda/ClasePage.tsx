@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import type { ClaseDetalle } from '@studio/shared';
+import type { Clase } from '@studio/shared';
 import {
   Aviso,
   Boton,
@@ -52,7 +52,7 @@ export function ClasePage() {
   );
 }
 
-function Suplencia({ clase }: { clase: ClaseDetalle }) {
+function Suplencia({ clase }: { clase: Clase }) {
   const profesores = useProfesores();
   const actualizar = useActualizarClase(clase.id);
   const [elegido, setElegido] = useState(String(clase.profesor.id));

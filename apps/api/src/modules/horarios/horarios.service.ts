@@ -49,7 +49,3 @@ export async function horariosParaGenerar(ej: Ejecutor, horarioId?: number): Pro
   return repo.listarParaGenerar(ej, horarioId);
 }
 
-// Los horarios activos de un día de la semana, para la agenda.
-export async function listarHorariosDelDia(diaSemana: number): Promise<Horario[]> {
-  return repo.listarDelDia(db, diaSemana);
-}
