@@ -1,6 +1,6 @@
 # Renombrar horario y clase
 
-**Estado:** en curso
+**Estado:** lista
 **Depende de:** ficha-del-profesor (23)
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; la tabla que era `clase` se llama `horario`, la que era `sesion` se llama `clase`, y una búsqueda de `sesion` en el código solo encuentra la sesión de login.
 
@@ -169,6 +169,6 @@ No hay tests nuevos: esta feature no cambia lo que hace el sistema. Los que exis
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
-- [ ] `pnpm e2e` pasa.
-- [ ] Contra la base de desarrollo: `pnpm --filter @studio/api db:migrate` conserva los 3 horarios, y la agenda y la ficha del profesor los muestran.
+- [x] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
+- [x] `pnpm e2e` pasa.
+- [x] La migración conserva los datos. Se probó sobre una copia de la base de desarrollo (`pg_dump` a `studio_manager_copia_24`), no sobre la base misma, porque `pnpm dev` la estaba usando con la rama del prototipo: quedaron los 3 horarios, las 2 clases y las 2 asistencias, unidas por las claves foráneas nuevas. Las pantallas con los nombres nuevos las recorre el e2e. La base de desarrollo necesita `db:migrate` cuando se use esta rama.
