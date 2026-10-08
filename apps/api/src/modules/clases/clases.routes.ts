@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify';
-import { CAMPOS_PARA_MOVER_UNA_CLASE, actualizarClaseSchema, clasesQuerySchema } from '@studio/shared';
+import { CAMPOS_PARA_MOVER_UNA_CLASE, actualizarClaseSchema, clasesQuerySchema, crearClaseUnicaSchema } from '@studio/shared';
 import { SinPermisoError } from '../../lib/errores.ts';
 import { idParamSchema } from '../../lib/validacion.ts';
 import { requerirRol } from '../../plugins/autenticacion.ts';
-import { actualizarClase, listarClases, obtenerClase } from './clases.service.ts';
+import { actualizarClase, borrarClaseUnica, crearClaseUnica, listarClases, obtenerClase } from './clases.service.ts';
 
 export async function rutasClases(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requerirRol('recepcion'));
@@ -18,6 +18,17 @@ export async function rutasClases(app: FastifyInstance): Promise<void> {
   app.get('/api/clases/:id', async (request) => {
     const { id } = idParamSchema.parse(request.params);
     return obtenerClase(id, app.hoy());
+  });
+
+  app.post('/api/clases', { preHandler: requerirRol('admin') }, async (request, reply) => {
+    const datos = crearClaseUnicaSchema.parse(request.body);
+    return reply.status(201).send(await crearClaseUnica(datos, app.hoy()));
+  });
+
+  app.delete('/api/clases/:id', { preHandler: requerirRol('admin') }, async (request, reply) => {
+    const { id } = idParamSchema.parse(request.params);
+    await borrarClaseUnica(id, app.hoy());
+    return reply.status(204).send();
   });
 
   app.patch('/api/clases/:id', async (request) => {

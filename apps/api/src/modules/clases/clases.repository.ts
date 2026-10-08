@@ -77,6 +77,15 @@ export async function insertarLasQueFaltan(ej: Ejecutor, filas: NuevaClase[]): P
   return creadas.length;
 }
 
+export async function insertar(ej: Ejecutor, datos: NuevaClase): Promise<number> {
+  const [fila] = await ej.insert(clase).values(datos).returning({ id: clase.id });
+  return fila!.id;
+}
+
+export async function borrar(ej: Ejecutor, id: number): Promise<void> {
+  await ej.delete(clase).where(eq(clase.id, id));
+}
+
 // Devuelve null si ya existía una clase para ese horario y fecha (dos pedidos a la vez).
 export async function insertarSiNoExiste(ej: Ejecutor, datos: NuevaClase): Promise<number | null> {
   const [fila] = await ej.insert(clase).values(datos).onConflictDoNothing().returning({ id: clase.id });

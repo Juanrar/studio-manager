@@ -18,6 +18,24 @@ export const actualizarClaseSchema = z.object({
   nivel: textoOpcional,
 });
 
+// Una clase única: un workshop o una clase de recuperación que no sale de ningún horario.
+export const crearClaseUnicaSchema = z
+  .object({
+    fecha: fechaDiaSchema,
+    horaInicio: horaSchema,
+    horaFin: horaSchema,
+    estilo: nombreSchema,
+    nivel: textoOpcional,
+    profesorId: idSchema,
+  })
+  // Las horas HH:MM se pueden comparar como texto.
+  .refine((clase) => clase.horaFin > clase.horaInicio, {
+    message: 'La hora de fin tiene que ser posterior a la de inicio',
+    path: ['horaFin'],
+  });
+
+export type CrearClaseUnicaInput = z.infer<typeof crearClaseUnicaSchema>;
+
 // Los campos del PATCH que solo puede mandar un administrador. Recepción pone suplentes y cancela.
 export const CAMPOS_PARA_MOVER_UNA_CLASE = ['fecha', 'horaInicio', 'horaFin', 'estilo', 'nivel'] as const;
 

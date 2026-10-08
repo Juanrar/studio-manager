@@ -1,4 +1,4 @@
-import type { ActualizarClaseInput, Clase, ClasesDelRango } from '@studio/shared';
+import type { ActualizarClaseInput, Clase, ClasesDelRango, CrearClaseUnicaInput } from '@studio/shared';
 import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { diaSemanaIso, finDelHorizonte, lunesDe, sumarDias, type FechaDia } from '../../lib/fechas.ts';
@@ -96,6 +96,28 @@ export async function actualizarClase(id: number, datos: ActualizarClaseInput, h
       }
       throw error;
     }
+  });
+}
+
+// Un workshop o una clase de recuperación: se toma asistencia y se liquida como cualquier otra.
+export async function crearClaseUnica(datos: CrearClaseUnicaInput, hoy: FechaDia): Promise<Clase> {
+  if (datos.fecha < hoy) throw new ReglaDeNegocioError('No se puede crear una clase en un día que ya pasó');
+  await verificarProfesorActivo(db, datos.profesorId);
+  const id = await repo.insertar(db, { ...datos, nivel: datos.nivel ?? null, horarioId: null, semana: lunesDe(datos.fecha) });
+  return obtenerClase(id, hoy);
+}
+
+// Una clase futura sin asistencias no tiene historial: se puede borrar. Una de un horario se cancela,
+// así el generador no la vuelve a crear.
+export async function borrarClaseUnica(id: number, hoy: FechaDia): Promise<void> {
+  await db.transaction(async (tx) => {
+    const actual = await bloquearClase(tx, id);
+    if (actual.horarioId !== null) throw new ReglaDeNegocioError('Una clase de un horario no se borra: se cancela');
+    if (actual.fecha < hoy) throw new ReglaDeNegocioError(`La clase del ${actual.fecha} ya pasó: no se borra`);
+    if ((await repo.contarAsistencias(tx, id)) > 0) {
+      throw new ReglaDeNegocioError('La clase tiene asistencias registradas. Borralas antes de quitarla');
+    }
+    await repo.borrar(tx, id);
   });
 }
 

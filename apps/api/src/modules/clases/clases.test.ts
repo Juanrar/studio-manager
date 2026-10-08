@@ -184,17 +184,6 @@ describe('GET /api/clases', () => {
 
     expect(respuesta.statusCode).toBe(400);
   });
-
-  it('ya no se abre una clase por HTTP: las crea el generador', async () => {
-    const respuesta = await app.inject({
-      method: 'POST',
-      url: '/api/clases',
-      payload: { horarioId: hipHopMartes.id, fecha: MARTES },
-      headers: { cookie },
-    });
-
-    expect(respuesta.statusCode).toBe(404);
-  });
 });
 
 describe('abrirClase', () => {
@@ -359,6 +348,125 @@ describe('PATCH /api/clases/:id para mover una clase', () => {
 
     expect([suplente.statusCode, cancelar.statusCode, mover.statusCode, estilo.statusCode]).toEqual([200, 200, 403, 403]);
     expect(await horaYFechaDe(id)).toBe('2026-03-17 19:00:00');
+  });
+});
+
+describe('POST /api/clases: una clase única', () => {
+  // Sábado 14 de marzo: un workshop que no sale de ningún horario.
+  const WORKSHOP = { fecha: '2026-03-14', horaInicio: '18:00', horaFin: '20:00', estilo: 'Tango', nivel: 'Workshop' };
+
+  function crearUnica(datos: Record<string, unknown>, conCookie = cookieAdmin) {
+    return app.inject({ method: 'POST', url: '/api/clases', payload: datos, headers: { cookie: conCookie } });
+  }
+
+  it('crea una clase sin horario, sin titular y con cambios propios: existe solo esa semana', async () => {
+    const respuesta = await crearUnica({ ...WORKSHOP, profesorId: erik.id });
+
+    expect(respuesta.statusCode).toBe(201);
+    expect(respuesta.json()).toEqual({
+      id: expect.any(Number),
+      horarioId: null,
+      fecha: '2026-03-14',
+      horaInicio: '18:00',
+      horaFin: '20:00',
+      estilo: 'Tango',
+      nivel: 'Workshop',
+      estado: 'programada',
+      profesor: erikResumen(),
+      profesorTitular: null,
+      tieneCambios: true,
+      asistentes: 0,
+    });
+  });
+
+  it('el generador no la repite en otras semanas', async () => {
+    await crearUnica({ ...WORKSHOP, profesorId: erik.id });
+
+    await generarClases(db, MARTES);
+
+    const tangos = await db.select({ fecha: clase.fecha }).from(clase).where(eq(clase.estilo, 'Tango'));
+    expect(tangos).toEqual([{ fecha: '2026-03-14' }]);
+  });
+
+  it('responde 422 en un día que ya pasó, 400 si la hora de fin no es posterior y 403 para recepción', async () => {
+    const pasada = await crearUnica({ ...WORKSHOP, fecha: '2026-03-09', profesorId: erik.id });
+    const horas = await crearUnica({ ...WORKSHOP, horaFin: '17:00', profesorId: erik.id });
+    const recepcion = await crearUnica({ ...WORKSHOP, profesorId: erik.id }, cookie);
+
+    expect([pasada.statusCode, horas.statusCode, recepcion.statusCode]).toEqual([422, 400, 403]);
+    expect(pasada.json()).toEqual({ error: 'No se puede crear una clase en un día que ya pasó' });
+  });
+
+  it('recibe asistencias con el pack y suma en el detalle de la liquidación del profesor', async () => {
+    const workshop = (await crearUnica({ ...WORKSHOP, profesorId: erik.id })).json();
+    const recepcion = await crearUsuarioDeTest({ ...RECEPCION, email: 'otra@estudio.test' });
+    const martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García' });
+    const pack = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
+    const ahora = new Date(`${MARTES}T15:00:00Z`);
+    await registrarPago({ alumnoId: martina.id, packId: pack.id, medio: 'efectivo' }, recepcion.id, ahora, MARTES);
+    await registrarAsistencia(workshop.id, { alumnoId: martina.id }, recepcion.id, ahora, MARTES);
+
+    const detalle = await app.inject({
+      method: 'GET',
+      url: `/api/liquidaciones/detalle?profesorId=${erik.id}&periodo=2026-03`,
+      headers: { cookie: cookieAdmin },
+    });
+
+    // Pack x4 de $5.200: $1.300 la clase, el 50% para Erik.
+    expect(detalle.json()).toEqual({
+      items: [{ claseId: workshop.id, fecha: '2026-03-14', estilo: 'Tango', asistentes: 1, monto: 650 }],
+    });
+  });
+});
+
+describe('DELETE /api/clases/:id', () => {
+  function borrar(id: number, conCookie = cookieAdmin) {
+    return app.inject({ method: 'DELETE', url: `/api/clases/${id}`, headers: { cookie: conCookie } });
+  }
+
+  async function crearWorkshop() {
+    const respuesta = await app.inject({
+      method: 'POST',
+      url: '/api/clases',
+      payload: { fecha: '2026-03-14', horaInicio: '18:00', horaFin: '20:00', estilo: 'Tango', nivel: null, profesorId: erik.id },
+      headers: { cookie: cookieAdmin },
+    });
+    return respuesta.json().id as number;
+  }
+
+  it('borra una clase única futura sin asistencias', async () => {
+    const id = await crearWorkshop();
+
+    const respuesta = await borrar(id);
+
+    expect(respuesta.statusCode).toBe(204);
+    expect(await db.select().from(clase).where(eq(clase.id, id))).toEqual([]);
+  });
+
+  it('una clase de un horario no se borra: se cancela', async () => {
+    await generarClases(db, MARTES);
+    const id = await claseDe(hipHopMartes.id, '2026-03-17');
+
+    const respuesta = await borrar(id);
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({ error: 'Una clase de un horario no se borra: se cancela' });
+  });
+
+  it('una clase única con asistencias no se borra, y recepción no puede borrar', async () => {
+    const id = await crearWorkshop();
+    const recepcion = await crearUsuarioDeTest({ ...RECEPCION, email: 'otra@estudio.test' });
+    const martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García' });
+    const pack = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
+    const ahora = new Date(`${MARTES}T15:00:00Z`);
+    await registrarPago({ alumnoId: martina.id, packId: pack.id, medio: 'efectivo' }, recepcion.id, ahora, MARTES);
+    await registrarAsistencia(id, { alumnoId: martina.id }, recepcion.id, ahora, MARTES);
+
+    const conAsistencias = await borrar(id);
+    const comoRecepcion = await borrar(id, cookie);
+
+    expect([conAsistencias.statusCode, comoRecepcion.statusCode]).toEqual([422, 403]);
+    expect(conAsistencias.json()).toEqual({ error: 'La clase tiene asistencias registradas. Borralas antes de quitarla' });
   });
 });
 

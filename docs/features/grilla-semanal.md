@@ -126,11 +126,11 @@ jsdom no calcula posiciones: la cascada, la línea de ahora y el editor flotante
 
 **Archivos:** `clases.service.ts`, `clases.routes.ts`, `clases.repository.ts`, liquidaciones, sus tests
 
-- [ ] **Paso 1:** escribir los tests de crear, borrar, tomar asistencia y liquidar una clase única, y el del generador.
-- [ ] **Paso 2:** correr los tests y verificar que fallan.
-- [ ] **Paso 3:** implementar `POST` y `DELETE`, y revisar las consultas que todavía hagan join con `horario` sin `left join`.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(clases): clases únicas que no salen de un horario`.
+- [x] **Paso 1:** escribir los tests de crear, borrar, tomar asistencia y liquidar una clase única, y el del generador.
+- [x] **Paso 2:** correr los tests y verificar que fallan.
+- [x] **Paso 3:** implementar `POST` y `DELETE`, y revisar las consultas que todavía hagan join con `horario` sin `left join`. La feature 25 ya había sacado el join de la liquidación y de la actividad; la consulta de clases ya usaba `left join`. El test "ya no se abre una clase por HTTP" de la feature 25 se borró: `POST /api/clases` ahora crea una clase única.
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(clases): clases únicas que no salen de un horario`.
 
 ### Tarea 3: Aplicar a todas desde una semana
 
