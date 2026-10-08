@@ -37,6 +37,14 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 22 | [Baja automática por no comprar](baja-automatica.md) | lista | 21 |
 | 23 | [Ficha del profesor con sus clases](ficha-del-profesor.md) | lista | 15, 20 |
 
+## Grilla semanal
+
+| # | Feature | Estado | Depende de |
+|---|---|---|---|
+| 24 | [Renombrar horario y clase](renombrar-horario-y-clase.md) | en curso | 23 |
+| 25 | [Clases generadas por adelantado](clases-por-adelantado.md) | pendiente | 24 |
+| 26 | [Grilla semanal](grilla-semanal.md) | pendiente | 25 |
+
 ## Bitácora
 
 Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo sin releer todo el repositorio.
