@@ -176,11 +176,11 @@ jsdom no calcula posiciones: la cascada, la línea de ahora y el editor flotante
 
 **Archivos:** `features/grilla/`, sus tests
 
-- [ ] **Paso 1:** escribir los tests de la vista Mes y del paso a la vista Día.
-- [ ] **Paso 2:** correr los tests y verificar que fallan.
-- [ ] **Paso 3:** implementar las dos vistas.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(grilla): vistas de día y de mes`.
+- [x] **Paso 1:** escribir los tests de la vista Mes y del paso a la vista Día.
+- [x] **Paso 2:** correr los tests y verificar que fallan.
+- [x] **Paso 3:** implementar las dos vistas.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(grilla): vistas de día y de mes`.
 
 ### Tarea 8: El recorrido de punta a punta
 
