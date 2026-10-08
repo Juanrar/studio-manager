@@ -86,7 +86,15 @@ export async function insertarSiNoExiste(ej: Ejecutor, datos: NuevaClase): Promi
 export async function actualizar(
   ej: Ejecutor,
   id: number,
-  cambios: { profesorId?: number; estado?: EstadoClase },
+  cambios: {
+    profesorId?: number;
+    estado?: EstadoClase;
+    fecha?: FechaDia;
+    horaInicio?: string;
+    horaFin?: string;
+    estilo?: string;
+    nivel?: string | null;
+  },
 ): Promise<boolean> {
   if (Object.keys(cambios).length === 0) return (await bloquear(ej, id)) !== null;
   const filas = await ej.update(clase).set(cambios).where(eq(clase.id, id)).returning({ id: clase.id });
@@ -96,6 +104,7 @@ export async function actualizar(
 export type ClaseBloqueada = {
   id: number;
   horarioId: number | null;
+  semana: FechaDia;
   fecha: FechaDia;
   estado: EstadoClase;
   profesorId: number;
@@ -107,6 +116,7 @@ export async function bloquear(ej: Ejecutor, id: number): Promise<ClaseBloqueada
     .select({
       id: clase.id,
       horarioId: clase.horarioId,
+      semana: clase.semana,
       fecha: clase.fecha,
       estado: clase.estado,
       profesorId: clase.profesorId,

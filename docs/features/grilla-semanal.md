@@ -1,6 +1,6 @@
 # Grilla semanal
 
-**Estado:** pendiente
+**Estado:** en curso
 **Depende de:** clases-por-adelantado (25)
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; un administrador abre "Grilla", ve las clases de la semana, del día o del mes, arrastra una clase a otro día u horario de la misma semana, la estira o crea una nueva, y el cambio vale solo para esa semana salvo que elija "Aplicar a todas las semanas".
 
@@ -116,11 +116,11 @@ jsdom no calcula posiciones: la cascada, la línea de ahora y el editor flotante
 
 **Archivos:** `packages/shared/src/clases.ts`, `clases.service.ts`, `clases.routes.ts`, sus tests
 
-- [ ] **Paso 1:** escribir los tests de mover, de las reglas y de los permisos.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test clases` y verificar que fallan.
-- [ ] **Paso 3:** ampliar `actualizarClaseSchema` y `actualizarClase` con las reglas.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(clases): mover una clase dentro de su semana`.
+- [x] **Paso 1:** escribir los tests de mover, de las reglas y de los permisos.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test clases` y verificar que fallan.
+- [x] **Paso 3:** ampliar `actualizarClaseSchema` y `actualizarClase` con las reglas. El permiso va en la ruta, como `requerirRol`: si recepción manda un campo de `CAMPOS_PARA_MOVER_UNA_CLASE` responde 403. Un suplente o una cancelación siguen permitidos en una clase pasada (son correcciones); mover o cambiar la hora, el estilo o el nivel, no. `actualizarClase` recibe el día de hoy. Se sumaron tests de cambiar el estilo de una semana sola, de una clase que ya pasó y de la hora de fin anterior a la de inicio.
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(clases): mover una clase dentro de su semana`.
 
 ### Tarea 2: La clase única
 

@@ -162,7 +162,7 @@ describe('POST /api/clases/:id/asistencias', () => {
 
   it('responde 422 si la clase está cancelada', async () => {
     await pagar(packX4);
-    await actualizarClase(clase.id, { estado: 'cancelada' });
+    await actualizarClase(clase.id, { estado: 'cancelada' }, MARTES);
 
     const respuesta = await registrar(clase.id, { alumnoId: martina.id });
 

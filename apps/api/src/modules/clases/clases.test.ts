@@ -2,17 +2,20 @@ import { and, eq } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { Horario, Profesor } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../test/app.ts';
+import { ADMIN, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
-import { crearHorarioDeTest, crearProfesorDeTest } from '../../../test/fabricas.ts';
+import { crearAlumnoDeTest, crearHorarioDeTest, crearPackDeTest, crearProfesorDeTest } from '../../../test/fabricas.ts';
 import { db } from '../../db/client.ts';
 import { clase } from '../../db/schema.ts';
+import { registrarAsistencia } from '../asistencias/asistencias.service.ts';
+import { registrarPago } from '../pagos/pagos.service.ts';
 import { abrirClase, actualizarClase } from './clases.service.ts';
 import { generarClases } from './programacion.service.ts';
 
 let base: BaseDeTest;
 let app: FastifyInstance;
 let cookie: string;
+let cookieAdmin: string;
 let erik: Profesor;
 let hipHopMartes: Horario;
 
@@ -34,7 +37,9 @@ beforeEach(async () => {
   await base.limpiar();
   app = await crearAppDeTest();
   await crearUsuarioDeTest(RECEPCION);
+  await crearUsuarioDeTest(ADMIN);
   cookie = await loguear(app, RECEPCION.email, RECEPCION.password);
+  cookieAdmin = await loguear(app, ADMIN.email, ADMIN.password);
   erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata' });
   hipHopMartes = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' });
 });
@@ -77,8 +82,8 @@ describe('GET /api/clases', () => {
     });
     await crearHorarioDeTest(erik.id, { estilo: 'Jazz', diaSemana: 3 });
     await generarClases(db, MARTES);
-    await actualizarClase(await claseDe(ballet.id, MARTES), { estado: 'cancelada' });
-    await actualizarClase(await claseDe(hipHopMartes.id, MARTES), { profesorId: iaru.id });
+    await actualizarClase(await claseDe(ballet.id, MARTES), { estado: 'cancelada' }, MARTES);
+    await actualizarClase(await claseDe(hipHopMartes.id, MARTES), { profesorId: iaru.id }, MARTES);
 
     const respuesta = await pedirClases(`?desde=${MARTES}&hasta=${MARTES}`);
 
@@ -161,7 +166,7 @@ describe('GET /api/clases', () => {
   it('una clase de una semana anterior no marca cambios propios aunque haya tenido suplente', async () => {
     const iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni' });
     const { clase: pasada } = await abrirClase(hipHopMartes.id, '2026-03-03');
-    await actualizarClase(pasada.id, { profesorId: iaru.id });
+    await actualizarClase(pasada.id, { profesorId: iaru.id }, MARTES);
 
     const respuesta = await pedirClases('?desde=2026-03-03&hasta=2026-03-03');
 
@@ -234,6 +239,126 @@ describe('PATCH /api/clases/:id', () => {
       tieneCambios: true,
     });
     expect(horarios.json().items[0].profesor).toEqual(erikResumen());
+  });
+});
+
+describe('PATCH /api/clases/:id para mover una clase', () => {
+  beforeEach(async () => {
+    await generarClases(db, MARTES);
+  });
+
+  function cambiar(id: number, cambios: Record<string, unknown>, conCookie = cookieAdmin) {
+    return app.inject({ method: 'PATCH', url: `/api/clases/${id}`, payload: cambios, headers: { cookie: conCookie } });
+  }
+
+  async function horaYFechaDe(id: number) {
+    const [guardada] = await db.select().from(clase).where(eq(clase.id, id));
+    return `${guardada!.fecha} ${guardada!.horaInicio}`;
+  }
+
+  it('mover la clase del martes 17 al viernes 21:00 cambia solo esa clase y la marca con cambios propios', async () => {
+    const id = await claseDe(hipHopMartes.id, '2026-03-17');
+    const siguiente = await claseDe(hipHopMartes.id, '2026-03-24');
+
+    const respuesta = await cambiar(id, { fecha: '2026-03-20', horaInicio: '21:00', horaFin: '22:30' });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json()).toMatchObject({
+      id,
+      fecha: '2026-03-20',
+      horaInicio: '21:00',
+      horaFin: '22:30',
+      tieneCambios: true,
+    });
+    expect(await horaYFechaDe(siguiente)).toBe('2026-03-24 19:00:00');
+    const horarios = await app.inject({ method: 'GET', url: '/api/horarios', headers: { cookie } });
+    expect(horarios.json().items[0]).toMatchObject({ diaSemana: 2, horaInicio: '19:00' });
+  });
+
+  it('volverla a mano a su día y su hora la deja sin cambios propios', async () => {
+    const id = await claseDe(hipHopMartes.id, '2026-03-17');
+    await cambiar(id, { fecha: '2026-03-20', horaInicio: '21:00', horaFin: '22:30' });
+
+    const respuesta = await cambiar(id, { fecha: '2026-03-17', horaInicio: '19:00', horaFin: '20:30' });
+
+    expect(respuesta.json()).toMatchObject({ fecha: '2026-03-17', tieneCambios: false });
+  });
+
+  it('cambiar el estilo y el nivel de una semana sola no toca el horario', async () => {
+    const id = await claseDe(hipHopMartes.id, '2026-03-17');
+
+    const respuesta = await cambiar(id, { estilo: 'Hip-Hop Workshop', nivel: null });
+
+    expect(respuesta.json()).toMatchObject({ estilo: 'Hip-Hop Workshop', nivel: null, tieneCambios: true });
+  });
+
+  it('responde 422 si la fecha nueva cae en otra semana', async () => {
+    const id = await claseDe(hipHopMartes.id, '2026-03-17');
+
+    const respuesta = await cambiar(id, { fecha: '2026-03-23' });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({ error: 'Una clase se mueve dentro de su semana: del 2026-03-16 al 2026-03-22' });
+    expect(await horaYFechaDe(id)).toBe('2026-03-17 19:00:00');
+  });
+
+  it('responde 422 si la fecha nueva ya pasó', async () => {
+    const id = await claseDe(hipHopMartes.id, MARTES);
+
+    const respuesta = await cambiar(id, { fecha: '2026-03-09' });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({ error: 'No se puede mover una clase a un día que ya pasó' });
+  });
+
+  it('responde 422 si la clase ya pasó', async () => {
+    const { clase: pasada } = await abrirClase(hipHopMartes.id, '2026-03-03');
+
+    const respuesta = await cambiar(pasada.id, { horaInicio: '20:00', horaFin: '21:30' });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({ error: 'La clase del 2026-03-03 ya pasó: se corrige desde la clase, no se mueve' });
+  });
+
+  it('responde 422 si la hora de fin no es posterior a la de inicio', async () => {
+    const id = await claseDe(hipHopMartes.id, '2026-03-17');
+
+    const respuesta = await cambiar(id, { horaFin: '18:00' });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({ error: 'La hora de fin tiene que ser posterior a la de inicio' });
+  });
+
+  it('responde 422 y no cambia nada si un anotado tiene un pack que vence antes de la fecha nueva', async () => {
+    const recepcion = await crearUsuarioDeTest({ ...RECEPCION, email: 'otra@estudio.test' });
+    const martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García' });
+    const pack = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
+    const ahora = new Date(`${MARTES}T15:00:00Z`);
+    // Comprado hoy, vence el 10 de abril.
+    await registrarPago({ alumnoId: martina.id, packId: pack.id, medio: 'efectivo' }, recepcion.id, ahora, MARTES);
+    const id = await claseDe(hipHopMartes.id, '2026-04-07');
+    await registrarAsistencia(id, { alumnoId: martina.id }, recepcion.id, ahora, MARTES);
+
+    const respuesta = await cambiar(id, { fecha: '2026-04-11' });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({
+      error: 'La clase del 2026-04-07 tiene alumnos anotados con un pack que vence antes del 2026-04-11',
+    });
+    expect(await horaYFechaDe(id)).toBe('2026-04-07 19:00:00');
+  });
+
+  it('recepción puede poner un suplente o cancelar, pero no mover ni cambiar la hora o el estilo', async () => {
+    const iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni' });
+    const id = await claseDe(hipHopMartes.id, '2026-03-17');
+
+    const suplente = await cambiar(id, { profesorId: iaru.id }, cookie);
+    const cancelar = await cambiar(id, { estado: 'cancelada' }, cookie);
+    const mover = await cambiar(id, { fecha: '2026-03-20' }, cookie);
+    const estilo = await cambiar(id, { estilo: 'Otro' }, cookie);
+
+    expect([suplente.statusCode, cancelar.statusCode, mover.statusCode, estilo.statusCode]).toEqual([200, 200, 403, 403]);
+    expect(await horaYFechaDe(id)).toBe('2026-03-17 19:00:00');
   });
 });
 

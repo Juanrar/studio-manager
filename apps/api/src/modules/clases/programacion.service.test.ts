@@ -215,7 +215,7 @@ describe('PATCH /api/horarios/:id', () => {
 
   it('cambiar la hora cambia las clases desde hoy, salvo la que tiene suplente y la de la semana pasada', async () => {
     const iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni' });
-    await actualizarClase((await claseDel('2026-03-17')).id, { profesorId: iaru.id });
+    await actualizarClase((await claseDel('2026-03-17')).id, { profesorId: iaru.id }, MARTES);
 
     const respuesta = await cambiarHorario({ horaInicio: '20:00', horaFin: '21:30' });
 

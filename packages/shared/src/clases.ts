@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { fechaDiaSchema, type PersonaResumen } from './comun.ts';
+import { fechaDiaSchema, nombreSchema, textoOpcional, type PersonaResumen } from './comun.ts';
+import { horaSchema } from './horarios.ts';
 
 // La clase de una fecha: "Hip-Hop del martes 10". Sale de un horario, se crea por adelantado y guarda
 // su hora, su estilo y quién la dio de verdad.
@@ -9,7 +10,16 @@ const idSchema = z.number().int().positive();
 export const actualizarClaseSchema = z.object({
   profesorId: idSchema.optional(),
   estado: z.enum(['programada', 'cancelada']).optional(),
+  // Mover la clase dentro de su semana o cambiarla solo esa semana: lo hace un administrador desde la grilla.
+  fecha: fechaDiaSchema.optional(),
+  horaInicio: horaSchema.optional(),
+  horaFin: horaSchema.optional(),
+  estilo: nombreSchema.optional(),
+  nivel: textoOpcional,
 });
+
+// Los campos del PATCH que solo puede mandar un administrador. Recepción pone suplentes y cancela.
+export const CAMPOS_PARA_MOVER_UNA_CLASE = ['fecha', 'horaInicio', 'horaFin', 'estilo', 'nivel'] as const;
 
 export type ActualizarClaseInput = z.infer<typeof actualizarClaseSchema>;
 

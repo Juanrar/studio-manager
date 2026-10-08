@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
-import { actualizarClaseSchema, clasesQuerySchema } from '@studio/shared';
+import { CAMPOS_PARA_MOVER_UNA_CLASE, actualizarClaseSchema, clasesQuerySchema } from '@studio/shared';
+import { SinPermisoError } from '../../lib/errores.ts';
 import { idParamSchema } from '../../lib/validacion.ts';
 import { requerirRol } from '../../plugins/autenticacion.ts';
 import { actualizarClase, listarClases, obtenerClase } from './clases.service.ts';
@@ -21,7 +22,11 @@ export async function rutasClases(app: FastifyInstance): Promise<void> {
 
   app.patch('/api/clases/:id', async (request) => {
     const { id } = idParamSchema.parse(request.params);
-    await actualizarClase(id, actualizarClaseSchema.parse(request.body));
+    const datos = actualizarClaseSchema.parse(request.body);
+    if (request.usuario?.rol !== 'admin' && CAMPOS_PARA_MOVER_UNA_CLASE.some((campo) => datos[campo] !== undefined)) {
+      throw new SinPermisoError('Solo un administrador puede mover una clase o cambiarle la hora o el estilo');
+    }
+    await actualizarClase(id, datos, app.hoy());
     return obtenerClase(id, app.hoy());
   });
 }

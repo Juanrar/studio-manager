@@ -241,7 +241,7 @@ describe('GET /api/alumnos/:id/actividad', () => {
     // Hoy la clase la da Julia como suplente. La del martes que viene ya está anotada.
     for (const martes of ['2026-03-03', HOY, '2026-03-17']) {
       const { clase } = await abrirClase(hipHop.id, martes);
-      if (martes === HOY) await actualizarClase(clase.id, { profesorId: julia.id });
+      if (martes === HOY) await actualizarClase(clase.id, { profesorId: julia.id }, HOY);
       await registrarAsistencia(clase.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
     }
 
