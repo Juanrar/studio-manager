@@ -168,29 +168,42 @@ export const horario = pgTable(
       .notNull()
       .references(() => profesor.id),
     activo: boolean().notNull().default(true),
+    // Lunes de la primera semana en que se dicta: un horario nuevo no aparece en las semanas anteriores.
+    vigenteDesde: date().notNull(),
   },
   (t) => [
     check('horario_dia_valido', sql`${t.diaSemana} between 1 and 7`),
     check('horario_horas_validas', sql`${t.horaFin} > ${t.horaInicio}`),
+    check('horario_vigente_desde_lunes', sql`extract(isodow from ${t.vigenteDesde}) = 1`),
   ],
 );
 
+// La clase de una fecha. Copia la hora, el estilo y el nivel de su horario al crearse: si el horario
+// cambia, las semanas que ya pasaron siguen mostrando lo que pasó.
 export const clase = pgTable(
   'clase',
   {
     id: id(),
-    horarioId: referencia()
-      .notNull()
-      .references(() => horario.id),
+    // Nulo en una clase única, que no sale de ningún horario.
+    horarioId: referencia().references(() => horario.id),
+    // Lunes de la semana de la clase. Un horario tiene una sola clase por semana, aunque se mueva de día.
+    semana: date().notNull(),
     fecha: date().notNull(),
+    horaInicio: time().notNull(),
+    horaFin: time().notNull(),
+    estilo: text().notNull(),
+    nivel: text(),
     profesorId: referencia()
       .notNull()
       .references(() => profesor.id),
     estado: estadoClaseEnum().notNull().default('programada'),
   },
   (t) => [
-    unique('clase_horario_fecha_uq').on(t.horarioId, t.fecha),
+    unique('clase_horario_semana_uq').on(t.horarioId, t.semana),
     index('clase_profesor_fecha_idx').on(t.profesorId, t.fecha),
+    check('clase_horas_validas', sql`${t.horaFin} > ${t.horaInicio}`),
+    check('clase_semana_lunes', sql`extract(isodow from ${t.semana}) = 1`),
+    check('clase_fecha_en_semana', sql`${t.fecha} between ${t.semana} and ${t.semana} + 6`),
   ],
 );
 

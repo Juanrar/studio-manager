@@ -13,6 +13,7 @@ import { crearAlumno } from '../src/modules/alumnos/alumnos.service.ts';
 import { crearHorario } from '../src/modules/horarios/horarios.service.ts';
 import { crearPack } from '../src/modules/packs/packs.service.ts';
 import { crearProfesor } from '../src/modules/profesores/profesores.service.ts';
+import { hoyEnEstudio } from '../src/lib/fechas.ts';
 import { AHORA } from './app.ts';
 
 // El porcentaje inicial queda vigente desde esta fecha, antes del AHORA de los tests.
@@ -22,7 +23,12 @@ export async function crearProfesorDeTest(datos: Partial<CrearProfesorInput> = {
   return crearProfesor({ nombre: 'Erik', apellido: 'Zapata', porcentajeBp: 5000, ...datos }, ALTA_PROFESORES);
 }
 
-export async function crearHorarioDeTest(profesorId: number, datos: Partial<CrearHorarioInput> = {}) {
+// El horario rige desde la semana de `hoy`; por defecto, la del AHORA de los tests.
+export async function crearHorarioDeTest(
+  profesorId: number,
+  datos: Partial<CrearHorarioInput> = {},
+  hoy: string = hoyEnEstudio(AHORA),
+) {
   return crearHorario({
     estilo: 'Hip-Hop',
     nivel: 'Inicial',
@@ -31,7 +37,7 @@ export async function crearHorarioDeTest(profesorId: number, datos: Partial<Crea
     horaFin: '20:30',
     profesorId,
     ...datos,
-  });
+  }, hoy);
 }
 
 // `ahora` es el momento del alta.

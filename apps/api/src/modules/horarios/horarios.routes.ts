@@ -12,7 +12,7 @@ export async function rutasHorarios(app: FastifyInstance): Promise<void> {
 
   app.post('/api/horarios', { preHandler: requerirRol('admin') }, async (request, reply) => {
     const datos = crearHorarioSchema.parse(request.body);
-    return reply.status(201).send(await crearHorario(datos));
+    return reply.status(201).send(await crearHorario(datos, app.hoy()));
   });
 
   app.patch('/api/horarios/:id', { preHandler: requerirRol('admin') }, async (request) => {

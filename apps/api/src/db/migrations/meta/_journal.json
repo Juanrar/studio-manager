@@ -29,6 +29,13 @@
       "when": 1791477201268,
       "tag": "0003_renombrar_horario_y_clase",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791479358864,
+      "tag": "0004_clases_por_adelantado",
+      "breakpoints": true
     }
   ]
 }

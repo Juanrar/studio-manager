@@ -1,8 +1,11 @@
+import { eq } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { Horario, Profesor } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
+import { db } from '../../db/client.ts';
+import { clase } from '../../db/schema.ts';
 import { crearHorarioDeTest, crearProfesorDeTest } from '../../../test/fabricas.ts';
 import { actualizarHorario } from '../horarios/horarios.service.ts';
 
@@ -84,6 +87,24 @@ describe('GET /api/clases/dia', () => {
 });
 
 describe('POST /api/clases', () => {
+  it('la clase guarda su semana y copia la hora, el estilo y el nivel del horario', async () => {
+    const respuesta = await abrirClase(hipHopMartes.id, MARTES);
+
+    const [guardada] = await db.select().from(clase).where(eq(clase.id, respuesta.json().id));
+    expect(guardada).toEqual({
+      id: respuesta.json().id,
+      horarioId: hipHopMartes.id,
+      semana: '2026-03-09',
+      fecha: MARTES,
+      horaInicio: '19:00:00',
+      horaFin: '20:30:00',
+      estilo: 'Hip-Hop',
+      nivel: 'Inicial',
+      profesorId: erik.id,
+      estado: 'programada',
+    });
+  });
+
   it('abrir la misma clase dos veces devuelve la misma clase', async () => {
     const primera = await abrirClase(hipHopMartes.id, MARTES);
     const segunda = await abrirClase(hipHopMartes.id, MARTES);

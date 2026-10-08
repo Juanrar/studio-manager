@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { Profesor } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -10,6 +11,8 @@ import {
   loguear,
 } from '../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
+import { db } from '../../db/client.ts';
+import { horario as tablaHorario } from '../../db/schema.ts';
 import { crearHorarioDeTest, crearProfesorDeTest } from '../../../test/fabricas.ts';
 import { hoyEnEstudio } from '../../lib/fechas.ts';
 import { actualizarProfesor } from '../profesores/profesores.service.ts';
@@ -70,6 +73,14 @@ describe('POST /api/horarios', () => {
       activo: true,
     });
     expect(comoRecepcion.statusCode).toBe(403);
+  });
+
+  it('el horario rige desde el lunes de la semana en que se crea', async () => {
+    const respuesta = await crearHorario(cookieAdmin, { ...HIP_HOP_MARTES, profesorId: erik.id });
+
+    const [guardado] = await db.select().from(tablaHorario).where(eq(tablaHorario.id, respuesta.json().id));
+    // El reloj de los tests marca el martes 2026-03-10.
+    expect(guardado?.vigenteDesde).toBe('2026-03-09');
   });
 
   it('responde 400 si la hora de fin no es posterior al inicio', async () => {

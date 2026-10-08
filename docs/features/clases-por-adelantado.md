@@ -143,11 +143,11 @@ La migración de datos se prueba a mano contra la base de desarrollo, que tiene 
 
 **Archivos:** `apps/api/src/db/schema.ts`, la migración `0004` con sus `update` a mano, `apps/api/test/fabricas.ts` (las clases de test llevan `semana`, horas y estilo)
 
-- [ ] **Paso 1:** adaptar las fábricas de test para que creen la clase con sus columnas nuevas.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test` y verificar que falla porque las columnas no existen.
-- [ ] **Paso 3:** cambiar `schema.ts`, generar la migración y agregarle los `update`. `abrirClase` copia la hora, el estilo y el nivel del horario mientras siga existiendo.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test`, `pnpm typecheck` y `db:generate` (sin cambios), y verificar que pasan. Probar la migración contra una copia de la base de desarrollo.
-- [ ] **Paso 5:** commit `feat(clases): la clase guarda su semana, su hora y su estilo`.
+- [x] **Paso 1:** escribir dos tests que leen la base: abrir una clase guarda su semana y copia la hora, el estilo y el nivel del horario; crear un horario guarda `vigente_desde` en el lunes de la semana. Las fábricas no crean clases (las abre `abrirClase`), así que no hizo falta cambiarlas para eso; `crearHorarioDeTest` recibe opcionalmente el día de hoy.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test` y verificar que falla porque las columnas no existen.
+- [x] **Paso 3:** cambiar `schema.ts`, generar la migración y agregarle los `update`. `abrirClase` copia la hora, el estilo y el nivel del horario mientras siga existiendo. `crearHorario` recibe el día de hoy (la ruta pasa `app.hoy()`). `Clase.horarioId` pasa a `number | null` en shared.
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test`, `pnpm typecheck` y `db:generate` (sin cambios), y verificar que pasan. Probar la migración contra una copia de la base de desarrollo: las 2 clases copiaron hora, estilo y nivel, y la del sábado 3 de octubre quedó en la semana del 28 de septiembre.
+- [x] **Paso 5:** commit `feat(clases): la clase guarda su semana, su hora y su estilo`.
 
 ### Tarea 3: El generador
 

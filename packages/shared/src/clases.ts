@@ -27,7 +27,8 @@ export type EstadoClase = 'programada' | 'dictada' | 'cancelada';
 
 export type Clase = {
   id: number;
-  horarioId: number;
+  // Nulo en una clase única, que no sale de ningún horario.
+  horarioId: number | null;
   fecha: string;
   estado: EstadoClase;
   profesor: PersonaResumen;

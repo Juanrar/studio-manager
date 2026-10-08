@@ -1,7 +1,7 @@
 import type { ActualizarClaseInput, AgendaDelDia, Clase, ClaseDetalle } from '@studio/shared';
 import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
-import { diaSemanaIso, type FechaDia } from '../../lib/fechas.ts';
+import { diaSemanaIso, lunesDe, type FechaDia } from '../../lib/fechas.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
 import { verificarMesAbierto } from '../liquidaciones/liquidaciones.service.ts';
 import { listarHorariosDelDia, obtenerHorario } from '../horarios/horarios.service.ts';
@@ -40,7 +40,16 @@ export async function abrirClase(horarioId: number, fecha: FechaDia): Promise<{ 
   const existente = await repo.buscarPorHorarioYFecha(db, horarioId, fecha);
   if (existente !== null) return { clase: existente, creada: false };
 
-  const id = await repo.insertarSiNoExiste(db, { horarioId, fecha, profesorId: horario.profesor.id });
+  const id = await repo.insertarSiNoExiste(db, {
+    horarioId,
+    semana: lunesDe(fecha),
+    fecha,
+    horaInicio: horario.horaInicio,
+    horaFin: horario.horaFin,
+    estilo: horario.estilo,
+    nivel: horario.nivel,
+    profesorId: horario.profesor.id,
+  });
   const clase = await repo.buscarPorHorarioYFecha(db, horarioId, fecha);
   return { clase: clase!, creada: id !== null };
 }

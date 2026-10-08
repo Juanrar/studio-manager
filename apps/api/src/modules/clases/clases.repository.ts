@@ -50,7 +50,7 @@ export async function actualizar(
 
 export type ClaseBloqueada = {
   id: number;
-  horarioId: number;
+  horarioId: number | null;
   fecha: FechaDia;
   estado: EstadoClase;
   profesorId: number;

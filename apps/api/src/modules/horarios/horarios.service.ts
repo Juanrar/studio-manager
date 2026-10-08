@@ -1,14 +1,16 @@
 import type { ActualizarHorarioInput, CrearHorarioInput, Horario } from '@studio/shared';
 import { db } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
+import { lunesDe, type FechaDia } from '../../lib/fechas.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
 import { esViolacionCheck } from '../../lib/postgres.ts';
 import { verificarProfesorActivo } from '../profesores/profesores.service.ts';
 import * as repo from './horarios.repository.ts';
 
-export async function crearHorario(datos: CrearHorarioInput): Promise<Horario> {
+// Un horario nuevo rige desde el lunes de la semana de hoy.
+export async function crearHorario(datos: CrearHorarioInput, hoy: FechaDia): Promise<Horario> {
   await verificarProfesorActivo(db, datos.profesorId);
-  const id = await repo.insertar(db, { ...datos, nivel: datos.nivel ?? null });
+  const id = await repo.insertar(db, { ...datos, nivel: datos.nivel ?? null, vigenteDesde: lunesDe(hoy) });
   return obtenerHorario(id);
 }
 
