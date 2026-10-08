@@ -62,7 +62,7 @@ Estas reglas se rompen fácil y cuestan caro. Están explicadas en [docs/estruct
 - **Los porcentajes son enteros en puntos básicos**: `porcentaje_bp`, de 1 a 10000. 50% es 5000.
 - **Las clases restantes se calculan**, contando asistencias del pago. No hay contador guardado.
 - **Lo que ya pasó no cambia.** `pago.monto`, `asistencia.valor_clase` y `asistencia.porcentaje_bp` se copian al momento de registrar. Un cambio de precio no altera meses anteriores.
-- **`clase` es el horario semanal; `sesion` es la clase de una fecha.** La asistencia apunta a la sesión, nunca al horario.
+- **`horario` es lo que se repite cada semana; `clase` es la de una fecha.** La asistencia apunta a la clase, nunca al horario. "Sesión" es solo la del login (`sesion_usuario`).
 - **Nada con historial se borra.** Se usa `activo = false` o `anulado_en`.
 - **Las fechas del negocio son días** (`YYYY-MM-DD`) en la zona `America/Argentina/Buenos_Aires`. Pasan por `apps/api/src/lib/fechas.ts`.
 
@@ -145,6 +145,8 @@ Los tests de integración necesitan Docker corriendo.
 - **`pnpm e2e` usa el puerto fijo 3100** (`PUERTO_E2E` en `e2e/entorno.ts`). Si otro proceso lo ocupa, Playwright no levanta la API. Se cambia el número para esa corrida y se vuelve atrás con `git checkout -- e2e/entorno.ts`. No se cierra un proceso que no es de este proyecto.
 - **jsdom no calcula el diseño** ni evalúa media queries como `pointer-coarse`. La posición de una lista flotante o lo que se ve en una pantalla táctil se verifica en Chromium con un script de Playwright, como en la nota anterior.
 - **Tests web del `SelectorDeHora`:** el campo es un combobox (`getByRole('combobox', { name: 'Empieza' })`) y la lista se abre en un portal sobre `document.body`, así que `screen` la encuentra y `within(fila)` no.
+- **Renombrar una tabla o una columna con Drizzle:** `db:generate` pregunta en la terminal si es un renombre, y un agente no puede contestar. La migración se escribe a mano (`db:generate --custom --name <nombre>`) y el snapshot se regenera desde `schema.ts` en una carpeta temporal: `pnpm exec drizzle-kit generate --dialect postgresql --schema ./src/db/schema.ts --out <carpeta> --casing snake_case`, copiando el `id` y el `prevId` del snapshot que creó `--custom`. Hay que renombrar también las claves foráneas, las secuencias y las claves primarias. Después `db:generate` tiene que decir que no hay cambios. Ejemplo: la migración `0003_renombrar_horario_y_clase`.
+- **Un worktree nuevo no tiene `apps/api/.env`** (git lo ignora): `pnpm e2e` falla en el seed con `.env: not found`. Se copia el `.env.example` de la raíz.
 - **`vitest run --reporter=json`** escribe `.vitest/json/output.json` dentro del paquete, que git no ignora. Se pasa `--outputFile` con una ruta fuera del repositorio.
 
 ## Estilo de escritura

@@ -12,7 +12,7 @@ Diseño de la base para la versión web del sistema de gestión del estudio de d
 
 ## Decisiones principales
 
-1. **Separar el horario de la clase dictada.** `clase` es el horario semanal fijo ("Hip-Hop, martes 19:00"). `sesion` es una clase que ocurrió en una fecha, con el profesor que la dio de verdad. La asistencia apunta a la sesión. Así se pueden registrar suplencias y cancelaciones, y el historial no cambia si mañana se modifica el horario.
+1. **Separar el horario de la clase dictada.** `horario` es lo que se repite cada semana ("Hip-Hop, martes 19:00"). `clase` es la de una fecha, con el profesor que la dio de verdad. La asistencia apunta a la clase. Así se pueden registrar suplencias y cancelaciones, y el historial no cambia si mañana se modifica el horario.
 2. **El pago guarda lo que se cobró.** `pago.monto` es lo que pagó el alumno ese día. Si el precio del pack sube, los pagos anteriores y los sueldos ya calculados no cambian.
 3. **El valor de cada asistencia se fija al registrarla.** `asistencia.valor_clase` = `pago.monto / pago.cantidad_clases`, redondeado. `asistencia.porcentaje_bp` copia el porcentaje vigente del profesor en ese momento. El sueldo es la suma de `valor_clase * porcentaje_bp / 10000` y no depende de datos que puedan cambiar después.
 4. **Las clases restantes se calculan, no se guardan.** Restantes = `pago.cantidad_clases - asistencias del pago`. Con un contador aparte (`cantidad_restante` en la app original) el número se desincronizaba al borrar o cambiar asistencias.
@@ -43,11 +43,11 @@ erDiagram
     alumno ||--o{ asistencia : asiste
     alumno ||--o{ cambio_estado_alumno : "se da de baja o se reactiva"
     usuario ||--o{ cambio_estado_alumno : registra
-    profesor ||--o{ clase : "dicta (titular)"
-    profesor ||--o{ sesion : "dicta (real)"
+    profesor ||--o{ horario : "dicta (titular)"
+    profesor ||--o{ clase : "dicta (real)"
     profesor ||--o{ porcentaje_profesor : "tiene"
-    clase ||--o{ sesion : "genera"
-    sesion ||--o{ asistencia : "recibe"
+    horario ||--o{ clase : "genera"
+    clase ||--o{ asistencia : "recibe"
     profesor ||--o{ liquidacion : "cobra"
 
     usuario {
@@ -112,7 +112,7 @@ erDiagram
         bigint registrado_por FK
         timestamptz anulado_en
     }
-    clase {
+    horario {
         bigint id PK
         text estilo
         text nivel
@@ -120,18 +120,18 @@ erDiagram
         time hora_inicio
         time hora_fin
         bigint profesor_id FK
-        boolean activa
+        boolean activo
     }
-    sesion {
+    clase {
         bigint id PK
-        bigint clase_id FK
+        bigint horario_id FK
         date fecha
         bigint profesor_id FK
-        estado_sesion estado
+        estado_clase estado
     }
     asistencia {
         bigint id PK
-        bigint sesion_id FK
+        bigint clase_id FK
         bigint alumno_id FK
         bigint pago_id FK
         bigint valor_clase
@@ -155,7 +155,7 @@ erDiagram
 ```sql
 create type rol as enum ('admin', 'recepcion');
 create type medio_pago as enum ('efectivo', 'transferencia', 'mercado_pago', 'otro');
-create type estado_sesion as enum ('programada', 'dictada', 'cancelada');
+create type estado_clase as enum ('programada', 'dictada', 'cancelada');
 ```
 
 ### usuario
@@ -293,12 +293,12 @@ create table pago (
 create index pago_alumno_idx on pago (alumno_id, vence_el);
 ```
 
-### clase
+### horario
 
-Horario semanal fijo. `dia_semana` sigue ISO 8601: 1 = lunes, 7 = domingo. `profesor_id` es el titular.
+Lo que se repite cada semana. `dia_semana` sigue ISO 8601: 1 = lunes, 7 = domingo. `profesor_id` es el titular.
 
 ```sql
-create table clase (
+create table horario (
   id           bigint generated always as identity primary key,
   estilo       text not null,
   nivel        text,
@@ -306,42 +306,42 @@ create table clase (
   hora_inicio  time not null,
   hora_fin     time not null check (hora_fin > hora_inicio),
   profesor_id  bigint not null references profesor (id),
-  activa       boolean not null default true
+  activo       boolean not null default true
 );
 ```
 
-### sesion
+### clase
 
-Una clase en una fecha concreta. Se crea cuando recepción abre la clase del día para tomar asistencia. `profesor_id` arranca con el titular y se cambia si hay una suplencia.
+La clase de un horario en una fecha concreta. Se crea cuando recepción la abre para tomar asistencia. `profesor_id` arranca con el titular y se cambia si hay una suplencia.
 
 ```sql
-create table sesion (
+create table clase (
   id           bigint generated always as identity primary key,
-  clase_id     bigint not null references clase (id),
+  horario_id   bigint not null references horario (id),
   fecha        date   not null,
   profesor_id  bigint not null references profesor (id),
-  estado       estado_sesion not null default 'programada',
-  unique (clase_id, fecha)
+  estado       estado_clase not null default 'programada',
+  unique (horario_id, fecha)
 );
 
-create index sesion_profesor_fecha_idx on sesion (profesor_id, fecha);
+create index clase_profesor_fecha_idx on clase (profesor_id, fecha);
 ```
 
 ### asistencia
 
-Un alumno que asistió a una sesión y usó una clase de un pago. `valor_clase` y `porcentaje_bp` se copian al registrar la asistencia.
+Un alumno que asistió a una clase y usó una de las clases de un pago. `valor_clase` y `porcentaje_bp` se copian al registrar la asistencia.
 
 ```sql
 create table asistencia (
   id                  bigint generated always as identity primary key,
-  sesion_id           bigint not null references sesion (id),
+  clase_id            bigint not null references clase (id),
   alumno_id           bigint not null references alumno (id),
   pago_id             bigint not null references pago (id),
   valor_clase          bigint   not null check (valor_clase >= 0),
   porcentaje_bp        smallint not null check (porcentaje_bp > 0 and porcentaje_bp <= 10000),
   registrado_por      bigint not null references usuario (id),
   registrado_en       timestamptz not null default now(),
-  unique (sesion_id, alumno_id)
+  unique (clase_id, alumno_id)
 );
 
 create index asistencia_pago_idx on asistencia (pago_id);
@@ -371,18 +371,18 @@ La base no puede validar todas las reglas con `check`. Estas quedan en el backen
 
 1. El alumno elige un pago que cumpla todo esto:
    - `anulado_en is null`;
-   - `vence_el >= sesion.fecha`;
+   - `vence_el >= clase.fecha`;
    - clases usadas < `cantidad_clases`.
 2. Si tiene más de un pago válido, se usa el que vence primero.
 3. Si no tiene ninguno, recepción cobra una clase suelta en el mismo paso: crea el pago y la asistencia en la misma transacción.
-4. La sesión no puede estar `cancelada`.
+4. La clase no puede estar `cancelada`.
 5. Se bloquea el pago con `select ... for update` antes de contar las asistencias. Así dos recepcionistas no pueden usar la última clase del pack al mismo tiempo.
 
 **Anular un pago**
 
 - No se puede anular un pago con asistencias. Primero hay que borrar o mover esas asistencias.
 
-**Cancelar una sesión**
+**Cancelar una clase**
 
 - Solo si no tiene asistencias. Si ya tenía, se borran primero y las clases vuelven al pack del alumno.
 
@@ -407,15 +407,15 @@ order by p.vence_el;
 **Sueldo de un profesor en un mes**
 
 ```sql
-select s.profesor_id,
+select c.profesor_id,
        count(a.id) as asistencias,
        sum(round(a.valor_clase * a.porcentaje_bp / 10000.0)) as sueldo
 from asistencia a
-join sesion s on s.id = a.sesion_id
-where s.profesor_id = $1
-  and s.fecha >= $2::date                        -- primer día del mes
-  and s.fecha <  $2::date + interval '1 month'
-group by s.profesor_id;
+join clase c on c.id = a.clase_id
+where c.profesor_id = $1
+  and c.fecha >= $2::date                        -- primer día del mes
+  and c.fecha <  $2::date + interval '1 month'
+group by c.profesor_id;
 ```
 
 **Ingresos del mes**
@@ -433,7 +433,7 @@ group by medio;
 
 | Problema original | Solución |
 |---|---|
-| `clase` sin fecha: no hay suplencias ni cancelaciones | tabla `sesion` con `fecha` y `profesor_id` real |
+| `clase` sin fecha: no hay suplencias ni cancelaciones | `horario` para lo que se repite y `clase` con `fecha` y `profesor_id` real |
 | El sueldo usaba `pack.precio` actual | `pago.monto` y `asistencia.valor_clase` se fijan al momento |
 | Sueldo = 100% de lo cobrado, con `switch` por id de pack | `porcentaje_profesor` con historial; `valor_clase = monto / cantidad_clases` |
 | Montos con decimales (`numeric`) leídos como string | todo el dinero en pesos enteros con `bigint`; porcentajes en puntos básicos |
@@ -451,7 +451,7 @@ group by medio;
 
 1. **Clases adeudadas.** ¿Un alumno puede tomar la clase y pagar después? Si es así, `asistencia.pago_id` pasa a ser nullable y hace falta una vista de deudas.
 2. **Cambio de pack.** Si un alumno compró un x4, usó 1 clase y quiere pasar a un x8, ¿cómo se cobra? Propuesta: anular el x4, crear un pago x8 por la diferencia y mover la asistencia usada al pago nuevo.
-3. **Sesiones.** ¿Recepción abre la sesión del día al tomar asistencia, o el sistema genera todas las sesiones del mes por adelantado? La segunda opción permite ver el calendario, pero hay que generar sesiones nuevas cuando se crea o cambia una clase.
+3. **Clases por adelantado.** ¿Recepción abre la clase del día al tomar asistencia, o el sistema genera todas las clases del mes por adelantado? La segunda opción permite ver el calendario, pero hay que generar clases nuevas cuando se crea o cambia un horario. Se eligió la segunda en la feature [clases por adelantado](features/clases-por-adelantado.md) (25).
 4. **Otros egresos.** ¿El sistema tiene que registrar alquiler, servicios u otros gastos para calcular la ganancia del mes? Si es así, se agrega una tabla `egreso`.
-5. **Cupo.** ¿Alguna clase tiene cupo máximo? Si es así, se agrega `clase.cupo`.
-6. **Porcentaje por clase.** ¿Un profesor cobra el mismo porcentaje en todas sus clases, o puede variar por clase? Si varía, el porcentaje pasa a `clase` o a una tabla profesor-clase.
+5. **Cupo.** ¿Alguna clase tiene cupo máximo? Si es así, se agrega `horario.cupo`.
+6. **Porcentaje por clase.** ¿Un profesor cobra el mismo porcentaje en todas sus clases, o puede variar por horario? Si varía, el porcentaje pasa a `horario` o a una tabla profesor-horario.

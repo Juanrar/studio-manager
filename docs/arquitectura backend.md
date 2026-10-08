@@ -33,7 +33,8 @@ apps/api/
 │   │   │   ├── pagos.service.ts
 │   │   │   ├── pagos.repository.ts
 │   │   │   └── pagos.test.ts
-│   │   ├── clases/            # clase y sesion
+│   │   ├── horarios/          # lo que se repite cada semana
+│   │   ├── clases/            # la clase de una fecha
 │   │   ├── asistencias/
 │   │   └── liquidaciones/
 │   ├── db/
@@ -76,10 +77,10 @@ Una operación de negocio que escribe en más de una tabla abre una transacción
 // asistencias.service.ts
 async function registrar(input: RegistrarAsistenciaInput, usuarioId: number) {
   return db.transaction(async (tx) => {
-    const sesion = await sesionesRepo.obtener(tx, input.sesionId);
-    if (sesion.estado === 'cancelada') throw new ReglaDeNegocioError('La sesión está cancelada');
+    const clase = await clasesService.bloquearClase(tx, input.claseId);
+    if (clase.estado === 'cancelada') throw new ReglaDeNegocioError('La clase está cancelada');
 
-    const pago = await pagosService.bloquearPagoValido(tx, input.alumnoId, sesion.fecha);
+    const pago = await pagosService.bloquearPagoValido(tx, input.alumnoId, clase.fecha);
     // ...
     return asistenciasRepo.crear(tx, { ... });
   });
@@ -97,7 +98,7 @@ Tres tipos de error propios en `lib/errores.ts`, que el plugin de errores traduc
 | Error | HTTP | Cuándo |
 |---|---|---|
 | `NoEncontradoError` | 404 | El recurso no existe |
-| `ReglaDeNegocioError` | 422 | La operación viola una regla (pack vencido, sesión cancelada) |
+| `ReglaDeNegocioError` | 422 | La operación viola una regla (pack vencido, clase cancelada) |
 | `SinPermisoError` | 403 | El rol no alcanza |
 
 Errores de validación de Zod → 400. Cualquier otro error → 500, con el detalle en el log y un mensaje genérico en la respuesta.
@@ -120,12 +121,12 @@ El único redondeo permitido está en `lib/dinero.ts`, en dos funciones: dividir
 
 Las columnas `bigint` se leen como `number` con `mode: 'number'` en Drizzle. Un `number` de JavaScript representa enteros exactos hasta 2^53, muy por encima de cualquier monto del estudio.
 
-**Fechas.** `pago.vence_el` y `sesion.fecha` son fechas sin hora. La zona horaria del estudio (`America/Argentina/Buenos_Aires`) se define en `config.ts`. Ningún cálculo depende de la zona del servidor. Toda conversión pasa por `lib/fechas.ts`.
+**Fechas.** `pago.vence_el` y `clase.fecha` son fechas sin hora. La zona horaria del estudio (`America/Argentina/Buenos_Aires`) se define en `config.ts`. Ningún cálculo depende de la zona del servidor. Toda conversión pasa por `lib/fechas.ts`.
 
 ## API
 
 - REST con JSON, bajo el prefijo `/api`.
-- Nombres de recursos en plural: `/api/alumnos`, `/api/pagos`, `/api/sesiones/:id/asistencias`.
+- Nombres de recursos en plural: `/api/alumnos`, `/api/pagos`, `/api/clases/:id/asistencias`.
 - Campos en camelCase en la API y snake_case en la base. Drizzle hace la conversión.
 - Listados paginados con `?pagina=&porPagina=` y búsqueda con `?q=`.
 

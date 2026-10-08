@@ -40,7 +40,7 @@ studio-manager/
 
 ### Por qué `apps/` y `packages/` en lugar de `frontend/` y `backend/`
 
-- `apps/` agrupa lo que se despliega. Si se agrega un proceso aparte (por ejemplo, uno que genere las sesiones del mes o avise vencimientos), va a `apps/worker` sin mover nada.
+- `apps/` agrupa lo que se despliega. Si se agrega un proceso aparte (por ejemplo, uno que genere las clases del mes o avise vencimientos), va a `apps/worker` sin mover nada.
 - `packages/` agrupa el código que se comparte. Con `frontend/` y `backend/` no hay un lugar para el código común y termina duplicado o importado con rutas relativas entre apps.
 - Es la convención de pnpm, Turborepo y Nx.
 

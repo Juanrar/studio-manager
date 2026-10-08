@@ -163,9 +163,9 @@ No hay tests nuevos: esta feature no cambia lo que hace el sistema. Los que exis
 **Archivos:**
 - Modificar: `docs/estructura de base de datos.md`, `docs/arquitectura general.md`, `docs/arquitectura backend.md`, `docs/arquitectura frontend.md`, `CLAUDE.md` (reglas del dominio y notas del entorno que nombran sesiones o `/agenda`)
 
-- [ ] **Paso 1:** reemplazar los nombres en los documentos de diseño y en las reglas del dominio de CLAUDE.md. La regla queda: "`horario` es lo que se repite cada semana; `clase` es la de una fecha. La asistencia apunta a la clase, nunca al horario".
-- [ ] **Paso 2:** correr `grep -ri sesion docs/*.md CLAUDE.md` y verificar que solo aparece el login.
-- [ ] **Paso 3:** commit `docs: horario y clase en los documentos de diseño`.
+- [x] **Paso 1:** reemplazar los nombres en los documentos de diseño y en las reglas del dominio de CLAUDE.md. La regla queda: "`horario` es lo que se repite cada semana; `clase` es la de una fecha. La asistencia apunta a la clase, nunca al horario".
+- [x] **Paso 2:** correr `grep -ri sesion docs/*.md CLAUDE.md` y verificar que solo aparece el login. El ejemplo de código de `arquitectura backend.md` usaba el repository de sesiones desde asistencias; ahora usa `clasesService.bloquearClase`, como el código real. CLAUDE.md suma dos notas del entorno: cómo renombrar con Drizzle y el `.env` de un worktree.
+- [x] **Paso 3:** commit `docs: horario y clase en los documentos de diseño`.
 
 ## Verificación final
 
