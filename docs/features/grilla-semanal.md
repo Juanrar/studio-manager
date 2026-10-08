@@ -146,11 +146,11 @@ jsdom no calcula posiciones: la cascada, la línea de ahora y el editor flotante
 
 **Archivos:** `apps/web/src/features/grilla/arrastre.ts`, `cascada.ts`, sus tests
 
-- [ ] **Paso 1:** escribir los tests de `destinoDelArrastre` y `acomodarEnCascada`.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/web test grilla` y verificar que fallan.
-- [ ] **Paso 3:** implementarlas.
-- [ ] **Paso 4:** correr el test y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(grilla): cuentas del arrastre y de las clases superpuestas`.
+- [x] **Paso 1:** escribir los tests de `destinoDelArrastre` y `acomodarEnCascada`.
+- [x] **Paso 2:** correr `pnpm --filter @studio/web test grilla` y verificar que fallan.
+- [x] **Paso 3:** implementarlas.
+- [x] **Paso 4:** correr el test y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(grilla): cuentas del arrastre y de las clases superpuestas`.
 
 ### Tarea 5: La semana en lectura
 
