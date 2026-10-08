@@ -132,15 +132,15 @@ jsdom no calcula posiciones: la cascada, la línea de ahora y el editor flotante
 - [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
 - [x] **Paso 5:** commit `feat(clases): clases únicas que no salen de un horario`.
 
-### Tarea 3: Aplicar a todas desde una semana
+### Ttodas ya recibió la misma edición en la grilla, así que queda igual al horario nuevo y pierde sus cambios propios sola. `desde` tiene que ser un lunes (400), y un horario nuevo no puede regir desde una semana pasada (422). La clase única que se adopta tiene que estar en la semana `desde`.rea 3: Aplicar a todas desde una semana
 
 **Archivos:** `packages/shared/src/horarios.ts`, `programacion.service.ts`, `horarios.routes.ts`, sus tests
 
-- [ ] **Paso 1:** escribir los tests de aplicar, quitar y agregar desde una semana.
-- [ ] **Paso 2:** correr los tests y verificar que fallan.
-- [ ] **Paso 3:** sumar `desde` y `claseId`.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(horarios): aplicar un cambio desde una semana`.
+- [x] **Paso 1:** escribir los tests de aplicar, quitar y agregar desde una semana.
+- [x] **Paso 2:** correr los tests y verificar que fallan.
+- [x] **Paso 3:** sumar `desde` y `claseId`. La clase de la semana `desde` no hace falta forzarla: antes de Aplicar
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(horarios): aplicar un cambio desde una semana`.
 
 ### Tarea 4: Las cuentas del arrastre y la cascada
 

@@ -82,6 +82,10 @@ export async function insertar(ej: Ejecutor, datos: NuevaClase): Promise<number>
   return fila!.id;
 }
 
+export async function asignarHorario(ej: Ejecutor, id: number, horarioId: number): Promise<void> {
+  await ej.update(clase).set({ horarioId }).where(eq(clase.id, id));
+}
+
 export async function borrar(ej: Ejecutor, id: number): Promise<void> {
   await ej.delete(clase).where(eq(clase.id, id));
 }

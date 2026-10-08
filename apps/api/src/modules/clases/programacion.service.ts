@@ -1,6 +1,6 @@
 import type { ActualizarHorarioInput, CrearHorarioInput, Horario } from '@studio/shared';
 import { db, type Ejecutor } from '../../db/client.ts';
-import { ReglaDeNegocioError } from '../../lib/errores.ts';
+import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { lunesDe, semanasDelHorizonte, sumarDias, type FechaDia } from '../../lib/fechas.ts';
 import {
   actualizarHorario,
@@ -37,27 +37,39 @@ export async function generarClases(ej: Ejecutor, hoy: FechaDia, horarioId?: num
   return repo.insertarLasQueFaltan(ej, filas);
 }
 
-// Un horario nuevo aparece en la agenda en el momento, sin esperar a la tarea de cada hora.
+// Un horario nuevo aparece en la agenda en el momento, sin esperar a la tarea de cada hora. Con `claseId`,
+// esa clase única pasa a ser la primera de la serie ("Agregar a todas las semanas" en la grilla).
 export async function crearHorarioConSusClases(datos: CrearHorarioInput, hoy: FechaDia): Promise<Horario> {
   return db.transaction(async (tx) => {
     const creado = await crearHorario(datos, hoy, tx);
+    if (datos.claseId !== undefined) {
+      const unica = await repo.bloquear(tx, datos.claseId);
+      if (unica === null) throw new NoEncontradoError(`No existe la clase ${datos.claseId}`);
+      if (unica.horarioId !== null) throw new ReglaDeNegocioError('La clase ya es de un horario');
+      if (unica.semana !== (datos.desde ?? lunesDe(hoy))) {
+        throw new ReglaDeNegocioError('La clase única tiene que estar en la semana desde la que rige el horario');
+      }
+      await repo.asignarHorario(tx, unica.id, creado.id);
+    }
     await generarClases(tx, hoy, creado.id);
     return creado;
   });
 }
 
-// Cambiar un horario cambia también sus clases desde hoy que todavía eran iguales a él. Las que ya
-// pasaron y las que tienen cambios propios (un suplente, una cancelación) no se tocan.
+// Cambiar un horario cambia también sus clases desde la semana `desde` (o desde hoy) que todavía eran
+// iguales a él. Las que ya pasaron y las que tienen cambios propios (un suplente, una cancelación) no se
+// tocan. Es "Aplicar a todas las semanas" en la grilla; sin `desde`, la pantalla de horarios.
 export async function actualizarHorarioYSusClases(id: number, datos: ActualizarHorarioInput, hoy: FechaDia): Promise<Horario> {
   return db.transaction(async (tx) => {
     const viejo = await obtenerHorario(id, tx);
-    const { activo, ...cambios } = datos;
+    const { activo, desde, ...cambios } = datos;
+    const inicio = desde !== undefined && desde > hoy ? desde : hoy;
 
     if (Object.values(cambios).some((valor) => valor !== undefined)) {
       const nuevo = await actualizarHorario(id, cambios, tx);
-      await seguirAlHorario(tx, viejo, nuevo, hoy);
+      await seguirAlHorario(tx, viejo, nuevo, inicio, hoy);
     }
-    if (activo === false && viejo.activo) await darDeBaja(tx, viejo, hoy);
+    if (activo === false && viejo.activo) await darDeBaja(tx, viejo, inicio);
     if (activo === true && !viejo.activo) {
       await reactivarHorario(id, lunesDe(hoy), tx);
       await generarClases(tx, hoy, id);
@@ -76,11 +88,11 @@ const datosDe = (horario: Horario): repo.DatosDeHorario => ({
   profesorId: horario.profesor.id,
 });
 
-async function seguirAlHorario(tx: Ejecutor, viejo: Horario, nuevo: Horario, hoy: FechaDia): Promise<void> {
+async function seguirAlHorario(tx: Ejecutor, viejo: Horario, nuevo: Horario, inicio: FechaDia, hoy: FechaDia): Promise<void> {
   const { diaSemana, ...copiados } = datosDe(nuevo);
   const cambiaElProfesor = nuevo.profesor.id !== viejo.profesor.id;
 
-  for (const clase of await repo.igualesAlHorario(tx, viejo.id, datosDe(viejo), hoy)) {
+  for (const clase of await repo.igualesAlHorario(tx, viejo.id, datosDe(viejo), inicio)) {
     const fecha = sumarDias(clase.semana, diaSemana - 1);
     // Una clase de esta semana no pasa a un día que ya pasó: se queda donde estaba.
     if (fecha < hoy) continue;
@@ -97,13 +109,14 @@ async function seguirAlHorario(tx: Ejecutor, viejo: Horario, nuevo: Horario, hoy
   }
 }
 
-async function darDeBaja(tx: Ejecutor, horario: Horario, hoy: FechaDia): Promise<void> {
-  const conAnotados = await repo.primeraConAsistenciasDesde(tx, horario.id, hoy);
+// Borra las clases desde `desde`: las semanas anteriores, ya creadas, quedan como estaban.
+async function darDeBaja(tx: Ejecutor, horario: Horario, desde: FechaDia): Promise<void> {
+  const conAnotados = await repo.primeraConAsistenciasDesde(tx, horario.id, desde);
   if (conAnotados !== null) {
     throw new ReglaDeNegocioError(
       `El horario de ${horario.estilo} tiene alumnos anotados el ${conAnotados}. Quitalos antes de darlo de baja`,
     );
   }
-  await repo.borrarDesde(tx, horario.id, hoy);
+  await repo.borrarDesde(tx, horario.id, desde);
   await actualizarHorario(horario.id, { activo: false }, tx);
 }

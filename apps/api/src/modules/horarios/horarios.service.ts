@@ -7,20 +7,25 @@ import { esViolacionCheck } from '../../lib/postgres.ts';
 import { verificarProfesorActivo } from '../profesores/profesores.service.ts';
 import * as repo from './horarios.repository.ts';
 
-// Un horario nuevo rige desde el lunes de la semana de hoy. Sus clases las crea programacion.service.
+// Un horario nuevo rige desde `desde` o, sin él, desde el lunes de la semana de hoy. Sus clases las crea
+// programacion.service.
 export async function crearHorario(datos: CrearHorarioInput, hoy: FechaDia, ej: Ejecutor = db): Promise<Horario> {
-  await verificarProfesorActivo(ej, datos.profesorId);
-  const id = await repo.insertar(ej, { ...datos, nivel: datos.nivel ?? null, vigenteDesde: lunesDe(hoy) });
+  const { desde, claseId: _claseId, ...horario } = datos;
+  const vigenteDesde = desde ?? lunesDe(hoy);
+  if (vigenteDesde < lunesDe(hoy)) throw new ReglaDeNegocioError('Un horario nuevo rige desde esta semana o una posterior');
+  await verificarProfesorActivo(ej, horario.profesorId);
+  const id = await repo.insertar(ej, { ...horario, nivel: horario.nivel ?? null, vigenteDesde });
   return obtenerHorario(id, ej);
 }
 
 // Cambia solo la fila del horario. Para que sus clases sigan el cambio, la ruta usa
 // programacion.service.actualizarHorarioYSusClases.
 export async function actualizarHorario(id: number, datos: ActualizarHorarioInput, ej: Ejecutor = db): Promise<Horario> {
-  if (datos.profesorId !== undefined) await verificarProfesorActivo(ej, datos.profesorId);
+  const { desde: _desde, ...cambios } = datos;
+  if (cambios.profesorId !== undefined) await verificarProfesorActivo(ej, cambios.profesorId);
   let existe: boolean;
   try {
-    existe = await repo.actualizar(ej, id, sinIndefinidos(datos));
+    existe = await repo.actualizar(ej, id, sinIndefinidos(cambios));
   } catch (error) {
     // En un PATCH el esquema no ve la otra hora; la base la controla con su check.
     if (esViolacionCheck(error, 'horario_horas_validas')) {

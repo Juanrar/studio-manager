@@ -280,6 +280,91 @@ describe('PATCH /api/horarios/:id', () => {
     expect((await clasesGuardadas()).map((c) => c.fecha)).toEqual(['2026-03-03', ...MARTES_DEL_HORIZONTE]);
   });
 
+  it('aplicar a todas desde una semana cambia esa semana y las siguientes; las anteriores y la que tiene suplente quedan', async () => {
+    const iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni' });
+    await actualizarClase((await claseDel('2026-04-07')).id, { profesorId: iaru.id }, MARTES);
+    // Primero se movió la clase de la semana del 23 en la grilla; el aviso ofrece aplicarlo a todas.
+    const delVeinticuatro = (await claseDel('2026-03-24')).id;
+    await actualizarClase(delVeinticuatro, { horaInicio: '20:00', horaFin: '21:30' }, MARTES);
+
+    const respuesta = await cambiarHorario({ horaInicio: '20:00', horaFin: '21:30', desde: '2026-03-23' });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect((await clasesGuardadas()).map((c) => `${c.fecha} ${c.horaInicio}`)).toEqual([
+      '2026-03-03 19:00:00',
+      '2026-03-10 19:00:00',
+      '2026-03-17 19:00:00',
+      '2026-03-24 20:00:00',
+      '2026-03-31 20:00:00',
+      '2026-04-07 19:00:00',
+      '2026-04-14 20:00:00',
+      '2026-04-21 20:00:00',
+      '2026-04-28 20:00:00',
+    ]);
+    const semana = await app.inject({ method: 'GET', url: '/api/clases?desde=2026-03-23&hasta=2026-03-29', headers: { cookie } });
+    expect(semana.json().items).toEqual([expect.objectContaining({ id: delVeinticuatro, tieneCambios: false })]);
+  });
+
+  it('quitar de todas desde una semana borra esa semana y las siguientes, y deja las anteriores', async () => {
+    const respuesta = await cambiarHorario({ activo: false, desde: '2026-03-23' });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect((await clasesGuardadas()).map((c) => c.fecha)).toEqual(['2026-03-03', '2026-03-10', '2026-03-17']);
+  });
+
+  it('desde tiene que ser un lunes', async () => {
+    const respuesta = await cambiarHorario({ horaInicio: '20:00', horaFin: '21:30', desde: '2026-03-24' });
+
+    expect(respuesta.statusCode).toBe(400);
+  });
+
+  it('agregar a todas convierte la clase única en la primera de un horario nuevo y crea las semanas siguientes', async () => {
+    const unica = await app.inject({
+      method: 'POST',
+      url: '/api/clases',
+      payload: { fecha: '2026-03-21', horaInicio: '11:00', horaFin: '12:00', estilo: 'Jazz', nivel: null, profesorId: erik.id },
+      headers: { cookie },
+    });
+
+    const respuesta = await app.inject({
+      method: 'POST',
+      url: '/api/horarios',
+      payload: {
+        estilo: 'Jazz',
+        nivel: null,
+        diaSemana: 6,
+        horaInicio: '11:00',
+        horaFin: '12:00',
+        profesorId: erik.id,
+        desde: '2026-03-16',
+        claseId: unica.json().id,
+      },
+      headers: { cookie },
+    });
+
+    expect(respuesta.statusCode).toBe(201);
+    const jazz = (await clasesGuardadas()).filter((c) => c.estilo === 'Jazz');
+    expect(jazz.map((c) => [c.fecha, c.horarioId])).toEqual(
+      ['2026-03-21', '2026-03-28', '2026-04-04', '2026-04-11', '2026-04-18', '2026-04-25', '2026-05-02'].map((fecha) => [
+        fecha,
+        respuesta.json().id,
+      ]),
+    );
+    expect(jazz[0]?.id).toBe(unica.json().id);
+  });
+
+  it('un horario nuevo no puede regir desde una semana pasada', async () => {
+    const respuesta = await app.inject({
+      method: 'POST',
+      url: '/api/horarios',
+      payload: { estilo: 'Jazz', nivel: null, diaSemana: 6, horaInicio: '11:00', horaFin: '12:00', profesorId: erik.id, desde: '2026-03-02' },
+      headers: { cookie },
+    });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({ error: 'Un horario nuevo rige desde esta semana o una posterior' });
+  });
+
   it('reactivar un horario vuelve a crear sus clases desde esta semana', async () => {
     await cambiarHorario({ activo: false });
 
