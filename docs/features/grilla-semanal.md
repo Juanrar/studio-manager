@@ -166,11 +166,11 @@ jsdom no calcula posiciones: la cascada, la línea de ahora y el editor flotante
 
 **Archivos:** `features/grilla/`, `components/ui/Flotante.tsx`, sus tests
 
-- [ ] **Paso 1:** escribir los tests del editor, el aviso, los días pasados y las canceladas.
-- [ ] **Paso 2:** correr los tests y verificar que fallan.
-- [ ] **Paso 3:** implementar `useArrastre`, el editor flotante, el aviso y "Volver a dictarla".
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan. Mirar la cascada y el editor en Chromium con el script de capturas.
-- [ ] **Paso 5:** commit `feat(grilla): mover, estirar y crear clases arrastrando`.
+- [x] **Paso 1:** escribir los tests del editor, el aviso, los días pasados y las canceladas.
+- [x] **Paso 2:** correr los tests y verificar que fallan.
+- [x] **Paso 3:** implementar `useArrastre`, el editor flotante, el aviso y "Volver a dictarla". El cambio de una clase se ve en el momento (actualización optimista de React Query) y vuelve atrás si la API lo rechaza; el error sale en el aviso, en rojo. Quitar una clase única la borra y "Deshacer" la vuelve a crear. Una clase nueva arranca con el primer profesor de la lista. La etiqueta de la hora actual esconde la hora en punto que tenga a menos de 15 minutos. El test de crear toca un hueco con `getBoundingClientRect` simulado, porque jsdom no calcula el diseño.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan. Mirar la cascada y el editor en Chromium con el script de capturas.
+- [x] **Paso 5:** commit `feat(grilla): mover, estirar y crear clases arrastrando`.
 
 ### Tarea 7: Las vistas Día y Mes
 

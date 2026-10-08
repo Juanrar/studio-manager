@@ -2,6 +2,8 @@
 export const INICIO_GRILLA = 8 * 60;
 export const FIN_GRILLA = 23 * 60;
 export const PASO = 15;
+// Alto de un minuto en la grilla: 63 px por hora, como en DayFlow.
+export const PX_POR_MINUTO = 1.05;
 
 export function aMinutos(hora: string): number {
   const [horas, minutos] = hora.split(':').map(Number) as [number, number];

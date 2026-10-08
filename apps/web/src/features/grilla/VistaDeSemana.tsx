@@ -1,13 +1,15 @@
+import type { PointerEvent, RefObject } from 'react';
 import type { Clase } from '@studio/shared';
 import { colorDeNombre } from '../../components/ui/index.tsx';
 import { abreviaturaDelDia, diaDeLaSemana, nombreDelDia } from '../../lib/formato.ts';
 import { acomodarEnCascada, type Lugar } from './cascada.ts';
-import { FIN_GRILLA, INICIO_GRILLA, aHora, aMinutos } from './minutos.ts';
+import { FIN_GRILLA, INICIO_GRILLA, PX_POR_MINUTO, aHora, aMinutos } from './minutos.ts';
+import type { Fantasma } from './useArrastre.ts';
 
 // La grilla de horas: una columna por día y cada clase ubicada por su horario, con el aspecto de DayFlow.
-// Sirve para la semana (siete columnas) y para un día (una columna ancha).
+// Sirve para la semana (siete columnas) y para un día (una columna ancha). Los días que ya pasaron se ven
+// igual pero no se editan.
 
-export const PX_POR_MINUTO = 1.05;
 const ALTO = (FIN_GRILLA - INICIO_GRILLA) * PX_POR_MINUTO;
 const HORAS = Array.from({ length: (FIN_GRILLA - INICIO_GRILLA) / 60 + 1 }, (_, i) => INICIO_GRILLA + i * 60);
 const SANGRIA = 10;
@@ -24,12 +26,35 @@ export function nombreDeLaClase(clase: Clase): string {
   return partes.join(', ');
 }
 
-export function VistaDeSemana({ fechas, clases, hoy }: { fechas: string[]; clases: Clase[]; hoy: string }) {
+export type InteraccionesDeLaGrilla = {
+  columnas: RefObject<HTMLDivElement | null>;
+  fantasma: Fantasma | null;
+  idElegido: number | null;
+  alApretarClase: (evento: PointerEvent, clase: Clase) => void;
+  alEstirarClase: (evento: PointerEvent, clase: Clase) => void;
+  alApretarHueco: (evento: PointerEvent, fecha: string) => void;
+};
+
+export function VistaDeSemana({
+  fechas,
+  clases,
+  hoy,
+  interacciones,
+}: {
+  fechas: string[];
+  clases: Clase[];
+  hoy: string;
+  interacciones: InteraccionesDeLaGrilla;
+}) {
   const ancha = fechas.length === 1;
   const lugares = acomodarEnCascada(
     clases.map((clase) => ({ id: clase.id, fecha: clase.fecha, inicio: aMinutos(clase.horaInicio), fin: aMinutos(clase.horaFin) })),
   );
   const columnas = { gridTemplateColumns: `repeat(${fechas.length}, minmax(0, 1fr))` };
+  const { fantasma } = interacciones;
+  // La etiqueta roja de la hora actual tapa la hora en punto que tenga cerca: esa no se escribe.
+  const ahora = fechas.includes(hoy) ? minutosDeAhora() : null;
+  const horasConEtiqueta = HORAS.filter((minutos) => ahora === null || Math.abs(minutos - ahora) >= 15);
 
   return (
     <div className="-m-4 flex h-[calc(100%+2rem)] flex-col">
@@ -52,7 +77,7 @@ export function VistaDeSemana({ fechas, clases, hoy }: { fechas: string[]; clase
       <div className="min-h-0 flex-1 overflow-auto">
         <div className="grid grid-cols-[64px_minmax(0,1fr)] pt-2 pb-16">
           <div className="relative" style={{ height: ALTO }}>
-            {HORAS.map((minutos) => (
+            {horasConEtiqueta.map((minutos) => (
               <span
                 key={minutos}
                 className="absolute right-2 -translate-y-1/2 text-xs font-medium text-tenue tabular-nums"
@@ -63,7 +88,7 @@ export function VistaDeSemana({ fechas, clases, hoy }: { fechas: string[]; clase
             ))}
             {fechas.includes(hoy) && <EtiquetaDeAhora />}
           </div>
-          <div className="relative grid select-none" style={{ ...columnas, height: ALTO }}>
+          <div ref={interacciones.columnas} className="relative grid select-none" style={{ ...columnas, height: ALTO }}>
             {HORAS.map((minutos) => (
               <div
                 key={minutos}
@@ -71,18 +96,43 @@ export function VistaDeSemana({ fechas, clases, hoy }: { fechas: string[]; clase
                 style={{ top: (minutos - INICIO_GRILLA) * PX_POR_MINUTO }}
               />
             ))}
-            {fechas.map((fecha) => (
+            {fechas.map((fecha, indice) => (
               <div
                 key={fecha}
                 role="group"
                 aria-label={`${nombreDelDia(diaDeLaSemana(fecha))} ${Number(fecha.slice(8))}`}
                 className="relative border-l border-borde"
+                // Crear en un hueco solo con el mouse: con el dedo, apretar un hueco es empezar a desplazarse.
+                onPointerDown={(evento) => {
+                  if (evento.pointerType === 'mouse' && fecha >= hoy) interacciones.alApretarHueco(evento, fecha);
+                }}
               >
                 {clases
                   .filter((clase) => clase.fecha === fecha)
                   .map((clase) => (
-                    <ClaseEnLaGrilla key={clase.id} clase={clase} lugar={lugares.get(clase.id)!} ancha={ancha} />
+                    <ClaseEnLaGrilla
+                      key={clase.id}
+                      clase={clase}
+                      lugar={lugares.get(clase.id)!}
+                      ancha={ancha}
+                      editable={fecha >= hoy}
+                      atenuada={fantasma?.id === clase.id}
+                      elegida={interacciones.idElegido === clase.id}
+                      alApretar={(evento) => interacciones.alApretarClase(evento, clase)}
+                      alEstirar={(evento) => interacciones.alEstirarClase(evento, clase)}
+                    />
                   ))}
+                {fantasma && fantasma.dia === indice + 1 && (
+                  <div
+                    className="pointer-events-none absolute inset-x-1 z-30 rounded border border-dashed border-acento/70 bg-acento/15 px-2 py-1 text-xs font-medium"
+                    style={{
+                      top: (fantasma.inicio - INICIO_GRILLA) * PX_POR_MINUTO,
+                      height: (fantasma.fin - fantasma.inicio) * PX_POR_MINUTO - 2,
+                    }}
+                  >
+                    {aHora(fantasma.inicio)} - {aHora(fantasma.fin)}
+                  </div>
+                )}
                 {fecha === hoy && <LineaDeAhora />}
               </div>
             ))}
@@ -93,13 +143,32 @@ export function VistaDeSemana({ fechas, clases, hoy }: { fechas: string[]; clase
   );
 }
 
-function ClaseEnLaGrilla({ clase, lugar, ancha }: { clase: Clase; lugar: Lugar; ancha: boolean }) {
+function ClaseEnLaGrilla({
+  clase,
+  lugar,
+  ancha,
+  editable,
+  atenuada,
+  elegida,
+  alApretar,
+  alEstirar,
+}: {
+  clase: Clase;
+  lugar: Lugar;
+  ancha: boolean;
+  editable: boolean;
+  atenuada: boolean;
+  elegida: boolean;
+  alApretar: (evento: PointerEvent) => void;
+  alEstirar: (evento: PointerEvent) => void;
+}) {
   const color = colorDeNombre(clase.estilo);
   const inicio = aMinutos(clase.horaInicio);
   const alto = (aMinutos(clase.horaFin) - inicio) * PX_POR_MINUTO - 2;
   const corrimiento = lugar.sangria * SANGRIA;
   const cancelada = clase.estado === 'cancelada';
   const profesor = `${clase.profesor.nombre} ${clase.profesor.apellido}`;
+  const arrastrable = editable && !cancelada;
 
   return (
     <div
@@ -107,7 +176,12 @@ function ClaseEnLaGrilla({ clase, lugar, ancha }: { clase: Clase; lugar: Lugar; 
       tabIndex={0}
       aria-label={nombreDeLaClase(clase)}
       data-clase={clase.id}
-      className={`absolute overflow-hidden rounded py-1 pr-1.5 pl-2.5 text-xs leading-snug ${cancelada ? 'line-through opacity-50' : 'hover:brightness-125'}`}
+      onPointerDown={alApretar}
+      className={`absolute overflow-hidden rounded py-1 pr-1.5 pl-2.5 text-xs leading-snug ${
+        cancelada ? 'line-through opacity-50 hover:opacity-80' : 'hover:brightness-125'
+      } ${arrastrable ? 'cursor-grab touch-none active:cursor-grabbing' : editable ? 'cursor-pointer' : ''} ${
+        atenuada ? 'opacity-30' : ''
+      } ${elegida ? 'ring-1 ring-white/50' : ''}`}
       style={{
         top: (inicio - INICIO_GRILLA) * PX_POR_MINUTO + 1,
         height: alto,
@@ -131,6 +205,7 @@ function ClaseEnLaGrilla({ clase, lugar, ancha }: { clase: Clase; lugar: Lugar; 
         </p>
       )}
       {!ancha && alto >= 64 && <p className="truncate opacity-70">{profesor}</p>}
+      {arrastrable && <div onPointerDown={alEstirar} className="absolute inset-x-0 bottom-0 h-2 cursor-ns-resize" />}
     </div>
   );
 }
