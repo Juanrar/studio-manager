@@ -1,7 +1,7 @@
 import { and, asc, eq, gte, lt, type SQL } from 'drizzle-orm';
 import type { Liquidacion } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
-import { asistencia, horario, liquidacion, profesor, clase, type NuevaLiquidacion } from '../../db/schema.ts';
+import { asistencia, clase, liquidacion, profesor, type NuevaLiquidacion } from '../../db/schema.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 
 // Este módulo es de reportes: lee asistencias y clases para sumar, nunca las modifica.
@@ -27,13 +27,13 @@ export async function listarAsistenciasDelPeriodo(
       profesorId: clase.profesorId,
       claseId: clase.id,
       fecha: clase.fecha,
-      estilo: horario.estilo,
+      // El estilo de la clase y no el del horario: el detalle de un mes no cambia si después cambia el horario.
+      estilo: clase.estilo,
       valorClase: asistencia.valorClase,
       porcentajeBp: asistencia.porcentajeBp,
     })
     .from(asistencia)
     .innerJoin(clase, eq(clase.id, asistencia.claseId))
-    .innerJoin(horario, eq(horario.id, clase.horarioId))
     .where(and(...filtros))
     .orderBy(asc(clase.fecha), asc(clase.id));
 }

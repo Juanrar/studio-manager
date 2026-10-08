@@ -5,7 +5,6 @@ import type { FechaDia } from '../../lib/fechas.ts';
 import {
   alumno,
   asistencia,
-  horario,
   pack,
   pago,
   profesor,
@@ -65,20 +64,20 @@ export async function ultimasFechas(
 export type ClaseDeAlumno = { fecha: FechaDia; clase: string; profesor: PersonaResumen };
 
 // Las clases de un alumno, también las anotadas para más adelante, de la más nueva a la más vieja.
-// El profesor es el de la clase, que cambia si hubo suplencia; el del horario es el titular.
+// El profesor es el de la clase, que cambia si hubo suplencia; el del horario es el titular. El estilo
+// es el de la clase: si después cambia el horario, lo que pasó se sigue viendo como fue.
 export async function listarDeAlumno(ej: Ejecutor, alumnoId: number): Promise<ClaseDeAlumno[]> {
   return ej
     .select({
       fecha: clase.fecha,
-      clase: horario.estilo,
+      clase: clase.estilo,
       profesor: { id: profesor.id, nombre: profesor.nombre, apellido: profesor.apellido },
     })
     .from(asistencia)
     .innerJoin(clase, eq(clase.id, asistencia.claseId))
-    .innerJoin(horario, eq(horario.id, clase.horarioId))
     .innerJoin(profesor, eq(profesor.id, clase.profesorId))
     .where(eq(asistencia.alumnoId, alumnoId))
-    .orderBy(desc(clase.fecha), desc(horario.horaInicio), desc(asistencia.id));
+    .orderBy(desc(clase.fecha), desc(clase.horaInicio), desc(asistencia.id));
 }
 
 export async function borrar(ej: Ejecutor, id: number): Promise<boolean> {

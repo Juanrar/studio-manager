@@ -19,6 +19,7 @@ import {
 } from '../../../test/fabricas.ts';
 import { registrarAsistencia } from '../asistencias/asistencias.service.ts';
 import { abrirClase, type ClaseAbierta } from '../clases/clases.service.ts';
+import { actualizarHorario, listarHorarios } from '../horarios/horarios.service.ts';
 import { registrarPago } from '../pagos/pagos.service.ts';
 
 // Los tests corren el 5 de abril de 2026, con marzo ya terminado.
@@ -133,6 +134,15 @@ describe('GET /api/liquidaciones', () => {
         { claseId: clase10DeMarzo.id, fecha: '2026-03-10', estilo: 'Hip-Hop', asistentes: 2, monto: 1400 },
       ],
     });
+  });
+
+  it('el detalle muestra el estilo que tuvo cada clase aunque después cambie el horario', async () => {
+    const [hipHop] = await listarHorarios({ incluirInactivos: false });
+    await actualizarHorario(hipHop!.id, { estilo: 'Hip-Hop Avanzado' });
+
+    const respuesta = await get(`/api/liquidaciones/detalle?profesorId=${erik.id}&periodo=2026-03`);
+
+    expect(respuesta.json().items.map((item: { estilo: string }) => item.estilo)).toEqual(['Hip-Hop', 'Hip-Hop']);
   });
 
   it('recepción no accede a liquidaciones ni a ingresos', async () => {

@@ -189,11 +189,11 @@ La migración de datos se prueba a mano contra la base de desarrollo, que tiene 
 
 **Archivos:** los repositories de clases, asistencias (actividad del alumno) y liquidaciones, y sus tests
 
-- [ ] **Paso 1:** escribir el test de que cambiar el estilo de un horario no cambia la clase de la semana pasada en el detalle, la actividad y la liquidación.
-- [ ] **Paso 2:** correr los tests y verificar que fallan.
-- [ ] **Paso 3:** cambiar las consultas para que lean de la clase.
-- [ ] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `fix(clases): una clase pasada muestra su hora y su estilo de entonces`.
+- [x] **Paso 1:** escribir el test de que cambiar el estilo de un horario no cambia la clase de la semana pasada en el detalle, la actividad y la liquidación. El detalle de la clase ya lee de la clase desde la tarea 4; quedaron dos tests, uno en la actividad del alumno y otro en el detalle de la liquidación.
+- [x] **Paso 2:** correr los tests y verificar que fallan.
+- [x] **Paso 3:** cambiar las consultas para que lean de la clase. Las dos dejan de hacer join con `horario`, lo que también las deja listas para las clases únicas de la feature 26.
+- [x] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `fix(clases): una clase pasada muestra su hora y su estilo de entonces`.
 
 ## Verificación final
 

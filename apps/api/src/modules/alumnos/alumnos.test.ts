@@ -11,6 +11,7 @@ import {
 } from '../../../test/fabricas.ts';
 import { registrarAsistencia } from '../asistencias/asistencias.service.ts';
 import { abrirClase, actualizarClase } from '../clases/clases.service.ts';
+import { actualizarHorario } from '../horarios/horarios.service.ts';
 import { anularPago, registrarPago } from '../pagos/pagos.service.ts';
 import { actualizarAlumno } from './alumnos.service.ts';
 import { darDeBajaPorNoComprar } from './baja-automatica.service.ts';
@@ -276,6 +277,20 @@ describe('GET /api/alumnos/:id/actividad', () => {
         { tipo: 'alta', fecha: '2026-02-20' },
       ],
     });
+  });
+
+  it('la actividad muestra el estilo que tuvo la clase aunque después cambie el horario', async () => {
+    const pack = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
+    const hipHop = await crearHorarioDeTest((await crearProfesorDeTest()).id, { estilo: 'Hip-Hop', diaSemana: 2 });
+    const martina = await crearAlumnoDeTest({}, new Date('2026-02-20T13:00:00Z'));
+    await pagar(martina, pack, '2026-03-02');
+    const { clase } = await abrirClase(hipHop.id, '2026-03-03');
+    await registrarAsistencia(clase.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
+    await actualizarHorario(hipHop.id, { estilo: 'Hip-Hop Avanzado' });
+
+    const respuesta = await app.inject({ method: 'GET', url: `/api/alumnos/${martina.id}/actividad`, headers: { cookie } });
+
+    expect(respuesta.json().items[0]).toMatchObject({ tipo: 'asistencia', fecha: '2026-03-03', clase: 'Hip-Hop' });
   });
 
   it('las bajas y reactivaciones, a mano o automáticas, aparecen en la actividad por hora dentro del día; editar otros datos no registra nada', async () => {
