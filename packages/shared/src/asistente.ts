@@ -1,7 +1,9 @@
 import { z } from 'zod';
 import type { PersonaResumen } from './comun.ts';
 import type { CrearClaseUnicaInput } from './clases.ts';
-import type { CrearHorarioInput } from './horarios.ts';
+import { nombreSchema, textoOpcional } from './comun.ts';
+import { diaSemanaSchema, horaSchema, type CrearHorarioInput } from './horarios.ts';
+import { crearProfesorSchema } from './profesores.ts';
 
 export const LARGO_MAXIMO_DEL_MENSAJE = 2000;
 // Cada pedido suma de 4 a 6 elementos al historial: el mensaje, las llamadas a funciones, sus resultados y el
@@ -20,10 +22,31 @@ export const mensajeAlAsistenteSchema = z.object({
 
 export type MensajeAlAsistenteInput = z.infer<typeof mensajeAlAsistenteSchema>;
 
+const horarioDelAltaSchema = z
+  .object({
+    estilo: nombreSchema,
+    nivel: textoOpcional,
+    diaSemana: diaSemanaSchema,
+    horaInicio: horaSchema,
+    horaFin: horaSchema,
+  })
+  .refine((horario) => horario.horaFin > horario.horaInicio, {
+    message: 'La hora de fin tiene que ser posterior a la de inicio',
+    path: ['horaFin'],
+  });
+
+export const altaDeProfesorSchema = z.object({
+  profesor: crearProfesorSchema,
+  horarios: z.array(horarioDelAltaSchema).min(1, 'Tiene que tener al menos un horario').max(14, 'Son 14 horarios como máximo'),
+});
+
+export type AltaDeProfesorInput = z.infer<typeof altaDeProfesorSchema>;
+
 // Algo que el asistente propone crear. Se crea recién cuando el usuario toca "Crear".
 export type PropuestaDelAsistente =
   | { tipo: 'claseUnica'; datos: CrearClaseUnicaInput; profesor: PersonaResumen }
-  | { tipo: 'horario'; datos: Omit<CrearHorarioInput, 'desde' | 'claseId'>; profesor: PersonaResumen };
+  | { tipo: 'horario'; datos: Omit<CrearHorarioInput, 'desde' | 'claseId'>; profesor: PersonaResumen }
+  | { tipo: 'altaDeProfesor'; datos: AltaDeProfesorInput };
 
 export type RespuestaDelAsistente = {
   historial: unknown[];

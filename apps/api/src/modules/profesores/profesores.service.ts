@@ -15,20 +15,23 @@ import * as repo from './profesores.repository.ts';
 
 // El porcentaje inicial queda vigente desde el día del alta.
 export async function crearProfesor(datos: CrearProfesorInput, hoy: FechaDia): Promise<Profesor> {
-  const { porcentajeBp, ...personales } = datos;
-  const id = await db.transaction(async (tx) => {
-    const nuevoId = await repo.insertar(tx, {
-      nombre: personales.nombre,
-      apellido: personales.apellido,
-      dni: personales.dni ?? null,
-      email: personales.email ?? null,
-      telefono: personales.telefono ?? null,
-      aliasCbu: personales.aliasCbu ?? null,
-    });
-    await repo.insertarPorcentaje(tx, { profesorId: nuevoId, porcentajeBp, vigenteDesde: hoy });
-    return nuevoId;
-  });
+  const id = await db.transaction((tx) => crearProfesorEn(tx, datos, hoy));
   return obtenerProfesor(id, hoy);
+}
+
+// Recibe el ejecutor para que el asistente cree al profesor y sus horarios en una sola transacción.
+export async function crearProfesorEn(ej: Ejecutor, datos: CrearProfesorInput, hoy: FechaDia): Promise<number> {
+  const { porcentajeBp, ...personales } = datos;
+  const id = await repo.insertar(ej, {
+    nombre: personales.nombre,
+    apellido: personales.apellido,
+    dni: personales.dni ?? null,
+    email: personales.email ?? null,
+    telefono: personales.telefono ?? null,
+    aliasCbu: personales.aliasCbu ?? null,
+  });
+  await repo.insertarPorcentaje(ej, { profesorId: id, porcentajeBp, vigenteDesde: hoy });
+  return id;
 }
 
 export async function actualizarProfesor(

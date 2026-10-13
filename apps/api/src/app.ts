@@ -4,6 +4,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import { config } from './config.ts';
 import { hoyEnEstudio, type FechaDia } from './lib/fechas.ts';
 import { rutasAlumnos } from './modules/alumnos/alumnos.routes.ts';
+import { rutasAltaDeProfesor } from './modules/asistente/alta-de-profesor.routes.ts';
 import { crearModeloGemini } from './modules/asistente/gemini.ts';
 import type { ModeloDeLenguaje } from './modules/asistente/modelo.ts';
 import { rutasAsistente } from './modules/asistente/asistente.routes.ts';
@@ -69,6 +70,7 @@ export function buildApp(opciones: OpcionesApp = {}): FastifyInstance {
         ? null
         : crearModeloGemini({ clave: config.gemini.clave, modelo: config.gemini.modelo, respaldo: config.gemini.respaldo });
   app.register(rutasAsistente, { modelo });
+  app.register(rutasAltaDeProfesor);
 
   return app;
 }

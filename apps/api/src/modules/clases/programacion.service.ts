@@ -40,20 +40,23 @@ export async function generarClases(ej: Ejecutor, hoy: FechaDia, horarioId?: num
 // Un horario nuevo aparece en la agenda en el momento, sin esperar a la tarea de cada hora. Con `claseId`,
 // esa clase única pasa a ser la primera de la serie ("Agregar a todas las semanas" en la grilla).
 export async function crearHorarioConSusClases(datos: CrearHorarioInput, hoy: FechaDia): Promise<Horario> {
-  return db.transaction(async (tx) => {
-    const creado = await crearHorario(datos, hoy, tx);
-    if (datos.claseId !== undefined) {
-      const unica = await repo.bloquear(tx, datos.claseId);
-      if (unica === null) throw new NoEncontradoError(`No existe la clase ${datos.claseId}`);
-      if (unica.horarioId !== null) throw new ReglaDeNegocioError('La clase ya es de un horario');
-      if (unica.semana !== (datos.desde ?? lunesDe(hoy))) {
-        throw new ReglaDeNegocioError('La clase única tiene que estar en la semana desde la que rige el horario');
-      }
-      await repo.asignarHorario(tx, unica.id, creado.id);
+  return db.transaction((tx) => crearHorarioConSusClasesEn(tx, datos, hoy));
+}
+
+// Recibe el ejecutor para que el asistente cree un profesor y todos sus horarios en una sola transacción.
+export async function crearHorarioConSusClasesEn(ej: Ejecutor, datos: CrearHorarioInput, hoy: FechaDia): Promise<Horario> {
+  const creado = await crearHorario(datos, hoy, ej);
+  if (datos.claseId !== undefined) {
+    const unica = await repo.bloquear(ej, datos.claseId);
+    if (unica === null) throw new NoEncontradoError(`No existe la clase ${datos.claseId}`);
+    if (unica.horarioId !== null) throw new ReglaDeNegocioError('La clase ya es de un horario');
+    if (unica.semana !== (datos.desde ?? lunesDe(hoy))) {
+      throw new ReglaDeNegocioError('La clase única tiene que estar en la semana desde la que rige el horario');
     }
-    await generarClases(tx, hoy, creado.id);
-    return creado;
-  });
+    await repo.asignarHorario(ej, unica.id, creado.id);
+  }
+  await generarClases(ej, hoy, creado.id);
+  return creado;
 }
 
 // Cambiar un horario cambia también sus clases desde la semana `desde` (o desde hoy) que todavía eran

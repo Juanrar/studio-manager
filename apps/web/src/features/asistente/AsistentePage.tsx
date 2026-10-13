@@ -57,14 +57,17 @@ export function AsistentePage() {
               >
                 {mensaje.texto}
               </div>
-              {mensaje.propuestas.map(({ propuesta, creada }, indice) => (
-                <TarjetaDePropuesta
-                  key={indice}
-                  propuesta={propuesta}
-                  creada={creada}
-                  alCrearse={(enlace) => conversacion.marcarCreada(mensaje.id, indice, enlace)}
-                />
-              ))}
+              {mensaje.propuestas.map(({ propuesta, creada }, indice) =>
+                // La tarjeta del alta de profesor llega en la tarea 4.
+                propuesta.tipo === 'altaDeProfesor' ? null : (
+                  <TarjetaDePropuesta
+                    key={indice}
+                    propuesta={propuesta}
+                    creada={creada}
+                    alCrearse={(enlace) => conversacion.marcarCreada(mensaje.id, indice, enlace)}
+                  />
+                ),
+              )}
             </Fragment>
           ))}
           {esperando && <p className="text-tenue">Pensando...</p>}

@@ -7,7 +7,7 @@ export const horaSchema = z
   .string()
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'La hora tiene que tener el formato HH:MM');
 
-const diaSemanaSchema = z
+export const diaSemanaSchema = z
   .number()
   .int()
   .min(1, 'El día va de 1 (lunes) a 7 (domingo)')

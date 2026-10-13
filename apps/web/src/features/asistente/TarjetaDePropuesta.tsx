@@ -12,7 +12,7 @@ export function TarjetaDePropuesta({
   creada,
   alCrearse,
 }: {
-  propuesta: PropuestaDelAsistente;
+  propuesta: Exclude<PropuestaDelAsistente, { tipo: 'altaDeProfesor' }>;
   creada: { enlace: string } | undefined;
   alCrearse: (enlace: string) => void;
 }) {

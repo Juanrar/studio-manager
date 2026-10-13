@@ -111,12 +111,12 @@ Devuelve al modelo `PROPUESTA_MOSTRADA` y a la web la propuesta `{ tipo: 'altaDe
 
 **Produce:** `altaDeProfesorSchema`, `AltaDeProfesorInput`, `darDeAltaProfesor(datos, hoy)`, `POST /api/asistente/altas-de-profesor`.
 
-- [ ] **Paso 1:** escribir `alta-de-profesor.test.ts`, con la base real y la app de test. Casos:
+- [x] **Paso 1:** escribir `alta-de-profesor.test.ts`, con la base real y la app de test. Casos:
   - Como admin, el cuerpo de la sección API responde 201 con `{ id, nombre: 'Lucía', apellido: 'Fernández', dni: '30123456', email: null, telefono: null, aliasCbu: null, activo: true, porcentajeVigenteBp: 5000 }`. `GET /api/horarios?profesorId=<id>` trae los dos horarios y `GET /api/clases?desde=2026-03-09&hasta=2026-03-15` trae las clases del martes 10 y del jueves 12.
   - Llamando a `darDeAltaProfesor` directo, sin Zod, con un segundo horario de `21:00` a `20:00`: lanza el error del check y `listarProfesores(true, '2026-03-10')` sigue vacío, igual que la tabla `horario`.
   - Recepción recibe 403. `horarios: []` da 400.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test alta-de-profesor` y verificar que fallan porque la ruta no existe.
-- [ ] **Paso 3:** implementar. En `packages/shared/src/asistente.ts`:
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test alta-de-profesor` y verificar que fallan porque la ruta no existe.
+- [x] **Paso 3:** implementar. En `packages/shared/src/asistente.ts`:
 
 ```ts
 const horarioDelAltaSchema = z
@@ -140,7 +140,7 @@ export const altaDeProfesorSchema = z.object({
 export type AltaDeProfesorInput = z.infer<typeof altaDeProfesorSchema>;
 ```
 
-Y sumar a `PropuestaDelAsistente` el caso `| { tipo: 'altaDeProfesor'; datos: AltaDeProfesorInput }`. El caso nuevo rompe el typecheck de la web, que todavía no sabe mostrarlo: en esta tarea `TarjetaDePropuesta` devuelve `null` para `altaDeProfesor`, y la tarea 4 lo reemplaza por la tarjeta.
+Y sumar a `PropuestaDelAsistente` el caso `| { tipo: 'altaDeProfesor'; datos: AltaDeProfesorInput }`. El caso nuevo rompe el typecheck de la web, que todavía no sabe mostrarlo: en esta tarea `AsistentePage` no dibuja nada para `altaDeProfesor` (`TarjetaDePropuesta` recibe el tipo sin ese caso, porque un `return null` antes de los hooks rompería su orden), y la tarea 4 lo reemplaza por la tarjeta.
 
 En `profesores.service.ts`, separar la escritura:
 
@@ -193,7 +193,7 @@ export async function darDeAltaProfesor(datos: AltaDeProfesorInput, hoy: FechaDi
 
 La ruta: `app.post('/api/asistente/altas-de-profesor', { preHandler: requerirRol('admin') }, ...)` con `altaDeProfesorSchema.parse(request.body)` y `reply.status(201).send(...)`. No necesita el modelo: funciona aunque falte `GEMINI_API_KEY`.
 
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan, también los tests de profesores y de horarios que ya existían.
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan, también los tests de profesores y de horarios que ya existían.
 - [ ] **Paso 5:** commit `feat(asistente): dar de alta un profesor con sus horarios`.
 
 ### Tarea 2: La herramienta del alta
