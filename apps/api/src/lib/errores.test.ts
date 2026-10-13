@@ -3,6 +3,7 @@ import {
   esErrorDeDominio,
   NoEncontradoError,
   ReglaDeNegocioError,
+  ServicioNoDisponibleError,
   SinPermisoError,
 } from './errores.ts';
 
@@ -22,6 +23,15 @@ describe('errores de dominio', () => {
 
   it('SinPermisoError usa el código 403', () => {
     expect(new SinPermisoError('Necesitás rol admin').codigoHttp).toBe(403);
+  });
+
+  it('ServicioNoDisponibleError usa el código 503 y conserva el código', () => {
+    const error = new ServicioNoDisponibleError('El asistente está saturado', 'MODELO_SATURADO');
+
+    expect(error.codigoHttp).toBe(503);
+    expect(error.codigo).toBe('MODELO_SATURADO');
+    expect(error.message).toBe('El asistente está saturado');
+    expect(error.name).toBe('ServicioNoDisponibleError');
   });
 
   it('esErrorDeDominio distingue los errores propios de los demás', () => {

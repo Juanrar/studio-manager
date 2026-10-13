@@ -27,6 +27,11 @@ export class SinPermisoError extends ErrorDeDominio {
   override readonly codigoHttp = 403;
 }
 
+// Un servicio externo no responde: la cuota del asistente se terminó o el modelo está saturado.
+export class ServicioNoDisponibleError extends ErrorDeDominio {
+  override readonly codigoHttp = 503;
+}
+
 export function esErrorDeDominio(error: unknown): error is ErrorDeDominio {
   return error instanceof ErrorDeDominio;
 }

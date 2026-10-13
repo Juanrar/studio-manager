@@ -205,7 +205,7 @@ El historial vive en el estado de la página: recargar la página empieza una co
 
 **Produce:** `ModeloDeLenguaje`, `crearModeloGemini(opciones)`, `ServicioNoDisponibleError`, `config.gemini`.
 
-- [ ] **Paso 1:** escribir los tests. `gemini.test.ts` no necesita la base: el `fetch` falso devuelve respuestas grabadas y guarda los pedidos. La respuesta grabada es la real del 2026-10-13:
+- [x] **Paso 1:** escribir los tests. `gemini.test.ts` no necesita la base: el `fetch` falso devuelve respuestas grabadas y guarda los pedidos. La respuesta grabada es la real del 2026-10-13:
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -354,8 +354,8 @@ describe('crearModeloGemini', () => {
 
 En `errores.test.ts`, sumar que `ServicioNoDisponibleError` tiene `codigoHttp` 503 y conserva su `codigo`, como los tests de las otras clases.
 
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test gemini errores` y verificar que fallan porque no existen `gemini.ts` ni `ServicioNoDisponibleError`.
-- [ ] **Paso 3:** implementar. En `lib/errores.ts`:
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test gemini errores` y verificar que fallan porque no existen `gemini.ts` ni `ServicioNoDisponibleError`.
+- [x] **Paso 3:** implementar. En `lib/errores.ts`:
 
 ```ts
 // Un servicio externo no responde: la cuota del asistente se terminó o el modelo está saturado.
@@ -555,7 +555,7 @@ En `.env.example`, al final:
 # GEMINI_MODELO_RESPALDO=gemini-3.1-flash-lite
 ```
 
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test gemini errores` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test gemini errores` y `pnpm typecheck`, y verificar que pasan.
 - [ ] **Paso 5:** commit `feat(asistente): cliente de Gemini con modelo de respaldo`.
 
 ### Tarea 2: Las herramientas
