@@ -264,7 +264,7 @@ export const proponerAltaDeProfesor: Herramienta = {
 `sinTildes` pasa de `consultas.ts` a un archivo propio del módulo (`texto.ts`) para usarla en los dos. En `instrucciones.ts`, para admin: "Para sumar un profesor nuevo usá proponer_alta_de_profesor. No pidas DNI, email, teléfono ni alias: se completan en la tarjeta."
 
 - [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(asistente): proponer el alta de un profesor`.
+- [x] **Paso 5:** commit `feat(asistente): proponer el alta de un profesor`.
 
 ### Tarea 3: La semana incrustada
 
@@ -274,14 +274,14 @@ export const proponerAltaDeProfesor: Herramienta = {
 
 **Produce:** `VistaDeSemana` con `incrustada`, `clasesDeLaPropuesta(alta, hoy)`, `rangoDeHoras(clases)`, `fechasDeLaSemana(hoy)`.
 
-- [ ] **Paso 1:** escribir los tests.
+- [x] **Paso 1:** escribir los tests.
   - `grillaDeLaPropuesta.test.ts`, sin DOM: con hoy `2026-10-13` (martes) y los horarios de martes y jueves de 19:00 a 20:30, `clasesDeLaPropuesta` devuelve dos clases con `fecha` `2026-10-13` y `2026-10-15`, `id` `-1` y `-2`, `profesor: { id: 0, nombre: 'Lucía', apellido: 'Fernández' }`, `horarioId: null`, `estado: 'programada'`, `tieneCambios: false` y `asistentes: 0`. `rangoDeHoras` da `{ inicio: 1080, fin: 1320 }` para esas clases, `{ inicio: 360, fin: 540 }` para una de 07:00 a 08:00 y `{ inicio: 1320, fin: 1440 }` para una de 23:00 a 23:30. `fechasDeLaSemana('2026-10-13')` da del lunes 12 al domingo 18.
   - `semana-incrustada.test.tsx` renderiza `VistaDeSemana` sola, sin la app, con `incrustada={{ inicio: 1080, fin: 1320 }}`, las fechas de la semana y la clase de las 19:00 del martes. Verifica: la clase está en el grupo "Martes 13" con su `aria-label` (`getByLabelText`), no hay ningún `button`, se ven "18:00" y "22:00", no se ve "08:00", y el estilo de la clase tiene `top: 64px` (60 minutos por 1,05 px, más 1).
-- [ ] **Paso 2:** correr `pnpm --filter @studio/web test grillaDeLaPropuesta semana-incrustada` y verificar que fallan.
-- [ ] **Paso 3:** implementar.
+- [x] **Paso 2:** correr `pnpm --filter @studio/web test grillaDeLaPropuesta semana-incrustada` y verificar que fallan.
+- [x] **Paso 3:** implementar.
   - En `VistaDeSemana`, las props pasan a una unión: `{ interacciones: InteraccionesDeLaGrilla; incrustada?: undefined } | { incrustada: { inicio: number; fin: number }; interacciones?: undefined }`. Lo que hoy usa `INICIO_GRILLA` y `FIN_GRILLA` para ubicar (las horas, las líneas, `ClaseEnLaGrilla`, el fantasma) usa el inicio y el fin del rango, que por defecto son esas constantes. `ALTO` y `HORAS` pasan a calcularse con el rango. Incrustada: el contenedor no lleva `-m-4` ni `h-[calc(100%+2rem)]`, el cuerpo no tiene `overflow-auto`, no hay `LineaDeAhora` ni `EtiquetaDeAhora` (y por eso ninguna hora en punto se esconde), y `ClaseEnLaGrilla` recibe `soloLectura`: sin `role="button"`, sin `tabIndex` y sin manejadores de puntero, con el mismo `aria-label`.
   - `grillaDeLaPropuesta.ts` con `lunesDe` y `sumarDias` de `lib/formato.ts`, y `aMinutos` de `features/grilla/minutos.ts`.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan, con los tests de la grilla que ya existían.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan, con los tests de la grilla que ya existían.
 - [ ] **Paso 5:** commit `refactor(grilla): semana de solo lectura con rango de horas`.
 
 ### Tarea 4: La tarjeta del alta

@@ -10,8 +10,6 @@ import type { Fantasma } from './useArrastre.ts';
 // Sirve para la semana (siete columnas) y para un día (una columna ancha). Los días que ya pasaron se ven
 // igual pero no se editan.
 
-const ALTO = (FIN_GRILLA - INICIO_GRILLA) * PX_POR_MINUTO;
-const HORAS = Array.from({ length: (FIN_GRILLA - INICIO_GRILLA) / 60 + 1 }, (_, i) => INICIO_GRILLA + i * 60);
 const SANGRIA = 10;
 
 // El texto en el color del estilo, más claro para que se lea sobre el fondo oscuro. El fondo se mezcla con
@@ -35,29 +33,30 @@ export type InteraccionesDeLaGrilla = {
   alApretarHueco: (evento: PointerEvent, fecha: string) => void;
 };
 
-export function VistaDeSemana({
-  fechas,
-  clases,
-  hoy,
-  interacciones,
-}: {
-  fechas: string[];
-  clases: Clase[];
-  hoy: string;
-  interacciones: InteraccionesDeLaGrilla;
-}) {
+// Sin `incrustada` es la grilla de la página, editable. Con `incrustada` es de solo lectura, con ese rango de horas
+// (minutos desde las 00:00), para mostrarla dentro de otra pantalla.
+type PropsDeVistaDeSemana = { fechas: string[]; clases: Clase[]; hoy: string } & (
+  | { interacciones: InteraccionesDeLaGrilla; incrustada?: undefined }
+  | { incrustada: { inicio: number; fin: number }; interacciones?: undefined }
+);
+
+export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada }: PropsDeVistaDeSemana) {
+  const inicioDelRango = incrustada?.inicio ?? INICIO_GRILLA;
+  const finDelRango = incrustada?.fin ?? FIN_GRILLA;
+  const alto = (finDelRango - inicioDelRango) * PX_POR_MINUTO;
+  const horas = Array.from({ length: (finDelRango - inicioDelRango) / 60 + 1 }, (_, i) => inicioDelRango + i * 60);
   const ancha = fechas.length === 1;
   const lugares = acomodarEnCascada(
     clases.map((clase) => ({ id: clase.id, fecha: clase.fecha, inicio: aMinutos(clase.horaInicio), fin: aMinutos(clase.horaFin) })),
   );
   const columnas = { gridTemplateColumns: `repeat(${fechas.length}, minmax(0, 1fr))` };
-  const { fantasma } = interacciones;
+  const fantasma = interacciones?.fantasma ?? null;
   // La etiqueta roja de la hora actual tapa la hora en punto que tenga cerca: esa no se escribe.
-  const ahora = fechas.includes(hoy) ? minutosDeAhora() : null;
-  const horasConEtiqueta = HORAS.filter((minutos) => ahora === null || Math.abs(minutos - ahora) >= 15);
+  const ahora = !incrustada && fechas.includes(hoy) ? minutosDeAhora() : null;
+  const horasConEtiqueta = horas.filter((minutos) => ahora === null || Math.abs(minutos - ahora) >= 15);
 
   return (
-    <div className="-m-4 flex h-[calc(100%+2rem)] flex-col">
+    <div className={incrustada ? 'flex flex-col' : '-m-4 flex h-[calc(100%+2rem)] flex-col'}>
       <div className="grid flex-none grid-cols-[64px_minmax(0,1fr)] border-b border-borde">
         <div />
         <div className="grid" style={columnas}>
@@ -74,26 +73,26 @@ export function VistaDeSemana({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div className={incrustada ? undefined : 'min-h-0 flex-1 overflow-auto'}>
         <div className="grid grid-cols-[64px_minmax(0,1fr)] pt-2 pb-16">
-          <div className="relative" style={{ height: ALTO }}>
+          <div className="relative" style={{ height: alto }}>
             {horasConEtiqueta.map((minutos) => (
               <span
                 key={minutos}
                 className="absolute right-2 -translate-y-1/2 text-xs font-medium text-tenue tabular-nums"
-                style={{ top: (minutos - INICIO_GRILLA) * PX_POR_MINUTO }}
+                style={{ top: (minutos - inicioDelRango) * PX_POR_MINUTO }}
               >
                 {aHora(minutos)}
               </span>
             ))}
-            {fechas.includes(hoy) && <EtiquetaDeAhora />}
+            {!incrustada && fechas.includes(hoy) && <EtiquetaDeAhora />}
           </div>
-          <div ref={interacciones.columnas} className="relative grid select-none" style={{ ...columnas, height: ALTO }}>
-            {HORAS.map((minutos) => (
+          <div ref={interacciones?.columnas} className="relative grid select-none" style={{ ...columnas, height: alto }}>
+            {horas.map((minutos) => (
               <div
                 key={minutos}
                 className="pointer-events-none absolute inset-x-0 border-t border-borde"
-                style={{ top: (minutos - INICIO_GRILLA) * PX_POR_MINUTO }}
+                style={{ top: (minutos - inicioDelRango) * PX_POR_MINUTO }}
               />
             ))}
             {fechas.map((fecha, indice) => (
@@ -104,7 +103,7 @@ export function VistaDeSemana({
                 className="relative border-l border-borde"
                 // Crear en un hueco solo con el mouse: con el dedo, apretar un hueco es empezar a desplazarse.
                 onPointerDown={(evento) => {
-                  if (evento.pointerType === 'mouse' && fecha >= hoy) interacciones.alApretarHueco(evento, fecha);
+                  if (interacciones && evento.pointerType === 'mouse' && fecha >= hoy) interacciones.alApretarHueco(evento, fecha);
                 }}
               >
                 {clases
@@ -115,25 +114,30 @@ export function VistaDeSemana({
                       clase={clase}
                       lugar={lugares.get(clase.id)!}
                       ancha={ancha}
+                      inicioDelRango={inicioDelRango}
                       editable={fecha >= hoy}
                       atenuada={fantasma?.id === clase.id}
-                      elegida={interacciones.idElegido === clase.id}
-                      alApretar={(evento) => interacciones.alApretarClase(evento, clase)}
-                      alEstirar={(evento) => interacciones.alEstirarClase(evento, clase)}
+                      {...(interacciones
+                        ? {
+                            elegida: interacciones.idElegido === clase.id,
+                            alApretar: (evento: PointerEvent) => interacciones.alApretarClase(evento, clase),
+                            alEstirar: (evento: PointerEvent) => interacciones.alEstirarClase(evento, clase),
+                          }
+                        : { soloLectura: true })}
                     />
                   ))}
                 {fantasma && fantasma.dia === indice + 1 && (
                   <div
                     className="pointer-events-none absolute inset-x-1 z-30 rounded border border-dashed border-acento/70 bg-acento/15 px-2 py-1 text-xs font-medium"
                     style={{
-                      top: (fantasma.inicio - INICIO_GRILLA) * PX_POR_MINUTO,
+                      top: (fantasma.inicio - inicioDelRango) * PX_POR_MINUTO,
                       height: (fantasma.fin - fantasma.inicio) * PX_POR_MINUTO - 2,
                     }}
                   >
                     {aHora(fantasma.inicio)} - {aHora(fantasma.fin)}
                   </div>
                 )}
-                {fecha === hoy && <LineaDeAhora />}
+                {!incrustada && fecha === hoy && <LineaDeAhora />}
               </div>
             ))}
           </div>
@@ -147,43 +151,43 @@ function ClaseEnLaGrilla({
   clase,
   lugar,
   ancha,
+  inicioDelRango,
   editable,
   atenuada,
-  elegida,
-  alApretar,
-  alEstirar,
+  ...resto
 }: {
   clase: Clase;
   lugar: Lugar;
   ancha: boolean;
+  inicioDelRango: number;
   editable: boolean;
   atenuada: boolean;
-  elegida: boolean;
-  alApretar: (evento: PointerEvent) => void;
-  alEstirar: (evento: PointerEvent) => void;
-}) {
+} & (
+  | { soloLectura?: undefined; elegida: boolean; alApretar: (evento: PointerEvent) => void; alEstirar: (evento: PointerEvent) => void }
+  | { soloLectura: true; elegida?: undefined; alApretar?: undefined; alEstirar?: undefined }
+)) {
   const color = colorDeNombre(clase.estilo);
   const inicio = aMinutos(clase.horaInicio);
   const alto = (aMinutos(clase.horaFin) - inicio) * PX_POR_MINUTO - 2;
   const corrimiento = lugar.sangria * SANGRIA;
   const cancelada = clase.estado === 'cancelada';
   const profesor = `${clase.profesor.nombre} ${clase.profesor.apellido}`;
-  const arrastrable = editable && !cancelada;
+  const { soloLectura, elegida, alApretar, alEstirar } = resto;
+  const arrastrable = !soloLectura && editable && !cancelada;
 
   return (
     <div
-      role="button"
-      tabIndex={0}
+      {...(soloLectura ? {} : { role: 'button', tabIndex: 0 })}
       aria-label={nombreDeLaClase(clase)}
       data-clase={clase.id}
-      onPointerDown={alApretar}
+      onPointerDown={soloLectura ? undefined : alApretar}
       className={`absolute overflow-hidden rounded py-1 pr-1.5 pl-2.5 text-xs leading-snug ${
         cancelada ? 'line-through opacity-50 hover:opacity-80' : 'hover:brightness-125'
-      } ${arrastrable ? 'cursor-grab touch-none active:cursor-grabbing' : editable ? 'cursor-pointer' : ''} ${
+      } ${arrastrable ? 'cursor-grab touch-none active:cursor-grabbing' : !soloLectura && editable ? 'cursor-pointer' : ''} ${
         atenuada ? 'opacity-30' : ''
       } ${elegida ? 'ring-1 ring-white/50' : ''}`}
       style={{
-        top: (inicio - INICIO_GRILLA) * PX_POR_MINUTO + 1,
+        top: (inicio - inicioDelRango) * PX_POR_MINUTO + 1,
         height: alto,
         left: `calc(${corrimiento}px + (100% - ${corrimiento}px) * ${lugar.carril / lugar.carriles} + 2px)`,
         width: `calc((100% - ${corrimiento}px) / ${lugar.carriles} - 4px)`,
@@ -205,7 +209,7 @@ function ClaseEnLaGrilla({
         </p>
       )}
       {!ancha && alto >= 64 && <p className="truncate opacity-70">{profesor}</p>}
-      {arrastrable && <div onPointerDown={alEstirar} className="absolute inset-x-0 bottom-0 h-2 cursor-ns-resize" />}
+      {arrastrable && alEstirar && <div onPointerDown={alEstirar} className="absolute inset-x-0 bottom-0 h-2 cursor-ns-resize" />}
     </div>
   );
 }
