@@ -1,5 +1,12 @@
 import { ZodError } from 'zod';
-import type { MensajeAlAsistenteInput, PropuestaDelAsistente, RespuestaDelAsistente, Rol } from '@studio/shared';
+import {
+  CONVERSACION_LARGA,
+  ELEMENTOS_MAXIMOS_DEL_HISTORIAL,
+  type MensajeAlAsistenteInput,
+  type PropuestaDelAsistente,
+  type RespuestaDelAsistente,
+  type Rol,
+} from '@studio/shared';
 import { esErrorDeDominio, ReglaDeNegocioError } from '../../lib/errores.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 import { herramientasPara, type ContextoDeHerramienta, type Herramienta, type SalidaDeHerramienta } from './herramientas.ts';
@@ -14,6 +21,9 @@ export async function conversar(
   entrada: MensajeAlAsistenteInput,
   contexto: { hoy: FechaDia; rol: Rol },
 ): Promise<RespuestaDelAsistente> {
+  if (entrada.historial.length > ELEMENTOS_MAXIMOS_DEL_HISTORIAL) {
+    throw new ReglaDeNegocioError('La conversación es muy larga: empezá una nueva', CONVERSACION_LARGA);
+  }
   const herramientas = herramientasPara(contexto.rol);
   const texto = instrucciones(contexto.hoy, contexto.rol);
   const propuestas: PropuestaDelAsistente[] = [];

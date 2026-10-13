@@ -216,6 +216,34 @@ describe('POST /api/asistente/mensajes', () => {
     expect(respuesta.statusCode).toBe(400);
   });
 
+  it('un historial de más de 80 elementos responde 422 CONVERSACION_LARGA sin llamar al modelo', async () => {
+    await crearUsuarioDeTest(ADMIN);
+    const modelo = crearModeloFalso([{ texto: 'Hola' }]);
+    app = await crearAppDeTest({ modelo });
+    const cookie = await loguear(app, ADMIN.email, ADMIN.password);
+    const historial = Array.from({ length: 81 }, () => ({ rol: 'usuario', texto: 'Hola' }));
+
+    const respuesta = await preguntar(cookie, { historial, mensaje: 'Hola' });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({ error: 'La conversación es muy larga: empezá una nueva', codigo: 'CONVERSACION_LARGA' });
+    expect(modelo.pedidos).toEqual([]);
+  });
+
+  it('un historial de 80 elementos todavía llega al modelo', async () => {
+    await crearUsuarioDeTest(ADMIN);
+    const modelo = crearModeloFalso([{ texto: 'Hola' }]);
+    app = await crearAppDeTest({ modelo });
+    const cookie = await loguear(app, ADMIN.email, ADMIN.password);
+    const historial = Array.from({ length: 80 }, () => ({ rol: 'usuario', texto: 'Hola' }));
+
+    const respuesta = await preguntar(cookie, { historial, mensaje: 'Hola' });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json()).toEqual({ historial: expect.any(Array), texto: 'Hola', propuestas: [] });
+    expect(modelo.pedidos).toHaveLength(1);
+  });
+
   it('sin modelo configurado responde 503 con el código ASISTENTE_SIN_CONFIGURAR', async () => {
     await crearUsuarioDeTest(ADMIN);
     app = await crearAppDeTest();

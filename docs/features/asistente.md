@@ -73,7 +73,8 @@ Errores:
 | Caso | Respuesta |
 |---|---|
 | Sin sesión | 401 |
-| `mensaje` vacío o de más de 2000 caracteres, `historial` de más de 80 elementos | 400 |
+| `mensaje` vacío o de más de 2000 caracteres | 400 |
+| `historial` de más de 80 elementos | 422, `codigo: 'CONVERSACION_LARGA'`, sin llamar al modelo |
 | Falta `GEMINI_API_KEY` | 503, `codigo: 'ASISTENTE_SIN_CONFIGURAR'` |
 | Los dos modelos sin cuota (429) | 503, `codigo: 'CUOTA_AGOTADA'` |
 | Los dos modelos saturados (500, 503 o 504), sin red o sin respuesta en 45 segundos | 503, `codigo: 'MODELO_SATURADO'` |
@@ -190,6 +191,7 @@ El historial vive en el estado de la página: recargar la página empieza una co
 | A recepción se le ofrecen solo `buscar_profesores` y `listar_clases`; si el modelo pide `proponer_clase_unica`, recibe "No existe la herramienta" | Integración HTTP con modelo falso | Filtrar mal por rol |
 | Argumentos inválidos y errores de dominio vuelven al modelo como `{ error }` y la respuesta es 200 | Integración HTTP con modelo falso | Convertirlos en 400 o 500 y cortar la conversación |
 | 6 vueltas sin texto dan 422 | Integración HTTP con modelo falso | Un ciclo sin fin que gasta la cuota |
+| Un historial de 81 elementos da 422 `CONVERSACION_LARGA` y el modelo no recibe nada; uno de 80 todavía pasa | Integración HTTP con modelo falso | Volver a validar el largo con Zod, que responde "Datos inválidos" y la web no puede ofrecer empezar de nuevo |
 | Sin sesión 401, mensaje vacío 400, sin modelo configurado 503 `ASISTENTE_SIN_CONFIGURAR` | Integración HTTP | La validación de entrada |
 | Enviar muestra el mensaje y la respuesta, y el segundo envío manda el historial que llegó en el primero | Web | Perder el historial entre mensajes |
 | Enter envía y Shift+Enter agrega un renglón | Web | El atajo del campo |
@@ -610,6 +612,8 @@ export type RespuestaDelAsistente = {
   propuestas: PropuestaDelAsistente[];
 };
 ```
+
+Nota de la revisión final: el `.max(...)` de `historial` salió del esquema. Zod lo convertía en un 400 "Datos inválidos" y la web nunca mostraba el motivo ni podía ofrecer empezar de nuevo. Ahora lo controla `conversar`, que lanza `ReglaDeNegocioError` con el código `CONVERSACION_LARGA` (constante en `asistente.ts`). Cada pedido suma de 4 a 6 elementos, no 2.
 
 Y `export * from './asistente.ts';` en `index.ts`.
 

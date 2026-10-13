@@ -4,12 +4,17 @@ import type { CrearClaseUnicaInput } from './clases.ts';
 import type { CrearHorarioInput } from './horarios.ts';
 
 export const LARGO_MAXIMO_DEL_MENSAJE = 2000;
-// Cada vuelta suma dos elementos al historial: con 80 entra una conversación larga.
+// Cada pedido suma de 4 a 6 elementos al historial: el mensaje, las llamadas a funciones, sus resultados y el
+// texto final. Con 80 entran unos 15 a 20 pedidos.
 export const ELEMENTOS_MAXIMOS_DEL_HISTORIAL = 80;
 
+// Código de error que manda la API cuando el historial pasa de ELEMENTOS_MAXIMOS_DEL_HISTORIAL.
+export const CONVERSACION_LARGA = 'CONVERSACION_LARGA';
+
 export const mensajeAlAsistenteSchema = z.object({
-  // Lo arma el proveedor del modelo: la web lo devuelve sin mirarlo.
-  historial: z.array(z.unknown()).max(ELEMENTOS_MAXIMOS_DEL_HISTORIAL, 'La conversación es muy larga: empezá una nueva'),
+  // Lo arma el proveedor del modelo: la web lo devuelve sin mirarlo. El largo lo controla la API, que
+  // responde CONVERSACION_LARGA para que la web ofrezca empezar de nuevo.
+  historial: z.array(z.unknown()),
   mensaje: z.string().trim().min(1, 'Escribí un mensaje').max(LARGO_MAXIMO_DEL_MENSAJE, 'El mensaje es muy largo'),
 });
 
