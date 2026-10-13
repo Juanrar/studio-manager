@@ -556,7 +556,7 @@ En `.env.example`, al final:
 ```
 
 - [x] **Paso 4:** correr `pnpm --filter @studio/api test gemini errores` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(asistente): cliente de Gemini con modelo de respaldo`.
+- [x] **Paso 5:** commit `feat(asistente): cliente de Gemini con modelo de respaldo`.
 
 ### Tarea 2: Las herramientas
 
@@ -567,15 +567,15 @@ En `.env.example`, al final:
 **Consume:** `DefinicionDeHerramienta` de la tarea 1.
 **Produce:** `PropuestaDelAsistente`, `RespuestaDelAsistente`, `mensajeAlAsistenteSchema`, `Herramienta`, `herramientasPara(rol)`.
 
-- [ ] **Paso 1:** escribir `herramientas.test.ts`, un test de service con base real como `usuarios.service.test.ts`. Llama a `herramienta.ejecutar(argumentos, { hoy: '2026-03-10' })` directo. Casos:
+- [x] **Paso 1:** escribir `herramientas.test.ts`, un test de service con base real como `usuarios.service.test.ts`. Llama a `herramienta.ejecutar(argumentos, { hoy: '2026-03-10' })` directo. Casos:
   - `buscar_profesores` con `{ texto: 'martin' }` y con `{ texto: 'gomez martin' }` devuelve `{ resultado: { profesores: [{ id, nombre: 'Martín', apellido: 'Gómez' }] } }` para un profesor creado con DNI, email y teléfono: la aserción completa prueba que esos campos no salen. Un profesor dado de baja con el mismo nombre no aparece.
   - `listar_clases` con un horario de Erik los martes, del `2026-03-09` al `2026-03-15`, devuelve la clase del 10 con `profesor: 'Erik Zapata'` y `repiteCadaSemana: true`. Para tener la clase, `generarClases(db, '2026-03-10')`, como dice CLAUDE.md. Del `2026-03-01` al `2026-04-15` lanza `ReglaDeNegocioError`.
   - `proponer_clase_unica` con datos válidos devuelve `{ resultado: PROPUESTA_MOSTRADA, propuesta: { tipo: 'claseUnica', datos, profesor: { id, nombre: 'Erik', apellido: 'Zapata' } } }`, y la tabla `clase` sigue vacía.
   - `proponer_clase_unica` con `fecha: '2026-03-09'`, con un profesor dado de baja y con `horaFin` antes de `horaInicio` lanza el error con su motivo (`ReglaDeNegocioError` o `ZodError`).
   - `proponer_horario` con datos válidos y un `desde` de más devuelve `datos` sin `desde`; con `diaSemana: 8` lanza `ZodError`.
   - `herramientasPara('recepcion')` da `['buscar_profesores', 'listar_clases']` y `herramientasPara('admin')` suma `proponer_clase_unica` y `proponer_horario`.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test herramientas` y verificar que fallan porque no existen los módulos.
-- [ ] **Paso 3:** implementar. En `packages/shared/src/asistente.ts`:
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test herramientas` y verificar que fallan porque no existen los módulos.
+- [x] **Paso 3:** implementar. En `packages/shared/src/asistente.ts`:
 
 ```ts
 import { z } from 'zod';
@@ -766,7 +766,7 @@ export const proponerHorario: Herramienta = {
 
 Si `as const` en `CAMPOS_DE_UNA_CLASE` choca con el tipo `EsquemaDeCampo`, declararlo como `Record<string, EsquemaDeCampo>`.
 
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test herramientas` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test herramientas` y `pnpm typecheck`, y verificar que pasan.
 - [ ] **Paso 5:** commit `feat(asistente): herramientas para consultar y proponer clases`.
 
 ### Tarea 3: La conversación por la API
