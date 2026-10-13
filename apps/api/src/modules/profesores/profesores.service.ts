@@ -23,14 +23,20 @@ export async function crearProfesor(datos: CrearProfesorInput, hoy: FechaDia): P
 // Recibe el ejecutor para que el asistente cree al profesor y sus horarios en una sola transacción.
 export async function crearProfesorEn(ej: Ejecutor, datos: CrearProfesorInput, hoy: FechaDia): Promise<number> {
   const { porcentajeBp, ...personales } = datos;
-  const id = await repo.insertar(ej, {
-    nombre: personales.nombre,
-    apellido: personales.apellido,
-    dni: personales.dni ?? null,
-    email: personales.email ?? null,
-    telefono: personales.telefono ?? null,
-    aliasCbu: personales.aliasCbu ?? null,
-  });
+  let id: number;
+  try {
+    id = await repo.insertar(ej, {
+      nombre: personales.nombre,
+      apellido: personales.apellido,
+      dni: personales.dni ?? null,
+      email: personales.email ?? null,
+      telefono: personales.telefono ?? null,
+      aliasCbu: personales.aliasCbu ?? null,
+    });
+  } catch (error) {
+    if (esViolacionUnica(error, 'profesor_dni_unique')) throw new ReglaDeNegocioError('Ya existe un profesor con ese DNI');
+    throw error;
+  }
   await repo.insertarPorcentaje(ej, { profesorId: id, porcentajeBp, vigenteDesde: hoy });
   return id;
 }

@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { ADMIN, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
+import { crearProfesorDeTest } from '../../../test/fabricas.ts';
 import { db } from '../../db/client.ts';
 import { horario, profesor as profesorTabla } from '../../db/schema.ts';
 import { esViolacionCheck } from '../../lib/postgres.ts';
@@ -158,6 +159,26 @@ describe('un segundo alta de la misma persona', () => {
     });
     expect(await db.select({ id: profesorTabla.id }).from(profesorTabla)).toEqual([{ id: primero.json().id }]);
     expect(await db.select().from(horario)).toHaveLength(2);
+  });
+});
+
+describe('un alta con el DNI de otro profesor', () => {
+  it('responde 422 y no crea nada', async () => {
+    await crearUsuarioDeTest(ADMIN);
+    const cookie = await loguear(app, ADMIN.email, ADMIN.password);
+    const existente = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata', dni: '30123456' });
+
+    const respuesta = await app.inject({
+      method: 'POST',
+      url: '/api/asistente/altas-de-profesor',
+      headers: { cookie },
+      payload: ALTA,
+    });
+
+    expect(respuesta.statusCode).toBe(422);
+    expect(respuesta.json()).toEqual({ error: 'Ya existe un profesor con ese DNI' });
+    expect(await db.select({ id: profesorTabla.id }).from(profesorTabla)).toEqual([{ id: existente.id }]);
+    expect(await db.select().from(horario)).toEqual([]);
   });
 });
 

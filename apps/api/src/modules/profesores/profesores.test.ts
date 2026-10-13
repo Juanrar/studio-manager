@@ -135,6 +135,15 @@ describe('/api/profesores', () => {
     expect(respuesta.json().detalles.map((d: { campo: string }) => d.campo)).toEqual(['porcentajeBp']);
   });
 
+  it('responde 422 si ya hay un profesor con ese DNI', async () => {
+    const primero = await crearProfesor(cookieAdmin, { ...MALENA, dni: '30123456' });
+    const repetido = await crearProfesor(cookieAdmin, { ...MALENA, nombre: 'Erik', apellido: 'Zapata', dni: '30123456' });
+
+    expect(primero.statusCode).toBe(201);
+    expect(repetido.statusCode).toBe(422);
+    expect(repetido.json()).toEqual({ error: 'Ya existe un profesor con ese DNI' });
+  });
+
   it('responde 422 si ya hay un porcentaje con la misma fecha', async () => {
     const profesor = (await crearProfesor(cookieAdmin, MALENA)).json();
     const cargar = () =>

@@ -506,14 +506,14 @@ describe('/asistente', () => {
     it('con 422 muestra el motivo en la tarjeta y deja volver a intentar', async () => {
       servidor.use(
         http.post('/api/asistente/altas-de-profesor', () =>
-          HttpResponse.json({ error: 'Ya existe un profesor con ese DNI.', codigo: 'REGLA_DE_NEGOCIO' }, { status: 422 }),
+          HttpResponse.json({ error: 'Ya existe un profesor con ese DNI', codigo: 'REGLA_DE_NEGOCIO' }, { status: 422 }),
         ),
       );
       const usuario = await pedirElAlta();
 
       await usuario.click(screen.getByRole('button', { name: 'Crear profesor' }));
 
-      expect(await screen.findByRole('alert')).toHaveTextContent('Ya existe un profesor con ese DNI.');
+      expect(await screen.findByRole('alert')).toHaveTextContent('Ya existe un profesor con ese DNI');
       expect(screen.getByRole('button', { name: 'Crear profesor' })).toBeEnabled();
       expect(screen.queryByText('Creado')).not.toBeInTheDocument();
     });
