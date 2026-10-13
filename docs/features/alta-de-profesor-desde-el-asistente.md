@@ -1,6 +1,6 @@
 # Alta de profesor desde el asistente
 
-**Estado:** en curso
+**Estado:** lista
 **Depende de:** asistente (27)
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; un administrador escribe "Sumá a Lucía Fernández, 50%, da Contemporáneo los martes y jueves de 19 a 20:30", ve una tarjeta con la semana dibujada como en la grilla, completa el DNI en la tarjeta, toca "Crear profesor" y la profesora queda creada con sus dos horarios y sus clases.
 
@@ -317,16 +317,16 @@ export const proponerAltaDeProfesor: Herramienta = {
 | "Sumá a una profesora nueva que da Salsa los lunes" | Pregunta nombre, porcentaje y horario. Sin propuesta |
 | "Sumá a {profesor}, 40%, da Jazz los viernes de 18 a 19" | Dice que ya existe y pregunta si es la misma persona |
 
-La frase 9 no se verificó el 2026-10-13: cinco corridas devolvieron 503 después del reintento con el modelo de respaldo. Hay que correrla cuando haya cuota. Las frases 10 y 11 pasaron.
+La frase 9 no se verificó en las primeras corridas del 2026-10-13: cinco devolvieron 503 después del reintento con el modelo de respaldo. Más tarde ese día pasó con `gemini-3.1-flash-lite`: propuesta `altaDeProfesor` con los martes y jueves de 19:00 a 20:30 y `porcentajeBp: 5000`. Las frases 10 y 11 pasaron.
 
 - [x] **Paso 2:** correr `pnpm --filter @studio/api asistente:probar`.
-- [ ] **Paso 3:** comparar con la tabla y ajustar las instrucciones o la descripción si hace falta. Anotar el resultado en la bitácora.
+- [x] **Paso 3:** comparar con la tabla y ajustar las instrucciones o la descripción si hace falta. Anotar el resultado en la bitácora.
 - [x] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
 - [x] **Paso 5:** commit `test(asistente): frases del alta de profesor`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
-- [ ] `pnpm e2e` pasa: la grilla de la página cambió por dentro.
-- [ ] Las frases de la tarea 5 se comportan como dice la tabla.
-- [ ] A mano, con `pnpm dev` y la clave en el `.env`: pedir el alta de Lucía, ver la semana en la tarjeta, completar el DNI, crear, abrir su ficha y ver sus clases en la grilla.
+- [x] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
+- [x] `pnpm e2e` pasa: la grilla de la página cambió por dentro.
+- [x] Las frases de la tarea 5 se comportan como dice la tabla.
+- [x] A mano, con `pnpm dev` y la clave en el `.env`: pedir el alta de Lucía, ver la semana en la tarjeta, completar el DNI, crear, abrir su ficha y ver sus clases en la grilla. Se hizo con Playwright en Chromium sobre la base del e2e: la tarjeta dibuja martes y jueves de 19:00 a 20:30, un DNI con puntos muestra el error del campo sin mandar nada, con el DNI correcto queda "Creado" y la ficha muestra 2 clases por semana. A 1280 px de ancho, cada día de la grilla de la tarjeta mide unos 80 px y el texto de la clase se corta.
