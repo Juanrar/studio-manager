@@ -3,6 +3,7 @@ import { AgendaPage } from './features/agenda/AgendaPage.tsx';
 import { ClasePage } from './features/agenda/ClasePage.tsx';
 import { AlumnosPage } from './features/alumnos/AlumnosPage.tsx';
 import { FichaAlumnoPage } from './features/alumnos/FichaAlumnoPage.tsx';
+import { AsistentePage } from './features/asistente/AsistentePage.tsx';
 import { LoginPage } from './features/auth/LoginPage.tsx';
 import { RequiereSesion, SoloAdmin } from './features/auth/RequiereSesion.tsx';
 import { GrillaPage } from './features/grilla/GrillaPage.tsx';
@@ -24,6 +25,7 @@ export const rutas: RouteObject[] = [
       { path: 'clases/:id', element: <ClasePage /> },
       // La ficha se abre en un panel encima de la lista, que sigue montada con su búsqueda.
       { path: 'alumnos', element: <AlumnosPage />, children: [{ path: ':id', element: <FichaAlumnoPage /> }] },
+      { path: 'asistente', element: <AsistentePage /> },
       {
         element: <SoloAdmin />,
         children: [

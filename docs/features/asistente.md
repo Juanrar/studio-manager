@@ -975,7 +975,7 @@ y registrar la ruta:
 En `test/app.ts`, `crearAppDeTest` pasa `modelo: null` antes de `...opciones`: un test nunca llama a Google aunque la máquina tenga la clave en el entorno.
 
 - [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(asistente): conversar con el asistente por la API`.
+- [x] **Paso 5:** commit `feat(asistente): conversar con el asistente por la API`.
 
 ### Tarea 4: La pantalla del chat
 
@@ -986,15 +986,15 @@ En `test/app.ts`, `crearAppDeTest` pasa `modelo: null` antes de `...opciones`: u
 **Consume:** `RespuestaDelAsistente`, `MensajeAlAsistenteInput` y `LARGO_MAXIMO_DEL_MENSAJE` (tarea 2), `POST /api/asistente/mensajes` (tarea 3).
 **Produce:** la ruta `/asistente` y el lugar donde la tarea 5 muestra las tarjetas.
 
-- [ ] **Paso 1:** escribir `asistente.test.tsx` con MSW, como `clase.test.tsx`. Casos:
+- [x] **Paso 1:** escribir `asistente.test.tsx` con MSW, como `clase.test.tsx`. Casos:
   - Escribir "¿Qué clases hay mañana?" en el campo "Mensaje para el asistente" y tocar "Enviar" muestra el mensaje y la respuesta "Mañana hay Hip-Hop a las 19:00.". El cuerpo recibido es `{ historial: [], mensaje: '¿Qué clases hay mañana?' }`.
   - El segundo envío manda el `historial` que devolvió el primero, por ejemplo `[{ rol: 'usuario' }, { rol: 'modelo' }]`.
   - Enter envía; Shift+Enter agrega un renglón y no manda nada.
   - Con un 503 `{ error: 'Se terminó la cuota del asistente por hoy. Probá mañana.', codigo: 'CUOTA_AGOTADA' }`, se ve ese texto y el campo conserva lo escrito.
   - Mientras espera, el botón "Enviar" está deshabilitado y se ve "Pensando...".
   - Recepción ve "Asistente" en el menú, en la sección Recepción.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/web test asistente` y verificar que fallan porque la ruta no existe.
-- [ ] **Paso 3:** implementar.
+- [x] **Paso 2:** correr `pnpm --filter @studio/web test asistente` y verificar que fallan porque la ruta no existe.
+- [x] **Paso 3:** implementar.
   - `api.ts`: `useConversar()`, un `useMutation` que hace `api.post<RespuestaDelAsistente>('/asistente/mensajes', entrada)`.
   - `AsistentePage.tsx` dentro de `Pagina` con título "Asistente". El estado: `historial: unknown[]` y `mensajes: { id: number; autor: 'usuario' | 'asistente'; texto: string; propuestas: PropuestaDelAsistente[] }[]`. Al enviar se agrega el mensaje del usuario; con la respuesta se reemplaza el historial y se agrega el mensaje del asistente. Si falla, se quita el mensaje del usuario, el texto vuelve al campo y el error se muestra con `Aviso` y `mensajeDeError`. El texto del asistente va con `whitespace-pre-wrap`, sin interpretar Markdown. La lista baja sola al último mensaje.
   - El campo es `AreaDeTexto` con `aria-label="Mensaje para el asistente"` y `maxLength={LARGO_MAXIMO_DEL_MENSAJE}`.
@@ -1011,7 +1011,7 @@ En `test/app.ts`, `crearAppDeTest` pasa `modelo: null` antes de `...opciones`: u
   ],
 ```
 
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
 - [ ] **Paso 5:** commit `feat(asistente): pantalla de chat`.
 
 ### Tarea 5: Confirmar una propuesta

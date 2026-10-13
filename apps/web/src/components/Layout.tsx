@@ -14,6 +14,7 @@ const SECCIONES: { titulo: string; rol: Rol; opciones: Opcion[] }[] = [
     opciones: [
       { ruta: '/agenda', texto: 'Agenda', icono: 'agenda' },
       { ruta: '/alumnos', texto: 'Alumnos', icono: 'alumnos' },
+      { ruta: '/asistente', texto: 'Asistente', icono: 'asistente' },
     ],
   },
   {
