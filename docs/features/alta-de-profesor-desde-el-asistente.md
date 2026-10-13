@@ -301,14 +301,14 @@ export const proponerAltaDeProfesor: Herramienta = {
   - `api.ts`: `useDarDeAltaProfesor()`, un `useMutation` con `api.post<Profesor>('/asistente/altas-de-profesor', datos)` que al terminar invalida `profesores`, `horarios`, `grilla`, `agenda` y `clases`, como `useRecargar` de `features/grilla/api.ts`.
   - `TarjetaDeAltaDeProfesor`: encabezado con `Avatar`, nombre y porcentaje (`formatearPorcentaje`); la semana con `VistaDeSemana` incrustada, `fechasDeLaSemana(hoyEnEstudio())` y `clasesDeLaPropuesta`; los campos DNI, Teléfono, Email y Alias o CBU con `Campo` y `Entrada`, con las etiquetas de `ProfesorForm`; el texto "Estos datos no pasan por el asistente." en `text-tenue`; y "Crear profesor".
 - [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan. Mirar la tarjeta en Chromium con el script de capturas que describe CLAUDE.md: jsdom no calcula el diseño. La mirada en Chromium queda para la verificación final.
-- [ ] **Paso 5:** commit `feat(asistente): el alta del profesor con su grilla`.
+- [x] **Paso 5:** commit `feat(asistente): el alta del profesor con su grilla`.
 
 ### Tarea 5: Frases de prueba
 
 **Archivos:**
 - Modificar: `apps/api/src/scripts/probar-asistente.ts`
 
-- [ ] **Paso 1:** sumar las frases:
+- [x] **Paso 1:** sumar las frases:
 
 | Frase | Qué tiene que pasar |
 |---|---|
@@ -316,9 +316,9 @@ export const proponerAltaDeProfesor: Herramienta = {
 | "Sumá a una profesora nueva que da Salsa los lunes" | Pregunta nombre, porcentaje y horario. Sin propuesta |
 | "Sumá a {profesor}, 40%, da Jazz los viernes de 18 a 19" | Dice que ya existe y pregunta si es la misma persona |
 
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api asistente:probar`.
-- [ ] **Paso 3:** comparar con la tabla y ajustar las instrucciones o la descripción si hace falta. Anotar el resultado en la bitácora.
-- [ ] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api asistente:probar`.
+- [x] **Paso 3:** comparar con la tabla y ajustar las instrucciones o la descripción si hace falta. Anotar el resultado en la bitácora.
+- [x] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
 - [ ] **Paso 5:** commit `test(asistente): frases del alta de profesor`.
 
 ## Verificación final

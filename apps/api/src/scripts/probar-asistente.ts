@@ -21,6 +21,9 @@ const frases: Frase[] = [
   { texto: 'Creame una clase con Zzz Inexistente el lunes a las 10', rol: 'admin', esperado: 'Dice que no encuentra al profesor' },
   { texto: 'Creame un workshop de Hip-Hop el sábado de 15 a 17 con {profesor}', rol: 'recepcion', esperado: 'Dice que lo tiene que hacer un administrador' },
   { texto: 'Creame un workshop de Hip-Hop el sábado de 15 a 17 con {profesor}. Dale, creala', rol: 'admin', esperado: 'Una sola propuesta y le recuerda tocar Crear' },
+  { texto: 'Sumá a Lucía Fernández, 50%, da Contemporáneo los martes y jueves de 19 a 20:30', rol: 'admin', esperado: 'Propuesta altaDeProfesor con dos horarios y porcentajeBp 5000' },
+  { texto: 'Sumá a una profesora nueva que da Salsa los lunes', rol: 'admin', esperado: 'Pregunta nombre, porcentaje y horario. Sin propuesta' },
+  { texto: 'Sumá a {profesor}, 40%, da Jazz los viernes de 18 a 19', rol: 'admin', esperado: 'Dice que ya existe y pregunta si es la misma persona' },
 ];
 
 try {

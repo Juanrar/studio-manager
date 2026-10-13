@@ -1076,6 +1076,9 @@ Esta tarea gasta cuota real: cada frase son 2 a 4 pedidos. Si se termina la cuot
 | "Creame una clase con Zzz Inexistente el lunes a las 10" | admin | Dice que no encuentra al profesor |
 | "Creame un workshop de Hip-Hop el sábado de 15 a 17 con {profesor}" | recepción | Dice que lo tiene que hacer un administrador |
 | "Creame un workshop de Hip-Hop el sábado de 15 a 17 con {profesor}. Dale, creala" | admin | Una sola propuesta y le recuerda tocar Crear |
+| "Sumá a Lucía Fernández, 50%, da Contemporáneo los martes y jueves de 19 a 20:30" | admin | Propuesta `altaDeProfesor` con dos horarios y `porcentajeBp: 5000` |
+| "Sumá a una profesora nueva que da Salsa los lunes" | admin | Pregunta nombre, porcentaje y horario. Sin propuesta |
+| "Sumá a {profesor}, 40%, da Jazz los viernes de 18 a 19" | admin | Dice que ya existe y pregunta si es la misma persona |
 
 La frase 8 se sumó en la revisión final, junto con la línea de las instrucciones de admin sobre confirmar con palabras. Un error de dominio (cuota, saturación, las 6 vueltas) se imprime como resultado de esa frase y el script sigue con las demás.
 
