@@ -3,6 +3,14 @@ import type { EsquemaDeCampo, LlamadaAHerramienta, ModeloDeLenguaje } from './mo
 
 const URL_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
+// Sin límite, Node espera hasta 300 segundos las cabeceras de la respuesta.
+const TIEMPO_MAXIMO_POR_PEDIDO = 45_000;
+
+// Fallas pasajeras de Google: se reintentan con el respaldo, igual que un pedido que no llegó por red o timeout.
+const ESTADOS_DE_SATURACION = [500, 503, 504];
+
+type Falla = 'cuota' | 'saturado';
+
 type Parte = {
   text?: string;
   thought?: boolean;
@@ -14,7 +22,7 @@ type Contenido = { role: string; parts?: Parte[] };
 export type OpcionesGemini = {
   clave: string;
   modelo: string;
-  // Tiene su propia cuota: se usa cuando el principal responde 429 o 503.
+  // Tiene su propia cuota: se usa cuando el principal responde 429, 500, 503 o 504, o no responde.
   respaldo: string;
   // Los tests pasan un fetch falso y nunca llaman a Google.
   fetch?: typeof fetch;
@@ -25,12 +33,24 @@ export type OpcionesGemini = {
 export function crearModeloGemini(opciones: OpcionesGemini): ModeloDeLenguaje {
   const pedirHttp = opciones.fetch ?? fetch;
 
-  const generar = (modelo: string, cuerpo: unknown) =>
-    pedirHttp(`${URL_BASE}/${modelo}:generateContent`, {
-      method: 'POST',
-      headers: { 'x-goog-api-key': opciones.clave, 'content-type': 'application/json' },
-      body: JSON.stringify(cuerpo),
-    });
+  // Devuelve la respuesta, o la falla si conviene probar con el otro modelo.
+  const generar = async (modelo: string, cuerpo: unknown): Promise<Response | Falla> => {
+    let respuesta: Response;
+    try {
+      respuesta = await pedirHttp(`${URL_BASE}/${modelo}:generateContent`, {
+        method: 'POST',
+        headers: { 'x-goog-api-key': opciones.clave, 'content-type': 'application/json' },
+        body: JSON.stringify(cuerpo),
+        signal: AbortSignal.timeout(TIEMPO_MAXIMO_POR_PEDIDO),
+      });
+    } catch {
+      return 'saturado';
+    }
+    if (respuesta.status !== 429 && !ESTADOS_DE_SATURACION.includes(respuesta.status)) return respuesta;
+    // El cuerpo no se lee: se cancela para liberar la conexión.
+    await respuesta.body?.cancel();
+    return respuesta.status === 429 ? 'cuota' : 'saturado';
+  };
 
   return {
     agregarMensaje: (historial, texto) => [...historial, { role: 'user', parts: [{ text: texto }] }],
@@ -65,11 +85,11 @@ export function crearModeloGemini(opciones: OpcionesGemini): ModeloDeLenguaje {
       };
 
       let respuesta = await generar(opciones.modelo, cuerpo);
-      if (respuesta.status === 429 || respuesta.status === 503) respuesta = await generar(opciones.respaldo, cuerpo);
-      if (respuesta.status === 429) {
+      if (typeof respuesta === 'string') respuesta = await generar(opciones.respaldo, cuerpo);
+      if (respuesta === 'cuota') {
         throw new ServicioNoDisponibleError('Se terminó la cuota del asistente por hoy. Probá mañana.', 'CUOTA_AGOTADA');
       }
-      if (respuesta.status === 503) {
+      if (respuesta === 'saturado') {
         throw new ServicioNoDisponibleError('El asistente está saturado. Probá en unos minutos.', 'MODELO_SATURADO');
       }
       if (!respuesta.ok) throw new Error(`Gemini respondió ${respuesta.status}: ${await respuesta.text()}`);

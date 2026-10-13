@@ -27,7 +27,7 @@ Límites y condiciones del plan gratuito:
 
 - **La cuota diaria no es pública.** Se ve por proyecto en https://aistudio.google.com/rate-limit. Cada vuelta del ciclo de funciones es una petición: un pedido como "creame una clase con Erik" usa 2 a 4.
 - **Google usa lo que recibe.** Los términos del plan gratuito dicen que Google usa entradas y respuestas para mejorar sus productos, que revisores humanos pueden leerlas, y piden no mandar información personal, confidencial o sensible. Por eso ninguna herramienta devuelve datos de alumnos, ni DNI, email, teléfono o alias de profesores.
-- **Los 503 son comunes.** Si el modelo principal responde 503 o 429, la API reintenta una vez con el modelo de respaldo, que tiene su propia cuota.
+- **Los 503 son comunes.** Si el modelo principal responde 429, 500, 503 o 504, o el pedido falla por red o tarda más de 45 segundos, la API reintenta una vez con el modelo de respaldo, que tiene su propia cuota. Sin ese límite, Node espera hasta 300 segundos las cabeceras de la respuesta.
 
 Modelos por defecto: `gemini-3.5-flash`, con `gemini-3.1-flash-lite` de respaldo. Se cambian con variables de entorno, sin tocar código. Se usan nombres fijos y no los alias `-latest`, que cambian de modelo sin aviso.
 
@@ -76,7 +76,7 @@ Errores:
 | `mensaje` vacío o de más de 2000 caracteres, `historial` de más de 80 elementos | 400 |
 | Falta `GEMINI_API_KEY` | 503, `codigo: 'ASISTENTE_SIN_CONFIGURAR'` |
 | Los dos modelos sin cuota (429) | 503, `codigo: 'CUOTA_AGOTADA'` |
-| Los dos modelos saturados (503) | 503, `codigo: 'MODELO_SATURADO'` |
+| Los dos modelos saturados (500, 503 o 504), sin red o sin respuesta en 45 segundos | 503, `codigo: 'MODELO_SATURADO'` |
 | Gemini no devuelve ninguna parte | 503, `codigo: 'SIN_RESPUESTA'` |
 | 6 vueltas sin respuesta de texto | 422 |
 
@@ -130,7 +130,7 @@ Nota: el plan decía "desde la grilla o desde este chat". En la prueba contra Ge
 ### API
 
 - `apps/api/src/modules/asistente/modelo.ts`: los tipos que no dependen del proveedor y la interfaz `ModeloDeLenguaje`.
-- `gemini.ts`: el adaptador de Gemini con `fetch`, sin SDK. Traduce las herramientas, interpreta la respuesta, reintenta con el respaldo y convierte 429 y 503 en `ServicioNoDisponibleError`.
+- `gemini.ts`: el adaptador de Gemini con `fetch`, sin SDK. Traduce las herramientas, interpreta la respuesta, corta cada pedido a los 45 segundos, reintenta con el respaldo y convierte 429, 500, 503, 504 y los fallos de red en `ServicioNoDisponibleError`.
 - `herramientas.ts`: los tipos de una herramienta y `herramientasPara(rol)`.
 - `consultas.ts`: `buscar_profesores` y `listar_clases`.
 - `propuestas.ts`: `proponer_clase_unica` y `proponer_horario`.
@@ -176,6 +176,8 @@ El historial vive en el estado de la página: recargar la página empieza una co
 | El historial que devuelve `responder` tiene el `content` del modelo tal cual, con `thoughtSignature` | Unitario con `fetch` falso | Rearmar las partes del modelo: Gemini responde 400 sin la firma |
 | `agregarResultados` arma un `functionResponse` con el mismo `id` y nombre de la llamada | Unitario | Perder el `id` de la llamada |
 | Un 503 del principal reintenta con el respaldo; 429 en los dos da `CUOTA_AGOTADA` y 503 en los dos da `MODELO_SATURADO` | Unitario con `fetch` falso | Sacar el respaldo o confundir los códigos |
+| Un 500, un 504 o un `fetch` que rechaza (red o timeout) en el principal reintentan con el respaldo; si los dos fallan así, `MODELO_SATURADO`; un 400 o un 403 no se reintentan | Unitario con `fetch` falso | Que una caída de red o un 504 de Google terminen en "Error interno" |
+| Cada pedido lleva el `signal` de `AbortSignal.timeout(45000)` y el cuerpo de la primera respuesta se libera antes de reintentar | Unitario con `fetch` falso | Esperar 300 segundos a Google o dejar conexiones abiertas |
 | Una respuesta sin partes da `SIN_RESPUESTA` y no agrega nada al historial | Unitario con `fetch` falso | Guardar un turno vacío, que hace fallar el pedido siguiente |
 | `buscar_profesores` encuentra "martin" y "gomez martin" sin tildes, no trae dados de baja ni DNI, email o teléfono | Service con base real | Mandarle datos personales a Google o comparar con tildes |
 | `listar_clases` devuelve las clases del rango con el profesor; un rango de más de 31 días da error | Service con base real | Mandar meses enteros al modelo |
