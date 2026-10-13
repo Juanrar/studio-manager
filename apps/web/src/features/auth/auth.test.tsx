@@ -1,32 +1,8 @@
 import { screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
-import type { UsuarioPublico } from '@studio/shared';
-import { ADMIN, RECEPCION, conAgendaVacia, conSesion, renderizarEn } from '../../../test/render.tsx';
+import { ADMIN, RECEPCION, conAgendaVacia, conSesion, renderizarEn, sesionDelServidor } from '../../../test/render.tsx';
 import { servidor } from '../../../test/servidor.ts';
-
-// Simula la sesión del servidor: el login la abre y el logout la cierra.
-function sesionDelServidor(usuarioAlLoguear: UsuarioPublico, logueadoAlEmpezar = false) {
-  let logueado = logueadoAlEmpezar;
-  const registro = { logoutLlamado: false };
-  servidor.use(
-    http.get('/api/auth/yo', () =>
-      logueado
-        ? HttpResponse.json(usuarioAlLoguear)
-        : HttpResponse.json({ error: 'Tenés que iniciar sesión' }, { status: 401 }),
-    ),
-    http.post('/api/auth/login', () => {
-      logueado = true;
-      return HttpResponse.json(usuarioAlLoguear);
-    }),
-    http.post('/api/auth/logout', () => {
-      logueado = false;
-      registro.logoutLlamado = true;
-      return new HttpResponse(null, { status: 204 });
-    }),
-  );
-  return registro;
-}
 
 describe('login', () => {
   it('con credenciales correctas lleva a la agenda y muestra el nombre del usuario', async () => {

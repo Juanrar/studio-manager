@@ -1,56 +1,27 @@
-import { Fragment, useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { LARGO_MAXIMO_DEL_MENSAJE, type PropuestaDelAsistente } from '@studio/shared';
+import { Fragment, useEffect, useRef, type KeyboardEvent } from 'react';
+import { LARGO_MAXIMO_DEL_MENSAJE } from '@studio/shared';
 import { AreaDeTexto, Aviso, Boton, Pagina } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { useSesion } from '../auth/api.ts';
-import { useConversar } from './api.ts';
+import { useConversacion } from './ConversacionDelAsistente.tsx';
 import { TarjetaDePropuesta } from './TarjetaDePropuesta.tsx';
-
-type Mensaje = { id: number; autor: 'usuario' | 'asistente'; texto: string; propuestas: PropuestaDelAsistente[] };
 
 export function AsistentePage() {
   const sesion = useSesion();
-  const conversar = useConversar();
-  const [historial, setHistorial] = useState<unknown[]>([]);
-  const [mensajes, setMensajes] = useState<Mensaje[]>([]);
-  const [texto, setTexto] = useState('');
-  const siguienteId = useRef(1);
+  const conversacion = useConversacion();
+  const { mensajes, borrador, esperando, error } = conversacion;
   const final = useRef<HTMLDivElement>(null);
   const esAdmin = sesion.data?.rol === 'admin';
 
   useEffect(() => {
     // jsdom no implementa scrollIntoView.
     final.current?.scrollIntoView?.({ block: 'end' });
-  }, [mensajes, conversar.isPending]);
-
-  function enviar() {
-    const mensaje = texto.trim();
-    if (mensaje === '' || conversar.isPending) return;
-    const idDelUsuario = siguienteId.current++;
-    setMensajes((actuales) => [...actuales, { id: idDelUsuario, autor: 'usuario', texto: mensaje, propuestas: [] }]);
-    setTexto('');
-    conversar.mutate(
-      { historial, mensaje },
-      {
-        onSuccess: (respuesta) => {
-          setHistorial(respuesta.historial);
-          setMensajes((actuales) => [
-            ...actuales,
-            { id: siguienteId.current++, autor: 'asistente', texto: respuesta.texto, propuestas: respuesta.propuestas },
-          ]);
-        },
-        onError: () => {
-          setMensajes((actuales) => actuales.filter((m) => m.id !== idDelUsuario));
-          setTexto(mensaje);
-        },
-      },
-    );
-  }
+  }, [mensajes, esperando]);
 
   function alTeclear(evento: KeyboardEvent<HTMLTextAreaElement>) {
     if (evento.key === 'Enter' && !evento.shiftKey && !evento.nativeEvent.isComposing) {
       evento.preventDefault();
-      enviar();
+      conversacion.enviar();
     }
   }
 
@@ -75,13 +46,18 @@ export function AsistentePage() {
               >
                 {mensaje.texto}
               </div>
-              {mensaje.propuestas.map((propuesta, indice) => (
-                <TarjetaDePropuesta key={indice} propuesta={propuesta} />
+              {mensaje.propuestas.map(({ propuesta, creada }, indice) => (
+                <TarjetaDePropuesta
+                  key={indice}
+                  propuesta={propuesta}
+                  creada={creada}
+                  alCrearse={(enlace) => conversacion.marcarCreada(mensaje.id, indice, enlace)}
+                />
               ))}
             </Fragment>
           ))}
-          {conversar.isPending && <p className="text-tenue">Pensando...</p>}
-          {conversar.isError && <Aviso>{mensajeDeError(conversar.error)}</Aviso>}
+          {esperando && <p className="text-tenue">Pensando...</p>}
+          {error !== null && <Aviso>{mensajeDeError(error)}</Aviso>}
           <div ref={final} />
         </div>
         <div className="sticky bottom-0 flex items-end gap-2 bg-panel pt-2">
@@ -89,11 +65,11 @@ export function AsistentePage() {
             aria-label="Mensaje para el asistente"
             rows={2}
             maxLength={LARGO_MAXIMO_DEL_MENSAJE}
-            value={texto}
-            onChange={(evento) => setTexto(evento.target.value)}
+            value={borrador}
+            onChange={(evento) => conversacion.cambiarBorrador(evento.target.value)}
             onKeyDown={alTeclear}
           />
-          <Boton onClick={enviar} disabled={conversar.isPending || texto.trim() === ''}>
+          <Boton onClick={conversacion.enviar} disabled={esperando || borrador.trim() === ''}>
             Enviar
           </Boton>
         </div>

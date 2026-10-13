@@ -35,6 +35,29 @@ export function conSesion(usuario: UsuarioPublico | null) {
   );
 }
 
+// Simula la sesión del servidor: el login la abre y el logout la cierra.
+export function sesionDelServidor(usuarioAlLoguear: UsuarioPublico, logueadoAlEmpezar = false) {
+  let logueado = logueadoAlEmpezar;
+  const registro = { logoutLlamado: false };
+  servidor.use(
+    http.get('/api/auth/yo', () =>
+      logueado
+        ? HttpResponse.json(usuarioAlLoguear)
+        : HttpResponse.json({ error: 'Tenés que iniciar sesión' }, { status: 401 }),
+    ),
+    http.post('/api/auth/login', () => {
+      logueado = true;
+      return HttpResponse.json(usuarioAlLoguear);
+    }),
+    http.post('/api/auth/logout', () => {
+      logueado = false;
+      registro.logoutLlamado = true;
+      return new HttpResponse(null, { status: 204 });
+    }),
+  );
+  return registro;
+}
+
 // Renderiza la app completa en una ruta, con el mismo árbol de rutas que producción.
 export function renderizarEn(ruta: string) {
   const router = createMemoryRouter(rutas, { initialEntries: [ruta] });

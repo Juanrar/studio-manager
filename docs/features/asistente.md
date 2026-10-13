@@ -146,11 +146,12 @@ No se usa el SDK `@google/genai`: hacen falta un solo endpoint y control total d
 ### Web
 
 - `apps/web/src/features/asistente/AsistentePage.tsx`: la conversación, el campo de texto y las tarjetas.
-- `TarjetaDePropuesta.tsx`: los datos de la propuesta y el botón "Crear".
+- `ConversacionDelAsistente.tsx`: `ProveedorDeConversacion` y `useConversacion()`. Guarda el historial, los mensajes, lo escrito en el campo y qué propuestas ya se crearon, con su enlace. La mutación de `POST /api/asistente/mensajes` vive acá. Se monta en `RequiereSesion`, arriba de las rutas hijas, con `key` igual al id del usuario.
+- `TarjetaDePropuesta.tsx`: los datos de la propuesta y el botón "Crear". Crea con `mutateAsync` y avisa a la conversación con `marcarCreada`; "Creada" sale de la conversación, no del estado de la mutación.
 - `api.ts`: `useConversar`. Para crear se reusan `useCrearClaseUnica` y `useCrearHorario` de `features/grilla/api.ts`, que ya recargan la grilla, la agenda y los horarios.
 - Ruta `/asistente` para los dos roles. En el menú, "Asistente" en la sección Recepción, debajo de "Alumnos".
 
-El historial vive en el estado de la página: recargar la página empieza una conversación nueva.
+La conversación vive en memoria mientras dure la sesión en la app: navegar no la borra; recargar o cerrar sesión empieza de cero. Antes vivía en el estado de la página, y el enlace "Ver en la grilla" de la propia tarjeta o cualquier clic en el menú borraban la conversación y lo escrito; al volver, una propuesta ya creada mostraba "Crear" otra vez y se podía duplicar la clase. No se usa `localStorage` ni `sessionStorage`: el chat no se guarda.
 
 ## Qué no se implementa
 
@@ -200,6 +201,10 @@ El historial vive en el estado de la página: recargar la página empieza una co
 | Una propuesta de horario manda `POST /api/horarios` | Web | Confundir los dos tipos |
 | Un 422 al crear se muestra en la tarjeta | Web | Que el error se pierda |
 | Recepción ve "Asistente" en el menú | Web | Dejarlo solo para administradores |
+| Ir a la agenda por el menú y volver conserva los mensajes, la tarjeta "Creada" sin botón "Crear" y lo escrito en el campo | Web | Volver a guardar la conversación en el estado de la página |
+| Una respuesta que llega con el usuario en otra pantalla aparece al volver | Web | Sacar la mutación del proveedor |
+| Una propuesta que se termina de crear con el usuario en otra pantalla figura "Creada" al volver | Web | Avisar con los callbacks de `mutate`, que no se llaman si la tarjeta se desmontó |
+| Cerrar sesión y volver a entrar empieza una conversación vacía | Web | Montar el proveedor fuera de `RequiereSesion` o guardar el chat en el navegador |
 
 ## Tareas
 

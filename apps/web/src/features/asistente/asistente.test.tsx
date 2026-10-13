@@ -2,11 +2,55 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import type { PropuestaDelAsistente } from '@studio/shared';
 import { describe, expect, it } from 'vitest';
-import { ADMIN, RECEPCION, conSesion, renderizarEn } from '../../../test/render.tsx';
+import { ADMIN, RECEPCION, conAgendaVacia, conSesion, renderizarEn, sesionDelServidor } from '../../../test/render.tsx';
 import { servidor } from '../../../test/servidor.ts';
 
 const PREGUNTA = '¿Qué clases hay mañana?';
 const RESPUESTA = 'Mañana hay Hip-Hop a las 19:00.';
+
+const ERIK = { id: 7, nombre: 'Erik', apellido: 'Zapata' };
+const CLASE_UNICA: PropuestaDelAsistente = {
+  tipo: 'claseUnica',
+  datos: { fecha: '2026-10-17', horaInicio: '15:00', horaFin: '17:00', estilo: 'Hip-Hop', profesorId: 7 },
+  profesor: ERIK,
+};
+const HORARIO: PropuestaDelAsistente = {
+  tipo: 'horario',
+  datos: { estilo: 'Salsa', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30', profesorId: 7 },
+  profesor: ERIK,
+};
+
+function asistenteQuePropone(propuesta: PropuestaDelAsistente) {
+  servidor.use(
+    http.post('/api/asistente/mensajes', () =>
+      HttpResponse.json({ historial: [], texto: 'Te propongo esto.', propuestas: [propuesta] }),
+    ),
+  );
+}
+
+// Una respuesta que llega recién cuando el test llama a `responder`.
+function respuestaDemorada(respuesta: () => Response) {
+  const control = { pedidos: 0, responder: () => {} };
+  const llegada = new Promise<void>((resolver) => {
+    control.responder = resolver;
+  });
+  return {
+    control,
+    manejador: async () => {
+      control.pedidos++;
+      await llegada;
+      return respuesta();
+    },
+  };
+}
+
+// Va a la agenda por el menú, espera que cargue y vuelve al asistente.
+async function irALaAgendaYVolver(usuario: ReturnType<typeof renderizarEn>['usuario'], enLaAgenda = () => {}) {
+  await usuario.click(screen.getByRole('link', { name: 'Agenda' }));
+  expect(await screen.findByText('No hay clases este día.')).toBeInTheDocument();
+  enLaAgenda();
+  await usuario.click(screen.getByRole('link', { name: 'Asistente' }));
+}
 
 // Responde a cada mensaje con la respuesta fija y guarda los cuerpos recibidos.
 function asistenteQueResponde(cuerpos: unknown[]) {
@@ -133,26 +177,6 @@ describe('/asistente', () => {
   });
 
   describe('propuestas', () => {
-    const ERIK = { id: 7, nombre: 'Erik', apellido: 'Zapata' };
-    const CLASE_UNICA: PropuestaDelAsistente = {
-      tipo: 'claseUnica',
-      datos: { fecha: '2026-10-17', horaInicio: '15:00', horaFin: '17:00', estilo: 'Hip-Hop', profesorId: 7 },
-      profesor: ERIK,
-    };
-    const HORARIO: PropuestaDelAsistente = {
-      tipo: 'horario',
-      datos: { estilo: 'Salsa', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30', profesorId: 7 },
-      profesor: ERIK,
-    };
-
-    function asistenteQuePropone(propuesta: PropuestaDelAsistente) {
-      servidor.use(
-        http.post('/api/asistente/mensajes', () =>
-          HttpResponse.json({ historial: [], texto: 'Te propongo esto.', propuestas: [propuesta] }),
-        ),
-      );
-    }
-
     async function pedirPropuesta() {
       conSesion(ADMIN);
       const { usuario } = renderizarEn('/asistente');
@@ -243,6 +267,92 @@ describe('/asistente', () => {
       expect(await screen.findByRole('alert')).toHaveTextContent('Erik Zapata ya tiene una clase en ese horario.');
       expect(screen.getByRole('button', { name: 'Crear' })).toBeEnabled();
       expect(screen.queryByText('Creada')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('al cambiar de pantalla', () => {
+    it('ir a otra pantalla y volver conserva los mensajes, la propuesta creada y lo escrito', async () => {
+      asistenteQuePropone(CLASE_UNICA);
+      servidor.use(http.post('/api/clases', () => HttpResponse.json({ id: 1 }, { status: 201 })));
+      conAgendaVacia();
+      conSesion(ADMIN);
+      const { usuario } = renderizarEn('/asistente');
+      await usuario.type(await screen.findByLabelText('Mensaje para el asistente'), 'Creame una clase');
+      await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+      await usuario.click(await screen.findByRole('button', { name: 'Crear' }));
+      await screen.findByText('Creada');
+      await usuario.type(screen.getByLabelText('Mensaje para el asistente'), 'Y otra el domingo');
+
+      await irALaAgendaYVolver(usuario);
+
+      expect(await screen.findByText('Te propongo esto.')).toBeInTheDocument();
+      expect(screen.getByText('Creame una clase')).toBeInTheDocument();
+      const tarjeta = screen.getByRole('group', { name: 'Propuesta del asistente' });
+      expect(within(tarjeta).getByText('Creada')).toBeInTheDocument();
+      expect(within(tarjeta).queryByRole('button', { name: 'Crear' })).not.toBeInTheDocument();
+      expect(within(tarjeta).getByRole('link', { name: 'Ver en la grilla' })).toHaveAttribute('href', '/grilla?fecha=2026-10-17');
+      expect(screen.getByLabelText('Mensaje para el asistente')).toHaveValue('Y otra el domingo');
+    });
+
+    it('una respuesta que llega mientras el usuario está en otra pantalla aparece al volver', async () => {
+      const { control, manejador } = respuestaDemorada(() =>
+        HttpResponse.json({ historial: [], texto: RESPUESTA, propuestas: [] }),
+      );
+      servidor.use(http.post('/api/asistente/mensajes', manejador));
+      conAgendaVacia();
+      conSesion(RECEPCION);
+      const { usuario } = renderizarEn('/asistente');
+      await usuario.type(await screen.findByLabelText('Mensaje para el asistente'), PREGUNTA);
+      await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+      await waitFor(() => expect(control.pedidos).toBe(1));
+
+      await irALaAgendaYVolver(usuario, () => control.responder());
+
+      expect(await screen.findByText(RESPUESTA)).toBeInTheDocument();
+      expect(screen.getByText(PREGUNTA)).toBeInTheDocument();
+      expect(screen.queryByText('Pensando...')).not.toBeInTheDocument();
+    });
+
+    it('una propuesta que se termina de crear con el usuario en otra pantalla figura como Creada al volver', async () => {
+      asistenteQuePropone(CLASE_UNICA);
+      const { control, manejador } = respuestaDemorada(() => HttpResponse.json({ id: 1 }, { status: 201 }));
+      servidor.use(http.post('/api/clases', manejador));
+      conAgendaVacia();
+      conSesion(ADMIN);
+      const { usuario } = renderizarEn('/asistente');
+      await usuario.type(await screen.findByLabelText('Mensaje para el asistente'), 'Creame una clase');
+      await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+      await usuario.click(await screen.findByRole('button', { name: 'Crear' }));
+      await waitFor(() => expect(control.pedidos).toBe(1));
+
+      await irALaAgendaYVolver(usuario, () => control.responder());
+
+      const tarjeta = await screen.findByRole('group', { name: 'Propuesta del asistente' });
+      expect(await within(tarjeta).findByText('Creada')).toBeInTheDocument();
+      expect(within(tarjeta).queryByRole('button', { name: 'Crear' })).not.toBeInTheDocument();
+      expect(control.pedidos).toBe(1);
+    });
+
+    it('cerrar sesión borra la conversación', async () => {
+      asistenteQueResponde([]);
+      sesionDelServidor(RECEPCION, true);
+      conAgendaVacia();
+      const { usuario } = renderizarEn('/asistente');
+      await usuario.type(await screen.findByLabelText('Mensaje para el asistente'), PREGUNTA);
+      await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+      await screen.findByText(RESPUESTA);
+      await usuario.type(screen.getByLabelText('Mensaje para el asistente'), 'Algo sin mandar');
+
+      await usuario.click(screen.getByRole('button', { name: 'Cerrar sesión' }));
+      await usuario.type(await screen.findByLabelText('Email'), 'rita@estudio.test');
+      await usuario.type(screen.getByLabelText('Contraseña'), 'clave-de-rita-1');
+      await usuario.click(screen.getByRole('button', { name: 'Entrar' }));
+      await usuario.click(await screen.findByRole('link', { name: 'Asistente' }));
+
+      expect(await screen.findByText('¿Qué clases hay el jueves?')).toBeInTheDocument();
+      expect(screen.queryByText(PREGUNTA)).not.toBeInTheDocument();
+      expect(screen.queryByText(RESPUESTA)).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Mensaje para el asistente')).toHaveValue('');
     });
   });
 });

@@ -5,23 +5,39 @@ import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFechaLarga, nombreDelDia } from '../../lib/formato.ts';
 import { useCrearClaseUnica, useCrearHorario } from '../grilla/api.ts';
 
-// Cada tarjeta tiene su propia mutación: crear una propuesta no deshabilita las otras.
-export function TarjetaDePropuesta({ propuesta }: { propuesta: PropuestaDelAsistente }) {
+// Cada tarjeta tiene su propia mutación: crear una propuesta no deshabilita las otras. Que ya se creó lo
+// guarda la conversación, no la mutación: la tarjeta se desmonta al ir a otra pantalla.
+export function TarjetaDePropuesta({
+  propuesta,
+  creada,
+  alCrearse,
+}: {
+  propuesta: PropuestaDelAsistente;
+  creada: { enlace: string } | undefined;
+  alCrearse: (enlace: string) => void;
+}) {
   const crearClaseUnica = useCrearClaseUnica();
   const crearHorario = useCrearHorario();
   const mutacion = propuesta.tipo === 'claseUnica' ? crearClaseUnica : crearHorario;
   const { datos } = propuesta;
+  const enlace = propuesta.tipo === 'claseUnica' ? `/grilla?fecha=${propuesta.datos.fecha}` : '/grilla';
 
-  function crear() {
-    if (propuesta.tipo === 'claseUnica') crearClaseUnica.mutate(propuesta.datos);
-    else crearHorario.mutate(propuesta.datos);
+  // La promesa se cumple aunque la tarjeta ya no esté montada; los callbacks de `mutate` no se llaman.
+  async function crear() {
+    try {
+      if (propuesta.tipo === 'claseUnica') await crearClaseUnica.mutateAsync(propuesta.datos);
+      else await crearHorario.mutateAsync(propuesta.datos);
+    } catch {
+      // El motivo se muestra con `mutacion.error`.
+      return;
+    }
+    alCrearse(enlace);
   }
 
   const cuando =
     propuesta.tipo === 'claseUnica'
       ? formatearFechaLarga(propuesta.datos.fecha)
       : `los ${nombreDelDia(propuesta.datos.diaSemana).toLowerCase()}`;
-  const enlace = propuesta.tipo === 'claseUnica' ? `/grilla?fecha=${propuesta.datos.fecha}` : '/grilla';
 
   return (
     <div
@@ -35,16 +51,16 @@ export function TarjetaDePropuesta({ propuesta }: { propuesta: PropuestaDelAsist
       <p>{`${datos.horaInicio} a ${datos.horaFin}`}</p>
       <p>{`${propuesta.profesor.nombre} ${propuesta.profesor.apellido}`}</p>
       {mutacion.isError && <Aviso>{mensajeDeError(mutacion.error)}</Aviso>}
-      {mutacion.isSuccess ? (
+      {creada !== undefined ? (
         <div className="flex items-center gap-3">
           <span className="font-medium text-green-400">Creada</span>
-          <Link to={enlace} className={claseDeBoton('secundario')}>
+          <Link to={creada.enlace} className={claseDeBoton('secundario')}>
             Ver en la grilla
           </Link>
         </div>
       ) : (
         <div>
-          <Boton onClick={crear} disabled={mutacion.isPending}>
+          <Boton onClick={() => void crear()} disabled={mutacion.isPending}>
             Crear
           </Boton>
         </div>
