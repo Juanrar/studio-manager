@@ -4,7 +4,7 @@
 import type { Rol } from '@studio/shared';
 import { config } from '../config.ts';
 import { sql } from '../db/client.ts';
-import { ServicioNoDisponibleError } from '../lib/errores.ts';
+import { esErrorDeDominio } from '../lib/errores.ts';
 import { hoyEnEstudio } from '../lib/fechas.ts';
 import { conversar } from '../modules/asistente/asistente.service.ts';
 import { crearModeloGemini } from '../modules/asistente/gemini.ts';
@@ -20,6 +20,7 @@ const frases: Frase[] = [
   { texto: 'Creame una clase de Jazz ayer a las 10 con {profesor}', rol: 'admin', esperado: 'Explica que esa fecha ya pasó. Sin propuesta' },
   { texto: 'Creame una clase con Zzz Inexistente el lunes a las 10', rol: 'admin', esperado: 'Dice que no encuentra al profesor' },
   { texto: 'Creame un workshop de Hip-Hop el sábado de 15 a 17 con {profesor}', rol: 'recepcion', esperado: 'Dice que lo tiene que hacer un administrador' },
+  { texto: 'Creame un workshop de Hip-Hop el sábado de 15 a 17 con {profesor}. Dale, creala', rol: 'admin', esperado: 'Una sola propuesta y le recuerda tocar Crear' },
 ];
 
 try {
@@ -27,8 +28,8 @@ try {
     throw new Error('Falta GEMINI_API_KEY en apps/api/.env');
   }
   const hoy = hoyEnEstudio(new Date(), config.tzEstudio);
-  const profesores = await listarProfesores(false, hoy);
-  const profesor = profesores.find((p) => p.activo);
+  // Sin los inactivos, la lista trae solo profesores activos.
+  const [profesor] = await listarProfesores(false, hoy);
   if (!profesor) {
     throw new Error('La base de desarrollo no tiene ningún profesor activo: cargá uno antes de probar.');
   }
@@ -54,11 +55,10 @@ try {
       console.log(`Texto: ${respuesta.texto}`);
       console.log(`Propuestas: ${JSON.stringify(respuesta.propuestas, null, 2)}\n`);
     } catch (error) {
-      if (error instanceof ServicioNoDisponibleError) {
-        console.log(`Servicio no disponible: ${error.codigo}\n`);
-      } else {
-        throw error;
-      }
+      // Un error de dominio (cuota, saturación, las 6 vueltas) es el resultado de esta frase: se sigue con las demás.
+      if (!esErrorDeDominio(error)) throw error;
+      const codigo = error.codigo === undefined ? '' : ` ${error.codigo}`;
+      console.log(`Error ${error.codigoHttp}${codigo}: ${error.message}\n`);
     }
   }
 } catch (error) {
