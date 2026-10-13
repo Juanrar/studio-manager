@@ -1030,7 +1030,7 @@ En `test/app.ts`, `crearAppDeTest` pasa `modelo: null` antes de `...opciones`: u
 - [x] **Paso 2:** correr `pnpm --filter @studio/web test asistente` y verificar que fallan.
 - [x] **Paso 3:** implementar `TarjetaDePropuesta` con un `useCrearClaseUnica` o un `useCrearHorario` según `propuesta.tipo`; cada tarjeta tiene su propia mutación, así crear una no deshabilita las otras. El enlace "Ver en la grilla" va a `/grilla?fecha=<fecha>` para una clase única (`GrillaPage` lee `fecha` y `vista` de la URL) y a `/grilla` para un horario. La tarjeta usa `bg-panel` y `border-borde`, y el verde solo para "Creada".
 - [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(asistente): confirmar la clase o el horario propuesto`.
+- [x] **Paso 5:** commit `feat(asistente): confirmar la clase o el horario propuesto`.
 
 ### Tarea 6: Frases de prueba contra Gemini
 
@@ -1040,7 +1040,7 @@ En `test/app.ts`, `crearAppDeTest` pasa `modelo: null` antes de `...opciones`: u
 
 Esta tarea gasta cuota real: cada frase son 2 a 4 pedidos. Si la cuota diaria del modelo principal es chica, correr con `GEMINI_MODELO=gemini-3.1-flash-lite`.
 
-- [ ] **Paso 1:** escribir el script. Toma el primer profesor activo de la base de desarrollo, reemplaza `{profesor}` en cada frase, llama a `conversar` con `crearModeloGemini` y la configuración, e imprime la frase, el texto y las propuestas. Cierra la conexión con `await sql.end()`, como `crear-admin.ts`. En `package.json`: `"asistente:probar": "tsx --env-file=.env src/scripts/probar-asistente.ts"`.
+- [x] **Paso 1:** escribir el script. Toma el primer profesor activo de la base de desarrollo, reemplaza `{profesor}` en cada frase, llama a `conversar` con `crearModeloGemini` y la configuración, e imprime la frase, el texto y las propuestas. Cierra la conexión con `await sql.end()`, como `crear-admin.ts`. En `package.json`: `"asistente:probar": "tsx --env-file=.env src/scripts/probar-asistente.ts"`.
 
 | Frase | Rol | Qué tiene que pasar |
 |---|---|---|
@@ -1052,9 +1052,9 @@ Esta tarea gasta cuota real: cada frase son 2 a 4 pedidos. Si la cuota diaria de
 | "Creame una clase con Zzz Inexistente el lunes a las 10" | admin | Dice que no encuentra al profesor |
 | "Creame un workshop de Hip-Hop el sábado de 15 a 17 con {profesor}" | recepción | Dice que lo tiene que hacer un administrador |
 
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api asistente:probar` con la clave en `apps/api/.env` y Postgres levantado.
-- [ ] **Paso 3:** comparar cada respuesta con la tabla. Si una falla, ajustar `instrucciones.ts` o la descripción de la herramienta y volver a correr solo esa frase. Anotar en la bitácora qué modelo se usó, cuántas frases pasaron y qué se cambió.
-- [ ] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api asistente:probar` con la clave en `apps/api/.env` y Postgres levantado.
+- [x] **Paso 3:** comparar cada respuesta con la tabla. Si una falla, ajustar `instrucciones.ts` o la descripción de la herramienta y volver a correr solo esa frase. Anotar en la bitácora qué modelo se usó, cuántas frases pasaron y qué se cambió.
+- [x] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
 - [ ] **Paso 5:** commit `test(asistente): frases de prueba contra Gemini`.
 
 ## Verificación final

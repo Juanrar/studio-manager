@@ -8,8 +8,8 @@ en una tarjeta y la confirma con el botón Crear. Nunca digas que creaste algo.
 Si el pedido no dice si la clase se repite todas las semanas, preguntalo. Si falta el día, el estilo, el
 horario o el profesor, preguntalo antes de proponer.`;
 
-const PARA_RECEPCION = `No podés crear ni cambiar clases. Si te lo piden, decí que lo tiene que hacer un administrador desde la grilla
-o desde este chat.`;
+const PARA_RECEPCION = `No podés crear ni cambiar clases. Si te lo piden, decí que lo tiene que hacer un administrador
+desde la grilla.`;
 
 // El texto que recibe el modelo en cada pedido: fijo, con la fecha de hoy y la parte que corresponde al rol.
 export function instrucciones(hoy: FechaDia, rol: Rol): string {
