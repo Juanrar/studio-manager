@@ -29,7 +29,7 @@ Límites y condiciones del plan gratuito:
 - **Google usa lo que recibe.** Los términos del plan gratuito dicen que Google usa entradas y respuestas para mejorar sus productos, que revisores humanos pueden leerlas, y piden no mandar información personal, confidencial o sensible. Por eso ninguna herramienta devuelve datos de alumnos, ni DNI, email, teléfono o alias de profesores. Lo que escribe el usuario también le llega a Google, así que la pantalla lo avisa con una línea fija debajo del campo: "Lo que escribís acá lo procesa Google. No escribas nombres, DNI ni teléfonos de alumnos."
 - **Los 503 son comunes.** Si el modelo principal responde 429, 500, 503 o 504, o el pedido falla por red o tarda más de 45 segundos, la API reintenta una vez con el modelo de respaldo, que tiene su propia cuota. Sin ese límite, Node espera hasta 300 segundos las cabeceras de la respuesta.
 
-Modelos por defecto: `gemini-3.1-flash-lite`, con `gemini-3.5-flash` de respaldo. El principal es `gemini-3.1-flash-lite` porque el plan gratuito de `gemini-3.5-flash` permite 20 pedidos por día (Google lo informó en un 429 el 2026-10-13), que alcanzan para 5 o 6 consultas. `gemini-3.1-flash-lite` también llama bien a la función y tiene más cuota. Se cambian con variables de entorno, sin tocar código. Se usan nombres fijos y no los alias `-latest`, que cambian de modelo sin aviso.
+Modelos por defecto: `gemini-3.1-flash-lite`, con `gemini-3.5-flash` de respaldo. El principal es `gemini-3.1-flash-lite` porque el plan gratuito de `gemini-3.5-flash` permite 20 pedidos por día (Google lo informó en un 429 el 2026-10-13), que alcanzan para 5 o 6 consultas. En las pruebas del 2026-10-13, `gemini-3.1-flash-lite` llamó bien a la función y su cuota no se agotó, mientras `gemini-3.5-flash` llegó al límite de 20. Se cambian con variables de entorno, sin tocar código. Se usan nombres fijos y no los alias `-latest`, que cambian de modelo sin aviso.
 
 **API elegida:** `generateContent` (`POST /v1beta/models/{modelo}:generateContent`), sin estado. Google recomienda la Interactions API para proyectos nuevos y llama "legacy" a `generateContent`, pero la documenta como "fully supported". La Interactions API guarda la conversación en los servidores de Google por defecto; acá la conversación la guarda el navegador.
 
@@ -424,6 +424,8 @@ export interface ModeloDeLenguaje {
 ```
 
 `gemini.ts`:
+
+> La revisión final cambió `generar`: timeout de 45 segundos, y red caída, 500 y 504 se tratan como 503. El código vigente está en `apps/api/src/modules/asistente/gemini.ts`.
 
 ```ts
 import { ServicioNoDisponibleError } from '../../lib/errores.ts';
@@ -1060,7 +1062,7 @@ En `test/app.ts`, `crearAppDeTest` pasa `modelo: null` antes de `...opciones`: u
 - Crear: `apps/api/src/scripts/probar-asistente.ts`
 - Modificar: `apps/api/package.json`
 
-Esta tarea gasta cuota real: cada frase son 2 a 4 pedidos. Si se termina la cuota diaria de `gemini-3.1-flash-lite`, correr con `GEMINI_MODELO=gemini-3.5-flash`, que da solo 20 pedidos por día.
+Esta tarea gasta cuota real: cada frase son 2 a 4 pedidos. Si se termina la cuota diaria de `gemini-3.1-flash-lite`, correr con `GEMINI_MODELO=gemini-3.5-flash GEMINI_MODELO_RESPALDO=gemini-3.1-flash-lite`, porque con los valores por defecto el respaldo ya es `gemini-3.5-flash`, que da solo 20 pedidos por día.
 
 - [x] **Paso 1:** escribir el script. Toma el primer profesor activo de la base de desarrollo, reemplaza `{profesor}` en cada frase, llama a `conversar` con `crearModeloGemini` y la configuración, e imprime la frase, el texto y las propuestas. Cierra la conexión con `await sql.end()`, como `crear-admin.ts`. En `package.json`: `"asistente:probar": "tsx --env-file=.env src/scripts/probar-asistente.ts"`.
 
