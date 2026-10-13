@@ -11,6 +11,7 @@ import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
 import { esViolacionUnica } from '../../lib/postgres.ts';
+import { normalizarNombre } from '../../lib/texto.ts';
 import * as repo from './profesores.repository.ts';
 
 // El porcentaje inicial queda vigente desde el día del alta.
@@ -32,6 +33,18 @@ export async function crearProfesorEn(ej: Ejecutor, datos: CrearProfesorInput, h
   });
   await repo.insertarPorcentaje(ej, { profesorId: id, porcentajeBp, vigenteDesde: hoy });
   return id;
+}
+
+// Compara el nombre completo con todos los profesores, activos o no.
+export async function buscarHomonimo(
+  ej: Ejecutor,
+  nombre: string,
+  apellido: string,
+  hoy: FechaDia,
+): Promise<Profesor | null> {
+  const buscado = normalizarNombre(`${nombre} ${apellido}`);
+  const profesores = await repo.listar(ej, true, hoy);
+  return profesores.find((p) => normalizarNombre(`${p.nombre} ${p.apellido}`) === buscado) ?? null;
 }
 
 export async function actualizarProfesor(

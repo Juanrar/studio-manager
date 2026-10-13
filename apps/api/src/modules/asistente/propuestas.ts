@@ -2,10 +2,9 @@ import { z } from 'zod';
 import { altaDeProfesorSchema, crearClaseUnicaSchema, crearHorarioSchema } from '@studio/shared';
 import { db } from '../../db/client.ts';
 import { ReglaDeNegocioError } from '../../lib/errores.ts';
-import { listarProfesores, verificarProfesorActivo } from '../profesores/profesores.service.ts';
+import { buscarHomonimo, verificarProfesorActivo } from '../profesores/profesores.service.ts';
 import type { Herramienta } from './herramientas.ts';
 import type { EsquemaDeObjeto } from './modelo.ts';
-import { sinTildes } from './texto.ts';
 
 export const PROPUESTA_MOSTRADA = {
   estado: 'propuesta mostrada al usuario',
@@ -94,11 +93,10 @@ export const proponerAltaDeProfesor: Herramienta = {
     const { nombre, apellido, porcentaje, horarios } = argumentosDelAltaSchema.parse(argumentos);
     // Los porcentajes se guardan en puntos básicos: 50% es 5000.
     const datos = altaDeProfesorSchema.parse({ profesor: { nombre, apellido, porcentajeBp: porcentaje * 100 }, horarios });
-    const buscado = sinTildes(`${datos.profesor.nombre} ${datos.profesor.apellido}`);
-    const repetido = (await listarProfesores(true, hoy)).find((p) => sinTildes(`${p.nombre} ${p.apellido}`) === buscado);
-    if (repetido !== undefined) {
+    const repetido = await buscarHomonimo(db, datos.profesor.nombre, datos.profesor.apellido, hoy);
+    if (repetido !== null) {
       throw new ReglaDeNegocioError(
-        `Ya existe ${repetido.nombre} ${repetido.apellido} (id ${repetido.id}). Preguntá si es la misma persona.`,
+        `Ya existe ${repetido.nombre} ${repetido.apellido} (id ${repetido.id}). Preguntá si es la misma persona. Si es otra, se da de alta desde Profesores; si es la misma y está dada de baja, se reactiva desde su ficha.`,
       );
     }
     return { resultado: PROPUESTA_MOSTRADA, propuesta: { tipo: 'altaDeProfesor', datos } };

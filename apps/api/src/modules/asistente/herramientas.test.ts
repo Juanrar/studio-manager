@@ -194,7 +194,9 @@ describe('proponer_alta_de_profesor', () => {
     await actualizarProfesor(existente.id, { activo: false }, HOY);
 
     await expect(herramienta('proponer_alta_de_profesor').ejecutar(argumentos, CONTEXTO)).rejects.toThrow(
-      new ReglaDeNegocioError(`Ya existe Lucia Fernandez (id ${existente.id}). Preguntá si es la misma persona.`),
+      new ReglaDeNegocioError(
+        `Ya existe Lucia Fernandez (id ${existente.id}). Preguntá si es la misma persona. Si es otra, se da de alta desde Profesores; si es la misma y está dada de baja, se reactiva desde su ficha.`,
+      ),
     );
   });
 });

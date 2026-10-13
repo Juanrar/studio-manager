@@ -5,7 +5,7 @@ import { sumarDias } from '../../lib/fechas.ts';
 import { listarClases } from '../clases/clases.service.ts';
 import { listarProfesores } from '../profesores/profesores.service.ts';
 import type { Herramienta } from './herramientas.ts';
-import { sinTildes } from './texto.ts';
+import { sinTildes } from '../../lib/texto.ts';
 
 const DIAS_MAXIMOS = 31;
 

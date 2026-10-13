@@ -3,7 +3,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { ADMIN, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
 import { db } from '../../db/client.ts';
-import { horario } from '../../db/schema.ts';
+import { horario, profesor as profesorTabla } from '../../db/schema.ts';
 import { esViolacionCheck } from '../../lib/postgres.ts';
 import { listarProfesores } from '../profesores/profesores.service.ts';
 import { darDeAltaProfesor } from './alta-de-profesor.service.ts';
@@ -133,6 +133,31 @@ describe('POST /api/asistente/altas-de-profesor', () => {
 
     expect(respuesta.statusCode).toBe(400);
     expect(await listarProfesores(true, HOY)).toEqual([]);
+  });
+});
+
+describe('un segundo alta de la misma persona', () => {
+  it('responde 422 con otras tildes y un espacio doble, y la tabla profesor sigue con una fila', async () => {
+    await crearUsuarioDeTest(ADMIN);
+    const cookie = await loguear(app, ADMIN.email, ADMIN.password);
+    const alta = (profesor: Record<string, unknown>) =>
+      app.inject({
+        method: 'POST',
+        url: '/api/asistente/altas-de-profesor',
+        headers: { cookie },
+        payload: { ...ALTA, profesor: { ...ALTA.profesor, ...profesor } },
+      });
+
+    const primero = await alta({ nombre: 'María José', apellido: 'Fernández', dni: '' });
+    const segundo = await alta({ nombre: 'Maria  Jose', apellido: 'FERNANDEZ', dni: '' });
+
+    expect(primero.statusCode).toBe(201);
+    expect(segundo.statusCode).toBe(422);
+    expect(segundo.json()).toEqual({
+      error: `Ya existe María José Fernández (id ${primero.json().id}). Si es otra persona, se da de alta desde Profesores; si es la misma y está dada de baja, se reactiva desde su ficha.`,
+    });
+    expect(await db.select({ id: profesorTabla.id }).from(profesorTabla)).toEqual([{ id: primero.json().id }]);
+    expect(await db.select().from(horario)).toHaveLength(2);
   });
 });
 
