@@ -191,7 +191,8 @@ describe('/asistente', () => {
       const usuario = await pedirPropuesta();
 
       await usuario.click(screen.getByRole('button', { name: 'Crear' }));
-      await waitFor(() => expect(screen.getByRole('button', { name: 'Crear' })).toBeDisabled());
+      await waitFor(() => expect(cuerpos).toHaveLength(1));
+      expect(screen.getByRole('button', { name: 'Crear' })).toBeDisabled();
       responder();
 
       expect(await screen.findByText('Creada')).toBeInTheDocument();
