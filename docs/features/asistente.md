@@ -118,6 +118,7 @@ Para crear una clase usá proponer_clase_unica o proponer_horario. Una propuesta
 en una tarjeta y la confirma con el botón Crear. Nunca digas que creaste algo.
 Si el pedido no dice si la clase se repite todas las semanas, preguntalo. Si falta el día, el estilo, el
 horario o el profesor, preguntalo antes de proponer.
+Si el usuario confirma con palabras, recordale que toque Crear en la tarjeta. No vuelvas a proponer lo mismo.
 
 [recepción]
 No podés crear ni cambiar clases. Si te lo piden, decí que lo tiene que hacer un administrador
@@ -125,6 +126,8 @@ desde la grilla.
 ```
 
 Nota: el plan decía "desde la grilla o desde este chat". En la prueba contra Gemini el modelo le repetía a recepción "o desde este chat", y recepción no puede crear desde el chat. Se quitó esa parte.
+
+Nota de la revisión final: se sumó al bloque de admin la línea "Si el usuario confirma con palabras, recordale que toque Crear en la tarjeta. No vuelvas a proponer lo mismo.". Con un "dale, creala" el modelo puede volver a proponer la misma clase, y el usuario termina con dos tarjetas iguales. La frase 8 de la tarea 6 lo prueba.
 
 ## Arquitectura
 
@@ -189,7 +192,7 @@ La conversación vive en memoria mientras dure la sesión en la app: navegar no 
 | `proponer_horario` devuelve la propuesta sin `desde` ni `claseId`; `diaSemana: 8` da error | Service con base real | Que el modelo elija desde qué semana rige |
 | `herramientasPara('recepcion')` no incluye `proponer_*` | Unitario | Que recepción pueda proponer clases |
 | El recorrido "buscar, proponer, contestar" responde 200 con la propuesta completa, el modelo recibe el resultado de la búsqueda y no se crea ninguna clase | Integración HTTP con modelo falso | Romper el ciclo de vueltas |
-| Las instrucciones dicen "Hoy es martes 2026-03-10" con el reloj fijo, y las de recepción dicen que no puede crear | Integración HTTP con modelo falso | Usar el reloj de la máquina o el mismo texto para los dos roles |
+| Las instrucciones dicen "Hoy es martes 2026-03-10" con el reloj fijo, las de admin piden recordar "Crear" cuando el usuario confirma con palabras, y las de recepción dicen que no puede crear | Integración HTTP con modelo falso | Usar el reloj de la máquina o el mismo texto para los dos roles |
 | A recepción se le ofrecen solo `buscar_profesores` y `listar_clases`; si el modelo pide `proponer_clase_unica`, recibe "No existe la herramienta" | Integración HTTP con modelo falso | Filtrar mal por rol |
 | Argumentos inválidos y errores de dominio vuelven al modelo como `{ error }` y la respuesta es 200 | Integración HTTP con modelo falso | Convertirlos en 400 o 500 y cortar la conversación |
 | 6 vueltas sin texto dan 422 | Integración HTTP con modelo falso | Un ciclo sin fin que gasta la cuota |

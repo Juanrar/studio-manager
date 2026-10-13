@@ -88,6 +88,9 @@ describe('POST /api/asistente/mensajes', () => {
     expect(respuesta.statusCode).toBe(200);
     expect(modelo.pedidos[0]?.instrucciones).toContain('Hoy es martes 2026-03-10');
     expect(modelo.pedidos[0]?.instrucciones).not.toContain('No podés crear ni cambiar clases');
+    expect(modelo.pedidos[0]?.instrucciones).toContain(
+      'Si el usuario confirma con palabras, recordale que toque Crear en la tarjeta. No vuelvas a proponer lo mismo.',
+    );
   });
 
   it('a recepción le da solo las consultas y le avisa que no puede crear clases', async () => {
@@ -100,6 +103,7 @@ describe('POST /api/asistente/mensajes', () => {
 
     expect(respuesta.statusCode).toBe(200);
     expect(modelo.pedidos[0]?.instrucciones).toContain('No podés crear ni cambiar clases');
+    expect(modelo.pedidos[0]?.instrucciones).not.toContain('toque Crear en la tarjeta');
     expect(modelo.pedidos[0]?.herramientas.map((h) => h.nombre)).toEqual(['buscar_profesores', 'listar_clases']);
   });
 
