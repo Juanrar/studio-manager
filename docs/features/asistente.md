@@ -127,7 +127,7 @@ desde la grilla.
 
 Nota: el plan decía "desde la grilla o desde este chat". En la prueba contra Gemini el modelo le repetía a recepción "o desde este chat", y recepción no puede crear desde el chat. Se quitó esa parte.
 
-Nota de la revisión final: se sumó al bloque de admin la línea "Si el usuario confirma con palabras, recordale que toque Crear en la tarjeta. No vuelvas a proponer lo mismo.". Con un "dale, creala" el modelo puede volver a proponer la misma clase, y el usuario termina con dos tarjetas iguales. La frase 8 de la tarea 6 lo prueba.
+Nota de la revisión final: se sumó al bloque de admin la última línea, la de confirmar con palabras. Con un "dale, creala" el modelo puede volver a proponer la misma clase, y el usuario termina con dos tarjetas iguales. La frase 8 de la tarea 6 lo prueba.
 
 ## Arquitectura
 
