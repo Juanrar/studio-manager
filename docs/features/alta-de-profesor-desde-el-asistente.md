@@ -316,8 +316,10 @@ export const proponerAltaDeProfesor: Herramienta = {
 | "Sumá a una profesora nueva que da Salsa los lunes" | Pregunta nombre, porcentaje y horario. Sin propuesta |
 | "Sumá a {profesor}, 40%, da Jazz los viernes de 18 a 19" | Dice que ya existe y pregunta si es la misma persona |
 
+Nota: la frase 9 quedó sin verificar el 2026-10-13 porque Google respondió saturación en `gemini-3.1-flash-lite` y cuota agotada en `gemini-3.5-flash`. Hay que correrla cuando haya cuota. Las frases 10 y 11 pasaron.
+
 - [x] **Paso 2:** correr `pnpm --filter @studio/api asistente:probar`.
-- [x] **Paso 3:** comparar con la tabla y ajustar las instrucciones o la descripción si hace falta. Anotar el resultado en la bitácora.
+- [ ] **Paso 3:** comparar con la tabla y ajustar las instrucciones o la descripción si hace falta. Anotar el resultado en la bitácora.
 - [x] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
 - [ ] **Paso 5:** commit `test(asistente): frases del alta de profesor`.
 
