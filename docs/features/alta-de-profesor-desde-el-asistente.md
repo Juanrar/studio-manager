@@ -194,7 +194,7 @@ export async function darDeAltaProfesor(datos: AltaDeProfesorInput, hoy: FechaDi
 La ruta: `app.post('/api/asistente/altas-de-profesor', { preHandler: requerirRol('admin') }, ...)` con `altaDeProfesorSchema.parse(request.body)` y `reply.status(201).send(...)`. No necesita el modelo: funciona aunque falte `GEMINI_API_KEY`.
 
 - [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan, también los tests de profesores y de horarios que ya existían.
-- [ ] **Paso 5:** commit `feat(asistente): dar de alta un profesor con sus horarios`.
+- [x] **Paso 5:** commit `feat(asistente): dar de alta un profesor con sus horarios`.
 
 ### Tarea 2: La herramienta del alta
 
@@ -203,12 +203,12 @@ La ruta: `app.post('/api/asistente/altas-de-profesor', { preHandler: requerirRol
 
 **Consume:** `altaDeProfesorSchema` (tarea 1), `Herramienta` y `PROPUESTA_MOSTRADA` (feature 27).
 
-- [ ] **Paso 1:** sumar los tests:
+- [x] **Paso 1:** sumar los tests:
   - En `herramientas.test.ts`: `proponer_alta_de_profesor` con `{ nombre: 'Lucía', apellido: 'Fernández', porcentaje: 50, horarios: [martes y jueves de 19:00 a 20:30] }` devuelve `{ resultado: PROPUESTA_MOSTRADA, propuesta: { tipo: 'altaDeProfesor', datos: { profesor: { nombre: 'Lucía', apellido: 'Fernández', porcentajeBp: 5000 }, horarios: [...] } } }` y no crea ningún profesor. Con `porcentaje: 0`, `150` o `50.5`, y con `horarios: []`, lanza `ZodError`. Con una "Lucia Fernandez" dada de baja ya cargada, lanza `ReglaDeNegocioError` con "Ya existe Lucia Fernandez (id N)".
   - `herramientasPara('recepcion')` sigue sin herramientas `proponer_*` y `herramientasPara('admin')` suma `proponer_alta_de_profesor`.
   - En `asistente.test.ts`, las instrucciones de admin mencionan `proponer_alta_de_profesor` y dicen que DNI, email, teléfono y alias se completan en la tarjeta.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test herramientas asistente` y verificar que fallan.
-- [ ] **Paso 3:** implementar en `propuestas.ts`:
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test herramientas asistente` y verificar que fallan.
+- [x] **Paso 3:** implementar en `propuestas.ts`:
 
 ```ts
 const HORARIO_DEL_ALTA: EsquemaDeObjeto = {
@@ -263,7 +263,7 @@ export const proponerAltaDeProfesor: Herramienta = {
 
 `sinTildes` pasa de `consultas.ts` a un archivo propio del módulo (`texto.ts`) para usarla en los dos. En `instrucciones.ts`, para admin: "Para sumar un profesor nuevo usá proponer_alta_de_profesor. No pidas DNI, email, teléfono ni alias: se completan en la tarjeta."
 
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
 - [ ] **Paso 5:** commit `feat(asistente): proponer el alta de un profesor`.
 
 ### Tarea 3: La semana incrustada

@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { ZodError } from 'zod';
 import { crearHorarioDeTest, crearProfesorDeTest } from '../../../test/fabricas.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../test/db.ts';
-import { clase } from '../../db/schema.ts';
+import { clase, profesor } from '../../db/schema.ts';
 import { ReglaDeNegocioError } from '../../lib/errores.ts';
 import { generarClases } from '../clases/programacion.service.ts';
 import { actualizarProfesor } from '../profesores/profesores.service.ts';
@@ -157,6 +157,48 @@ describe('proponer_horario', () => {
   });
 });
 
+describe('proponer_alta_de_profesor', () => {
+  const horarios = [
+    { estilo: 'Contemporáneo', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' },
+    { estilo: 'Contemporáneo', diaSemana: 4, horaInicio: '19:00', horaFin: '20:30' },
+  ];
+  const argumentos = { nombre: 'Lucía', apellido: 'Fernández', porcentaje: 50, horarios };
+
+  it('pasa el porcentaje a puntos básicos, devuelve la propuesta y no crea al profesor', async () => {
+    const salida = await herramienta('proponer_alta_de_profesor').ejecutar(argumentos, CONTEXTO);
+
+    expect(salida).toEqual({
+      resultado: PROPUESTA_MOSTRADA,
+      propuesta: {
+        tipo: 'altaDeProfesor',
+        datos: { profesor: { nombre: 'Lucía', apellido: 'Fernández', porcentajeBp: 5000 }, horarios },
+      },
+    });
+    expect(await base.db.select().from(profesor)).toEqual([]);
+  });
+
+  it.each([0, 150, 50.5])('rechaza el porcentaje %s', async (porcentaje) => {
+    await expect(
+      herramienta('proponer_alta_de_profesor').ejecutar({ ...argumentos, porcentaje }, CONTEXTO),
+    ).rejects.toThrow(ZodError);
+  });
+
+  it('rechaza una lista de horarios vacía', async () => {
+    await expect(
+      herramienta('proponer_alta_de_profesor').ejecutar({ ...argumentos, horarios: [] }, CONTEXTO),
+    ).rejects.toThrow(ZodError);
+  });
+
+  it('avisa con su id si ya hay un profesor con ese nombre, aunque esté dado de baja y sin tildes', async () => {
+    const existente = await crearProfesorDeTest({ nombre: 'Lucia', apellido: 'Fernandez' });
+    await actualizarProfesor(existente.id, { activo: false }, HOY);
+
+    await expect(herramienta('proponer_alta_de_profesor').ejecutar(argumentos, CONTEXTO)).rejects.toThrow(
+      new ReglaDeNegocioError(`Ya existe Lucia Fernandez (id ${existente.id}). Preguntá si es la misma persona.`),
+    );
+  });
+});
+
 describe('herramientasPara', () => {
   it('recepción solo consulta y el administrador también propone', () => {
     expect(herramientasPara('recepcion').map((h) => h.nombre)).toEqual(['buscar_profesores', 'listar_clases']);
@@ -165,6 +207,7 @@ describe('herramientasPara', () => {
       'listar_clases',
       'proponer_clase_unica',
       'proponer_horario',
+      'proponer_alta_de_profesor',
     ]);
   });
 });

@@ -2,7 +2,7 @@ import type { PropuestaDelAsistente, Rol } from '@studio/shared';
 import type { FechaDia } from '../../lib/fechas.ts';
 import { buscarProfesores, listarClasesDelRango } from './consultas.ts';
 import type { DefinicionDeHerramienta } from './modelo.ts';
-import { proponerClaseUnica, proponerHorario } from './propuestas.ts';
+import { proponerAltaDeProfesor, proponerClaseUnica, proponerHorario } from './propuestas.ts';
 
 export type ContextoDeHerramienta = { hoy: FechaDia };
 
@@ -15,7 +15,7 @@ export type Herramienta = DefinicionDeHerramienta & {
   ejecutar(argumentos: Record<string, unknown>, contexto: ContextoDeHerramienta): Promise<SalidaDeHerramienta>;
 };
 
-const TODAS: Herramienta[] = [buscarProfesores, listarClasesDelRango, proponerClaseUnica, proponerHorario];
+const TODAS: Herramienta[] = [buscarProfesores, listarClasesDelRango, proponerClaseUnica, proponerHorario, proponerAltaDeProfesor];
 
 export function herramientasPara(rol: Rol): Herramienta[] {
   return TODAS.filter((herramienta) => rol === 'admin' || !herramienta.soloAdmin);

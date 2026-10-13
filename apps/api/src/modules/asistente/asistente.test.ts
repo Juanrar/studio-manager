@@ -91,6 +91,9 @@ describe('POST /api/asistente/mensajes', () => {
     expect(modelo.pedidos[0]?.instrucciones).toContain(
       'Si el usuario confirma con palabras, recordale que toque Crear en la tarjeta. No vuelvas a proponer lo mismo.',
     );
+    expect(modelo.pedidos[0]?.instrucciones).toContain(
+      'Para sumar un profesor nuevo usá proponer_alta_de_profesor. No pidas DNI, email, teléfono ni alias: se completan en la tarjeta.',
+    );
   });
 
   it('a recepción le da solo las consultas y le avisa que no puede crear clases', async () => {

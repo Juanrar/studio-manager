@@ -1,8 +1,11 @@
-import { crearClaseUnicaSchema, crearHorarioSchema } from '@studio/shared';
+import { z } from 'zod';
+import { altaDeProfesorSchema, crearClaseUnicaSchema, crearHorarioSchema } from '@studio/shared';
 import { db } from '../../db/client.ts';
 import { ReglaDeNegocioError } from '../../lib/errores.ts';
-import { verificarProfesorActivo } from '../profesores/profesores.service.ts';
+import { listarProfesores, verificarProfesorActivo } from '../profesores/profesores.service.ts';
 import type { Herramienta } from './herramientas.ts';
+import type { EsquemaDeObjeto } from './modelo.ts';
+import { sinTildes } from './texto.ts';
 
 export const PROPUESTA_MOSTRADA = {
   estado: 'propuesta mostrada al usuario',
@@ -50,5 +53,54 @@ export const proponerHorario: Herramienta = {
     const { desde: _desde, claseId: _claseId, ...datos } = crearHorarioSchema.parse(argumentos);
     const profesor = await verificarProfesorActivo(db, datos.profesorId);
     return { resultado: PROPUESTA_MOSTRADA, propuesta: { tipo: 'horario', datos, profesor } };
+  },
+};
+
+const HORARIO_DEL_ALTA: EsquemaDeObjeto = {
+  type: 'object',
+  properties: {
+    estilo: { type: 'string', description: 'Estilo de danza, por ejemplo "Contemporáneo"' },
+    nivel: { type: 'string', description: 'Opcional, por ejemplo "Inicial"' },
+    diaSemana: { type: 'integer', description: 'Día de la semana: 1 es lunes y 7 es domingo' },
+    horaInicio: { type: 'string', description: 'HH:MM de 24 horas' },
+    horaFin: { type: 'string', description: 'HH:MM, posterior a horaInicio' },
+  },
+  required: ['estilo', 'diaSemana', 'horaInicio', 'horaFin'],
+};
+
+const argumentosDelAltaSchema = z.object({
+  nombre: z.string(),
+  apellido: z.string(),
+  porcentaje: z.number().int('El porcentaje va sin decimales').min(1).max(100),
+  horarios: z.array(z.unknown()),
+});
+
+export const proponerAltaDeProfesor: Herramienta = {
+  nombre: 'proponer_alta_de_profesor',
+  descripcion:
+    'Propone sumar un profesor nuevo con sus clases semanales. No crea nada: el usuario ve la semana en una tarjeta, completa sus datos personales ahí y confirma.',
+  parametros: {
+    type: 'object',
+    properties: {
+      nombre: { type: 'string' },
+      apellido: { type: 'string' },
+      porcentaje: { type: 'integer', description: 'Porcentaje que cobra el profesor de cada clase, de 1 a 100' },
+      horarios: { type: 'array', description: 'Las clases que da cada semana', items: HORARIO_DEL_ALTA },
+    },
+    required: ['nombre', 'apellido', 'porcentaje', 'horarios'],
+  },
+  soloAdmin: true,
+  async ejecutar(argumentos, { hoy }) {
+    const { nombre, apellido, porcentaje, horarios } = argumentosDelAltaSchema.parse(argumentos);
+    // Los porcentajes se guardan en puntos básicos: 50% es 5000.
+    const datos = altaDeProfesorSchema.parse({ profesor: { nombre, apellido, porcentajeBp: porcentaje * 100 }, horarios });
+    const buscado = sinTildes(`${datos.profesor.nombre} ${datos.profesor.apellido}`);
+    const repetido = (await listarProfesores(true, hoy)).find((p) => sinTildes(`${p.nombre} ${p.apellido}`) === buscado);
+    if (repetido !== undefined) {
+      throw new ReglaDeNegocioError(
+        `Ya existe ${repetido.nombre} ${repetido.apellido} (id ${repetido.id}). Preguntá si es la misma persona.`,
+      );
+    }
+    return { resultado: PROPUESTA_MOSTRADA, propuesta: { tipo: 'altaDeProfesor', datos } };
   },
 };

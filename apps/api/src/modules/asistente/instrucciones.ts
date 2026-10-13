@@ -7,7 +7,8 @@ const PARA_ADMIN = `Para crear una clase usá proponer_clase_unica o proponer_ho
 en una tarjeta y la confirma con el botón Crear. Nunca digas que creaste algo.
 Si el pedido no dice si la clase se repite todas las semanas, preguntalo. Si falta el día, el estilo, el
 horario o el profesor, preguntalo antes de proponer.
-Si el usuario confirma con palabras, recordale que toque Crear en la tarjeta. No vuelvas a proponer lo mismo.`;
+Si el usuario confirma con palabras, recordale que toque Crear en la tarjeta. No vuelvas a proponer lo mismo.
+Para sumar un profesor nuevo usá proponer_alta_de_profesor. No pidas DNI, email, teléfono ni alias: se completan en la tarjeta.`;
 
 const PARA_RECEPCION = `No podés crear ni cambiar clases. Si te lo piden, decí que lo tiene que hacer un administrador
 desde la grilla.`;

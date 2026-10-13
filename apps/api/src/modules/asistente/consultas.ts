@@ -5,10 +5,9 @@ import { sumarDias } from '../../lib/fechas.ts';
 import { listarClases } from '../clases/clases.service.ts';
 import { listarProfesores } from '../profesores/profesores.service.ts';
 import type { Herramienta } from './herramientas.ts';
+import { sinTildes } from './texto.ts';
 
 const DIAS_MAXIMOS = 31;
-
-const sinTildes = (texto: string) => texto.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim();
 
 // Solo id, nombre y apellido: el plan gratuito de Gemini no puede recibir datos personales.
 export const buscarProfesores: Herramienta = {
