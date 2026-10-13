@@ -15,6 +15,7 @@ type Conversacion = {
   esperando: boolean;
   error: Error | null;
   marcarCreada: (idDelMensaje: number, indice: number, enlace: string) => void;
+  empezarDeNuevo: () => void;
 };
 
 const ContextoDeConversacion = createContext<Conversacion | null>(null);
@@ -67,6 +68,14 @@ export function ProveedorDeConversacion({ children }: { children: ReactNode }) {
     );
   }
 
+  // Lo escrito en el campo queda, para mandarlo en la conversación nueva. `reset` borra el error y descarta
+  // una respuesta que todavía no llegó: sus callbacks no se llaman.
+  function empezarDeNuevo() {
+    conversar.reset();
+    setHistorial([]);
+    setMensajes([]);
+  }
+
   const valor: Conversacion = {
     mensajes,
     borrador,
@@ -75,6 +84,7 @@ export function ProveedorDeConversacion({ children }: { children: ReactNode }) {
     esperando: conversar.isPending,
     error: conversar.error,
     marcarCreada,
+    empezarDeNuevo,
   };
   return <ContextoDeConversacion value={valor}>{children}</ContextoDeConversacion>;
 }

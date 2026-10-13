@@ -145,7 +145,7 @@ No se usa el SDK `@google/genai`: hacen falta un solo endpoint y control total d
 
 ### Web
 
-- `apps/web/src/features/asistente/AsistentePage.tsx`: la conversación, el campo de texto y las tarjetas.
+- `apps/web/src/features/asistente/AsistentePage.tsx`: la conversación, el campo de texto y las tarjetas. Con mensajes, la barra tiene "Nueva conversación", que vacía el historial, los mensajes y el error, y conserva lo escrito.
 - `ConversacionDelAsistente.tsx`: `ProveedorDeConversacion` y `useConversacion()`. Guarda el historial, los mensajes, lo escrito en el campo y qué propuestas ya se crearon, con su enlace. La mutación de `POST /api/asistente/mensajes` vive acá. Se monta en `RequiereSesion`, arriba de las rutas hijas, con `key` igual al id del usuario.
 - `TarjetaDePropuesta.tsx`: los datos de la propuesta y el botón "Crear". Crea con `mutateAsync` y avisa a la conversación con `marcarCreada`; "Creada" sale de la conversación, no del estado de la mutación.
 - `api.ts`: `useConversar`. Para crear se reusan `useCrearClaseUnica` y `useCrearHorario` de `features/grilla/api.ts`, que ya recargan la grilla, la agenda y los horarios.
@@ -169,6 +169,7 @@ La conversación vive en memoria mientras dure la sesión en la app: navegar no 
 3. **Recepción pide crear.** No tiene las herramientas, y si un historial inventado las nombra, recibe "No existe la herramienta".
 4. **Doble clic en "Crear".** El botón se deshabilita mientras se crea y desaparece cuando se creó.
 5. **Cuota agotada a mitad de la conversación.** El mensaje de error se ve y el texto escrito queda en el campo para reintentar más tarde.
+6. **Conversación larga.** Después de unos 15 a 20 pedidos el historial pasa de 80 elementos y la API responde `CONVERSACION_LARGA`. La página muestra el aviso, resalta "Nueva conversación" en la barra y deja lo escrito en el campo para mandarlo en la conversación nueva.
 
 ## Tests
 
@@ -205,6 +206,9 @@ La conversación vive en memoria mientras dure la sesión en la app: navegar no 
 | Una respuesta que llega con el usuario en otra pantalla aparece al volver | Web | Sacar la mutación del proveedor |
 | Una propuesta que se termina de crear con el usuario en otra pantalla figura "Creada" al volver | Web | Avisar con los callbacks de `mutate`, que no se llaman si la tarjeta se desmontó |
 | Cerrar sesión y volver a entrar empieza una conversación vacía | Web | Montar el proveedor fuera de `RequiereSesion` o guardar el chat en el navegador |
+| "Nueva conversación" aparece con mensajes, vacía la lista, conserva lo escrito y el siguiente envío manda `historial: []` | Web | Mandar el historial viejo o borrar lo escrito |
+| "Nueva conversación" mientras espera descarta la respuesta que llega después | Web | Sacar `reset()`: la respuesta vieja aparece en la conversación nueva |
+| Un 422 `CONVERSACION_LARGA` muestra el aviso, resalta "Nueva conversación" y deja lo escrito; después de tocarlo, el envío manda `historial: []` | Web | Dejar el chat trabado sin forma de empezar de nuevo |
 
 ## Tareas
 

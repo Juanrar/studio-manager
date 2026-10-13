@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, type KeyboardEvent } from 'react';
-import { LARGO_MAXIMO_DEL_MENSAJE } from '@studio/shared';
+import { CONVERSACION_LARGA, LARGO_MAXIMO_DEL_MENSAJE } from '@studio/shared';
 import { AreaDeTexto, Aviso, Boton, Pagina } from '../../components/ui/index.tsx';
-import { mensajeDeError } from '../../lib/api.ts';
+import { ErrorDeApi, mensajeDeError } from '../../lib/api.ts';
 import { useSesion } from '../auth/api.ts';
 import { useConversacion } from './ConversacionDelAsistente.tsx';
 import { TarjetaDePropuesta } from './TarjetaDePropuesta.tsx';
@@ -12,6 +12,8 @@ export function AsistentePage() {
   const { mensajes, borrador, esperando, error } = conversacion;
   const final = useRef<HTMLDivElement>(null);
   const esAdmin = sesion.data?.rol === 'admin';
+  // La API no acepta más historial: el botón se resalta porque es la única forma de seguir.
+  const conversacionLarga = error instanceof ErrorDeApi && error.codigo === CONVERSACION_LARGA;
 
   useEffect(() => {
     // jsdom no implementa scrollIntoView.
@@ -26,7 +28,16 @@ export function AsistentePage() {
   }
 
   return (
-    <Pagina titulo="Asistente">
+    <Pagina
+      titulo="Asistente"
+      acciones={
+        mensajes.length > 0 && (
+          <Boton variante={conversacionLarga ? 'primario' : 'secundario'} onClick={conversacion.empezarDeNuevo}>
+            Nueva conversación
+          </Boton>
+        )
+      }
+    >
       <div className="mx-auto flex min-h-full max-w-2xl flex-col gap-3">
         <div className="flex flex-1 flex-col gap-3">
           {mensajes.length === 0 && (

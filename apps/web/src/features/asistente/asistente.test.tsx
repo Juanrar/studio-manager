@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import type { PropuestaDelAsistente } from '@studio/shared';
+import { CONVERSACION_LARGA, type PropuestaDelAsistente } from '@studio/shared';
 import { describe, expect, it } from 'vitest';
 import { ADMIN, RECEPCION, conAgendaVacia, conSesion, renderizarEn, sesionDelServidor } from '../../../test/render.tsx';
 import { servidor } from '../../../test/servidor.ts';
@@ -133,6 +133,109 @@ describe('/asistente', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Se terminó la cuota del asistente por hoy. Probá mañana.');
     expect(screen.getByLabelText('Mensaje para el asistente')).toHaveValue(PREGUNTA);
     expect(screen.queryByText('Pensando...')).not.toBeInTheDocument();
+  });
+
+  it('Nueva conversación vacía la lista, conserva lo escrito y el siguiente envío manda el historial vacío', async () => {
+    const cuerpos: unknown[] = [];
+    asistenteQueResponde(cuerpos);
+    conSesion(RECEPCION);
+    const { usuario } = renderizarEn('/asistente');
+    const campo = await screen.findByLabelText('Mensaje para el asistente');
+    expect(screen.queryByRole('button', { name: 'Nueva conversación' })).not.toBeInTheDocument();
+
+    await usuario.type(campo, PREGUNTA);
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+    await screen.findByText(RESPUESTA);
+    await usuario.type(campo, 'Y el viernes?');
+    await usuario.click(screen.getByRole('button', { name: 'Nueva conversación' }));
+
+    expect(screen.queryByText(PREGUNTA)).not.toBeInTheDocument();
+    expect(screen.queryByText(RESPUESTA)).not.toBeInTheDocument();
+    expect(screen.getByText('¿Qué clases hay el jueves?')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Nueva conversación' })).not.toBeInTheDocument();
+    expect(campo).toHaveValue('Y el viernes?');
+
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+    await waitFor(() => expect(cuerpos).toHaveLength(2));
+    expect(cuerpos[1]).toEqual({ historial: [], mensaje: 'Y el viernes?' });
+  });
+
+  it('Nueva conversación mientras espera descarta la respuesta que llega después', async () => {
+    const cuerpos: unknown[] = [];
+    let responderPrimera: () => void = () => {};
+    servidor.use(
+      http.post('/api/asistente/mensajes', async ({ request }) => {
+        cuerpos.push(await request.json());
+        if (cuerpos.length === 1) {
+          await new Promise<void>((resolver) => {
+            responderPrimera = resolver;
+          });
+          return HttpResponse.json({ historial: [{ rol: 'vieja' }], texto: 'Respuesta vieja', propuestas: [] });
+        }
+        return HttpResponse.json({ historial: [{ rol: 'nueva' }], texto: 'Respuesta nueva', propuestas: [] });
+      }),
+    );
+    conSesion(RECEPCION);
+    const { usuario } = renderizarEn('/asistente');
+    const campo = await screen.findByLabelText('Mensaje para el asistente');
+    await usuario.type(campo, PREGUNTA);
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+    await waitFor(() => expect(cuerpos).toHaveLength(1));
+
+    await usuario.click(screen.getByRole('button', { name: 'Nueva conversación' }));
+    expect(screen.queryByText('Pensando...')).not.toBeInTheDocument();
+    responderPrimera();
+    await usuario.type(campo, 'Otra pregunta');
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+
+    expect(await screen.findByText('Respuesta nueva')).toBeInTheDocument();
+    expect(screen.queryByText('Respuesta vieja')).not.toBeInTheDocument();
+    expect(screen.queryByText(PREGUNTA)).not.toBeInTheDocument();
+    expect(cuerpos).toEqual([
+      { historial: [], mensaje: PREGUNTA },
+      { historial: [], mensaje: 'Otra pregunta' },
+    ]);
+  });
+
+  it('una conversación muy larga muestra el aviso, resalta Nueva conversación y deja lo escrito en el campo', async () => {
+    const cuerpos: unknown[] = [];
+    servidor.use(
+      http.post('/api/asistente/mensajes', async ({ request }) => {
+        cuerpos.push(await request.json());
+        if (cuerpos.length === 2) {
+          return HttpResponse.json(
+            { error: 'La conversación es muy larga: empezá una nueva', codigo: CONVERSACION_LARGA },
+            { status: 422 },
+          );
+        }
+        return HttpResponse.json({ historial: [{ rol: 'usuario' }, { rol: 'modelo' }], texto: RESPUESTA, propuestas: [] });
+      }),
+    );
+    conSesion(RECEPCION);
+    const { usuario } = renderizarEn('/asistente');
+    const campo = await screen.findByLabelText('Mensaje para el asistente');
+    await usuario.type(campo, PREGUNTA);
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+    await screen.findByText(RESPUESTA);
+    expect(screen.getByRole('button', { name: 'Nueva conversación' })).not.toHaveClass('bg-acento');
+
+    await usuario.type(campo, 'Y el viernes?');
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('La conversación es muy larga: empezá una nueva');
+    expect(campo).toHaveValue('Y el viernes?');
+    expect(screen.getByRole('button', { name: 'Nueva conversación' })).toHaveClass('bg-acento');
+
+    await usuario.click(screen.getByRole('button', { name: 'Nueva conversación' }));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+
+    expect(await screen.findByText(RESPUESTA)).toBeInTheDocument();
+    expect(cuerpos).toEqual([
+      { historial: [], mensaje: PREGUNTA },
+      { historial: [{ rol: 'usuario' }, { rol: 'modelo' }], mensaje: 'Y el viernes?' },
+      { historial: [], mensaje: 'Y el viernes?' },
+    ]);
   });
 
   it('mientras espera deshabilita Enviar y muestra "Pensando..."', async () => {
