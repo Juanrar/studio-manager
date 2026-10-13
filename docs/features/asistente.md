@@ -25,11 +25,11 @@ El estudio quiere empezar sin pagar, con el plan gratuito de la API de Gemini. S
 
 Límites y condiciones del plan gratuito:
 
-- **La cuota diaria no es pública.** Se ve por proyecto en https://aistudio.google.com/rate-limit. Cada vuelta del ciclo de funciones es una petición: un pedido como "creame una clase con Erik" usa 2 a 4.
+- **La cuota diaria no es pública.** Se ve por proyecto en https://aistudio.google.com/rate-limit. Cada vuelta del ciclo de funciones es una petición: un pedido como "creame una clase con Erik" usa 2 a 4. El 2026-10-13, Google respondió en un 429 con `generate_content_free_tier_requests, limit: 20` para `gemini-3.5-flash`: 20 pedidos por día, o 5 o 6 consultas. Un 429 puede ser el límite por minuto o el diario; el mensaje de `CUOTA_AGOTADA` no los distingue.
 - **Google usa lo que recibe.** Los términos del plan gratuito dicen que Google usa entradas y respuestas para mejorar sus productos, que revisores humanos pueden leerlas, y piden no mandar información personal, confidencial o sensible. Por eso ninguna herramienta devuelve datos de alumnos, ni DNI, email, teléfono o alias de profesores. Lo que escribe el usuario también le llega a Google, así que la pantalla lo avisa con una línea fija debajo del campo: "Lo que escribís acá lo procesa Google. No escribas nombres, DNI ni teléfonos de alumnos."
 - **Los 503 son comunes.** Si el modelo principal responde 429, 500, 503 o 504, o el pedido falla por red o tarda más de 45 segundos, la API reintenta una vez con el modelo de respaldo, que tiene su propia cuota. Sin ese límite, Node espera hasta 300 segundos las cabeceras de la respuesta.
 
-Modelos por defecto: `gemini-3.5-flash`, con `gemini-3.1-flash-lite` de respaldo. Se cambian con variables de entorno, sin tocar código. Se usan nombres fijos y no los alias `-latest`, que cambian de modelo sin aviso.
+Modelos por defecto: `gemini-3.1-flash-lite`, con `gemini-3.5-flash` de respaldo. El principal es `gemini-3.1-flash-lite` porque el plan gratuito de `gemini-3.5-flash` permite 20 pedidos por día (Google lo informó en un 429 el 2026-10-13), que alcanzan para 5 o 6 consultas. `gemini-3.1-flash-lite` también llama bien a la función y tiene más cuota. Se cambian con variables de entorno, sin tocar código. Se usan nombres fijos y no los alias `-latest`, que cambian de modelo sin aviso.
 
 **API elegida:** `generateContent` (`POST /v1beta/models/{modelo}:generateContent`), sin estado. Google recomienda la Interactions API para proyectos nuevos y llama "legacy" a `generateContent`, pero la documenta como "fully supported". La Interactions API guarda la conversación en los servidores de Google por defecto; acá la conversación la guarda el navegador.
 
@@ -495,7 +495,7 @@ export function crearModeloGemini(opciones: OpcionesGemini): ModeloDeLenguaje {
       let respuesta = await generar(opciones.modelo, cuerpo);
       if (respuesta.status === 429 || respuesta.status === 503) respuesta = await generar(opciones.respaldo, cuerpo);
       if (respuesta.status === 429) {
-        throw new ServicioNoDisponibleError('Se terminó la cuota del asistente por hoy. Probá mañana.', 'CUOTA_AGOTADA');
+        throw new ServicioNoDisponibleError('Se alcanzó el límite de pedidos del plan gratuito. Probá en un minuto; si sigue, la cuota del día se renueva mañana.', 'CUOTA_AGOTADA');
       }
       if (respuesta.status === 503) {
         throw new ServicioNoDisponibleError('El asistente está saturado. Probá en unos minutos.', 'MODELO_SATURADO');
@@ -554,8 +554,8 @@ En `config.ts`, sumar al esquema y a `config`:
 ```ts
   // Sin clave, el asistente responde 503. Los modelos se pueden cambiar sin tocar código.
   GEMINI_API_KEY: z.string().min(1).optional(),
-  GEMINI_MODELO: z.string().min(1).default('gemini-3.5-flash'),
-  GEMINI_MODELO_RESPALDO: z.string().min(1).default('gemini-3.1-flash-lite'),
+  GEMINI_MODELO: z.string().min(1).default('gemini-3.1-flash-lite'),
+  GEMINI_MODELO_RESPALDO: z.string().min(1).default('gemini-3.5-flash'),
 ```
 
 ```ts
@@ -571,8 +571,8 @@ En `.env.example`, al final:
 ```text
 # Asistente: la clave se saca en https://aistudio.google.com/apikey. Sin clave, el asistente no anda.
 # GEMINI_API_KEY=
-# GEMINI_MODELO=gemini-3.5-flash
-# GEMINI_MODELO_RESPALDO=gemini-3.1-flash-lite
+# GEMINI_MODELO=gemini-3.1-flash-lite
+# GEMINI_MODELO_RESPALDO=gemini-3.5-flash
 ```
 
 - [x] **Paso 4:** correr `pnpm --filter @studio/api test gemini errores` y `pnpm typecheck`, y verificar que pasan.
@@ -1012,7 +1012,7 @@ En `test/app.ts`, `crearAppDeTest` pasa `modelo: null` antes de `...opciones`: u
   - Escribir "¿Qué clases hay mañana?" en el campo "Mensaje para el asistente" y tocar "Enviar" muestra el mensaje y la respuesta "Mañana hay Hip-Hop a las 19:00.". El cuerpo recibido es `{ historial: [], mensaje: '¿Qué clases hay mañana?' }`.
   - El segundo envío manda el `historial` que devolvió el primero, por ejemplo `[{ rol: 'usuario' }, { rol: 'modelo' }]`.
   - Enter envía; Shift+Enter agrega un renglón y no manda nada.
-  - Con un 503 `{ error: 'Se terminó la cuota del asistente por hoy. Probá mañana.', codigo: 'CUOTA_AGOTADA' }`, se ve ese texto y el campo conserva lo escrito.
+  - Con un 503 `{ error: 'Se alcanzó el límite de pedidos del plan gratuito. Probá en un minuto; si sigue, la cuota del día se renueva mañana.', codigo: 'CUOTA_AGOTADA' }`, se ve ese texto y el campo conserva lo escrito.
   - Mientras espera, el botón "Enviar" está deshabilitado y se ve "Pensando...".
   - Recepción ve "Asistente" en el menú, en la sección Recepción.
 - [x] **Paso 2:** correr `pnpm --filter @studio/web test asistente` y verificar que fallan porque la ruta no existe.
@@ -1060,7 +1060,7 @@ En `test/app.ts`, `crearAppDeTest` pasa `modelo: null` antes de `...opciones`: u
 - Crear: `apps/api/src/scripts/probar-asistente.ts`
 - Modificar: `apps/api/package.json`
 
-Esta tarea gasta cuota real: cada frase son 2 a 4 pedidos. Si la cuota diaria del modelo principal es chica, correr con `GEMINI_MODELO=gemini-3.1-flash-lite`.
+Esta tarea gasta cuota real: cada frase son 2 a 4 pedidos. Si se termina la cuota diaria de `gemini-3.1-flash-lite`, correr con `GEMINI_MODELO=gemini-3.5-flash`, que da solo 20 pedidos por día.
 
 - [x] **Paso 1:** escribir el script. Toma el primer profesor activo de la base de desarrollo, reemplaza `{profesor}` en cada frase, llama a `conversar` con `crearModeloGemini` y la configuración, e imprime la frase, el texto y las propuestas. Cierra la conexión con `await sql.end()`, como `crear-admin.ts`. En `package.json`: `"asistente:probar": "tsx --env-file=.env src/scripts/probar-asistente.ts"`.
 

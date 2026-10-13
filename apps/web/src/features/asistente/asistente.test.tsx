@@ -119,7 +119,10 @@ describe('/asistente', () => {
     servidor.use(
       http.post('/api/asistente/mensajes', () =>
         HttpResponse.json(
-          { error: 'Se terminó la cuota del asistente por hoy. Probá mañana.', codigo: 'CUOTA_AGOTADA' },
+          {
+            error: 'Se alcanzó el límite de pedidos del plan gratuito. Probá en un minuto; si sigue, la cuota del día se renueva mañana.',
+            codigo: 'CUOTA_AGOTADA',
+          },
           { status: 503 },
         ),
       ),
@@ -130,7 +133,9 @@ describe('/asistente', () => {
     await usuario.type(await screen.findByLabelText('Mensaje para el asistente'), PREGUNTA);
     await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Se terminó la cuota del asistente por hoy. Probá mañana.');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Se alcanzó el límite de pedidos del plan gratuito. Probá en un minuto; si sigue, la cuota del día se renueva mañana.',
+    );
     expect(screen.getByLabelText('Mensaje para el asistente')).toHaveValue(PREGUNTA);
     expect(screen.queryByText('Pensando...')).not.toBeInTheDocument();
   });

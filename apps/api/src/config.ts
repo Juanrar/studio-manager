@@ -10,8 +10,8 @@ const esquema = z.object({
   WEB_DIST: z.string().min(1).optional(),
   // Sin clave, el asistente responde 503. Los modelos se pueden cambiar sin tocar código.
   GEMINI_API_KEY: z.string().min(1).optional(),
-  GEMINI_MODELO: z.string().min(1).default('gemini-3.5-flash'),
-  GEMINI_MODELO_RESPALDO: z.string().min(1).default('gemini-3.1-flash-lite'),
+  GEMINI_MODELO: z.string().min(1).default('gemini-3.1-flash-lite'),
+  GEMINI_MODELO_RESPALDO: z.string().min(1).default('gemini-3.5-flash'),
 });
 
 const parseado = esquema.safeParse(process.env);

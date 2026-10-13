@@ -87,7 +87,7 @@ export function crearModeloGemini(opciones: OpcionesGemini): ModeloDeLenguaje {
       let respuesta = await generar(opciones.modelo, cuerpo);
       if (typeof respuesta === 'string') respuesta = await generar(opciones.respaldo, cuerpo);
       if (respuesta === 'cuota') {
-        throw new ServicioNoDisponibleError('Se terminó la cuota del asistente por hoy. Probá mañana.', 'CUOTA_AGOTADA');
+        throw new ServicioNoDisponibleError('Se alcanzó el límite de pedidos del plan gratuito. Probá en un minuto; si sigue, la cuota del día se renueva mañana.', 'CUOTA_AGOTADA');
       }
       if (respuesta === 'saturado') {
         throw new ServicioNoDisponibleError('El asistente está saturado. Probá en unos minutos.', 'MODELO_SATURADO');
