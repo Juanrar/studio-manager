@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import type { AltaDeProfesorInput } from '@studio/shared';
+import { crearProfesorSchema, type AltaDeProfesorInput } from '@studio/shared';
 import { Avatar, Aviso, Boton, Campo, Entrada, claseDeBoton } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearPorcentaje, hoyEnEstudio } from '../../lib/formato.ts';
@@ -14,6 +14,10 @@ const CAMPOS_PERSONALES = [
   { campo: 'email', etiqueta: 'Email' },
   { campo: 'aliasCbu', etiqueta: 'Alias o CBU' },
 ] as const;
+
+const personalesSchema = crearProfesorSchema.pick({ dni: true, email: true, telefono: true, aliasCbu: true });
+
+type Personales = Record<(typeof CAMPOS_PERSONALES)[number]['campo'], string>;
 
 // Los datos personales se completan acá y van directo a la API del estudio: no pasan por el asistente.
 // Que ya se creó lo guarda la conversación, no la mutación: la tarjeta se desmonta al ir a otra pantalla.
@@ -29,12 +33,25 @@ export function TarjetaDeAltaDeProfesor({
   const { datos } = propuesta;
   const { nombre, apellido, porcentajeBp } = datos.profesor;
   const darDeAlta = useDarDeAltaProfesor();
-  const [personales, setPersonales] = useState({ dni: '', telefono: '', email: '', aliasCbu: '' });
+  const [personales, setPersonales] = useState<Personales>({ dni: '', telefono: '', email: '', aliasCbu: '' });
+  const [errores, setErrores] = useState<Partial<Personales>>({});
   const hoy = hoyEnEstudio();
   const clases = clasesDeLaPropuesta(datos, hoy);
 
   // La promesa se cumple aunque la tarjeta ya no esté montada; los callbacks de `mutate` no se llaman.
   async function crear() {
+    const validacion = personalesSchema.safeParse(personales);
+    if (!validacion.success) {
+      const campos = validacion.error.flatten().fieldErrors;
+      setErrores({
+        ...(campos.dni?.[0] === undefined ? {} : { dni: campos.dni[0] }),
+        ...(campos.telefono?.[0] === undefined ? {} : { telefono: campos.telefono[0] }),
+        ...(campos.email?.[0] === undefined ? {} : { email: campos.email[0] }),
+        ...(campos.aliasCbu?.[0] === undefined ? {} : { aliasCbu: campos.aliasCbu[0] }),
+      });
+      return;
+    }
+    setErrores({});
     try {
       const profesor = await darDeAlta.mutateAsync({ ...datos, profesor: { ...datos.profesor, ...personales } });
       alCrearse(`/profesores/${profesor.id}`);
@@ -59,7 +76,7 @@ export function TarjetaDeAltaDeProfesor({
         <>
           <div className="grid gap-2 sm:grid-cols-2">
             {CAMPOS_PERSONALES.map(({ campo, etiqueta }) => (
-              <Campo key={campo} etiqueta={etiqueta}>
+              <Campo key={campo} etiqueta={etiqueta} error={errores[campo]}>
                 {(id) => (
                   <Entrada
                     id={id}

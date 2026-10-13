@@ -479,6 +479,24 @@ describe('/asistente', () => {
       expect(JSON.stringify(cuerposDelChat)).not.toContain('30123456');
     });
 
+    it('un DNI con puntos muestra el error del esquema en su campo y no manda nada', async () => {
+      let pedidos = 0;
+      servidor.use(
+        http.post('/api/asistente/altas-de-profesor', () => {
+          pedidos++;
+          return HttpResponse.json({ id: 31 }, { status: 201 });
+        }),
+      );
+      const usuario = await pedirElAlta();
+
+      await usuario.type(screen.getByLabelText('DNI'), '30.123.456');
+      await usuario.click(screen.getByRole('button', { name: 'Crear profesor' }));
+
+      expect(await screen.findByText('El DNI tiene que tener entre 6 y 9 números')).toBeInTheDocument();
+      expect(pedidos).toBe(0);
+      expect(screen.getByRole('button', { name: 'Crear profesor' })).toBeEnabled();
+    });
+
     it('con 201 desaparece el botón y se ve Creado con el enlace a la ficha', async () => {
       let responder: () => void = () => {};
       let pedidos = 0;
