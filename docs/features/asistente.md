@@ -26,7 +26,7 @@ El estudio quiere empezar sin pagar, con el plan gratuito de la API de Gemini. S
 Límites y condiciones del plan gratuito:
 
 - **La cuota diaria no es pública.** Se ve por proyecto en https://aistudio.google.com/rate-limit. Cada vuelta del ciclo de funciones es una petición: un pedido como "creame una clase con Erik" usa 2 a 4.
-- **Google usa lo que recibe.** Los términos del plan gratuito dicen que Google usa entradas y respuestas para mejorar sus productos, que revisores humanos pueden leerlas, y piden no mandar información personal, confidencial o sensible. Por eso ninguna herramienta devuelve datos de alumnos, ni DNI, email, teléfono o alias de profesores.
+- **Google usa lo que recibe.** Los términos del plan gratuito dicen que Google usa entradas y respuestas para mejorar sus productos, que revisores humanos pueden leerlas, y piden no mandar información personal, confidencial o sensible. Por eso ninguna herramienta devuelve datos de alumnos, ni DNI, email, teléfono o alias de profesores. Lo que escribe el usuario también le llega a Google, así que la pantalla lo avisa con una línea fija debajo del campo: "Lo que escribís acá lo procesa Google. No escribas nombres, DNI ni teléfonos de alumnos."
 - **Los 503 son comunes.** Si el modelo principal responde 429, 500, 503 o 504, o el pedido falla por red o tarda más de 45 segundos, la API reintenta una vez con el modelo de respaldo, que tiene su propia cuota. Sin ese límite, Node espera hasta 300 segundos las cabeceras de la respuesta.
 
 Modelos por defecto: `gemini-3.5-flash`, con `gemini-3.1-flash-lite` de respaldo. Se cambian con variables de entorno, sin tocar código. Se usan nombres fijos y no los alias `-latest`, que cambian de modelo sin aviso.
@@ -203,6 +203,7 @@ La conversación vive en memoria mientras dure la sesión en la app: navegar no 
 | Una propuesta de horario manda `POST /api/horarios` | Web | Confundir los dos tipos |
 | Un 422 al crear se muestra en la tarjeta | Web | Que el error se pierda |
 | Recepción ve "Asistente" en el menú | Web | Dejarlo solo para administradores |
+| Debajo del campo se ve "Lo que escribís acá lo procesa Google. No escribas nombres, DNI ni teléfonos de alumnos." | Web | Sacar el aviso de privacidad del plan gratuito |
 | Ir a la agenda por el menú y volver conserva los mensajes, la tarjeta "Creada" sin botón "Crear" y lo escrito en el campo | Web | Volver a guardar la conversación en el estado de la página |
 | Una respuesta que llega con el usuario en otra pantalla aparece al volver | Web | Sacar la mutación del proveedor |
 | Una propuesta que se termina de crear con el usuario en otra pantalla figura "Creada" al volver | Web | Avisar con los callbacks de `mutate`, que no se llaman si la tarjeta se desmontó |

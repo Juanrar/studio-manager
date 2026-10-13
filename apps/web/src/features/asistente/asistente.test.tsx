@@ -295,6 +295,15 @@ describe('/asistente', () => {
     expect(screen.queryByText(/Creame un workshop/)).not.toBeInTheDocument();
   });
 
+  it('avisa debajo del campo que lo escrito lo procesa Google', async () => {
+    conSesion(RECEPCION);
+    renderizarEn('/asistente');
+
+    expect(
+      await screen.findByText('Lo que escribís acá lo procesa Google. No escribas nombres, DNI ni teléfonos de alumnos.'),
+    ).toBeInTheDocument();
+  });
+
   it('el administrador ve el ejemplo de crear un workshop', async () => {
     conSesion(ADMIN);
     renderizarEn('/asistente');

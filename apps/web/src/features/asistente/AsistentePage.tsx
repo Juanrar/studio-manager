@@ -71,18 +71,23 @@ export function AsistentePage() {
           {error !== null && <Aviso>{mensajeDeError(error)}</Aviso>}
           <div ref={final} />
         </div>
-        <div className="sticky bottom-0 flex items-end gap-2 bg-panel pt-2">
-          <AreaDeTexto
-            aria-label="Mensaje para el asistente"
-            rows={2}
-            maxLength={LARGO_MAXIMO_DEL_MENSAJE}
-            value={borrador}
-            onChange={(evento) => conversacion.cambiarBorrador(evento.target.value)}
-            onKeyDown={alTeclear}
-          />
-          <Boton onClick={conversacion.enviar} disabled={esperando || borrador.trim() === ''}>
-            Enviar
-          </Boton>
+        <div className="sticky bottom-0 flex flex-col gap-1 bg-panel pt-2">
+          <div className="flex items-end gap-2">
+            <AreaDeTexto
+              aria-label="Mensaje para el asistente"
+              rows={2}
+              maxLength={LARGO_MAXIMO_DEL_MENSAJE}
+              value={borrador}
+              onChange={(evento) => conversacion.cambiarBorrador(evento.target.value)}
+              onKeyDown={alTeclear}
+            />
+            <Boton onClick={conversacion.enviar} disabled={esperando || borrador.trim() === ''}>
+              Enviar
+            </Boton>
+          </div>
+          <p className="text-xs text-tenue">
+            Lo que escribís acá lo procesa Google. No escribas nombres, DNI ni teléfonos de alumnos.
+          </p>
         </div>
       </div>
     </Pagina>
