@@ -1,6 +1,6 @@
 # Asistente con Gemini
 
-**Estado:** en curso
+**Estado:** lista
 **Depende de:** grilla-semanal (26)
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; un administrador abre "Asistente", escribe "Creame un workshop de Hip-Hop el sábado de 15 a 17 con Erik", ve una tarjeta con la clase propuesta, toca "Crear" y la clase aparece en la grilla; recepción usa el mismo chat para consultar clases y profesores, pero no puede crear nada.
 
@@ -1082,12 +1082,12 @@ La frase 8 se sumó en la revisión final, junto con la línea de las instruccio
 - [x] **Paso 2:** correr `pnpm --filter @studio/api asistente:probar` con la clave en `apps/api/.env` y Postgres levantado.
 - [x] **Paso 3:** comparar cada respuesta con la tabla. Si una falla, ajustar `instrucciones.ts` o la descripción de la herramienta y volver a correr solo esa frase. Anotar en la bitácora qué modelo se usó, cuántas frases pasaron y qué se cambió.
 - [x] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `test(asistente): frases de prueba contra Gemini`.
+- [x] **Paso 5:** commit `test(asistente): frases de prueba contra Gemini`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
-- [ ] `pnpm e2e` sigue pasando: el asistente no lo toca, pero la ruta y el menú nuevos sí.
-- [ ] Las frases de la tarea 6 se comportan como dice la tabla.
-- [ ] A mano, con `pnpm dev` y la clave en el `.env`: como administrador, pedir el workshop del sábado, tocar "Crear" y verlo en la grilla; como recepción, preguntar las clases de mañana y pedir crear una.
-- [ ] En https://aistudio.google.com/rate-limit, anotar en la bitácora la cuota diaria de los dos modelos y cuánto gastó la verificación.
+- [x] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
+- [x] `pnpm e2e` sigue pasando: el asistente no lo toca, pero la ruta y el menú nuevos sí.
+- [x] Las frases de la tarea 6 se comportan como dice la tabla.
+- [x] A mano, con `pnpm dev` y la clave en el `.env`: como administrador, pedir el workshop del sábado, tocar "Crear" y verlo en la grilla; como recepción, preguntar las clases de mañana y pedir crear una. Se hizo con Playwright en Chromium sobre la base del e2e, con la API en otro puerto y `gemini-3.1-flash-lite` en los dos modelos. Recepción pidió crear una clase; las clases de mañana las cubre la frase 4 de la tarea 6.
+- [ ] En https://aistudio.google.com/rate-limit, anotar en la bitácora la cuota diaria de los dos modelos y cuánto gastó la verificación. Pendiente: necesita la cuenta de Google del estudio. Un 429 de Google ya dijo que `gemini-3.5-flash` permite 20 pedidos por día; la de `gemini-3.1-flash-lite` no se conoce.

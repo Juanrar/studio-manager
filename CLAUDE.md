@@ -113,6 +113,7 @@ Reglas que siguen:
 | `pnpm e2e` | Prueba de punta a punta con Playwright: base limpia, build y recorrido en Chromium |
 | `pnpm --filter @studio/api db:generate` | Genera una migración desde `schema.ts` |
 | `pnpm --filter @studio/api db:migrate` | Aplica las migraciones |
+| `pnpm --filter @studio/api asistente:probar [n]` | Corre las frases de prueba del asistente contra Gemini real, o solo la frase `n`. Gasta cuota |
 
 Los tests de integración necesitan Docker corriendo.
 
@@ -150,6 +151,11 @@ Los tests de integración necesitan Docker corriendo.
 - **Renombrar una tabla o una columna con Drizzle:** `db:generate` pregunta en la terminal si es un renombre, y un agente no puede contestar. La migración se escribe a mano (`db:generate --custom --name <nombre>`) y el snapshot se regenera desde `schema.ts` en una carpeta temporal: `pnpm exec drizzle-kit generate --dialect postgresql --schema ./src/db/schema.ts --out <carpeta> --casing snake_case`, copiando el `id` y el `prevId` del snapshot que creó `--custom`. Hay que renombrar también las claves foráneas, las secuencias y las claves primarias. Después `db:generate` tiene que decir que no hay cambios. Ejemplo: la migración `0003_renombrar_horario_y_clase`.
 - **Un worktree nuevo no tiene `apps/api/.env`** (git lo ignora): `pnpm e2e` falla en el seed con `.env: not found`. Se copia el `.env.example` de la raíz.
 - **`vitest run --reporter=json`** escribe `.vitest/json/output.json` dentro del paquete, que git no ignora. Se pasa `--outputFile` con una ruta fuera del repositorio.
+- **El asistente y Gemini:** los tests nunca llaman a Google. `crearAppDeTest` pasa `modelo: null`, y para probar el ciclo de herramientas se usa `crearModeloFalso(guion)` de `apps/api/test/modelo-falso.ts`, que guarda cada pedido en `modelo.pedidos`. Gemini responde 400 si una llamada a función vuelve sin su `thoughtSignature`: el historial es opaco y nunca se rearma. La clave va en `GEMINI_API_KEY` de `apps/api/.env`.
+- **Cuota de Gemini gratis:** `gemini-3.5-flash` permite 20 pedidos por día y cada consulta al asistente usa de 2 a 4. Los 503 por saturación son frecuentes en los dos modelos. Antes de correr `asistente:probar`, conviene probar una sola frase.
+- **Ver el asistente en Chromium:** API con la base del e2e en otro puerto, `WEB_DIST=../web/dist` y `NODE_ENV=development`. Con `production` la cookie de sesión es `secure` y el login por http no anda. Las variables del entorno ganan sobre `--env-file`, así que `GEMINI_MODELO=...` en la línea de comando elige el modelo.
+- **Cortar una tarea en segundo plano** que levantó la API con `tsx` deja vivo el `node.exe` del servidor. Antes de volver a levantarla, buscá el PID con `netstat -ano` en ese puerto y cerralo; si no, el pedido siguiente habla con el código viejo.
+- **La conversación del asistente** vive en `ProveedorDeConversacion`, montado dentro de `RequiereSesion` con la clave del usuario: navegar no la borra, recargar o cerrar sesión sí.
 
 ## Estilo de escritura
 
