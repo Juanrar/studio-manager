@@ -97,11 +97,6 @@ export function crearModeloGemini(opciones: OpcionesGemini): ModeloDeLenguaje {
       const datos = (await respuesta.json()) as { candidates?: { content?: Contenido }[] };
       const contenido = datos.candidates?.[0]?.content;
       const partes = contenido?.parts ?? [];
-      // Un turno sin partes en el historial hace fallar el pedido siguiente: no se guarda.
-      if (contenido === undefined || partes.length === 0) {
-        throw new ServicioNoDisponibleError('El asistente no pudo responder. Probá con otras palabras.', 'SIN_RESPUESTA');
-      }
-
       const llamadas: LlamadaAHerramienta[] = partes.flatMap((parte) =>
         parte.functionCall === undefined
           ? []
@@ -118,6 +113,11 @@ export function crearModeloGemini(opciones: OpcionesGemini): ModeloDeLenguaje {
         .map((parte) => parte.text ?? '')
         .join('')
         .trim();
+      // Sin texto ni llamadas no hay nada que mostrar, y un turno vacío en el historial hace fallar el pedido
+      // siguiente: no se guarda.
+      if (contenido === undefined || (texto === '' && llamadas.length === 0)) {
+        throw new ServicioNoDisponibleError('El asistente no pudo responder. Probá con otras palabras.', 'SIN_RESPUESTA');
+      }
       return { historial: [...historial, contenido], texto, llamadas };
     },
   };

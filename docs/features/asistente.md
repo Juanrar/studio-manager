@@ -77,7 +77,7 @@ Errores:
 | Falta `GEMINI_API_KEY` | 503, `codigo: 'ASISTENTE_SIN_CONFIGURAR'` |
 | Los dos modelos sin cuota (429) | 503, `codigo: 'CUOTA_AGOTADA'` |
 | Los dos modelos saturados (500, 503 o 504), sin red o sin respuesta en 45 segundos | 503, `codigo: 'MODELO_SATURADO'` |
-| Gemini no devuelve ninguna parte | 503, `codigo: 'SIN_RESPUESTA'` |
+| Gemini no devuelve texto ni llamadas a funciones (sin partes o solo pensamientos) | 503, `codigo: 'SIN_RESPUESTA'` |
 | 6 vueltas sin respuesta de texto | 422 |
 
 Confirmar una propuesta no tiene endpoint nuevo: la tarjeta llama a `POST /api/clases` o `POST /api/horarios`, que ya piden administrador.
@@ -178,7 +178,7 @@ El historial vive en el estado de la página: recargar la página empieza una co
 | Un 503 del principal reintenta con el respaldo; 429 en los dos da `CUOTA_AGOTADA` y 503 en los dos da `MODELO_SATURADO` | Unitario con `fetch` falso | Sacar el respaldo o confundir los códigos |
 | Un 500, un 504 o un `fetch` que rechaza (red o timeout) en el principal reintentan con el respaldo; si los dos fallan así, `MODELO_SATURADO`; un 400 o un 403 no se reintentan | Unitario con `fetch` falso | Que una caída de red o un 504 de Google terminen en "Error interno" |
 | Cada pedido lleva el `signal` de `AbortSignal.timeout(45000)` y el cuerpo de la primera respuesta se libera antes de reintentar | Unitario con `fetch` falso | Esperar 300 segundos a Google o dejar conexiones abiertas |
-| Una respuesta sin partes da `SIN_RESPUESTA` y no agrega nada al historial | Unitario con `fetch` falso | Guardar un turno vacío, que hace fallar el pedido siguiente |
+| Una respuesta sin partes, o con solo pensamientos, da `SIN_RESPUESTA` y no agrega nada al historial | Unitario con `fetch` falso | Guardar un turno vacío, que hace fallar el pedido siguiente, o mostrar una burbuja vacía |
 | `buscar_profesores` encuentra "martin" y "gomez martin" sin tildes, no trae dados de baja ni DNI, email o teléfono | Service con base real | Mandarle datos personales a Google o comparar con tildes |
 | `listar_clases` devuelve las clases del rango con el profesor; un rango de más de 31 días da error | Service con base real | Mandar meses enteros al modelo |
 | `proponer_clase_unica` devuelve la propuesta con el profesor y no crea ninguna clase | Service con base real | Que la herramienta escriba en la base |

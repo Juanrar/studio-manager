@@ -201,4 +201,18 @@ describe('crearModeloGemini', () => {
 
     expect(error).toMatchObject({ codigo: 'SIN_RESPUESTA' });
   });
+
+  it('una respuesta con solo pensamientos, sin texto ni llamadas, lanza SIN_RESPUESTA', async () => {
+    const { modelo } = modeloCon([
+      { status: 200, cuerpo: { candidates: [{ content: { role: 'model', parts: [{ text: 'pensando', thought: true }] } }] } },
+    ]);
+
+    const error = await modelo.responder(SIN_NADA).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ServicioNoDisponibleError);
+    expect(error).toMatchObject({
+      message: 'El asistente no pudo responder. Probá con otras palabras.',
+      codigo: 'SIN_RESPUESTA',
+    });
+  });
 });
