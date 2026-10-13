@@ -119,9 +119,11 @@ Si el pedido no dice si la clase se repite todas las semanas, preguntalo. Si fal
 horario o el profesor, preguntalo antes de proponer.
 
 [recepción]
-No podés crear ni cambiar clases. Si te lo piden, decí que lo tiene que hacer un administrador desde la grilla
-o desde este chat.
+No podés crear ni cambiar clases. Si te lo piden, decí que lo tiene que hacer un administrador
+desde la grilla.
 ```
+
+Nota: el plan decía "desde la grilla o desde este chat". En la prueba contra Gemini el modelo le repetía a recepción "o desde este chat", y recepción no puede crear desde el chat. Se quitó esa parte.
 
 ## Arquitectura
 
