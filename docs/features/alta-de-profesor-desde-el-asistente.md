@@ -81,6 +81,7 @@ Devuelve al modelo `PROPUESTA_MOSTRADA` y a la web la propuesta `{ tipo: 'altaDe
 3. **Un horario fuera de 08:00 a 23:00**, como las 07:00. La grilla de la tarjeta se ajusta al rango de las clases; la de la página sigue de 08:00 a 23:00.
 4. **El DNI en la tarjeta.** No viaja a `/api/asistente/mensajes`.
 5. **Doble clic en "Crear profesor".** El botón se deshabilita mientras espera y desaparece cuando se creó.
+6. **Dos propuestas de la misma profesora.** Si el administrador pide otra propuesta para cambiar un horario, quedan dos tarjetas con "Crear profesor". El servidor rechaza el segundo alta con 422.
 
 ## Tests
 
@@ -107,7 +108,7 @@ Devuelve al modelo `PROPUESTA_MOSTRADA` y a la web la propuesta `{ tipo: 'altaDe
 
 **Archivos:**
 - Crear: `apps/api/src/modules/asistente/alta-de-profesor.service.ts`, `alta-de-profesor.routes.ts`, `alta-de-profesor.test.ts`
-- Modificar: `packages/shared/src/asistente.ts`, `packages/shared/src/horarios.ts` (exportar `diaSemanaSchema`), `apps/api/src/modules/profesores/profesores.service.ts`, `apps/api/src/modules/clases/programacion.service.ts`, `apps/api/src/app.ts`, `apps/web/src/features/asistente/TarjetaDePropuesta.tsx`
+- Modificar: `packages/shared/src/asistente.ts`, `packages/shared/src/horarios.ts` (exportar `diaSemanaSchema`), `apps/api/src/modules/profesores/profesores.service.ts`, `apps/api/src/modules/clases/programacion.service.ts`, `apps/api/src/app.ts`, `apps/web/src/features/asistente/AsistentePage.tsx`, `apps/web/src/features/asistente/TarjetaDePropuesta.tsx`
 
 **Produce:** `altaDeProfesorSchema`, `AltaDeProfesorInput`, `darDeAltaProfesor(datos, hoy)`, `POST /api/asistente/altas-de-profesor`.
 
@@ -288,7 +289,7 @@ export const proponerAltaDeProfesor: Herramienta = {
 
 **Archivos:**
 - Crear: `apps/web/src/features/asistente/TarjetaDeAltaDeProfesor.tsx`
-- Modificar: `apps/web/src/features/asistente/api.ts`, `TarjetaDePropuesta.tsx` (elige la tarjeta según `tipo`), `asistente.test.tsx`
+- Modificar: `apps/web/src/features/asistente/api.ts`, `AsistentePage.tsx` (elige la tarjeta según `tipo`), `asistente.test.tsx`
 
 **Consume:** `VistaDeSemana` incrustada y las funciones de `grillaDeLaPropuesta.ts` (tarea 3), `POST /api/asistente/altas-de-profesor` (tarea 1).
 
@@ -316,12 +317,12 @@ export const proponerAltaDeProfesor: Herramienta = {
 | "Sumá a una profesora nueva que da Salsa los lunes" | Pregunta nombre, porcentaje y horario. Sin propuesta |
 | "Sumá a {profesor}, 40%, da Jazz los viernes de 18 a 19" | Dice que ya existe y pregunta si es la misma persona |
 
-Nota: la frase 9 quedó sin verificar el 2026-10-13 porque Google respondió saturación en `gemini-3.1-flash-lite` y cuota agotada en `gemini-3.5-flash`. Hay que correrla cuando haya cuota. Las frases 10 y 11 pasaron.
+La frase 9 no se verificó el 2026-10-13: cinco corridas devolvieron 503 después del reintento con el modelo de respaldo. Hay que correrla cuando haya cuota. Las frases 10 y 11 pasaron.
 
 - [x] **Paso 2:** correr `pnpm --filter @studio/api asistente:probar`.
 - [ ] **Paso 3:** comparar con la tabla y ajustar las instrucciones o la descripción si hace falta. Anotar el resultado en la bitácora.
 - [x] **Paso 4:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `test(asistente): frases del alta de profesor`.
+- [x] **Paso 5:** commit `test(asistente): frases del alta de profesor`.
 
 ## Verificación final
 
