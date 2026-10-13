@@ -481,8 +481,10 @@ describe('/asistente', () => {
 
     it('con 201 desaparece el botón y se ve Creado con el enlace a la ficha', async () => {
       let responder: () => void = () => {};
+      let pedidos = 0;
       servidor.use(
         http.post('/api/asistente/altas-de-profesor', async () => {
+          pedidos++;
           await new Promise<void>((resolver) => {
             responder = resolver;
           });
@@ -492,7 +494,8 @@ describe('/asistente', () => {
       const usuario = await pedirElAlta();
 
       await usuario.click(screen.getByRole('button', { name: 'Crear profesor' }));
-      await waitFor(() => expect(screen.getByRole('button', { name: 'Crear profesor' })).toBeDisabled());
+      await waitFor(() => expect(pedidos).toBe(1));
+      expect(screen.getByRole('button', { name: 'Crear profesor' })).toBeDisabled();
       responder();
 
       expect(await screen.findByText('Creado')).toBeInTheDocument();
