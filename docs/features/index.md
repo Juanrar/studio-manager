@@ -50,7 +50,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | # | Feature | Estado | Depende de |
 |---|---|---|---|
 | 27 | [Asistente con Gemini](asistente.md) | lista | 26 |
-| 28 | [Alta de profesor desde el asistente](alta-de-profesor-desde-el-asistente.md) | pendiente | 27 |
+| 28 | [Alta de profesor desde el asistente](alta-de-profesor-desde-el-asistente.md) | en curso | 27 |
 
 ## Bitácora
 

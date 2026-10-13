@@ -1,6 +1,6 @@
 # Alta de profesor desde el asistente
 
-**Estado:** pendiente
+**Estado:** en curso
 **Depende de:** asistente (27)
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; un administrador escribe "Sumá a Lucía Fernández, 50%, da Contemporáneo los martes y jueves de 19 a 20:30", ve una tarjeta con la semana dibujada como en la grilla, completa el DNI en la tarjeta, toca "Crear profesor" y la profesora queda creada con sus dos horarios y sus clases.
 
