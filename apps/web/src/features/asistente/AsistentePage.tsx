@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { Fragment, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { LARGO_MAXIMO_DEL_MENSAJE, type PropuestaDelAsistente } from '@studio/shared';
 import { AreaDeTexto, Aviso, Boton, Pagina } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { useSesion } from '../auth/api.ts';
 import { useConversar } from './api.ts';
+import { TarjetaDePropuesta } from './TarjetaDePropuesta.tsx';
 
 type Mensaje = { id: number; autor: 'usuario' | 'asistente'; texto: string; propuestas: PropuestaDelAsistente[] };
 
@@ -64,16 +65,20 @@ export function AsistentePage() {
             </div>
           )}
           {mensajes.map((mensaje) => (
-            <div
-              key={mensaje.id}
-              className={
-                mensaje.autor === 'usuario'
-                  ? 'max-w-[85%] self-end rounded-lg bg-resalte px-3 py-2 whitespace-pre-wrap'
-                  : 'max-w-[85%] self-start rounded-lg border border-borde bg-elevado px-3 py-2 whitespace-pre-wrap'
-              }
-            >
-              {mensaje.texto}
-            </div>
+            <Fragment key={mensaje.id}>
+              <div
+                className={
+                  mensaje.autor === 'usuario'
+                    ? 'max-w-[85%] self-end rounded-lg bg-resalte px-3 py-2 whitespace-pre-wrap'
+                    : 'max-w-[85%] self-start rounded-lg border border-borde bg-elevado px-3 py-2 whitespace-pre-wrap'
+                }
+              >
+                {mensaje.texto}
+              </div>
+              {mensaje.propuestas.map((propuesta, indice) => (
+                <TarjetaDePropuesta key={indice} propuesta={propuesta} />
+              ))}
+            </Fragment>
           ))}
           {conversar.isPending && <p className="text-tenue">Pensando...</p>}
           {conversar.isError && <Aviso>{mensajeDeError(conversar.error)}</Aviso>}

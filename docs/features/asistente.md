@@ -1012,7 +1012,7 @@ En `test/app.ts`, `crearAppDeTest` pasa `modelo: null` antes de `...opciones`: u
 ```
 
 - [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(asistente): pantalla de chat`.
+- [x] **Paso 5:** commit `feat(asistente): pantalla de chat`.
 
 ### Tarea 5: Confirmar una propuesta
 
@@ -1022,14 +1022,14 @@ En `test/app.ts`, `crearAppDeTest` pasa `modelo: null` antes de `...opciones`: u
 
 **Consume:** `PropuestaDelAsistente` (tarea 2), `useCrearClaseUnica` y `useCrearHorario` de `features/grilla/api.ts`.
 
-- [ ] **Paso 1:** sumar a `asistente.test.tsx`:
+- [x] **Paso 1:** sumar a `asistente.test.tsx`:
   - Una respuesta con la propuesta `claseUnica` del ejemplo de la API muestra una tarjeta con "Clase única", "Hip-Hop", la fecha con `formatearFechaLarga` (buscarla con `/sábado,? 17 de octubre/`, porque Intl puede agregar la coma), "15:00 a 17:00" y "Erik Zapata".
   - "Crear" manda `POST /api/clases` con `{ fecha: '2026-10-17', horaInicio: '15:00', horaFin: '17:00', estilo: 'Hip-Hop', profesorId: 7 }`. Mientras espera, el botón está deshabilitado; cuando responde 201, el botón no está más y se ve "Creada" con un enlace "Ver en la grilla" a `/grilla?fecha=2026-10-17`.
   - Una propuesta `horario` muestra "Todas las semanas" y "martes", y "Crear" manda `POST /api/horarios` con sus `datos`.
   - Un 422 al crear muestra el motivo en la tarjeta y el botón vuelve a estar habilitado.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/web test asistente` y verificar que fallan.
-- [ ] **Paso 3:** implementar `TarjetaDePropuesta` con un `useCrearClaseUnica` o un `useCrearHorario` según `propuesta.tipo`; cada tarjeta tiene su propia mutación, así crear una no deshabilita las otras. El enlace "Ver en la grilla" va a `/grilla?fecha=<fecha>` para una clase única (`GrillaPage` lee `fecha` y `vista` de la URL) y a `/grilla` para un horario. La tarjeta usa `bg-panel` y `border-borde`, y el verde solo para "Creada".
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 2:** correr `pnpm --filter @studio/web test asistente` y verificar que fallan.
+- [x] **Paso 3:** implementar `TarjetaDePropuesta` con un `useCrearClaseUnica` o un `useCrearHorario` según `propuesta.tipo`; cada tarjeta tiene su propia mutación, así crear una no deshabilita las otras. El enlace "Ver en la grilla" va a `/grilla?fecha=<fecha>` para una clase única (`GrillaPage` lee `fecha` y `vista` de la URL) y a `/grilla` para un horario. La tarjeta usa `bg-panel` y `border-borde`, y el verde solo para "Creada".
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
 - [ ] **Paso 5:** commit `feat(asistente): confirmar la clase o el horario propuesto`.
 
 ### Tarea 6: Frases de prueba contra Gemini
