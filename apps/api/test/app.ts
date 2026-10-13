@@ -11,7 +11,7 @@ export function relojFijo(fecha: Date = AHORA): () => Date {
 }
 
 export async function crearAppDeTest(opciones: OpcionesApp = {}): Promise<FastifyInstance> {
-  const app = buildApp({ reloj: relojFijo(), ...opciones });
+  const app = buildApp({ reloj: relojFijo(), modelo: null, ...opciones });
   await app.ready();
   return app;
 }

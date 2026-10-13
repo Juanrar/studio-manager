@@ -4,6 +4,9 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import { config } from './config.ts';
 import { hoyEnEstudio, type FechaDia } from './lib/fechas.ts';
 import { rutasAlumnos } from './modules/alumnos/alumnos.routes.ts';
+import { crearModeloGemini } from './modules/asistente/gemini.ts';
+import type { ModeloDeLenguaje } from './modules/asistente/modelo.ts';
+import { rutasAsistente } from './modules/asistente/asistente.routes.ts';
 import { rutasAsistencias } from './modules/asistencias/asistencias.routes.ts';
 import { rutasAuth } from './modules/auth/auth.routes.ts';
 import { rutasHorarios } from './modules/horarios/horarios.routes.ts';
@@ -21,6 +24,8 @@ export type OpcionesApp = {
   reloj?: () => Date;
   // Carpeta del frontend compilado. Si viene, la API también sirve la app web.
   directorioWeb?: string | undefined;
+  // El modelo del asistente. Sin `modelo`, se arma con la configuración; `null` lo deja apagado.
+  modelo?: ModeloDeLenguaje | null;
 };
 
 declare module 'fastify' {
@@ -56,6 +61,14 @@ export function buildApp(opciones: OpcionesApp = {}): FastifyInstance {
   app.register(rutasPagos);
   app.register(rutasAsistencias);
   app.register(rutasLiquidaciones);
+
+  const modelo =
+    opciones.modelo !== undefined
+      ? opciones.modelo
+      : config.gemini.clave === undefined
+        ? null
+        : crearModeloGemini({ clave: config.gemini.clave, modelo: config.gemini.modelo, respaldo: config.gemini.respaldo });
+  app.register(rutasAsistente, { modelo });
 
   return app;
 }

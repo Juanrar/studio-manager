@@ -767,7 +767,7 @@ export const proponerHorario: Herramienta = {
 Si `as const` en `CAMPOS_DE_UNA_CLASE` choca con el tipo `EsquemaDeCampo`, declararlo como `Record<string, EsquemaDeCampo>`.
 
 - [x] **Paso 4:** correr `pnpm --filter @studio/api test herramientas` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(asistente): herramientas para consultar y proponer clases`.
+- [x] **Paso 5:** commit `feat(asistente): herramientas para consultar y proponer clases`.
 
 ### Tarea 3: La conversación por la API
 
@@ -778,7 +778,7 @@ Si `as const` en `CAMPOS_DE_UNA_CLASE` choca con el tipo `EsquemaDeCampo`, decla
 **Consume:** `ModeloDeLenguaje` (tarea 1), `herramientasPara` y `mensajeAlAsistenteSchema` (tarea 2).
 **Produce:** `POST /api/asistente/mensajes`, `conversar(modelo, entrada, contexto)`, `crearModeloFalso(guion)`, la opción `modelo` de `buildApp`.
 
-- [ ] **Paso 1:** escribir el modelo falso y los tests de integración. `apps/api/test/modelo-falso.ts`:
+- [x] **Paso 1:** escribir el modelo falso y los tests de integración. `apps/api/test/modelo-falso.ts`:
 
 ```ts
 import type { LlamadaAHerramienta, ModeloDeLenguaje, PedidoAlModelo } from '../src/modules/asistente/modelo.ts';
@@ -867,8 +867,8 @@ Los demás casos, con aserciones completas:
   - Sin cookie 401; `mensaje: '  '` 400; con `crearAppDeTest()` sin modelo, 503 con `{ error: 'El asistente no está configurado: falta GEMINI_API_KEY en el .env de la API', codigo: 'ASISTENTE_SIN_CONFIGURAR' }`.
   - Un historial que vuelve en el segundo mensaje llega al modelo con el mensaje nuevo al final.
 
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test asistente` y verificar que fallan porque la ruta no existe (404).
-- [ ] **Paso 3:** implementar. `instrucciones.ts` arma el texto de la sección "Instrucciones del modelo" con `diaSemanaIso(hoy)` y una lista de nombres de días. `asistente.service.ts`:
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test asistente` y verificar que fallan porque la ruta no existe (404).
+- [x] **Paso 3:** implementar. `instrucciones.ts` arma el texto de la sección "Instrucciones del modelo" con `diaSemanaIso(hoy)` y una lista de nombres de días. `asistente.service.ts`:
 
 ```ts
 import { ZodError } from 'zod';
@@ -974,7 +974,7 @@ y registrar la ruta:
 
 En `test/app.ts`, `crearAppDeTest` pasa `modelo: null` antes de `...opciones`: un test nunca llama a Google aunque la máquina tenga la clave en el entorno.
 
-- [ ] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 4:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
 - [ ] **Paso 5:** commit `feat(asistente): conversar con el asistente por la API`.
 
 ### Tarea 4: La pantalla del chat
