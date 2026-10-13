@@ -4,6 +4,7 @@ import { AreaDeTexto, Aviso, Boton, Pagina } from '../../components/ui/index.tsx
 import { ErrorDeApi, mensajeDeError } from '../../lib/api.ts';
 import { useSesion } from '../auth/api.ts';
 import { useConversacion } from './ConversacionDelAsistente.tsx';
+import { TarjetaDeAltaDeProfesor } from './TarjetaDeAltaDeProfesor.tsx';
 import { TarjetaDePropuesta } from './TarjetaDePropuesta.tsx';
 
 export function AsistentePage() {
@@ -58,8 +59,14 @@ export function AsistentePage() {
                 {mensaje.texto}
               </div>
               {mensaje.propuestas.map(({ propuesta, creada }, indice) =>
-                // La tarjeta del alta de profesor llega en la tarea 4.
-                propuesta.tipo === 'altaDeProfesor' ? null : (
+                propuesta.tipo === 'altaDeProfesor' ? (
+                  <TarjetaDeAltaDeProfesor
+                    key={indice}
+                    propuesta={propuesta}
+                    creada={creada}
+                    alCrearse={(enlace) => conversacion.marcarCreada(mensaje.id, indice, enlace)}
+                  />
+                ) : (
                   <TarjetaDePropuesta
                     key={indice}
                     propuesta={propuesta}

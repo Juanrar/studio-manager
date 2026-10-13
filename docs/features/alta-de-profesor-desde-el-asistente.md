@@ -282,7 +282,7 @@ export const proponerAltaDeProfesor: Herramienta = {
   - En `VistaDeSemana`, las props pasan a una unión: `{ interacciones: InteraccionesDeLaGrilla; incrustada?: undefined } | { incrustada: { inicio: number; fin: number }; interacciones?: undefined }`. Lo que hoy usa `INICIO_GRILLA` y `FIN_GRILLA` para ubicar (las horas, las líneas, `ClaseEnLaGrilla`, el fantasma) usa el inicio y el fin del rango, que por defecto son esas constantes. `ALTO` y `HORAS` pasan a calcularse con el rango. Incrustada: el contenedor no lleva `-m-4` ni `h-[calc(100%+2rem)]`, el cuerpo no tiene `overflow-auto`, no hay `LineaDeAhora` ni `EtiquetaDeAhora` (y por eso ninguna hora en punto se esconde), y `ClaseEnLaGrilla` recibe `soloLectura`: sin `role="button"`, sin `tabIndex` y sin manejadores de puntero, con el mismo `aria-label`.
   - `grillaDeLaPropuesta.ts` con `lunesDe` y `sumarDias` de `lib/formato.ts`, y `aMinutos` de `features/grilla/minutos.ts`.
 - [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan, con los tests de la grilla que ya existían.
-- [ ] **Paso 5:** commit `refactor(grilla): semana de solo lectura con rango de horas`.
+- [x] **Paso 5:** commit `refactor(grilla): semana de solo lectura con rango de horas`.
 
 ### Tarea 4: La tarjeta del alta
 
@@ -292,15 +292,15 @@ export const proponerAltaDeProfesor: Herramienta = {
 
 **Consume:** `VistaDeSemana` incrustada y las funciones de `grillaDeLaPropuesta.ts` (tarea 3), `POST /api/asistente/altas-de-profesor` (tarea 1).
 
-- [ ] **Paso 1:** sumar a `asistente.test.tsx`, con el reloj fijo en `2026-10-13T15:00:00Z` como los tests de la grilla (`vi.useFakeTimers({ toFake: ['Date'] })`, soltarlo en `afterEach`):
+- [x] **Paso 1:** sumar a `asistente.test.tsx`, con el reloj fijo en `2026-10-13T15:00:00Z` como los tests de la grilla (`vi.useFakeTimers({ toFake: ['Date'] })`, soltarlo en `afterEach`):
   - Una respuesta con la propuesta `altaDeProfesor` muestra "Lucía Fernández", "50%" y la clase "Contemporáneo, 19:00 a 20:30, Lucía Fernández" dentro de los grupos "Martes 13" y "Jueves 15".
   - Escribir `30123456` en "DNI" y tocar "Crear profesor" manda a `/api/asistente/altas-de-profesor` exactamente `{ profesor: { nombre: 'Lucía', apellido: 'Fernández', porcentajeBp: 5000, dni: '30123456', email: '', telefono: '', aliasCbu: '' }, horarios: [...] }`. Todos los cuerpos que recibió `/api/asistente/mensajes` en el test, guardados en una lista, no contienen `30123456`.
   - Con 201 y `{ id: 31, ... }`, el botón no está más y se ve "Creado" con un enlace "Ver ficha" a `/profesores/31`. Con 422, el motivo se ve en la tarjeta.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/web test asistente` y verificar que fallan.
-- [ ] **Paso 3:** implementar.
+- [x] **Paso 2:** correr `pnpm --filter @studio/web test asistente` y verificar que fallan.
+- [x] **Paso 3:** implementar.
   - `api.ts`: `useDarDeAltaProfesor()`, un `useMutation` con `api.post<Profesor>('/asistente/altas-de-profesor', datos)` que al terminar invalida `profesores`, `horarios`, `grilla`, `agenda` y `clases`, como `useRecargar` de `features/grilla/api.ts`.
   - `TarjetaDeAltaDeProfesor`: encabezado con `Avatar`, nombre y porcentaje (`formatearPorcentaje`); la semana con `VistaDeSemana` incrustada, `fechasDeLaSemana(hoyEnEstudio())` y `clasesDeLaPropuesta`; los campos DNI, Teléfono, Email y Alias o CBU con `Campo` y `Entrada`, con las etiquetas de `ProfesorForm`; el texto "Estos datos no pasan por el asistente." en `text-tenue`; y "Crear profesor".
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan. Mirar la tarjeta en Chromium con el script de capturas que describe CLAUDE.md: jsdom no calcula el diseño.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan. Mirar la tarjeta en Chromium con el script de capturas que describe CLAUDE.md: jsdom no calcula el diseño. La mirada en Chromium queda para la verificación final.
 - [ ] **Paso 5:** commit `feat(asistente): el alta del profesor con su grilla`.
 
 ### Tarea 5: Frases de prueba

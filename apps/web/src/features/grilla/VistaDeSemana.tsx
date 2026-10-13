@@ -74,7 +74,7 @@ export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada }
       </div>
 
       <div className={incrustada ? undefined : 'min-h-0 flex-1 overflow-auto'}>
-        <div className="grid grid-cols-[64px_minmax(0,1fr)] pt-2 pb-16">
+        <div className={`grid grid-cols-[64px_minmax(0,1fr)] pt-2 ${incrustada ? 'pb-2' : 'pb-16'}`}>
           <div className="relative" style={{ height: alto }}>
             {horasConEtiqueta.map((minutos) => (
               <span
@@ -102,9 +102,13 @@ export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada }
                 aria-label={`${nombreDelDia(diaDeLaSemana(fecha))} ${Number(fecha.slice(8))}`}
                 className="relative border-l border-borde"
                 // Crear en un hueco solo con el mouse: con el dedo, apretar un hueco es empezar a desplazarse.
-                onPointerDown={(evento) => {
-                  if (interacciones && evento.pointerType === 'mouse' && fecha >= hoy) interacciones.alApretarHueco(evento, fecha);
-                }}
+                onPointerDown={
+                  interacciones
+                    ? (evento) => {
+                        if (evento.pointerType === 'mouse' && fecha >= hoy) interacciones.alApretarHueco(evento, fecha);
+                      }
+                    : undefined
+                }
               >
                 {clases
                   .filter((clase) => clase.fecha === fecha)
@@ -182,7 +186,7 @@ function ClaseEnLaGrilla({
       data-clase={clase.id}
       onPointerDown={soloLectura ? undefined : alApretar}
       className={`absolute overflow-hidden rounded py-1 pr-1.5 pl-2.5 text-xs leading-snug ${
-        cancelada ? 'line-through opacity-50 hover:opacity-80' : 'hover:brightness-125'
+        cancelada ? 'line-through opacity-50 hover:opacity-80' : soloLectura ? '' : 'hover:brightness-125'
       } ${arrastrable ? 'cursor-grab touch-none active:cursor-grabbing' : !soloLectura && editable ? 'cursor-pointer' : ''} ${
         atenuada ? 'opacity-30' : ''
       } ${elegida ? 'ring-1 ring-white/50' : ''}`}
