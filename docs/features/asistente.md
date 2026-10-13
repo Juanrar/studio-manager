@@ -198,6 +198,7 @@ La conversación vive en memoria mientras dure la sesión en la app: navegar no 
 | Enviar muestra el mensaje y la respuesta, y el segundo envío manda el historial que llegó en el primero | Web | Perder el historial entre mensajes |
 | Enter envía y Shift+Enter agrega un renglón | Web | El atajo del campo |
 | Un error 503 muestra el motivo y deja el texto escrito en el campo | Web | Perder lo escrito cuando no hay cuota |
+| Si el pedido falla después de que el usuario escribió otra cosa mientras esperaba, el campo tiene los dos textos y el mensaje enviado sale de la lista | Web | Pisar con lo enviado lo que se escribió durante la espera |
 | Una propuesta de clase única muestra estilo, día, horario y profesor; "Crear" manda `POST /api/clases` con los datos exactos, el botón se deshabilita y aparece "Creada" con un enlace a la grilla | Web | Crear dos veces o mandar otros datos |
 | Una propuesta de horario manda `POST /api/horarios` | Web | Confundir los dos tipos |
 | Un 422 al crear se muestra en la tarjeta | Web | Que el error se pierda |

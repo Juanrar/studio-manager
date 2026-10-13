@@ -52,7 +52,8 @@ export function ProveedorDeConversacion({ children }: { children: ReactNode }) {
         },
         onError: () => {
           setMensajes((actuales) => actuales.filter((m) => m.id !== idDelUsuario));
-          setBorrador(mensaje);
+          // Lo enviado vuelve al campo sin pisar lo que el usuario escribió mientras esperaba.
+          setBorrador((actual) => (actual.trim() === '' ? mensaje : `${mensaje}\n${actual}`));
         },
       },
     );

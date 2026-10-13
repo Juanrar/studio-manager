@@ -238,6 +238,29 @@ describe('/asistente', () => {
     ]);
   });
 
+  it('si el pedido falla, lo enviado vuelve al campo sin pisar lo escrito mientras esperaba', async () => {
+    const { control, manejador } = respuestaDemorada(() =>
+      HttpResponse.json(
+        { error: 'El asistente está saturado. Probá en unos minutos.', codigo: 'MODELO_SATURADO' },
+        { status: 503 },
+      ),
+    );
+    servidor.use(http.post('/api/asistente/mensajes', manejador));
+    conSesion(RECEPCION);
+    const { usuario } = renderizarEn('/asistente');
+    const campo = await screen.findByLabelText('Mensaje para el asistente');
+    await usuario.type(campo, PREGUNTA);
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+    await waitFor(() => expect(control.pedidos).toBe(1));
+
+    await usuario.type(campo, 'Y el viernes?');
+    control.responder();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('El asistente está saturado. Probá en unos minutos.');
+    expect(campo).toHaveValue(`${PREGUNTA}\nY el viernes?`);
+    expect(screen.queryByText(PREGUNTA)).not.toBeInTheDocument();
+  });
+
   it('mientras espera deshabilita Enviar y muestra "Pensando..."', async () => {
     let responder: () => void = () => {};
     servidor.use(
