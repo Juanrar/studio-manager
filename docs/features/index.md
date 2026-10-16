@@ -44,6 +44,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 24 | [Renombrar horario y clase](renombrar-horario-y-clase.md) | lista | 23 |
 | 25 | [Clases generadas por adelantado](clases-por-adelantado.md) | lista | 24 |
 | 26 | [Grilla semanal](grilla-semanal.md) | lista | 25 |
+| 29 | [Navegación de la grilla](navegacion-de-la-grilla.md) | en curso | 26 |
 
 ## Asistente
 
