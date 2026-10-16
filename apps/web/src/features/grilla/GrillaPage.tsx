@@ -29,9 +29,10 @@ function primeroDelMes(fecha: string, meses = 0): string {
 }
 
 // Lo que muestra cada vista alrededor de `fecha`: el rango que se pide, los días de la grilla (o las
-// semanas del mes), adónde llevan las flechas y el mes del título.
+// semanas del mes), adónde llevan las flechas, el mes del título y el texto del botón que vuelve a hoy.
 type Periodo = {
   etiqueta: string;
+  actual: string;
   desde: string;
   hasta: string;
   fechas: string[];
@@ -45,6 +46,7 @@ function periodoDe(vista: Vista, fecha: string): Periodo {
   if (vista === 'dia') {
     return {
       etiqueta: 'Día',
+      actual: 'Hoy',
       desde: fecha,
       hasta: fecha,
       fechas: [fecha],
@@ -61,6 +63,7 @@ function periodoDe(vista: Vista, fecha: string): Periodo {
     for (let lunes = lunesDe(primero); lunes <= ultimo; lunes = sumarDias(lunes, 7)) semanas.push(lunes);
     return {
       etiqueta: 'Mes',
+      actual: 'Este mes',
       desde: semanas[0]!,
       hasta: sumarDias(semanas.at(-1)!, 6),
       fechas: [],
@@ -73,6 +76,7 @@ function periodoDe(vista: Vista, fecha: string): Periodo {
   const lunes = lunesDe(fecha);
   return {
     etiqueta: 'Semana',
+    actual: 'Esta semana',
     desde: lunes,
     hasta: sumarDias(lunes, 6),
     fechas: Array.from({ length: 7 }, (_, indice) => sumarDias(lunes, indice)),
@@ -355,7 +359,7 @@ export function GrillaPage() {
             onClick={() => ir({})}
             className="h-8 rounded-md border border-borde-fuerte px-3 font-medium text-tenue hover:bg-resalte hover:text-texto"
           >
-            Hoy
+            {periodo.actual}
           </button>
           <BotonIcono
             icono="siguiente"

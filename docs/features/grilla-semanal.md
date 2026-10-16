@@ -14,7 +14,7 @@ Arman la grilla por semana: cada semana puede tener clases y profesores distinto
 
 Se eligió con quien administra el estudio entre varios prototipos en la app real. Los prototipos quedaron sin versionar, en la rama local `prototipo/grilla`. El elegido sigue el aspecto de DayFlow (dayflow-js/calendar) en oscuro:
 
-- **Barra:** el mes en grande a la izquierda ("Octubre 2026"), "Día / Semana / Mes" al centro y "‹ Hoy ›" con borde a la derecha. Sin la barra secundaria de `Pagina`.
+- **Barra:** el mes en grande a la izquierda ("Octubre 2026"), "Día / Semana / Mes" al centro y "‹ Hoy ›" con borde a la derecha. El botón del medio dice "Hoy", "Esta semana" o "Este mes" según la vista. Sin la barra secundaria de `Pagina`.
 - **Encabezado de días:** "Lun 5" en una línea, en gris; el día de hoy en blanco y negrita. Sin fila de "todo el día".
 - **Grilla:** de 08:00 a 23:00, 63 px por hora, líneas finas de hora y de columna. Las horas a la izquierda ("10:00").
 - **Clase:** fondo suave del color de su estilo, una barra de 3 px de ese color a la izquierda, y el estilo y el horario escritos en ese color, más claro. Si entra, el profesor debajo. En la vista Día, además, el nivel y el profesor en la misma línea del horario.
@@ -106,6 +106,7 @@ Si alguna clase de la serie no puede cambiar (un anotado con un pack que vence a
 | Guardar en el editor manda el `PATCH` y muestra el aviso; "Aplicar a todas" manda `PATCH /api/horarios/:id` con `desde`; "Deshacer" manda los valores anteriores | Web | Cambios en el flujo del aviso |
 | Una clase cancelada se ve tachada y "Volver a dictarla" manda `estado: 'programada'` | Web | Que la cancelada desaparezca y no se pueda recuperar |
 | La vista Mes muestra hasta 4 clases y "N más", y un clic en el día abre la vista Día | Web | Cambios en la vista Mes |
+| El botón que vuelve al presente dice "Hoy", "Esta semana" o "Este mes" según la vista, y "Este mes" vuelve al mes de hoy | Web | Dejar el texto fijo o que el botón pierda la vista al volver |
 | e2e: el administrador arrastra una clase de hoy a una hora más tarde del mismo día, elige "Aplicar a todas las semanas" y recepción la ve en la agenda con la hora nueva | e2e | El arrastre real en Chromium, que jsdom no calcula |
 
 jsdom no calcula posiciones: la cascada, la línea de ahora y el editor flotante se miran en Chromium con un script de capturas fuera del repo, como dice CLAUDE.md.

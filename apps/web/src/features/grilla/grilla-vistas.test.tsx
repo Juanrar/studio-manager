@@ -99,4 +99,28 @@ describe('/grilla: vistas de día y de mes', () => {
       ]),
     );
   });
+
+  it('el botón que vuelve al presente dice "Hoy", "Esta semana" o "Este mes" según la vista', async () => {
+    const pedidos = grillaCon([]);
+    const { usuario, router } = renderizarEn('/grilla?vista=mes&fecha=2026-04-15');
+    await screen.findByRole('button', { name: 'Miércoles 15, sin clases' });
+
+    await usuario.click(screen.getByRole('button', { name: 'Este mes' }));
+    await screen.findByRole('button', { name: 'Martes 10, sin clases' });
+    expect(router.state.location.search).toBe('?vista=mes');
+
+    await usuario.click(screen.getByRole('button', { name: 'Semana' }));
+    await screen.findByRole('group', { name: 'Lunes 9' });
+    expect(screen.getByRole('button', { name: 'Esta semana' })).toBeInTheDocument();
+
+    await usuario.click(screen.getByRole('button', { name: 'Día' }));
+    await screen.findByRole('group', { name: 'Martes 10' });
+    expect(screen.getByRole('button', { name: 'Hoy' })).toBeInTheDocument();
+    expect(pedidos).toEqual([
+      '?desde=2026-03-30&hasta=2026-05-03',
+      '?desde=2026-02-23&hasta=2026-04-05',
+      '?desde=2026-03-09&hasta=2026-03-15',
+      '?desde=2026-03-10&hasta=2026-03-10',
+    ]);
+  });
 });

@@ -75,14 +75,14 @@ describe('/grilla', () => {
     expect(screen.getByRole('link', { name: 'Grilla' })).toHaveAttribute('aria-current', 'page');
   });
 
-  it('las flechas pasan de semana y "Hoy" vuelve a la de hoy', async () => {
+  it('las flechas pasan de semana y "Esta semana" vuelve a la de hoy', async () => {
     const pedidos = grillaCon([HIP_HOP]);
     const { usuario, router } = renderizarEn('/grilla');
     await screen.findByRole('button', { name: /Hip-Hop/ });
 
     await usuario.click(screen.getByRole('button', { name: 'Semana siguiente' }));
     await screen.findByRole('group', { name: 'Lunes 16' });
-    await usuario.click(screen.getByRole('button', { name: 'Hoy' }));
+    await usuario.click(screen.getByRole('button', { name: 'Esta semana' }));
     await screen.findByRole('group', { name: 'Lunes 9' });
 
     expect(pedidos).toEqual(['?desde=2026-03-09&hasta=2026-03-15', '?desde=2026-03-16&hasta=2026-03-22', '?desde=2026-03-09&hasta=2026-03-15']);
