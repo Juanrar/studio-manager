@@ -1,6 +1,6 @@
 # Navegación de la grilla
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** grilla-semanal  
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; en `/grilla`, entre las flechas se lee el período que se ve y el botón para volver aparece solo fuera del presente, con el texto de la vista.
 
@@ -52,8 +52,8 @@ jsdom no calcula el diseño: que la barra no se pise a 1024 px se mira en Chromi
 - [x] **Paso 3:** agregar `rango` a `periodoDe`, calcular si se está en el presente y armar la barra.
 - [x] **Paso 4:** correr los tests de la web y `pnpm typecheck`, y verificar que pasan.
 - [x] **Paso 5:** mirar en Chromium, a 1280 y a 1024 px, la semana de hoy y una semana siguiente: "Volver a esta semana" no pisa "Día / Semana / Mes".
-- [ ] **Paso 6:** commit `feat(grilla): el período entre las flechas y "Volver" fuera del presente`.
+- [x] **Paso 6:** commit `feat(grilla): el período entre las flechas y "Volver" fuera del presente`.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan: web 149, API 28 archivos sin cambios.

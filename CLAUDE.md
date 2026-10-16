@@ -155,6 +155,8 @@ Los tests de integración necesitan Docker corriendo.
 - **Cuota de Gemini gratis:** `gemini-3.5-flash` permite 20 pedidos por día y cada consulta al asistente usa de 2 a 4. Los 503 por saturación son frecuentes en los dos modelos. Antes de correr `asistente:probar`, conviene probar una sola frase.
 - **Ver el asistente en Chromium:** API con la base del e2e en otro puerto, `WEB_DIST=../web/dist` y `NODE_ENV=development`. Con `production` la cookie de sesión es `secure` y el login por http no anda. Las variables del entorno ganan sobre `--env-file`, así que `GEMINI_MODELO=...` en la línea de comando elige el modelo.
 - **Cortar una tarea en segundo plano** que levantó la API con `tsx` deja vivo el `node.exe` del servidor. Antes de volver a levantarla, buscá el PID con `netstat -ano` en ese puerto y cerralo; si no, el pedido siguiente habla con el código viejo.
+- **PowerShell 5.1 parte los argumentos con comillas dobles** que van a un programa: `git commit -m` con un mensaje que tiene `"Hoy"` falla con `pathspec ... did not match`. Se commitea desde Bash con `git commit -F -` y un heredoc. Tampoco se usa `2>&1` con `pnpm` en PowerShell: el resultado sale como error aunque el comando pase.
+- **Ver la web sin la base de desarrollo:** un script de Playwright fuera del repo puede simular la API con `page.route('**/api/**', ...)`, respondiendo `/api/auth/yo` con un admin. Sirve para capturas de una pantalla contra `pnpm dev:web`.
 - **La conversación del asistente** vive en `ProveedorDeConversacion`, montado dentro de `RequiereSesion` con la clave del usuario: navegar no la borra, recargar o cerrar sesión sí.
 
 ## Estilo de escritura
