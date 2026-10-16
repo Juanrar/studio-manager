@@ -100,26 +100,38 @@ describe('/grilla: vistas de día y de mes', () => {
     );
   });
 
-  it('el botón que vuelve al presente dice "Hoy", "Esta semana" o "Este mes" según la vista', async () => {
+  it('entre las flechas va el período que se ve, y "Volver" aparece solo fuera del presente y conserva la vista', async () => {
     const pedidos = grillaCon([]);
-    const { usuario, router } = renderizarEn('/grilla?vista=mes&fecha=2026-04-15');
-    await screen.findByRole('button', { name: 'Miércoles 15, sin clases' });
+    const { usuario, router } = renderizarEn('/grilla?fecha=2026-03-30');
+    await screen.findByRole('group', { name: 'Lunes 30' });
+    expect(screen.getByText('30 mar – 5 abr')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Volver a esta semana' })).toBeInTheDocument();
 
-    await usuario.click(screen.getByRole('button', { name: 'Este mes' }));
+    // El 30 de marzo es de marzo: el mes de hoy, aunque la semana termine en abril.
+    await usuario.click(screen.getByRole('button', { name: 'Mes' }));
     await screen.findByRole('button', { name: 'Martes 10, sin clases' });
-    expect(router.state.location.search).toBe('?vista=mes');
+    expect(screen.getByText('Marzo')).toBeInTheDocument();
+    expect(screen.getByText('Este mes')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Volver/ })).not.toBeInTheDocument();
 
-    await usuario.click(screen.getByRole('button', { name: 'Semana' }));
-    await screen.findByRole('group', { name: 'Lunes 9' });
-    expect(screen.getByRole('button', { name: 'Esta semana' })).toBeInTheDocument();
+    await usuario.click(screen.getByRole('button', { name: 'Mes siguiente' }));
+    await screen.findByRole('button', { name: 'Miércoles 15, sin clases' });
+    expect(screen.getByText('Abril')).toBeInTheDocument();
+    expect(screen.queryByText('Este mes')).not.toBeInTheDocument();
+    await usuario.click(screen.getByRole('button', { name: 'Volver a este mes' }));
+    await screen.findByText('Marzo');
+    expect(router.state.location.search).toBe('?vista=mes');
 
     await usuario.click(screen.getByRole('button', { name: 'Día' }));
     await screen.findByRole('group', { name: 'Martes 10' });
-    expect(screen.getByRole('button', { name: 'Hoy' })).toBeInTheDocument();
+    expect(screen.getByText('Martes 10')).toBeInTheDocument();
+    expect(screen.getByText('Hoy')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Volver/ })).not.toBeInTheDocument();
     expect(pedidos).toEqual([
+      '?desde=2026-03-30&hasta=2026-04-05',
+      '?desde=2026-02-23&hasta=2026-04-05',
       '?desde=2026-03-30&hasta=2026-05-03',
       '?desde=2026-02-23&hasta=2026-04-05',
-      '?desde=2026-03-09&hasta=2026-03-15',
       '?desde=2026-03-10&hasta=2026-03-10',
     ]);
   });

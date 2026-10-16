@@ -1,9 +1,18 @@
 import { useCallback, useRef, useState, type PointerEvent } from 'react';
 import { useSearchParams } from 'react-router';
 import type { ActualizarClaseInput, ActualizarHorarioInput, Clase } from '@studio/shared';
-import { Aviso, Boton, BotonIcono, Flotante, Pagina, type Ancla } from '../../components/ui/index.tsx';
+import { Aviso, Boton, BotonIcono, Flotante, Icono, Pagina, type Ancla } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
-import { diaDeLaSemana, formatearMes, hoyEnEstudio, lunesDe, nombreDelDia, sumarDias } from '../../lib/formato.ts';
+import {
+  diaDeLaSemana,
+  formatearDiaYMes,
+  formatearMes,
+  hoyEnEstudio,
+  lunesDe,
+  nombreDelDia,
+  nombreDelMes,
+  sumarDias,
+} from '../../lib/formato.ts';
 import { useBorrarClase, useCambiarClase, useCambiarHorario, useClasesDelRango, useCrearClaseUnica, useCrearHorario } from './api.ts';
 import type { Arrastre, Destino } from './arrastre.ts';
 import { AvisoDeCambio, type ContenidoDelAviso } from './AvisoDeCambio.tsx';
@@ -12,8 +21,6 @@ import { FIN_GRILLA, INICIO_GRILLA, PASO, PX_POR_MINUTO, aHora, aMinutos } from 
 import { useArrastre } from './useArrastre.ts';
 import { VistaDelMes } from './VistaDelMes.tsx';
 import { VistaDeSemana } from './VistaDeSemana.tsx';
-
-const NAVEGACION = 'border border-borde-fuerte disabled:pointer-events-none disabled:opacity-40';
 
 type Vista = 'dia' | 'semana' | 'mes';
 const VISTAS: { id: Vista; texto: string }[] = [
@@ -28,11 +35,20 @@ function primeroDelMes(fecha: string, meses = 0): string {
   return new Date(Date.UTC(anio, mes - 1 + meses, 1)).toISOString().slice(0, 10);
 }
 
+// "9 – 15 mar", o "30 mar – 5 abr" si la semana cruza de mes.
+function rangoDeLaSemana(lunes: string): string {
+  const domingo = sumarDias(lunes, 6);
+  const desde = lunes.slice(5, 7) === domingo.slice(5, 7) ? String(Number(lunes.slice(8))) : formatearDiaYMes(lunes);
+  return `${desde} – ${formatearDiaYMes(domingo)}`;
+}
+
 // Lo que muestra cada vista alrededor de `fecha`: el rango que se pide, los días de la grilla (o las
-// semanas del mes), adónde llevan las flechas, el mes del título y el texto del botón que vuelve a hoy.
+// semanas del mes), adónde llevan las flechas, el mes del título, el período escrito entre las flechas y
+// cómo se llama el período de hoy.
 type Periodo = {
   etiqueta: string;
   actual: string;
+  rango: string;
   desde: string;
   hasta: string;
   fechas: string[];
@@ -47,6 +63,7 @@ function periodoDe(vista: Vista, fecha: string): Periodo {
     return {
       etiqueta: 'Día',
       actual: 'Hoy',
+      rango: `${nombreDelDia(diaDeLaSemana(fecha))} ${Number(fecha.slice(8))}`,
       desde: fecha,
       hasta: fecha,
       fechas: [fecha],
@@ -64,6 +81,7 @@ function periodoDe(vista: Vista, fecha: string): Periodo {
     return {
       etiqueta: 'Mes',
       actual: 'Este mes',
+      rango: nombreDelMes(primero),
       desde: semanas[0]!,
       hasta: sumarDias(semanas.at(-1)!, 6),
       fechas: [],
@@ -77,6 +95,7 @@ function periodoDe(vista: Vista, fecha: string): Periodo {
   return {
     etiqueta: 'Semana',
     actual: 'Esta semana',
+    rango: rangoDeLaSemana(lunes),
     desde: lunes,
     hasta: sumarDias(lunes, 6),
     fechas: Array.from({ length: 7 }, (_, indice) => sumarDias(lunes, indice)),
@@ -139,6 +158,9 @@ export function GrillaPage() {
   };
   // Después del horizonte no hay clases creadas: la grilla de ese período todavía no está armada.
   const ultimoPeriodo = clases.data !== undefined && periodo.siguiente > clases.data.finDelHorizonte;
+  // En el mes compara el lunes de la primera semana, que es distinto para cada mes.
+  const enElPresente = periodoDe(vista, hoy).desde === periodo.desde;
+  const volver = `Volver a ${periodo.actual.toLowerCase()}`;
 
   const columnas = useRef<HTMLDivElement>(null);
   const anclaApretada = useRef<Ancla>({ left: 0, right: 0, top: 0 });
@@ -348,26 +370,35 @@ export function GrillaPage() {
               </button>
             ))}
           </div>
-          <BotonIcono
-            icono="anterior"
-            etiqueta={`${periodo.etiqueta} anterior`}
-            onClick={() => ir({ fecha: periodo.anterior })}
-            className={NAVEGACION}
-          />
-          <button
-            type="button"
-            onClick={() => ir({})}
-            className="h-8 rounded-md border border-borde-fuerte px-3 font-medium text-tenue hover:bg-resalte hover:text-texto"
-          >
-            {periodo.actual}
-          </button>
-          <BotonIcono
-            icono="siguiente"
-            etiqueta={`${periodo.etiqueta} siguiente`}
-            disabled={ultimoPeriodo}
-            onClick={() => ir({ fecha: periodo.siguiente })}
-            className={NAVEGACION}
-          />
+          {/* Debajo de 1280 px el texto pisaría "Día / Semana / Mes": "Volver" queda en el ícono y la marca se esconde. */}
+          {enElPresente ? (
+            <span className="hidden h-8 items-center gap-1.5 px-2 text-apagado xl:flex">
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-acento" />
+              {periodo.actual}
+            </span>
+          ) : (
+            <button
+              type="button"
+              aria-label={volver}
+              title={volver}
+              onClick={() => ir({})}
+              className="flex h-8 items-center gap-1.5 rounded-md bg-acento-fondo px-2.5 font-medium text-acento hover:brightness-125 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento"
+            >
+              <Icono nombre="historial" />
+              <span className="hidden xl:inline">{volver}</span>
+            </button>
+          )}
+          <div className="flex items-center rounded-lg border border-borde-fuerte">
+            <BotonIcono icono="anterior" etiqueta={`${periodo.etiqueta} anterior`} onClick={() => ir({ fecha: periodo.anterior })} />
+            <span className="w-32 text-center font-medium tabular-nums">{periodo.rango}</span>
+            <BotonIcono
+              icono="siguiente"
+              etiqueta={`${periodo.etiqueta} siguiente`}
+              disabled={ultimoPeriodo}
+              onClick={() => ir({ fecha: periodo.siguiente })}
+              className="disabled:pointer-events-none disabled:opacity-40"
+            />
+          </div>
         </>
       }
     >

@@ -66,11 +66,15 @@ export function formatearFechaCorta(fecha: string, hoy: string): string {
   return anio === hoy.slice(0, 4) ? formatearDiaYMes(fecha) : `${formatearDiaYMes(fecha)} ${anio}`;
 }
 
+// AAAA-MM a "Septiembre", sin el año.
+export function nombreDelMes(periodo: string): string {
+  const nombre = MESES[Number(periodo.slice(5, 7)) - 1] ?? '';
+  return `${nombre.charAt(0).toUpperCase()}${nombre.slice(1)}`;
+}
+
 // AAAA-MM a "Septiembre 2026", como título de un mes.
 export function formatearMes(periodo: string): string {
-  const [anio, mes] = periodo.split('-').map(Number) as [number, number];
-  const nombre = MESES[mes - 1] ?? '';
-  return `${nombre.charAt(0).toUpperCase()}${nombre.slice(1)} ${anio}`;
+  return `${nombreDelMes(periodo)} ${periodo.slice(0, 4)}`;
 }
 
 export const DIAS_DE_LA_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];

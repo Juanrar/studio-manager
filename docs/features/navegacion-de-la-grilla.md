@@ -47,11 +47,11 @@ jsdom no calcula el diseño: que la barra no se pise a 1024 px se mira en Chromi
 - Modificar: `apps/web/src/features/grilla/GrillaPage.tsx`
 - Test: `apps/web/src/features/grilla/grilla.test.tsx`, `apps/web/src/features/grilla/grilla-vistas.test.tsx`
 
-- [ ] **Paso 1:** cambiar el test de las flechas de `grilla.test.tsx` y reemplazar el de la tarea 1 en `grilla-vistas.test.tsx`, como dice la tabla de tests.
-- [ ] **Paso 2:** correrlos y verificar que fallan porque no hay período entre las flechas ni botón "Volver".
-- [ ] **Paso 3:** agregar `rango` a `periodoDe`, calcular si se está en el presente y armar la barra.
-- [ ] **Paso 4:** correr los tests de la web y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** mirar en Chromium, a 1280 y a 1024 px, la semana de hoy y una semana siguiente: "Volver a esta semana" no pisa "Día / Semana / Mes".
+- [x] **Paso 1:** cambiar el test de las flechas de `grilla.test.tsx` y reemplazar el de la tarea 1 en `grilla-vistas.test.tsx`, como dice la tabla de tests.
+- [x] **Paso 2:** correrlos y verificar que fallan porque no hay período entre las flechas ni botón "Volver".
+- [x] **Paso 3:** agregar `rango` a `periodoDe`, calcular si se está en el presente y armar la barra.
+- [x] **Paso 4:** correr los tests de la web y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** mirar en Chromium, a 1280 y a 1024 px, la semana de hoy y una semana siguiente: "Volver a esta semana" no pisa "Día / Semana / Mes".
 - [ ] **Paso 6:** commit `feat(grilla): el período entre las flechas y "Volver" fuera del presente`.
 
 ## Verificación final
