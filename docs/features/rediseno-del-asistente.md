@@ -190,7 +190,7 @@ it('avisa que lo escrito lo procesa Google', async () => {
 - Usa: `CajaDeMensaje`, `Saludo` y `Sugerencias` de la tarea 1.
 - Deja: `ListaDeMensajes({ mensajes, esperando, alCrearse }: { mensajes: MensajeDelChat[]; esperando: boolean; alCrearse: (idDelMensaje: number, indice: number, enlace: string) => void })`, y en `AsistentePage.tsx`, `Resplandor({ visible }: { visible: boolean })`, un `div` con `aria-hidden="true"`, `data-resplandor` y la clase `opacity-100` u `opacity-0`.
 
-- [ ] **Paso 1:** escribir el test. Guarda el mismo elemento de punta a punta: si se desmontara, no se desvanecería.
+- [x] **Paso 1:** escribir el test. Guarda el mismo elemento de punta a punta: si se desmontara, no se desvanecería.
 
 ```tsx
 it('el resplandor se apaga con el primer mensaje y vuelve con Nueva conversación', async () => {
@@ -210,11 +210,11 @@ it('el resplandor se apaga con el primer mensaje y vuelve con Nueva conversació
 });
 ```
 
-- [ ] **Paso 2:** correr el archivo de tests del asistente y verificar que el test nuevo falla porque no hay ningún elemento con `data-resplandor`.
-- [ ] **Paso 3:** agregar `Resplandor` en `AsistentePage.tsx`, montado en un contenedor `relative flex min-h-full flex-col` que envuelve a las dos disposiciones, con `visible={vacia}` y `transition-opacity duration-700`. Crear `ListaDeMensajes.tsx` con las burbujas, el avatar y los puntos, y usarla en la conversación.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** mirar en Chromium, a 1280 y a 1024 px, la pantalla vacía de admin y de recepción, una conversación con una propuesta y los cinco puntos de "Qué mirar en la revisión".
-- [ ] **Paso 6:** commit `feat(asistente): resplandor que se apaga y mensajes con avatar`.
+- [x] **Paso 2:** correr el archivo de tests del asistente y verificar que el test nuevo falla porque no hay ningún elemento con `data-resplandor`.
+- [x] **Paso 3:** agregar `Resplandor` en `AsistentePage.tsx`, montado en un contenedor `relative flex min-h-full flex-col` que envuelve a las dos disposiciones, con `visible={vacia}` y `transition-opacity duration-700`. Crear `ListaDeMensajes.tsx` con las burbujas, el avatar y los puntos, y usarla en la conversación.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** mirar en Chromium, a 1280 y a 1024 px, la pantalla vacía de admin y de recepción, una conversación con una propuesta y los cinco puntos de "Qué mirar en la revisión".
+- [x] **Paso 6:** commit `feat(asistente): resplandor que se apaga y mensajes con avatar`.
 
 ## Verificación final
 

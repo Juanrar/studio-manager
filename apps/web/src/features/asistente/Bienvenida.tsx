@@ -1,5 +1,5 @@
-import type { CSSProperties } from 'react';
 import { Icono, type NombreIcono } from '../../components/ui/index.tsx';
+import { ACENTO_CLARO, DEGRADE } from './estilo.ts';
 
 type Sugerencia = { icono: NombreIcono; titulo: string; frase: string; soloAdmin: boolean };
 
@@ -25,9 +25,6 @@ export const SUGERENCIAS: Sugerencia[] = [
   },
   { icono: 'profesores', titulo: 'Clases de un profesor', frase: '¿Qué clases da Erik esta semana?', soloAdmin: false },
 ];
-
-export const ACENTO_CLARO = 'color-mix(in oklab, var(--color-acento) 45%, white)';
-export const DEGRADE: CSSProperties = { background: `linear-gradient(135deg, var(--color-acento), ${ACENTO_CLARO})` };
 
 export function Saludo({ nombre }: { nombre: string }) {
   return (

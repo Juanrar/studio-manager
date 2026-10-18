@@ -176,6 +176,22 @@ describe('/asistente', () => {
     expect(cuerpos[1]).toEqual({ historial: [], mensaje: 'Y el viernes?' });
   });
 
+  it('el resplandor se apaga con el primer mensaje y vuelve con Nueva conversación', async () => {
+    asistenteQueResponde([]);
+    conSesion(RECEPCION);
+    const { usuario } = renderizarEn('/asistente');
+    await usuario.type(await screen.findByLabelText('Mensaje para el asistente'), PREGUNTA);
+    const resplandor = document.querySelector('[data-resplandor]');
+    expect(resplandor).toHaveClass('opacity-100');
+
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+    await screen.findByText(RESPUESTA);
+    expect(resplandor).toHaveClass('opacity-0');
+
+    await usuario.click(screen.getByRole('button', { name: 'Nueva conversación' }));
+    expect(resplandor).toHaveClass('opacity-100');
+  });
+
   it('Nueva conversación mientras espera descarta la respuesta que llega después', async () => {
     const cuerpos: unknown[] = [];
     let responderPrimera: () => void = () => {};

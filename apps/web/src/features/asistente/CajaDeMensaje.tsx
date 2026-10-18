@@ -1,7 +1,7 @@
 import type { KeyboardEvent, Ref } from 'react';
 import { LARGO_MAXIMO_DEL_MENSAJE } from '@studio/shared';
 import { Icono } from '../../components/ui/index.tsx';
-import { ACENTO_CLARO } from './Bienvenida.tsx';
+import { ACENTO_CLARO } from './estilo.ts';
 
 export function CajaDeMensaje({
   grande,
