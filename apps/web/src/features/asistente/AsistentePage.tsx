@@ -1,8 +1,10 @@
-import { Fragment, useEffect, useRef, type KeyboardEvent } from 'react';
-import { CONVERSACION_LARGA, LARGO_MAXIMO_DEL_MENSAJE } from '@studio/shared';
-import { AreaDeTexto, Aviso, Boton, Pagina } from '../../components/ui/index.tsx';
+import { Fragment, useEffect, useRef } from 'react';
+import { CONVERSACION_LARGA } from '@studio/shared';
+import { Aviso, Boton, Pagina } from '../../components/ui/index.tsx';
 import { ErrorDeApi, mensajeDeError } from '../../lib/api.ts';
 import { useSesion } from '../auth/api.ts';
+import { Saludo, Sugerencias } from './Bienvenida.tsx';
+import { CajaDeMensaje } from './CajaDeMensaje.tsx';
 import { useConversacion } from './ConversacionDelAsistente.tsx';
 import { TarjetaDeAltaDeProfesor } from './TarjetaDeAltaDeProfesor.tsx';
 import { TarjetaDePropuesta } from './TarjetaDePropuesta.tsx';
@@ -12,7 +14,10 @@ export function AsistentePage() {
   const conversacion = useConversacion();
   const { mensajes, borrador, esperando, error } = conversacion;
   const final = useRef<HTMLDivElement>(null);
+  const campo = useRef<HTMLTextAreaElement>(null);
   const esAdmin = sesion.data?.rol === 'admin';
+  const nombre = sesion.data?.nombre.split(' ')[0] ?? '';
+  const vacia = mensajes.length === 0 && !esperando;
   // La API no acepta más historial: el botón se resalta porque es la única forma de seguir.
   const conversacionLarga = error instanceof ErrorDeApi && error.codigo === CONVERSACION_LARGA;
 
@@ -21,12 +26,22 @@ export function AsistentePage() {
     final.current?.scrollIntoView?.({ block: 'end' });
   }, [mensajes, esperando]);
 
-  function alTeclear(evento: KeyboardEvent<HTMLTextAreaElement>) {
-    if (evento.key === 'Enter' && !evento.shiftKey && !evento.nativeEvent.isComposing) {
-      evento.preventDefault();
-      conversacion.enviar();
-    }
+  function usarSugerencia(frase: string) {
+    conversacion.cambiarBorrador(frase);
+    campo.current?.focus();
   }
+
+  const caja = (grande: boolean) => (
+    <CajaDeMensaje
+      grande={grande}
+      campo={campo}
+      valor={borrador}
+      alCambiar={conversacion.cambiarBorrador}
+      alEnviar={conversacion.enviar}
+      esperando={esperando}
+    />
+  );
+  const aviso = error !== null && <Aviso>{mensajeDeError(error)}</Aviso>;
 
   return (
     <Pagina
@@ -39,66 +54,54 @@ export function AsistentePage() {
         )
       }
     >
-      <div className="mx-auto flex min-h-full max-w-2xl flex-col gap-3">
-        <div className="flex flex-1 flex-col gap-3">
-          {mensajes.length === 0 && (
-            <div className="flex flex-col gap-1 text-tenue">
-              <p>¿Qué clases hay el jueves?</p>
-              {esAdmin && <p>Creame un workshop de Hip-Hop el sábado de 15 a 17 con Erik</p>}
-            </div>
-          )}
-          {mensajes.map((mensaje) => (
-            <Fragment key={mensaje.id}>
-              <div
-                className={
-                  mensaje.autor === 'usuario'
-                    ? 'max-w-[85%] self-end rounded-lg bg-resalte px-3 py-2 whitespace-pre-wrap'
-                    : 'max-w-[85%] self-start rounded-lg border border-borde bg-elevado px-3 py-2 whitespace-pre-wrap'
-                }
-              >
-                {mensaje.texto}
-              </div>
-              {mensaje.propuestas.map(({ propuesta, creada }, indice) =>
-                propuesta.tipo === 'altaDeProfesor' ? (
-                  <TarjetaDeAltaDeProfesor
-                    key={indice}
-                    propuesta={propuesta}
-                    creada={creada}
-                    alCrearse={(enlace) => conversacion.marcarCreada(mensaje.id, indice, enlace)}
-                  />
-                ) : (
-                  <TarjetaDePropuesta
-                    key={indice}
-                    propuesta={propuesta}
-                    creada={creada}
-                    alCrearse={(enlace) => conversacion.marcarCreada(mensaje.id, indice, enlace)}
-                  />
-                ),
-              )}
-            </Fragment>
-          ))}
-          {esperando && <p className="text-tenue">Pensando...</p>}
-          {error !== null && <Aviso>{mensajeDeError(error)}</Aviso>}
-          <div ref={final} />
-        </div>
-        <div className="sticky bottom-0 flex flex-col gap-1 bg-panel pt-2">
-          <div className="flex items-end gap-2">
-            <AreaDeTexto
-              aria-label="Mensaje para el asistente"
-              rows={2}
-              maxLength={LARGO_MAXIMO_DEL_MENSAJE}
-              value={borrador}
-              onChange={(evento) => conversacion.cambiarBorrador(evento.target.value)}
-              onKeyDown={alTeclear}
-            />
-            <Boton onClick={conversacion.enviar} disabled={esperando || borrador.trim() === ''}>
-              Enviar
-            </Boton>
+      {/* La caja ocupa siempre el mismo lugar del árbol: así el campo no se vuelve a montar ni pierde el foco al empezar. */}
+      <div
+        className={`mx-auto flex min-h-full w-full max-w-2xl flex-col ${vacia ? 'justify-center gap-6 py-10' : ''}`}
+      >
+        {vacia ? (
+          <Saludo nombre={nombre} />
+        ) : (
+          <div className="flex flex-1 flex-col justify-end gap-3 py-6">
+            {mensajes.map((mensaje) => (
+              <Fragment key={mensaje.id}>
+                <div
+                  className={
+                    mensaje.autor === 'usuario'
+                      ? 'max-w-[85%] self-end rounded-lg bg-resalte px-3 py-2 whitespace-pre-wrap'
+                      : 'max-w-[85%] self-start rounded-lg border border-borde bg-elevado px-3 py-2 whitespace-pre-wrap'
+                  }
+                >
+                  {mensaje.texto}
+                </div>
+                {mensaje.propuestas.map(({ propuesta, creada }, indice) =>
+                  propuesta.tipo === 'altaDeProfesor' ? (
+                    <TarjetaDeAltaDeProfesor
+                      key={indice}
+                      propuesta={propuesta}
+                      creada={creada}
+                      alCrearse={(enlace) => conversacion.marcarCreada(mensaje.id, indice, enlace)}
+                    />
+                  ) : (
+                    <TarjetaDePropuesta
+                      key={indice}
+                      propuesta={propuesta}
+                      creada={creada}
+                      alCrearse={(enlace) => conversacion.marcarCreada(mensaje.id, indice, enlace)}
+                    />
+                  ),
+                )}
+              </Fragment>
+            ))}
+            {esperando && <p className="text-tenue">Pensando...</p>}
+            <div ref={final} />
           </div>
-          <p className="text-xs text-tenue">
-            Lo que escribís acá lo procesa Google. No escribas nombres, DNI ni teléfonos de alumnos.
-          </p>
+        )}
+        <div className={vacia ? 'flex flex-col gap-6' : 'sticky bottom-0 flex flex-col gap-2 bg-panel pt-3'}>
+          {!vacia && aviso}
+          {caja(vacia)}
+          {vacia && aviso}
         </div>
+        {vacia && <Sugerencias esAdmin={esAdmin} alUsar={usarSugerencia} />}
       </div>
     </Pagina>
   );

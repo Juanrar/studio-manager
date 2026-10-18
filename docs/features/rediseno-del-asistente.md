@@ -99,7 +99,7 @@ jsdom no calcula el diseño. Estos casos se miran en Chromium en el paso 5 de la
 - `Saludo({ nombre }: { nombre: string })`.
 - `Sugerencias({ esAdmin, alUsar }: { esAdmin: boolean; alUsar: (frase: string) => void })`, con `role="group"` y `aria-label="Sugerencias"`.
 
-- [ ] **Paso 1:** escribir los tests nuevos y cambiar los viejos como dice la tabla. Los nuevos:
+- [x] **Paso 1:** escribir los tests nuevos y cambiar los viejos como dice la tabla. Los nuevos:
 
 ```tsx
 it('la pantalla vacía saluda a recepción por el nombre y ofrece las dos sugerencias de consulta', async () => {
@@ -174,10 +174,10 @@ it('avisa que lo escrito lo procesa Google', async () => {
   - "si la API falla...": `getByRole('heading', { name: '¿Por dónde empezamos?' })` está.
   - "Nueva conversación vacía la lista..." y "cerrar sesión borra la conversación": donde buscaban el texto "¿Qué clases hay el jueves?", buscan el `heading` "¿Por dónde empezamos?".
 
-- [ ] **Paso 2:** correr `pnpm --filter @studio/web exec vitest run src/features/asistente/asistente.test.tsx` y verificar que los tests nuevos y cambiados fallan porque no encuentran el título "¿Por dónde empezamos?", el grupo "Sugerencias" o el aviso nuevo.
-- [ ] **Paso 3:** agregar los tres íconos a `Icono.tsx`, crear `CajaDeMensaje.tsx` y `Bienvenida.tsx`, y armar las dos disposiciones en `AsistentePage.tsx`: vacía (saludo, caja grande, error y sugerencias, centrados en vertical) y con conversación (mensajes como hoy, caja chica fija abajo con el error arriba). `usarSugerencia(frase)` llama a `conversacion.cambiarBorrador(frase)` y enfoca el `ref` del campo.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(asistente): saludo, sugerencias y caja nueva en la pantalla vacía`.
+- [x] **Paso 2:** correr `pnpm --filter @studio/web exec vitest run src/features/asistente/asistente.test.tsx` y verificar que los tests nuevos y cambiados fallan porque no encuentran el título "¿Por dónde empezamos?", el grupo "Sugerencias" o el aviso nuevo.
+- [x] **Paso 3:** agregar los tres íconos a `Icono.tsx`, crear `CajaDeMensaje.tsx` y `Bienvenida.tsx`, y armar las dos disposiciones en `AsistentePage.tsx`: vacía (saludo, caja grande, error y sugerencias, centrados en vertical) y con conversación (mensajes como hoy, caja chica fija abajo con el error arriba). `usarSugerencia(frase)` llama a `conversacion.cambiarBorrador(frase)` y enfoca el `ref` del campo.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(asistente): saludo, sugerencias y caja nueva en la pantalla vacía`.
 
 ### Tarea 2: Resplandor que se apaga y mensajes con avatar
 

@@ -88,6 +88,8 @@ describe('/asistente', () => {
     expect(screen.getByText(PREGUNTA)).toBeInTheDocument();
     expect(cuerpos).toEqual([{ historial: [], mensaje: PREGUNTA }]);
     expect(screen.getByLabelText('Mensaje para el asistente')).toHaveValue('');
+    expect(screen.queryByRole('heading', { name: '¿Por dónde empezamos?' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Sugerencias' })).not.toBeInTheDocument();
   });
 
   it('el segundo envío manda el historial que devolvió el primero', async () => {
@@ -146,6 +148,7 @@ describe('/asistente', () => {
     );
     expect(screen.getByLabelText('Mensaje para el asistente')).toHaveValue(PREGUNTA);
     expect(screen.queryByText('Pensando...')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '¿Por dónde empezamos?' })).toBeInTheDocument();
   });
 
   it('Nueva conversación vacía la lista, conserva lo escrito y el siguiente envío manda el historial vacío', async () => {
@@ -164,7 +167,7 @@ describe('/asistente', () => {
 
     expect(screen.queryByText(PREGUNTA)).not.toBeInTheDocument();
     expect(screen.queryByText(RESPUESTA)).not.toBeInTheDocument();
-    expect(screen.getByText('¿Qué clases hay el jueves?')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '¿Por dónde empezamos?' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Nueva conversación' })).not.toBeInTheDocument();
     expect(campo).toHaveValue('Y el viernes?');
 
@@ -298,30 +301,70 @@ describe('/asistente', () => {
     expect(screen.queryByText('Pensando...')).not.toBeInTheDocument();
   });
 
-  it('recepción ve el menú Asistente y un solo ejemplo; el administrador ve los dos', async () => {
+  it('la pantalla vacía saluda a recepción por el nombre y ofrece las dos sugerencias de consulta', async () => {
     conSesion(RECEPCION);
     renderizarEn('/asistente');
 
-    const menu = await screen.findByRole('navigation', { name: 'Menú' });
-    expect(menu).toHaveTextContent('Asistente');
-    expect(screen.getByText('¿Qué clases hay el jueves?')).toBeInTheDocument();
-    expect(screen.queryByText(/Creame un workshop/)).not.toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: '¿Por dónde empezamos?' })).toBeInTheDocument();
+    expect(screen.getByText('Hola, Rita')).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Menú' })).toHaveTextContent('Asistente');
+    const sugerencias = within(screen.getByRole('group', { name: 'Sugerencias' })).getAllByRole('button');
+    expect(sugerencias.map((boton) => boton.textContent)).toEqual(['Clases del jueves', 'Clases de un profesor']);
   });
 
-  it('avisa debajo del campo que lo escrito lo procesa Google', async () => {
-    conSesion(RECEPCION);
-    renderizarEn('/asistente');
-
-    expect(
-      await screen.findByText('Lo que escribís acá lo procesa Google. No escribas nombres, DNI ni teléfonos de alumnos.'),
-    ).toBeInTheDocument();
-  });
-
-  it('el administrador ve el ejemplo de crear un workshop', async () => {
+  it('el administrador ve las cinco sugerencias', async () => {
     conSesion(ADMIN);
     renderizarEn('/asistente');
 
-    expect(await screen.findByText('Creame un workshop de Hip-Hop el sábado de 15 a 17 con Erik')).toBeInTheDocument();
+    expect(await screen.findByText('Hola, Ana')).toBeInTheDocument();
+    const sugerencias = within(screen.getByRole('group', { name: 'Sugerencias' })).getAllByRole('button');
+    expect(sugerencias.map((boton) => boton.textContent)).toEqual([
+      'Clases del jueves',
+      'Crear un workshop',
+      'Alta de profesor',
+      'Horario nuevo',
+      'Clases de un profesor',
+    ]);
+  });
+
+  it('tocar una sugerencia reemplaza lo escrito, deja el foco en el campo y no envía', async () => {
+    let pedidos = 0;
+    servidor.use(
+      http.post('/api/asistente/mensajes', () => {
+        pedidos++;
+        return HttpResponse.json({ historial: [], texto: RESPUESTA, propuestas: [] });
+      }),
+    );
+    conSesion(ADMIN);
+    const { usuario } = renderizarEn('/asistente');
+    const campo = await screen.findByLabelText('Mensaje para el asistente');
+    await usuario.type(campo, 'algo');
+
+    await usuario.click(screen.getByRole('button', { name: 'Crear un workshop' }));
+
+    expect(campo).toHaveValue('Creame un workshop de Hip-Hop el sábado de 15 a 17 con Erik');
+    expect(campo).toHaveFocus();
+    expect(pedidos).toBe(0);
+  });
+
+  it('Enviar está deshabilitado con el campo vacío o con solo espacios', async () => {
+    conSesion(RECEPCION);
+    const { usuario } = renderizarEn('/asistente');
+    const campo = await screen.findByLabelText('Mensaje para el asistente');
+    const enviar = screen.getByRole('button', { name: 'Enviar' });
+    expect(enviar).toBeDisabled();
+
+    await usuario.type(campo, '   ');
+    expect(enviar).toBeDisabled();
+    await usuario.type(campo, 'a');
+    expect(enviar).toBeEnabled();
+  });
+
+  it('avisa que lo escrito lo procesa Google', async () => {
+    conSesion(RECEPCION);
+    renderizarEn('/asistente');
+
+    expect(await screen.findByText('Lo procesa Google. No escribas datos de alumnos.')).toBeInTheDocument();
   });
 
   describe('propuestas', () => {
@@ -616,7 +659,7 @@ describe('/asistente', () => {
       await usuario.click(screen.getByRole('button', { name: 'Entrar' }));
       await usuario.click(await screen.findByRole('link', { name: 'Asistente' }));
 
-      expect(await screen.findByText('¿Qué clases hay el jueves?')).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: '¿Por dónde empezamos?' })).toBeInTheDocument();
       expect(screen.queryByText(PREGUNTA)).not.toBeInTheDocument();
       expect(screen.queryByText(RESPUESTA)).not.toBeInTheDocument();
       expect(screen.getByLabelText('Mensaje para el asistente')).toHaveValue('');
