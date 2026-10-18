@@ -125,6 +125,19 @@ describe('/asistente', () => {
     expect(cuerpos).toEqual([{ historial: [], mensaje: 'Hola\nchau' }]);
   });
 
+  it('después de tocar Enviar con el mouse el foco vuelve al campo', async () => {
+    asistenteQueResponde([]);
+    conSesion(RECEPCION);
+    const { usuario } = renderizarEn('/asistente');
+    const campo = await screen.findByLabelText('Mensaje para el asistente');
+
+    await usuario.type(campo, PREGUNTA);
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+    await screen.findByText(RESPUESTA);
+
+    expect(campo).toHaveFocus();
+  });
+
   it('si la API falla muestra el error y el campo conserva lo escrito', async () => {
     servidor.use(
       http.post('/api/asistente/mensajes', () =>
@@ -143,9 +156,12 @@ describe('/asistente', () => {
     await usuario.type(await screen.findByLabelText('Mensaje para el asistente'), PREGUNTA);
     await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
+    const alerta = await screen.findByRole('alert');
+    expect(alerta).toHaveTextContent(
       'Se alcanzó el límite de pedidos del plan gratuito. Probá en un minuto; si sigue, la cuota del día se renueva mañana.',
     );
+    // En la pantalla vacía el error va debajo de la caja.
+    expect(screen.getByLabelText('Mensaje para el asistente').compareDocumentPosition(alerta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByLabelText('Mensaje para el asistente')).toHaveValue(PREGUNTA);
     expect(screen.queryByText('Pensando...')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: '¿Por dónde empezamos?' })).toBeInTheDocument();
@@ -254,7 +270,10 @@ describe('/asistente', () => {
     await usuario.type(campo, 'Y el viernes?');
     await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('La conversación es muy larga: empezá una nueva');
+    const alerta = await screen.findByRole('alert');
+    expect(alerta).toHaveTextContent('La conversación es muy larga: empezá una nueva');
+    // Con la conversación empezada el error va arriba de la caja.
+    expect(campo.compareDocumentPosition(alerta) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
     expect(campo).toHaveValue('Y el viernes?');
     expect(screen.getByRole('button', { name: 'Nueva conversación' })).toHaveClass('bg-acento');
 

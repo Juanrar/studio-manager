@@ -1,6 +1,6 @@
 import type { KeyboardEvent, Ref } from 'react';
 import { LARGO_MAXIMO_DEL_MENSAJE } from '@studio/shared';
-import { Icono } from '../../components/ui/index.tsx';
+import { enfoque, Icono } from '../../components/ui/index.tsx';
 import { ACENTO_CLARO } from './estilo.ts';
 
 export function CajaDeMensaje({
@@ -29,7 +29,7 @@ export function CajaDeMensaje({
   // El brillo alrededor es solo de la caja grande: con la conversación empezada se apaga.
   return (
     <div
-      className={`rounded-xl p-px transition-shadow duration-700 motion-reduce:transition-none ${grande ? 'shadow-[0_0_48px_-14px_color-mix(in_oklab,var(--color-acento)_55%,transparent)] focus-within:shadow-[0_0_56px_-10px_color-mix(in_oklab,var(--color-acento)_70%,transparent)]' : ''}`}
+      className={`rounded-xl p-px transition-shadow duration-700 motion-reduce:transition-none ${grande ? 'shadow-[0_0_48px_-14px_color-mix(in_oklab,var(--color-acento)_55%,transparent)] focus-within:shadow-[0_0_56px_-10px_color-mix(in_oklab,var(--color-acento)_70%,transparent)]' : 'focus-within:shadow-[0_0_0_1px_var(--color-acento)]'}`}
       style={{
         background: `linear-gradient(135deg, var(--color-acento), var(--color-borde-fuerte) 45%, var(--color-borde-fuerte) 70%, ${ACENTO_CLARO})`,
       }}
@@ -56,7 +56,7 @@ export function CajaDeMensaje({
             title="Enviar"
             onClick={alEnviar}
             disabled={esperando || valor.trim() === ''}
-            className="ml-auto grid size-8 place-items-center rounded-lg bg-acento text-white transition hover:bg-acento/85 disabled:cursor-not-allowed disabled:opacity-35"
+            className={`ml-auto grid size-8 place-items-center rounded-lg bg-acento text-white transition ${enfoque} hover:bg-acento/85 disabled:cursor-not-allowed disabled:opacity-35`}
           >
             <Icono nombre="flechaArriba" />
           </button>

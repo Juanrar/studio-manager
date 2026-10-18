@@ -45,7 +45,7 @@ export function ListaDeMensajes({
         mensaje.autor === 'usuario' ? (
           <div
             key={mensaje.id}
-            className="max-w-[80%] self-end rounded-2xl rounded-br-md bg-resalte px-3.5 py-2 leading-6 whitespace-pre-wrap"
+            className="max-w-[80%] self-end rounded-2xl rounded-br-md bg-resalte px-3.5 py-2 leading-6 break-words whitespace-pre-wrap"
           >
             {mensaje.texto}
           </div>
@@ -53,7 +53,7 @@ export function ListaDeMensajes({
           <div key={mensaje.id} className="flex gap-3 self-stretch">
             <AvatarDelAsistente />
             <div className="flex min-w-0 flex-1 flex-col gap-3 pt-0.5">
-              <p className="leading-6 whitespace-pre-wrap">{mensaje.texto}</p>
+              <p className="leading-6 break-words whitespace-pre-wrap">{mensaje.texto}</p>
               {mensaje.propuestas.map(({ propuesta, creada }, indice) =>
                 propuesta.tipo === 'altaDeProfesor' ? (
                   <TarjetaDeAltaDeProfesor

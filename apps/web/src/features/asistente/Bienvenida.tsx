@@ -1,4 +1,4 @@
-import { Icono, type NombreIcono } from '../../components/ui/index.tsx';
+import { enfoque, Icono, type NombreIcono } from '../../components/ui/index.tsx';
 import { ACENTO_CLARO, DEGRADE } from './estilo.ts';
 
 type Sugerencia = { icono: NombreIcono; titulo: string; frase: string; soloAdmin: boolean };
@@ -54,7 +54,7 @@ export function Sugerencias({ esAdmin, alUsar }: { esAdmin: boolean; alUsar: (fr
           key={sugerencia.titulo}
           type="button"
           onClick={() => alUsar(sugerencia.frase)}
-          className="inline-flex h-8 flex-none items-center gap-1.5 rounded-full border border-borde-fuerte bg-panel px-3 font-medium whitespace-nowrap text-tenue transition hover:border-acento/50 hover:bg-resalte hover:text-texto"
+          className={`inline-flex h-8 flex-none items-center gap-1.5 rounded-full border border-borde-fuerte bg-panel px-3 font-medium whitespace-nowrap text-tenue transition ${enfoque} hover:border-acento/50 hover:bg-resalte hover:text-texto`}
         >
           <Icono nombre={sugerencia.icono} className="size-3.5" />
           {sugerencia.titulo}

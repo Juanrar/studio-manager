@@ -25,6 +25,12 @@ export function AsistentePage() {
     final.current?.scrollIntoView?.({ block: 'end' });
   }, [mensajes, esperando]);
 
+  function enviar() {
+    conversacion.enviar();
+    // El clic en Enviar deja el foco en el botón, que se deshabilita.
+    campo.current?.focus();
+  }
+
   function usarSugerencia(frase: string) {
     conversacion.cambiarBorrador(frase);
     campo.current?.focus();
@@ -36,7 +42,7 @@ export function AsistentePage() {
       campo={campo}
       valor={borrador}
       alCambiar={conversacion.cambiarBorrador}
-      alEnviar={conversacion.enviar}
+      alEnviar={enviar}
       esperando={esperando}
     />
   );

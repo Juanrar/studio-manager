@@ -23,7 +23,7 @@ const estilosBoton: Record<VarianteBoton, string> = {
   peligro: 'border border-red-500/30 bg-red-500/15 text-red-300 hover:bg-red-500/25',
 };
 
-const enfoque = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento';
+export const enfoque = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento';
 
 // También sirve para que un Link se vea como botón.
 export function claseDeBoton(variante: VarianteBoton = 'primario') {
