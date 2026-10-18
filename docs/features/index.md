@@ -52,6 +52,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 |---|---|---|---|
 | 27 | [Asistente con Gemini](asistente.md) | lista | 26 |
 | 28 | [Alta de profesor desde el asistente](alta-de-profesor-desde-el-asistente.md) | lista | 27 |
+| 30 | [Rediseño de la pantalla del asistente](rediseno-del-asistente.md) | pendiente | 28 |
 
 ## Bitácora
 
