@@ -1,6 +1,6 @@
 # Rediseño de la pantalla del asistente
 
-**Estado:** pendiente  
+**Estado:** lista  
 **Depende de:** alta-de-profesor-desde-el-asistente  
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; en `/asistente`, la pantalla vacía muestra el saludo centrado con resplandor, la caja con borde en degradé y las sugerencias en píldoras, y el resplandor se desvanece con el primer mensaje.
 
@@ -221,8 +221,8 @@ it('el resplandor se apaga con el primer mensaje y vuelve con Nueva conversació
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
-- [ ] En [asistente.md](asistente.md), la lista de archivos de la web suma `CajaDeMensaje.tsx`, `Bienvenida.tsx` y `ListaDeMensajes.tsx`.
+- [x] `pnpm test` y `pnpm typecheck` pasan: web 153, API 244 sin cambios.
+- [x] En [asistente.md](asistente.md), la lista de archivos de la web suma `CajaDeMensaje.tsx`, `Bienvenida.tsx` y `ListaDeMensajes.tsx`.
 
 ## Notas de la ejecución
 
