@@ -56,6 +56,7 @@ Todos en `apps/web/src/features/asistente/`:
 - `CajaDeMensaje.tsx` (nuevo): la caja.
 - `Bienvenida.tsx` (nuevo): `Saludo`, `Sugerencias` y la lista `SUGERENCIAS`.
 - `ListaDeMensajes.tsx` (nuevo): los mensajes, el avatar y los puntos de espera.
+- `estilo.ts` (nuevo): `ACENTO_CLARO` y `DEGRADE`, que usan el saludo, la caja y el avatar.
 
 ## Tests
 
@@ -72,6 +73,8 @@ Todos en `apps/web/src/features/asistente/asistente.test.tsx`.
 | Si la API falla muestra el error... | 1 (se le suma que vuelve el saludo) | Calcular la pantalla vacía sin mirar los mensajes |
 | Nueva conversación vacía la lista... y Cerrar sesión borra la conversación | 1 (buscan el título "¿Por dónde empezamos?" en lugar de la frase de ejemplo) | Que la pantalla vacía no vuelva |
 | El resplandor se apaga con el primer mensaje y vuelve con Nueva conversación | 2 | Atar el resplandor a otra cosa que la conversación, o desmontarlo en lugar de bajar su opacidad |
+| Después de tocar Enviar con el mouse el foco vuelve al campo | Arreglos de la revisión final | Que el clic en Enviar deje el foco en el botón |
+| Si la API falla muestra el error... y Una conversación muy larga muestra el aviso... (se les suma la posición de la alerta) | Arreglos de la revisión final | Poner el error en el mismo lugar en las dos disposiciones |
 
 Los tests de "Pensando..." y de "Enviar" deshabilitado mientras espera siguen sin cambios: el texto queda en `sr-only` y el botón conserva el nombre.
 
@@ -220,3 +223,16 @@ it('el resplandor se apaga con el primer mensaje y vuelve con Nueva conversació
 
 - [ ] `pnpm test` y `pnpm typecheck` pasan.
 - [ ] En [asistente.md](asistente.md), la lista de archivos de la web suma `CajaDeMensaje.tsx`, `Bienvenida.tsx` y `ListaDeMensajes.tsx`.
+
+## Notas de la ejecución
+
+Lo que cambió respecto del plan y por qué.
+
+- La pantalla vacía y la conversación son un solo árbol. La caja queda siempre en el mismo lugar, así el `textarea` no se vuelve a montar al mandar el primer mensaje. Volver a montarlo hacía perder el foco y rompía 5 tests.
+- `ACENTO_CLARO` y `DEGRADE` pasaron a `estilo.ts` porque los usan el saludo, la caja y el avatar.
+- La marca del `scrollIntoView` va debajo de la caja fija. Dentro de la lista, el último mensaje quedaba detrás de la caja: terminaba en 762 px y la caja empezaba en 683 px, a 1280 × 800.
+- La revisión final pidió cuatro arreglos, hechos en una tanda:
+  - Foco visible: la caja chica lleva un anillo de 1 px en `focus-within`, y el botón de enviar y las sugerencias usan `enfoque` (ahora exportado de `components/ui`).
+  - Foco al campo: después de enviar, `AsistentePage` lo devuelve al `textarea`, porque el clic dejaba el foco en el botón deshabilitado.
+  - Textos largos: los mensajes llevan `break-words`, para que un enlace sin espacios no desborde la burbuja.
+  - Tests del lugar del error: debajo de la caja en la pantalla vacía, arriba con la conversación.

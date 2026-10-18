@@ -26,7 +26,7 @@ El estudio quiere empezar sin pagar, con el plan gratuito de la API de Gemini. S
 Límites y condiciones del plan gratuito:
 
 - **La cuota diaria no es pública.** Se ve por proyecto en https://aistudio.google.com/rate-limit. Cada vuelta del ciclo de funciones es una petición: un pedido como "creame una clase con Erik" usa 2 a 4. El 2026-10-13, Google respondió en un 429 con `generate_content_free_tier_requests, limit: 20` para `gemini-3.5-flash`: 20 pedidos por día, o 5 o 6 consultas. Un 429 puede ser el límite por minuto o el diario; el mensaje de `CUOTA_AGOTADA` no los distingue.
-- **Google usa lo que recibe.** Los términos del plan gratuito dicen que Google usa entradas y respuestas para mejorar sus productos, que revisores humanos pueden leerlas, y piden no mandar información personal, confidencial o sensible. Por eso ninguna herramienta devuelve datos de alumnos, ni DNI, email, teléfono o alias de profesores. Lo que escribe el usuario también le llega a Google, así que la pantalla lo avisa con una línea fija debajo del campo: "Lo que escribís acá lo procesa Google. No escribas nombres, DNI ni teléfonos de alumnos."
+- **Google usa lo que recibe.** Los términos del plan gratuito dicen que Google usa entradas y respuestas para mejorar sus productos, que revisores humanos pueden leerlas, y piden no mandar información personal, confidencial o sensible. Por eso ninguna herramienta devuelve datos de alumnos, ni DNI, email, teléfono o alias de profesores. Lo que escribe el usuario también le llega a Google, así que la pantalla lo avisa con una línea fija debajo del campo: "Lo que escribís acá lo procesa Google. No escribas nombres, DNI ni teléfonos de alumnos." Desde la feature 30 es una etiqueta dentro de la caja que dice "Lo procesa Google. No escribas datos de alumnos." (ver [rediseno-del-asistente.md](rediseno-del-asistente.md)).
 - **Los 503 son comunes.** Si el modelo principal responde 429, 500, 503 o 504, o el pedido falla por red o tarda más de 45 segundos, la API reintenta una vez con el modelo de respaldo, que tiene su propia cuota. Sin ese límite, Node espera hasta 300 segundos las cabeceras de la respuesta.
 
 Modelos por defecto: `gemini-3.1-flash-lite`, con `gemini-3.5-flash` de respaldo. El principal es `gemini-3.1-flash-lite` porque el plan gratuito de `gemini-3.5-flash` permite 20 pedidos por día (Google lo informó en un 429 el 2026-10-13), que alcanzan para 5 o 6 consultas. En las pruebas del 2026-10-13, `gemini-3.1-flash-lite` llamó bien a la función y su cuota no se agotó, mientras `gemini-3.5-flash` llegó al límite de 20. Se cambian con variables de entorno, sin tocar código. Se usan nombres fijos y no los alias `-latest`, que cambian de modelo sin aviso.
@@ -148,7 +148,11 @@ No se usa el SDK `@google/genai`: hacen falta un solo endpoint y control total d
 
 ### Web
 
-- `apps/web/src/features/asistente/AsistentePage.tsx`: la conversación, el campo de texto y las tarjetas. Con mensajes, la barra tiene "Nueva conversación", que vacía el historial, los mensajes y el error, y conserva lo escrito.
+- `apps/web/src/features/asistente/AsistentePage.tsx`: arma la pantalla vacía o la conversación y monta el resplandor. Con mensajes, la barra tiene "Nueva conversación", que vacía el historial, los mensajes y el error, y conserva lo escrito.
+- `CajaDeMensaje.tsx`: el campo de texto, el botón de enviar y la etiqueta de privacidad.
+- `Bienvenida.tsx`: el saludo y las sugerencias de la pantalla vacía.
+- `ListaDeMensajes.tsx`: las burbujas, el avatar y los puntos de espera. Dibuja las tarjetas de las propuestas.
+- `estilo.ts`: `ACENTO_CLARO` y `DEGRADE`, los colores compartidos.
 - `ConversacionDelAsistente.tsx`: `ProveedorDeConversacion` y `useConversacion()`. Guarda el historial, los mensajes, lo escrito en el campo y qué propuestas ya se crearon, con su enlace. La mutación de `POST /api/asistente/mensajes` vive acá. Se monta en `RequiereSesion`, arriba de las rutas hijas, con `key` igual al id del usuario.
 - `TarjetaDePropuesta.tsx`: los datos de la propuesta y el botón "Crear". Crea con `mutateAsync` y avisa a la conversación con `marcarCreada`; "Creada" sale de la conversación, no del estado de la mutación.
 - `api.ts`: `useConversar`. Para crear se reusan `useCrearClaseUnica` y `useCrearHorario` de `features/grilla/api.ts`, que ya recargan la grilla, la agenda y los horarios.
