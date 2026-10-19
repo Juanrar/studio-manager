@@ -36,6 +36,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 21 | [Clases anotadas en la actividad](clases-anotadas-en-la-actividad.md) | lista | 20 |
 | 22 | [Baja automática por no comprar](baja-automatica.md) | lista | 21 |
 | 23 | [Ficha del profesor con sus clases](ficha-del-profesor.md) | lista | 15, 20 |
+| 31 | [Agenda en lista](agenda-en-lista.md) | en curso | 25 |
 
 ## Grilla semanal
 
