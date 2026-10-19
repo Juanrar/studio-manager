@@ -1,6 +1,6 @@
 # Agenda en lista
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** clases-por-adelantado  
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; en `/agenda`, las clases del día se ven en una lista por hora con estilo y profesor, sin tabla, y en el día de hoy una línea "Ahora" separa las que terminaron de las que faltan.
 
@@ -140,18 +140,18 @@ Otro día que no es hoy se ve sin línea, sin apagado y sin "en curso". La barra
 
 ### Tarea 3: Mirarla en Chromium y cerrar
 
-- [ ] **Paso 1:** con `pnpm dev:web` y un script de Playwright fuera del repo que simula la API con `page.route('**/api/**', ...)` (ver CLAUDE.md), capturar `/agenda` a 1280 y a 1024 px con clases de hoy antes, durante y después de la hora actual, y otro día. Verificar contra la maqueta: hora a la izquierda, barra de color, terminadas apagadas, renglón en curso resaltado, línea verde, y que la pantalla bajó a la línea.
-- [ ] **Paso 2:** correr la verificación final.
-- [ ] **Paso 3:** pasar la feature a `lista` en el índice y escribir la bitácora.
+- [x] **Paso 1:** con `pnpm dev:web` y un script de Playwright fuera del repo que simula la API con `page.route('**/api/**', ...)` (ver CLAUDE.md), capturar `/agenda` a 1280 y a 1024 px con clases de hoy antes, durante y después de la hora actual, y otro día. Verificar contra la maqueta: hora a la izquierda, barra de color, terminadas apagadas, renglón en curso resaltado, línea verde, y que la pantalla bajó a la línea.
+- [x] **Paso 2:** correr la verificación final.
+- [x] **Paso 3:** pasar la feature a `lista` en el índice y escribir la bitácora.
 
 ## Review Focus
 
 - Dos clases que empiezan juntas y terminan a distinta hora: dos renglones, cada uno con su fin. Lo cubre el test de `grupos.test.ts`.
 - Una clase cancelada en el horario actual no dice "en curso" y no deja la línea antes de tiempo. Lo cubre el caso de las 21:30.
 - Una clase que termina justo a la hora actual cuenta como terminada. Lo cubren el caso de las 22:00 y el cambio de minuto a las 20:30.
-- Hoy con `?fecha=` en la dirección se ve igual que sin fecha. Los tests de hoy usan `?fecha=2026-03-10`.
+- Hoy con `?fecha=` en la dirección se ve igual que sin fecha. Lo cubren los tests de hoy con `?fecha=2026-03-10` y el de `/agenda` sin fecha.
 - La pantalla abierta al pasar la medianoche: sin fecha en la dirección, la clave de la consulta lleva el día y la agenda pide el día nuevo sola. Lo cubre el test de la medianoche.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan: web 161, API 28 archivos sin cambios, `pnpm e2e` 1. La web y la API se corrieron por separado: en paralelo, un test de la grilla falló una vez antes de empezar, el mismo de la bitácora del 2026-10-13.
