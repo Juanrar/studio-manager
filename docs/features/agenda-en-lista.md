@@ -61,7 +61,7 @@ Otro día que no es hoy se ve sin línea, sin apagado y sin "en curso". La barra
 **Interfaces:**
 - Produce: `type GrupoDeClases = { horaInicio: string; horaFin: string; clases: Clase[] }` y `agruparPorHora(clases: Clase[]): GrupoDeClases[]`, en `grupos.ts`.
 
-- [ ] **Paso 1:** escribir `grupos.test.ts` con `unaClase` de `test/datos.ts`. Entran D 17:00–18:00 (id 4), A 18:00–19:30 (id 1), B 18:00–19:00 (id 2) y C 18:00–19:00 (id 3), en el orden 1, 2, 3, 4. Se espera:
+- [x] **Paso 1:** escribir `grupos.test.ts` con `unaClase` de `test/datos.ts`. Entran D 17:00–18:00 (id 4), A 18:00–19:30 (id 1), B 18:00–19:00 (id 2) y C 18:00–19:00 (id 3), en el orden 1, 2, 3, 4. Se espera:
 
   ```ts
   expect(agruparPorHora(clases).map((g) => [g.horaInicio, g.horaFin, g.clases.map((c) => c.id)])).toEqual([
@@ -71,7 +71,7 @@ Otro día que no es hoy se ve sin línea, sin apagado y sin "en curso". La barra
   ]);
   ```
 
-- [ ] **Paso 2:** en `agenda.test.tsx`, sumar a `CLASES_DEL_10`, después de Ballet, `unaClase({ id: 52, horarioId: 4, estilo: 'Jazz', nivel: null, horaInicio: '18:00', horaFin: '19:00', profesor: IARU, profesorTitular: IARU })`. Sumar el reloj a todo el archivo: en `beforeEach`, `vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] })` y `vi.setSystemTime(new Date('2026-03-11T15:00:00Z'))` (el día 11, así el 10 no es hoy); en `afterEach`, `vi.useRealTimers()`. Agregar el ayudante que lee la lista:
+- [x] **Paso 2:** en `agenda.test.tsx`, sumar a `CLASES_DEL_10`, después de Ballet, `unaClase({ id: 52, horarioId: 4, estilo: 'Jazz', nivel: null, horaInicio: '18:00', horaFin: '19:00', profesor: IARU, profesorTitular: IARU })`. Sumar el reloj a todo el archivo: en `beforeEach`, `vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] })` y `vi.setSystemTime(new Date('2026-03-11T15:00:00Z'))` (el día 11, así el 10 no es hoy); en `afterEach`, `vi.useRealTimers()`. Agregar el ayudante que lee la lista:
 
   ```ts
   // El texto de cada renglón de la agenda, sin lo decorativo (aria-hidden). La línea se lee "Ahora".
@@ -88,7 +88,7 @@ Otro día que no es hoy se ve sin línea, sin apagado y sin "en curso". La barra
   }
   ```
 
-- [ ] **Paso 3:** reemplazar el test de las filas por "otro día muestra cada grupo con su hora, estilo, profesor y marcas" en `/agenda?fecha=2026-03-10`:
+- [x] **Paso 3:** reemplazar el test de las filas por "otro día muestra cada grupo con su hora, estilo, profesor y marcas" en `/agenda?fecha=2026-03-10`:
 
   ```ts
   expect(renglones()).toEqual([
@@ -99,10 +99,10 @@ Otro día que no es hoy se ve sin línea, sin apagado y sin "en curso". La barra
   ```
 
   Conserva la aserción de `pedidos`. Cambiar el test de "Tomar asistencia" por "tocar una clase lleva a su asistencia": clic en `getByRole('link', { name: /Ballet/ })` y la ruta termina en `/clases/49`.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test agenda` y verificar que fallan: `agruparPorHora` no existe y no hay lista "Clases del día".
-- [ ] **Paso 5:** escribir `agruparPorHora` (ordena por inicio y después por fin, y junta los iguales) y armar la lista en `AgendaPage` como dice "Qué cambia", sin el ahora. Sacar `ESTADOS`, `Tabla`, `Celda` y `CeldaDeAcciones` de la página.
-- [ ] **Paso 6:** correr los tests de la web y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 7:** commit `feat(agenda): lista de clases agrupadas por hora en lugar de la tabla`.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test agenda` y verificar que fallan: `agruparPorHora` no existe y no hay lista "Clases del día".
+- [x] **Paso 5:** escribir `agruparPorHora` (ordena por inicio y después por fin, y junta los iguales) y armar la lista en `AgendaPage` como dice "Qué cambia", sin el ahora. Sacar `ESTADOS`, `Tabla`, `Celda` y `CeldaDeAcciones` de la página.
+- [x] **Paso 6:** correr los tests de la web y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 7:** commit `feat(agenda): lista de clases agrupadas por hora en lugar de la tabla`.
 
 ### Tarea 2: La línea "Ahora" y las clases en curso en el día de hoy
 

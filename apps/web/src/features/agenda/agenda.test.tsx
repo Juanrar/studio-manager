@@ -1,6 +1,6 @@
-import { screen, within } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ClasesDelRango } from '@studio/shared';
 import { unaClase } from '../../../test/datos.ts';
 import { RECEPCION, conSesion, renderizarEn } from '../../../test/render.tsx';
@@ -16,6 +16,16 @@ const CLASES_DEL_10: ClasesDelRango = {
   finDelHorizonte: '2026-05-03',
   items: [
     unaClase({ id: 49, horarioId: 1, estilo: 'Ballet', nivel: null, horaInicio: '18:00', horaFin: '19:00' }),
+    unaClase({
+      id: 52,
+      horarioId: 4,
+      estilo: 'Jazz',
+      nivel: null,
+      horaInicio: '18:00',
+      horaFin: '19:00',
+      profesor: IARU,
+      profesorTitular: IARU,
+    }),
     unaClase({ id: 50, horarioId: 2, profesor: IARU, profesorTitular: ERIK, tieneCambios: true, asistentes: 4 }),
     unaClase({
       id: 51,
@@ -43,23 +53,44 @@ function agendaQueDevuelve(respuesta: ClasesDelRango) {
   return pedidos;
 }
 
+// El texto de cada renglón de la agenda, sin lo decorativo (aria-hidden). La línea se lee "Ahora".
+function renglones(): string[] {
+  const lista = screen.getByRole('list', { name: 'Clases del día' });
+  return [...lista.children].map((renglon) => {
+    const copia = renglon.cloneNode(true) as HTMLElement;
+    copia.querySelectorAll('[aria-hidden="true"]').forEach((nodo) => nodo.remove());
+    const textos: string[] = [];
+    const recorrido = document.createTreeWalker(copia, NodeFilter.SHOW_TEXT);
+    while (recorrido.nextNode()) textos.push(recorrido.currentNode.textContent!.trim());
+    return textos.filter(Boolean).join(' ');
+  });
+}
+
 describe('/agenda', () => {
-  it('muestra cada clase del día en una fila con el profesor que la da, los asistentes y el estado', async () => {
+  beforeEach(() => {
+    // El día 11: así el 10 de marzo no es hoy.
+    vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] });
+    vi.setSystemTime(new Date('2026-03-11T15:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('otro día muestra cada grupo con su hora, estilo, profesor y marcas', async () => {
     const pedidos = agendaQueDevuelve(CLASES_DEL_10);
     renderizarEn('/agenda?fecha=2026-03-10');
 
-    await screen.findByRole('row', { name: /Hip-Hop/ });
-    const [, ...filas] = screen.getAllByRole('row');
-    const celdas = filas.map((fila) => within(fila).getAllByRole('cell').map((celda) => celda.textContent));
-    expect(celdas).toEqual([
-      ['18:00 a 19:00', 'Ballet', '—', 'Erik Zapata', '0', 'Programada', 'Tomar asistencia'],
-      ['19:00 a 20:30', 'Hip-Hop', 'Inicial', 'Iaru Speroni (suplente)', '4', 'Programada', 'Ver asistencia'],
-      ['21:00 a 22:00', 'Salsa', '—', 'Erik Zapata', '0', 'Cancelada', 'Ver asistencia'],
+    await screen.findByRole('list', { name: 'Clases del día' });
+    expect(renglones()).toEqual([
+      '18:00 a 19:00 Ballet Erik Zapata Jazz Iaru Speroni',
+      '19:00 a 20:30 Hip-Hop Iaru Speroni suplente',
+      '21:00 a 22:00 Salsa Erik Zapata cancelada',
     ]);
     expect(pedidos).toEqual(['?desde=2026-03-10&hasta=2026-03-10']);
   });
 
-  it('"Tomar asistencia" lleva a la clase, que ya existe: no la abre con un POST', async () => {
+  it('tocar una clase lleva a su asistencia, que ya existe: no la abre con un POST', async () => {
     agendaQueDevuelve(CLASES_DEL_10);
     servidor.use(
       // La pantalla de la clase carga sus datos al llegar. MSW falla si llega un POST que el test no previó.
@@ -69,8 +100,7 @@ describe('/agenda', () => {
     );
     const { usuario, router } = renderizarEn('/agenda?fecha=2026-03-10');
 
-    const ballet = await screen.findByRole('row', { name: /Ballet/ });
-    await usuario.click(within(ballet).getByRole('link', { name: 'Tomar asistencia' }));
+    await usuario.click(await screen.findByRole('link', { name: /Ballet/ }));
 
     await screen.findByRole('heading', { name: /Asistencia/ });
     expect(router.state.location.pathname).toBe('/clases/49');
