@@ -1,7 +1,7 @@
 import type { PointerEvent, RefObject } from 'react';
 import type { Clase } from '@studio/shared';
 import { colorDeNombre } from '../../components/ui/index.tsx';
-import { abreviaturaDelDia, diaDeLaSemana, nombreDelDia } from '../../lib/formato.ts';
+import { abreviaturaDelDia, diaDeLaSemana, horaEnEstudio, nombreDelDia } from '../../lib/formato.ts';
 import { acomodarEnCascada, type Lugar } from './cascada.ts';
 import { FIN_GRILLA, INICIO_GRILLA, PX_POR_MINUTO, aHora, aMinutos } from './minutos.ts';
 import type { Fantasma } from './useArrastre.ts';
@@ -51,8 +51,8 @@ export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada }
   );
   const columnas = { gridTemplateColumns: `repeat(${fechas.length}, minmax(0, 1fr))` };
   const fantasma = interacciones?.fantasma ?? null;
-  // La etiqueta roja de la hora actual tapa la hora en punto que tenga cerca: esa no se escribe.
-  const ahora = !incrustada && fechas.includes(hoy) ? minutosDeAhora() : null;
+  // La etiqueta verde de la hora actual tapa la hora en punto que tenga cerca: esa no se escribe.
+  const ahora = !incrustada && fechas.includes(hoy) ? aMinutos(horaEnEstudio()) : null;
   const horasConEtiqueta = horas.filter((minutos) => ahora === null || Math.abs(minutos - ahora) >= 15);
 
   return (
@@ -218,38 +218,24 @@ function ClaseEnLaGrilla({
   );
 }
 
-// La hora de ahora en la zona del estudio, en minutos desde las 00:00.
-function minutosDeAhora(): number {
-  const [horas, minutos] = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'America/Argentina/Buenos_Aires',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  })
-    .format(new Date())
-    .split(':')
-    .map(Number) as [number, number];
-  return horas * 60 + minutos;
-}
-
 function LineaDeAhora() {
-  const minutos = minutosDeAhora();
+  const minutos = aMinutos(horaEnEstudio());
   if (minutos < INICIO_GRILLA || minutos > FIN_GRILLA) return null;
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 z-40" style={{ top: (minutos - INICIO_GRILLA) * PX_POR_MINUTO }}>
-      <span className="absolute -top-[3.5px] -left-1 size-2 rounded-full bg-red-500" />
-      <div className="h-px bg-red-500" />
+      <span className="absolute -top-[3.5px] -left-1 size-2 rounded-full bg-green-500" />
+      <div className="h-px bg-green-500" />
     </div>
   );
 }
 
 function EtiquetaDeAhora() {
-  const minutos = minutosDeAhora();
+  const minutos = aMinutos(horaEnEstudio());
   if (minutos < INICIO_GRILLA || minutos > FIN_GRILLA) return null;
   return (
     <span
       aria-hidden="true"
-      className="absolute right-1 z-10 -translate-y-1/2 rounded bg-red-500 px-1 text-[11px] font-semibold text-white tabular-nums"
+      className="absolute right-1 z-10 -translate-y-1/2 rounded bg-green-500 px-1 text-[11px] font-semibold text-white tabular-nums"
       style={{ top: (minutos - INICIO_GRILLA) * PX_POR_MINUTO }}
     >
       {aHora(minutos)}

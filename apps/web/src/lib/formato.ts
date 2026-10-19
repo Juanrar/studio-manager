@@ -108,6 +108,16 @@ export function hoyEnEstudio(ahora: Date = new Date()): string {
   }).format(ahora);
 }
 
+// La hora de ahora en la zona del estudio, como HH:MM de 24 horas.
+export function horaEnEstudio(ahora: Date = new Date()): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(ahora);
+}
+
 export function sumarDias(fecha: string, dias: number): string {
   const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
   return new Date(Date.UTC(anio, mes - 1, dia + dias)).toISOString().slice(0, 10);

@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ClasesDelRango } from '@studio/shared';
@@ -66,6 +66,10 @@ function renglones(): string[] {
   });
 }
 
+const G1 = '18:00 a 19:00 Ballet Erik Zapata Jazz Iaru Speroni';
+const G2 = '19:00 a 20:30 Hip-Hop Iaru Speroni suplente';
+const G3 = '21:00 a 22:00 Salsa Erik Zapata cancelada';
+
 describe('/agenda', () => {
   beforeEach(() => {
     // El día 11: así el 10 de marzo no es hoy.
@@ -88,6 +92,53 @@ describe('/agenda', () => {
       '21:00 a 22:00 Salsa Erik Zapata cancelada',
     ]);
     expect(pedidos).toEqual(['?desde=2026-03-10&hasta=2026-03-10']);
+  });
+
+  it('hoy, la línea va antes de la primera clase que no terminó', async () => {
+    vi.setSystemTime(new Date('2026-03-10T22:20:00Z'));
+    agendaQueDevuelve(CLASES_DEL_10);
+    renderizarEn('/agenda?fecha=2026-03-10');
+
+    await screen.findByRole('list', { name: 'Clases del día' });
+    expect(renglones()).toEqual([G1, 'Ahora', `${G2} en curso`, G3]);
+  });
+
+  it.each([
+    ['10:00', '2026-03-10T13:00:00Z', ['Ahora', G1, G2, G3]],
+    ['21:30, con la cancelada en horario', '2026-03-11T00:30:00Z', [G1, G2, 'Ahora', G3]],
+    ['22:00, cuando terminó la última', '2026-03-11T01:00:00Z', [G1, G2, G3, 'Ahora']],
+  ])('hoy a las %s', async (_hora, instante, esperado) => {
+    vi.setSystemTime(new Date(instante));
+    agendaQueDevuelve(CLASES_DEL_10);
+    renderizarEn('/agenda?fecha=2026-03-10');
+
+    await screen.findByRole('list', { name: 'Clases del día' });
+    expect(renglones()).toEqual(esperado);
+  });
+
+  it('la línea avanza sola y la lista baja a ella una vez', async () => {
+    const desplazar = vi.fn();
+    Element.prototype.scrollIntoView = desplazar;
+    try {
+      vi.setSystemTime(new Date('2026-03-10T23:29:00Z'));
+      agendaQueDevuelve(CLASES_DEL_10);
+      renderizarEn('/agenda?fecha=2026-03-10');
+
+      await screen.findByRole('list', { name: 'Clases del día' });
+      expect(renglones()).toEqual([G1, 'Ahora', `${G2} en curso`, G3]);
+      expect(desplazar).toHaveBeenCalledTimes(1);
+      expect(desplazar).toHaveBeenCalledWith({ block: 'center' });
+      expect(desplazar.mock.contexts[0]).toHaveTextContent('Ahora');
+
+      act(() => {
+        vi.advanceTimersByTime(60_000);
+      });
+
+      expect(renglones()).toEqual([G1, G2, 'Ahora', G3]);
+      expect(desplazar).toHaveBeenCalledTimes(1);
+    } finally {
+      delete (Element.prototype as { scrollIntoView?: unknown }).scrollIntoView;
+    }
   });
 
   it('tocar una clase lleva a su asistencia, que ya existe: no la abre con un POST', async () => {

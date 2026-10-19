@@ -115,7 +115,7 @@ Otro día que no es hoy se ve sin línea, sin apagado y sin "en curso". La barra
 - Consume: `agruparPorHora` y `GrupoDeClases` de la tarea 1.
 - Produce: `horaEnEstudio(ahora: Date = new Date()): string` en `lib/formato.ts`, que da `HH:MM` en `America/Argentina/Buenos_Aires` con reloj de 24 horas; y `useAhora(): Date` en `lib/useAhora.ts`, que se renueva con `setInterval` cada 60 000 ms y lo limpia al desmontar.
 
-- [ ] **Paso 1:** en `agenda.test.tsx`, test "hoy, la línea va antes de la primera clase que no terminó" con `vi.setSystemTime(new Date('2026-03-10T22:20:00Z'))` (19:20 en el estudio):
+- [x] **Paso 1:** en `agenda.test.tsx`, test "hoy, la línea va antes de la primera clase que no terminó" con `vi.setSystemTime(new Date('2026-03-10T22:20:00Z'))` (19:20 en el estudio):
 
   ```ts
   expect(renglones()).toEqual([
@@ -126,15 +126,15 @@ Otro día que no es hoy se ve sin línea, sin apagado y sin "en curso". La barra
   ]);
   ```
 
-- [ ] **Paso 2:** test con `it.each` sobre el mismo día. Los grupos, abreviados acá como G1 (18:00), G2 (19:00, sin "en curso") y G3 (21:00), se escriben completos como en el paso 1:
+- [x] **Paso 2:** test con `it.each` sobre el mismo día. Los grupos, abreviados acá como G1 (18:00), G2 (19:00, sin "en curso") y G3 (21:00), se escriben completos como en el paso 1:
   - `2026-03-10T13:00:00Z` (10:00): `['Ahora', G1, G2, G3]`
   - `2026-03-11T00:30:00Z` (21:30, la cancelada en horario): `[G1, G2, 'Ahora', G3]`
   - `2026-03-11T01:00:00Z` (22:00, terminó la última): `[G1, G2, G3, 'Ahora']`
-- [ ] **Paso 3:** test "la línea avanza sola y la lista baja a ella una vez". Antes de renderizar, `Element.prototype.scrollIntoView = desplazar` con `const desplazar = vi.fn()`, y se borra al terminar. Con `2026-03-10T23:29:00Z` (20:29): `[G1, 'Ahora', '19:00 a 20:30 Hip-Hop Iaru Speroni suplente en curso', G3]`, `desplazar` llamado una vez con `{ block: 'center' }` y `desplazar.mock.contexts[0]` con el texto "Ahora". Después de `act(() => vi.advanceTimersByTime(60_000))`: `[G1, G2, 'Ahora', G3]` y `desplazar` sigue con una sola llamada.
-- [ ] **Paso 4:** correr `pnpm --filter @studio/web test agenda` y verificar que los tres fallan porque no hay renglón "Ahora".
-- [ ] **Paso 5:** escribir `horaEnEstudio` y `useAhora`, y sumar a `AgendaPage` el ahora como dice "Qué cambia". En `VistaDeSemana.tsx`, borrar `minutosDeAhora`, usar `aMinutos(horaEnEstudio())` en sus usos y pasar la línea y la etiqueta de la hora actual de `bg-red-500` a `bg-green-500`.
-- [ ] **Paso 6:** correr los tests de la web y `pnpm typecheck`, y verificar que pasan, también los de la grilla.
-- [ ] **Paso 7:** commit `feat(agenda): línea de "Ahora" y clases en curso en el día de hoy`.
+- [x] **Paso 3:** test "la línea avanza sola y la lista baja a ella una vez". Antes de renderizar, `Element.prototype.scrollIntoView = desplazar` con `const desplazar = vi.fn()`, y se borra al terminar. Con `2026-03-10T23:29:00Z` (20:29): `[G1, 'Ahora', '19:00 a 20:30 Hip-Hop Iaru Speroni suplente en curso', G3]`, `desplazar` llamado una vez con `{ block: 'center' }` y `desplazar.mock.contexts[0]` con el texto "Ahora". Después de `act(() => vi.advanceTimersByTime(60_000))`: `[G1, G2, 'Ahora', G3]` y `desplazar` sigue con una sola llamada.
+- [x] **Paso 4:** correr `pnpm --filter @studio/web test agenda` y verificar que los tres fallan porque no hay renglón "Ahora".
+- [x] **Paso 5:** escribir `horaEnEstudio` y `useAhora`, y sumar a `AgendaPage` el ahora como dice "Qué cambia". En `VistaDeSemana.tsx`, borrar `minutosDeAhora`, usar `aMinutos(horaEnEstudio())` en sus usos y pasar la línea y la etiqueta de la hora actual de `bg-red-500` a `bg-green-500`.
+- [x] **Paso 6:** correr los tests de la web y `pnpm typecheck`, y verificar que pasan, también los de la grilla.
+- [x] **Paso 7:** commit `feat(agenda): línea de "Ahora" y clases en curso en el día de hoy`.
 
 ### Tarea 3: Mirarla en Chromium y cerrar
 
