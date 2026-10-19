@@ -49,7 +49,7 @@ export function VistaDelMes({
               >
                 <span
                   className={`mb-0.5 grid h-5 min-w-5 place-items-center self-start rounded-full px-1 text-xs ${
-                    fecha === hoy ? 'bg-red-500 font-semibold text-white' : 'text-tenue'
+                    fecha === hoy ? 'bg-green-500 font-semibold text-fondo' : 'text-tenue'
                   }`}
                 >
                   {numero}

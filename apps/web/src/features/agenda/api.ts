@@ -3,9 +3,10 @@ import type { ActualizarClaseInput, Asistencia, Clase, ClasesDelRango, Registrar
 import { api, conQuery } from '../../lib/api.ts';
 
 // Las clases de un día, ya creadas por adelantado. Sin fecha, la API usa el día de hoy en el estudio.
-export function useAgenda(fecha: string | undefined) {
+// La clave lleva el día de hoy: al pasar la medianoche cambia y la pantalla pide el día nuevo.
+export function useAgenda(fecha: string | undefined, hoy: string) {
   return useQuery({
-    queryKey: ['agenda', fecha ?? 'hoy'],
+    queryKey: ['agenda', fecha ?? `hoy-${hoy}`],
     queryFn: () => api.get<ClasesDelRango>(conQuery('/clases', { desde: fecha, hasta: fecha })),
   });
 }

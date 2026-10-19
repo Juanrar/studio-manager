@@ -235,7 +235,7 @@ function EtiquetaDeAhora() {
   return (
     <span
       aria-hidden="true"
-      className="absolute right-1 z-10 -translate-y-1/2 rounded bg-green-500 px-1 text-[11px] font-semibold text-white tabular-nums"
+      className="absolute right-1 z-10 -translate-y-1/2 rounded bg-green-500 px-1 text-[11px] font-semibold text-fondo tabular-nums"
       style={{ top: (minutos - INICIO_GRILLA) * PX_POR_MINUTO }}
     >
       {aHora(minutos)}

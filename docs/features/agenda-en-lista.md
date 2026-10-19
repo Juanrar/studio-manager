@@ -32,7 +32,7 @@ La [agenda](frontend-agenda.md) mostraba las clases del día en una tabla con ho
 
 Otro día que no es hoy se ve sin línea, sin apagado y sin "en curso". La barra de `Pagina` ("‹ Hoy ›" y la fecha), el aviso de fuera del horizonte y "No hay clases este día." no cambian.
 
-**La grilla también pasa a verde.** El estudio pidió que la línea de la hora actual de la [grilla](grilla-semanal.md) tenga el mismo color que la de la agenda: en `LineaDeAhora` y `EtiquetaDeAhora` de `VistaDeSemana.tsx`, `bg-red-500` pasa a `bg-green-500`.
+**La grilla también pasa a verde.** El estudio pidió que la línea de la hora actual de la [grilla](grilla-semanal.md) tenga el mismo color que la de la agenda: en `LineaDeAhora` y `EtiquetaDeAhora` de `VistaDeSemana.tsx`, `bg-red-500` pasa a `bg-green-500`. El número del día de hoy en la vista Mes (`VistaDelMes.tsx`) también pasa a verde, con texto `text-fondo`. La etiqueta de la hora usa `text-fondo` para leerse sobre el verde.
 
 **Decisiones tomadas sin el estudio:**
 
@@ -47,6 +47,8 @@ Otro día que no es hoy se ve sin línea, sin apagado y sin "en curso". La barra
 | Tocar una clase lleva a su asistencia | Web | Que la clase deje de ser un enlace a `/clases/:id` |
 | Hoy a las 19:20, "Ahora" va entre el grupo de las 18:00 y Hip-Hop, que dice "en curso" | Web | Poner la línea por hora de inicio en lugar de fin, o no marcar la clase en curso |
 | A las 10:00 la línea va primera; a las 21:30 la cancelada en horario no dice "en curso"; a las 22:00 va al final | Web | Marcar en curso una cancelada, o dejar sin terminar la clase que termina justo ahora |
+| Hoy sin fecha en la dirección muestra la línea igual que con fecha | Web | Comparar la fecha de la dirección en lugar del día que devuelve la API |
+| Sin fecha, al pasar la medianoche la agenda pide el día nuevo | Web | Dejar la clave fija en 'hoy', que deja la pantalla en el día anterior |
 | A las 20:29 Hip-Hop está en curso y un minuto después la línea pasa después de ella sin recargar; la lista baja a la línea una sola vez | Web | Calcular la hora una sola vez al montar, o volver a desplazar en cada minuto |
 
 ---
@@ -148,7 +150,7 @@ Otro día que no es hoy se ve sin línea, sin apagado y sin "en curso". La barra
 - Una clase cancelada en el horario actual no dice "en curso" y no deja la línea antes de tiempo. Lo cubre el caso de las 21:30.
 - Una clase que termina justo a la hora actual cuenta como terminada. Lo cubren el caso de las 22:00 y el cambio de minuto a las 20:30.
 - Hoy con `?fecha=` en la dirección se ve igual que sin fecha. Los tests de hoy usan `?fecha=2026-03-10`.
-- La pantalla abierta al pasar la medianoche: el día que se ve deja de ser hoy y la lista queda sin línea hasta tocar "Hoy". Se acepta sin test.
+- La pantalla abierta al pasar la medianoche: sin fecha en la dirección, la clave de la consulta lleva el día y la agenda pide el día nuevo sola. Lo cubre el test de la medianoche.
 
 ## Verificación final
 

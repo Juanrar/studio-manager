@@ -21,11 +21,11 @@ import { agruparPorHora, type GrupoDeClases } from './grupos.ts';
 export function AgendaPage() {
   const [parametros, setParametros] = useSearchParams();
   const fecha = parametros.get('fecha') ?? undefined;
-  const agenda = useAgenda(fecha);
+  const ahora = useAhora();
+  const agenda = useAgenda(fecha, hoyEnEstudio(ahora));
   const irA = (nueva: string | undefined) => setParametros(nueva === undefined ? {} : { fecha: nueva });
   // La API decide cuál es el día cuando la dirección no trae fecha: el de hoy en el estudio.
   const dia = agenda.data?.desde;
-  const ahora = useAhora();
   // El ahora solo cuenta si el día que se ve es hoy; si no, la hora es null y no se marca nada.
   const esHoy = dia !== undefined && dia === hoyEnEstudio(ahora);
   const hora = esHoy ? horaEnEstudio(ahora) : null;
@@ -97,9 +97,11 @@ function LineaDeAhora({ referencia }: { referencia: RefObject<HTMLLIElement | nu
 
 function RenglonDeGrupo({ grupo, hora }: { grupo: GrupoDeClases; hora: string | null }) {
   const activo = hora !== null && grupo.clases.some((clase) => enCurso(clase, hora));
+  // Las clases de un grupo terminan a la misma hora: el renglón entero se apaga, hora incluida.
+  const terminado = hora !== null && grupo.horaFin <= hora;
   return (
     <li
-      className={`flex gap-4 py-3 ${activo ? '-mx-3 rounded-lg bg-elevado px-3' : 'border-b border-borde last:border-b-0'}`}
+      className={`flex gap-4 py-3 ${activo ? '-mx-3 rounded-lg bg-elevado px-3' : 'border-b border-borde last:border-b-0'} ${terminado ? 'opacity-40' : ''}`}
     >
       <div className="w-14 flex-none">
         <p className="text-[15px] font-semibold tabular-nums">{grupo.horaInicio}</p>
@@ -121,10 +123,7 @@ function ClaseDeLista({ clase, hora }: { clase: Clase; hora: string | null }) {
   const nombreDelProfesor = `${clase.profesor.nombre} ${clase.profesor.apellido}`;
 
   return (
-    <Link
-      to={`/clases/${clase.id}`}
-      className={`flex items-stretch gap-3 ${hora !== null && terminada(clase, hora) ? 'opacity-40' : ''}`}
-    >
+    <Link to={`/clases/${clase.id}`} className="flex items-stretch gap-3">
       <span
         aria-hidden="true"
         className={`w-[3px] flex-none rounded-full ${cancelada ? 'bg-borde-fuerte' : ''}`}

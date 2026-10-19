@@ -103,6 +103,31 @@ describe('/agenda', () => {
     expect(renglones()).toEqual([G1, 'Ahora', `${G2} en curso`, G3]);
   });
 
+  it('sin fecha en la dirección, hoy muestra la línea igual que con fecha', async () => {
+    vi.setSystemTime(new Date('2026-03-10T22:20:00Z'));
+    agendaQueDevuelve(CLASES_DEL_10);
+    renderizarEn('/agenda');
+
+    await screen.findByRole('list', { name: 'Clases del día' });
+    expect(renglones()).toEqual([G1, 'Ahora', `${G2} en curso`, G3]);
+  });
+
+  it('sin fecha, al pasar la medianoche la agenda pide el día nuevo', async () => {
+    // 23:59:30 del 10 en el estudio.
+    vi.setSystemTime(new Date('2026-03-11T02:59:30Z'));
+    const pedidos = agendaQueDevuelve(CLASES_DEL_10);
+    renderizarEn('/agenda');
+
+    await screen.findByRole('list', { name: 'Clases del día' });
+    expect(pedidos).toEqual(['']);
+
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+
+    await vi.waitFor(() => expect(pedidos).toEqual(['', '']));
+  });
+
   it.each([
     ['10:00', '2026-03-10T13:00:00Z', ['Ahora', G1, G2, G3]],
     ['21:30, con la cancelada en horario', '2026-03-11T00:30:00Z', [G1, G2, 'Ahora', G3]],
