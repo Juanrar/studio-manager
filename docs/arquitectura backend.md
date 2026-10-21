@@ -32,7 +32,9 @@ apps/api/
 │   │   │   ├── pagos.routes.ts
 │   │   │   ├── pagos.service.ts
 │   │   │   ├── pagos.repository.ts
-│   │   │   └── pagos.test.ts
+│   │   │   └── test/          # los tests del módulo, aparte del código
+│   │   │       ├── pagos.test.ts
+│   │   │       └── pagos.service.test.ts
 │   │   ├── horarios/          # lo que se repite cada semana
 │   │   ├── clases/            # la clase de una fecha
 │   │   ├── asistencias/
@@ -45,8 +47,9 @@ apps/api/
 │   ├── plugins/               # auth, manejo de errores, CORS
 │   ├── config.ts              # variables de entorno validadas con Zod
 │   ├── app.ts                 # crea la app y registra los módulos
-│   └── server.ts              # arranca el proceso
-├── test/                      # setup de tests de integración
+│   ├── server.ts              # arranca el proceso
+│   └── test/                  # tests de app.ts, tareas.ts y web.ts
+├── test/                      # setup y ayudantes de los tests de integración
 └── package.json
 ```
 

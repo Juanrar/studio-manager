@@ -24,7 +24,10 @@ apps/web/
 │   │   ├── alumnos/
 │   │   │   ├── api.ts         # hooks de TanStack Query para este módulo
 │   │   │   ├── AlumnosPage.tsx
-│   │   │   └── AlumnoForm.tsx
+│   │   │   ├── AlumnoForm.tsx
+│   │   │   └── test/          # los tests de la feature, aparte del código
+│   │   │       ├── alumnos.test.tsx
+│   │   │       └── ficha.test.tsx
 │   │   └── ...
 │   ├── components/ui/         # componentes genéricos sin lógica de negocio
 │   ├── lib/

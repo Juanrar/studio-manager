@@ -86,12 +86,13 @@ Antes de escribir tests nuevos, mirá estos. Son el modelo a seguir; si un test 
 
 | Tipo | Archivo | Qué muestra |
 |---|---|---|
-| Integración HTTP | `apps/api/src/modules/auth/auth.test.ts` | App completa con `crearAppDeTest()`, reloj fijo, login con `loguear()`, aserciones sobre la respuesta completa |
-| Service con base real | `apps/api/src/modules/usuarios/usuarios.service.test.ts` | Llamar al service directo y verificar lo persistido |
-| Unitario puro | `apps/api/src/lib/dinero.test.ts` | Funciones sin dependencias |
+| Integración HTTP | `apps/api/src/modules/auth/test/auth.test.ts` | App completa con `crearAppDeTest()`, reloj fijo, login con `loguear()`, aserciones sobre la respuesta completa |
+| Service con base real | `apps/api/src/modules/usuarios/test/usuarios.service.test.ts` | Llamar al service directo y verificar lo persistido |
+| Unitario puro | `apps/api/src/lib/test/dinero.test.ts` | Funciones sin dependencias |
 
 Reglas que siguen:
 
+- Los tests no van al lado del código: cada carpeta con tests tiene su carpeta `test/`. Ejemplos: `modules/pagos/test/pagos.test.ts`, `features/agenda/test/agenda.test.tsx`, `lib/test/dinero.test.ts`. Los tests de `app.ts`, `tareas.ts` y `web.ts` van en `apps/api/src/test/`. No hay que confundirla con `apps/api/test/` ni con `apps/web/test/`, que tienen los ayudantes compartidos.
 - La mayoría de los tests son de integración, con `app.inject()` contra el Postgres de test.
 - Nunca `new Date()` en un test: la app se crea con `reloj: relojFijo(...)` (ver `apps/api/test/app.ts`).
 - Cada test tiene una razón escrita en la tabla de tests de su feature: qué cambio de código lo rompería.
@@ -124,7 +125,7 @@ Los tests de integración necesitan Docker corriendo.
 - **Node 22.12 no ejecuta `.ts` sin flag.** Los scripts usan `tsx`.
 - **Drizzle envuelve los errores del driver** en `cause`. Para detectar violaciones de `unique` usá `esViolacionUnica()` de `lib/postgres.ts`.
 - **Un test que adelanta el reloj más de 7 días** tiene que volver a loguearse con la app nueva: la sesión vence a los 7 días.
-- **Para probar un bloqueo `for update`** sin depender de la suerte: abrir una transacción que tome el bloqueo y, adentro, otra con `set local lock_timeout = '50ms'` que tiene que fallar con código `55P03`. Ver `apps/api/src/modules/pagos/pagos.service.test.ts`.
+- **Para probar un bloqueo `for update`** sin depender de la suerte: abrir una transacción que tome el bloqueo y, adentro, otra con `set local lock_timeout = '50ms'` que tiene que fallar con código `55P03`. Ver `apps/api/src/modules/pagos/test/pagos.service.test.ts`.
 - **`localhost` en Windows resuelve a `::1`** y la API escucha en IPv4: el proxy de Vite apunta a `127.0.0.1:3000`.
 - **Vite escucha solo en `[::1]:5173`.** Un `curl` a `127.0.0.1:5173` queda colgado; usá `localhost:5173`.
 - **Cortar `pnpm dev` desde una tarea en segundo plano** deja vivos la API y Vite en Windows. Buscá los PID con `netstat -ano` en los puertos 3000 y 5173 y cerralos.
