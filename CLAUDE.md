@@ -161,6 +161,9 @@ Los tests de integración necesitan Docker corriendo.
 - **Ver la web sin la base de desarrollo:** un script de Playwright fuera del repo puede simular la API con `page.route('**/api/**', ...)`, respondiendo `/api/auth/yo` con un admin. Sirve para capturas de una pantalla contra `pnpm dev:web`.
 - **La conversación del asistente** vive en `ProveedorDeConversacion`, montado dentro de `RequiereSesion` con la clave del usuario: navegar no la borra, recargar o cerrar sesión sí.
 - **Tests web de la agenda:** la agenda decide si el día es hoy con el reloj del navegador y se renueva cada minuto con `useAhora` (`setInterval`). Los tests fijan `vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] })` y avanzan con `act(() => vi.advanceTimersByTime(60_000))`. Para que el día que se mira no sea hoy, el reloj va en otro día.
+- **`Ventana` de `components/ui`** es el contenedor de la ficha del alumno: `role="dialog"`, tapa toda la pantalla (también el menú lateral) y cierra con el botón, Escape o un clic que empieza y termina en el fondo. Un `Dialogo` abierto adentro no la cierra. En un test se busca con `getByRole('dialog', { name: 'Ficha de ...' })`, y el e2e tiene que cerrarla antes de ir a otra pantalla.
+- **Una lista que se reemplaza entera** (las clases del mes en el resumen) no lleva una clave que se pueda repetir, como la fecha: con dos filas de la misma clave React deja una fila vieja al cambiar los datos. Se le pone `key` al contenedor para que se remonte.
+- **jsdom descarta un estilo inválido** (`height: NaNpx`): un test que busca `NaN` en el HTML no lo ve. Hay que afirmar el valor del estilo.
 - **Si el puerto 5173 está ocupado**, `pnpm dev:web` arranca en 5174 y lo dice en su salida. Un `curl` a `localhost:5173` responde igual, porque contesta el otro proceso: las capturas van al puerto que imprimió Vite.
 
 ## Estilo de escritura

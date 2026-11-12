@@ -1,6 +1,6 @@
 # Resumen del alumno en una ventana
 
-**Estado:** pendiente  
+**Estado:** lista  
 **Depende de:** ficha-del-alumno, clases-anotadas-en-la-actividad  
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan; al tocar un alumno en el listado se abre una ventana ancha encima de la lista, con la pestaña Resumen primero: contacto, pack actual, indicadores de actividad, los profesores con los que toma clases y un gráfico de los últimos 12 meses con lo que compró y las clases que tomó.
 
@@ -276,7 +276,7 @@ export function Ventana(props: { etiqueta: string; alCerrar: () => void; encabez
 ```
 
 - `role="dialog"`, `aria-modal="true"`, `aria-label={etiqueta}`. Fondo `fixed inset-0 z-20 bg-black/60`, caja `max-w-5xl` con `max-h-full`, el encabezado fijo y el contenido con scroll propio. Las clases, como en `VarianteC` del prototipo.
-- El fondo cierra solo si `evento.target === evento.currentTarget`: un `Dialogo` abierto adentro es hijo en React y su clic sube hasta acá.
+- El fondo cierra solo si el clic empezó y terminó en el fondo (`mousedown` en el fondo y `evento.target === evento.currentTarget`): un `Dialogo` abierto adentro es hijo en React y su clic sube hasta acá, y soltar afuera una selección de texto no tiene que cerrar la ficha.
 - Escape cierra solo si la ventana es el único `[role="dialog"]` del documento.
 - En `FichaAlumnoPage`, `Ventana` reemplaza a `PanelLateral` en los dos lugares. El encabezado lleva avatar, nombre, insignias (suma `En el estudio desde {formatearFecha(alta)}`) y "Registrar pago". Las pestañas no cambian en esta tarea.
 - `PanelLateral` se borra de `components/ui` si no lo usa nadie más (hoy solo la ficha).
@@ -343,10 +343,10 @@ Textos fijos: "Clases tomadas" con la nota "desde el alta"; "Por semana" con "ú
 
 ### Tarea 6: cierre
 
-- [ ] `pnpm test`, `pnpm typecheck` y `pnpm e2e`.
-- [ ] Mirar en Chromium a 1280 y 1024 px (ver "Verificación final"). A 1024 px las tres columnas de arriba tienen que seguir entrando o pasar a una debajo de otra; anotar en la bitácora lo que quede afuera.
-- [ ] Actualizar `docs/arquitectura frontend.md` si nombra el panel lateral de la ficha.
-- [ ] Pasar la feature a `lista` en el índice y sumar la línea de la bitácora.
+- [x] `pnpm test`, `pnpm typecheck` y `pnpm e2e`.
+- [x] Mirar en Chromium a 1280 y 1024 px (ver "Verificación final"). A 1024 px las tres columnas de arriba tienen que seguir entrando o pasar a una debajo de otra; anotar en la bitácora lo que quede afuera.
+- [x] Actualizar `docs/arquitectura frontend.md` si nombra el panel lateral de la ficha.
+- [x] Pasar la feature a `lista` en el índice y sumar la línea de la bitácora.
 
 ## Verificación final
 
