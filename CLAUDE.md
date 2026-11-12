@@ -36,6 +36,7 @@ Reglas:
 - Un checkbox se marca solo después de correr el comando y ver que pasa. Nunca por adelantado.
 - Si un test no pasa, no sigas a la tarea siguiente.
 - Si el plan de la feature está mal o no compila, corregí el archivo de la feature y dejá escrito por qué. El plan no es sagrado; los tests sí.
+- Las features se ejecutan siempre con un subagente por tarea y una revisión después de cada una, para no llenar el contexto de la sesión principal (pedido del estudio, 2026-11-11).
 - Un commit por tarea, con mensaje en español y en modo `tipo(alcance): descripción`, por ejemplo `feat(pagos): registrar la compra de un pack`.
 
 ## Cómo cerrar una feature
