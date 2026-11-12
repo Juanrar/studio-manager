@@ -4,9 +4,7 @@ import { MESES_SIN_COMPRAR, type EventoDeAlumno, type FichaDeAlumno, type MedioP
 import {
   Aviso,
   Avatar,
-  Boton,
   Cargando,
-  Dialogo,
   Icono,
   Insignia,
   Pestanas,
@@ -17,9 +15,9 @@ import {
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearDiaYMes, formatearFecha, formatearMes, formatearPesos } from '../../lib/formato.ts';
 import { PagosDelAlumno, RegistrarPago } from '../pagos/PagosDelAlumno.tsx';
-import { AlumnoForm } from './AlumnoForm.tsx';
-import { useActividadDeAlumno, useActualizarAlumno, useFichaDeAlumno } from './api.ts';
-import { ClasesRestantes, EstadoDelAlumno } from './EstadoDelPack.tsx';
+import { DatosDelAlumno } from './DatosDelAlumno.tsx';
+import { useActividadDeAlumno, useFichaDeAlumno } from './api.ts';
+import { EstadoDelAlumno } from './EstadoDelPack.tsx';
 import { ResumenDelAlumno } from './ResumenDelAlumno.tsx';
 
 type IdPestana = 'resumen' | 'actividad' | 'datos' | 'pagos';
@@ -77,9 +75,9 @@ function Ficha({ datos, alCerrar }: { datos: FichaDeAlumno; alCerrar: () => void
             <ResumenDelAlumno datos={datos} />
           </div>
           {pestana !== 'resumen' && (
-            <div className="absolute inset-0 overflow-auto">
+            <div role="group" aria-label={PESTANAS.find((p) => p.id === pestana)?.texto} className="absolute inset-0 overflow-auto">
               {pestana === 'actividad' && <Actividad alumnoId={datos.id} />}
-              {pestana === 'datos' && <Datos datos={datos} />}
+              {pestana === 'datos' && <DatosDelAlumno datos={datos} />}
               {pestana === 'pagos' && (
                 <div className="p-4">
                   <PagosDelAlumno alumnoId={datos.id} />
@@ -223,61 +221,4 @@ function Hecho({ hecho }: { hecho: EventoDeAlumno }) {
         </>
       );
   }
-}
-
-function Datos({ datos }: { datos: FichaDeAlumno }) {
-  const actualizar = useActualizarAlumno(datos.id);
-  const [editando, setEditando] = useState(false);
-  const pago = datos.pagoActual;
-
-  const campos: [NombreIcono, string, ReactNode][] = [
-    ['documento', 'DNI', datos.dni],
-    ['telefono', 'Teléfono', datos.telefono],
-    ['correo', 'Email', datos.email],
-    ['torta', 'Fecha de nacimiento', datos.fechaNacimiento && formatearFecha(datos.fechaNacimiento)],
-    ['botiquin', 'Contacto de emergencia', datos.contactoEmergencia],
-    ['notas', 'Notas', datos.notas],
-    ['calendarioMas', 'Alta', formatearFecha(datos.alta)],
-    ['packs', 'Pack actual', pago?.pack],
-    ['pila', 'Clases restantes', pago && <ClasesRestantes pago={pago} />],
-    ['calendario', 'Vence', pago && formatearFecha(pago.venceEl)],
-  ];
-
-  return (
-    <div className="flex flex-col gap-3 p-4">
-      <div className="flex justify-end gap-2">
-        <Boton variante="secundario" onClick={() => setEditando(true)}>
-          Editar
-        </Boton>
-      </div>
-
-      {actualizar.isError && <Aviso>{mensajeDeError(actualizar.error)}</Aviso>}
-
-      <dl>
-        {campos.map(([icono, etiqueta, valor]) => (
-          <div
-            key={etiqueta}
-            className="grid min-h-8 grid-cols-[10rem_minmax(0,1fr)] items-center gap-3 rounded px-2 hover:bg-elevado sm:grid-cols-[12rem_minmax(0,1fr)]"
-          >
-            <dt className="flex items-center gap-1.5 text-apagado">
-              <Icono nombre={icono} className="size-3.5" />
-              {etiqueta}
-            </dt>
-            <dd className="py-1.5 break-words">{valor ?? <span className="text-apagado">Vacío</span>}</dd>
-          </div>
-        ))}
-      </dl>
-
-      <Dialogo titulo="Editar alumno" abierto={editando} alCerrar={() => setEditando(false)}>
-        <AlumnoForm
-          inicial={datos}
-          alGuardar={async (cambios) => {
-            await actualizar.mutateAsync(cambios);
-            setEditando(false);
-          }}
-          alCancelar={() => setEditando(false)}
-        />
-      </Dialogo>
-    </div>
-  );
 }

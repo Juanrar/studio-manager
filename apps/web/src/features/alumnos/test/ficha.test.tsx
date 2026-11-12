@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { EventoDeAlumno, FichaDeAlumno, Pago } from '@studio/shared';
 import { unAlumnoEnListado, unaFichaDeAlumno, unListadoDeAlumnos, unPack, unPago, unResumenDeAlumno } from '../../../../test/datos.ts';
 import { RECEPCION, conSesion, renderizarEn } from '../../../../test/render.tsx';
@@ -147,36 +147,108 @@ describe('/alumnos/:id', () => {
     expect(within(ficha).getByRole('button', { name: 'Registrar pago' })).toBeTruthy();
   });
 
-  it('la pestaña Datos muestra los datos, el pack que está usando y "Vacío" en lo que falta', async () => {
-    const { usuario } = fichaDeMartina({
-      ficha: {
-        dni: '38555666',
-        telefono: '11 5555-0000',
-        email: null,
-        fechaNacimiento: '1998-05-04',
-        contactoEmergencia: null,
-        notas: 'Rodilla operada',
-        alta: '2025-03-10',
-        estadoPack: 'vigente',
-        pagoActual: { pack: 'Pack x8', cantidadClases: 8, clasesRestantes: 6, venceEl: '2026-04-01' },
-      },
+  describe('la pestaña Datos', () => {
+    const DATOS = {
+      dni: '38555666',
+      telefono: '11 5555-0000',
+      email: null,
+      fechaNacimiento: '1998-05-04',
+      contactoEmergencia: null,
+      notas: 'Rodilla operada',
+      alta: '2025-03-10',
+      estadoPack: 'vigente',
+      pagoActual: { pack: 'Pack x8', cantidadClases: 8, clasesRestantes: 6, venceEl: '2026-04-01' },
+    } satisfies Partial<FichaDeAlumno>;
+
+    async function abrirDatos(ficha: Partial<FichaDeAlumno>) {
+      const { usuario } = fichaDeMartina({ ficha });
+      const ventana = await laFicha();
+      await usuario.click(within(ventana).getByRole('tab', { name: 'Datos' }));
+      // El Resumen sigue montado debajo (fija el tamaño de la ventana): se busca solo en el grupo de Datos.
+      return { usuario, panel: within(within(ventana).getByRole('tabpanel', { name: 'Datos' })).getByRole('group', { name: 'Datos' }) };
+    }
+
+    afterEach(() => vi.useRealTimers());
+
+    it('muestra la identidad con la edad y "Vacío" en lo que falta, sin repetir el pack', async () => {
+      // El día del cumpleaños todavía no llegó: 27 años, no 28.
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 4, 3, 12));
+      const { panel } = await abrirDatos(DATOS);
+
+      expect(camposDe(panel)).toEqual([
+        ['DNI', '38555666'],
+        ['Nacimiento', '04/05/1998 · 27 años'],
+        ['Alta', '10/03/2025'],
+      ]);
+      expect(within(panel).queryByText('Pack x8')).toBeNull();
     });
-    const ficha = await laFicha();
 
-    await usuario.click(within(ficha).getByRole('tab', { name: 'Datos' }));
+    it('muestra el teléfono y ofrece copiar el email solo si está cargado', async () => {
+      const sinEmail = await abrirDatos(DATOS);
 
-    expect(camposDe(within(ficha).getByRole('tabpanel', { name: 'Datos' }))).toEqual([
-      ['DNI', '38555666'],
-      ['Teléfono', '11 5555-0000'],
-      ['Email', 'Vacío'],
-      ['Fecha de nacimiento', '04/05/1998'],
-      ['Contacto de emergencia', 'Vacío'],
-      ['Notas', 'Rodilla operada'],
-      ['Alta', '10/03/2025'],
-      ['Pack actual', 'Pack x8'],
-      ['Clases restantes', '6 de 8'],
-      ['Vence', '01/04/2026'],
-    ]);
+      expect(within(sinEmail.panel).getByText('11 5555-0000')).toBeInTheDocument();
+      expect(within(sinEmail.panel).queryByRole('button', { name: 'Copiar' })).toBeNull();
+    });
+
+    it('"WhatsApp" abre el chat con el número completo, en otra pestaña, y no aparece si el teléfono no sirve', async () => {
+      const conTelefono = await abrirDatos(DATOS);
+      const enlace = within(conTelefono.panel).getByRole('link', { name: 'WhatsApp' });
+      expect(enlace).toHaveAttribute('href', 'https://wa.me/5491155550000');
+      expect(enlace).toHaveAttribute('target', '_blank');
+      expect(enlace).toHaveAttribute('rel', 'noopener noreferrer');
+    });
+
+    it('con un teléfono que WhatsApp no puede abrir, el botón está desactivado y dice por qué', async () => {
+      const { panel } = await abrirDatos({ ...DATOS, telefono: '5555-0000' });
+
+      expect(within(panel).getByText('5555-0000')).toBeInTheDocument();
+      expect(within(panel).queryByRole('link', { name: 'WhatsApp' })).toBeNull();
+      const boton = within(panel).getByRole('button', { name: 'WhatsApp' });
+      expect(boton).toBeDisabled();
+      expect(boton).toHaveAttribute('title', 'Falta el código de área en el teléfono');
+    });
+
+    it('sin teléfono no hay botón de WhatsApp', async () => {
+      const { panel } = await abrirDatos({ ...DATOS, telefono: null });
+
+      expect(within(panel).queryByRole('button', { name: 'WhatsApp' })).toBeNull();
+      expect(within(panel).queryByRole('link', { name: 'WhatsApp' })).toBeNull();
+    });
+
+    it('"Copiar" manda el email al portapapeles y avisa que lo copió', async () => {
+      const { usuario, panel } = await abrirDatos({ ...DATOS, email: 'martina@correo.com' });
+
+      await usuario.click(within(panel).getByRole('button', { name: 'Copiar' }));
+
+      expect(await navigator.clipboard.readText()).toBe('martina@correo.com');
+      expect(within(panel).getByRole('button', { name: 'Copiado' })).toBeInTheDocument();
+    });
+
+    it('destaca el contacto de emergencia y muestra las notas', async () => {
+      const { panel } = await abrirDatos({ ...DATOS, contactoEmergencia: 'Ana, mamá, 11 4444-1111' });
+
+      expect(within(panel).getByRole('region', { name: 'En caso de emergencia' })).toHaveTextContent('Ana, mamá, 11 4444-1111');
+      expect(within(panel).getByRole('region', { name: 'Notas' })).toHaveTextContent('Rodilla operada');
+    });
+
+    it('avisa cuando no hay contacto de emergencia ni notas', async () => {
+      const { panel } = await abrirDatos({ ...DATOS, contactoEmergencia: null, notas: null });
+
+      expect(within(panel).getByRole('region', { name: 'En caso de emergencia' })).toHaveTextContent(
+        'No cargó un contacto de emergencia.',
+      );
+      expect(within(panel).getByRole('region', { name: 'Notas' })).toHaveTextContent('Sin notas.');
+    });
+
+    it('"Editar" abre el formulario con todos los datos del alumno', async () => {
+      const { usuario, panel } = await abrirDatos(DATOS);
+
+      await usuario.click(within(panel).getByRole('button', { name: 'Editar' }));
+
+      const dialogo = screen.getByRole('dialog', { name: 'Editar alumno' });
+      expect(within(dialogo).getByLabelText('DNI')).toHaveValue('38555666');
+    });
   });
 
   it('registrar un pago manda pack y medio, y actualiza la ficha y la lista', async () => {

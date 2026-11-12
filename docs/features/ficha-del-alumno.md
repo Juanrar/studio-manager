@@ -39,7 +39,7 @@ Reglas:
 - **Encabezado:** inicial, nombre, estado del pack (o "Dado de baja") y el pack que está usando.
 - **"Registrar pago" va en la barra del panel**, como en la maqueta: se cobra desde cualquier pestaña.
 - **Actividad**, la pestaña que se abre primero: los hechos agrupados por mes, con un ícono por tipo y el día a la derecha.
-- **Datos:** DNI, teléfono, email, nacimiento, contacto de emergencia, notas, alta, pack actual, clases restantes y vencimiento, cada uno con su ícono. "Editar" y "Dar de baja" / "Reactivar" pasan a esta pestaña.
+- **Datos** (rediseñada después, ver la bitácora del índice): en dos columnas. A la izquierda, Contacto con el botón "Editar": el teléfono con un botón "WhatsApp" (enlace `wa.me`, que abre la app o WhatsApp Web; `lib/whatsapp.ts` lo arma con el código de país argentino 54 9 y si el número no tiene 10 dígitos el botón queda desactivado, con el aviso "Falta el código de área en el teléfono") y el email con un botón "Copiar" que lo manda al portapapeles. Abajo, Identidad (DNI, nacimiento con la edad, alta). A la derecha, el contacto de emergencia en un recuadro ámbar y las notas. El pack, las clases restantes y el vencimiento ya no están: se ven en el encabezado y en el Resumen. No hay botón de llamar. Un ícono nuevo, `copiar` y `whatsapp`, se copió de Tabler a `Icono.tsx`.
 - **Pagos:** la tabla de pagos con "Anular", con íconos en los encabezados.
 - **Registrar o anular un pago recarga también las consultas de alumnos:** cambian el estado del pack en la ficha y en la lista de atrás.
 
@@ -57,7 +57,13 @@ Reglas:
 | La actividad junta las asistencias hasta hoy con quien dio la clase, los pagos (también los anulados) y el alta, del más nuevo al más viejo | Integración HTTP | Si se muestra al titular en lugar del suplente, o una clase anotada para la semana que viene, la historia cuenta algo que no pasó |
 | La ficha y la actividad de un alumno que no existe responden 404 | Integración HTTP | Si la actividad no busca al alumno, responde una lista vacía o un 500 |
 | El encabezado muestra el estado y el pack, y la actividad se agrupa por mes con el año | Web | Si se agrupa solo por mes, marzo de este año se mezcla con el del anterior |
-| La pestaña Datos muestra los datos, el pack que está usando y "Vacío" en lo que falta | Web | Si Datos toma el vencimiento de otro pago o esconde un campo vacío, recepción no ve qué falta cargar |
+| La pestaña Datos muestra DNI, nacimiento con la edad y alta, "Vacío" en lo que falta, y no repite el pack | Web | Si la edad se calcula sin restar el cumpleaños que todavía no llegó, o se esconde un campo vacío, recepción ve un dato falso o no sabe qué falta cargar |
+| Datos muestra el teléfono y solo ofrece "Copiar" si hay email | Web | Si el botón aparece sin email, copia "null" al portapapeles |
+| "Copiar" manda el email al portapapeles y avisa "Copiado" | Web | Si copia otro dato o no avisa, recepción pega algo equivocado sin saberlo |
+| "WhatsApp" abre `wa.me` con el número completo en otra pestaña; con un teléfono que no sirve queda desactivado y dice por qué, y sin teléfono no aparece | Web | Si el enlace queda sin `noopener`, la pestaña de WhatsApp controla la ficha; si aparece con un número corto, abre un chat con un desconocido |
+| `enlaceDeWhatsapp` arma 54 9 + 10 dígitos desde formatos como `11 5555-0000`, `(011) 5555-0000` o `+54 11 5555-0000`, y devuelve `null` si no puede | Unitario | Si no saca el 0 inicial o no agrega el 9, WhatsApp no encuentra el número |
+| Datos destaca el contacto de emergencia y las notas, y avisa cuando faltan | Web | Si un contacto de emergencia vacío no se avisa, recepción no se entera de que falta en una emergencia |
+| "Editar" en Datos abre el formulario con todos los datos | Web | Si el botón se pierde en el rediseño, el alumno no se puede editar |
 | Registrar un pago manda pack y medio, y actualiza la ficha y la lista | Web (reemplaza al de registrar) | Si después de cobrar no se recargan las consultas de alumnos, la ficha y la lista siguen diciendo "Sin pack" |
 | Los tests de pagos y del panel pasan por las pestañas nuevas | Web (adaptados) | Si la tabla de pagos o el cierre del panel quedan inaccesibles, recepción no puede anular ni volver a la lista |
 | Recorrido de punta a punta | E2E (adaptado) | Si el cobro desde la ficha deja de funcionar con las pestañas, recepción no puede cobrar |
