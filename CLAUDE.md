@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Instrucciones para cualquier agente que trabaje en este repositorio. Leelo entero antes de tocar código.
+Instrucciones para cualquier agente que trabaje en este repositorio. Leé este archivo y, antes de tocar código, los de `docs/entorno/` que corresponden a tu tarea (ver "Antes de tocar").
 
 ## Qué es esto
 
@@ -16,7 +16,7 @@ Monorepo con pnpm: `apps/api` (Fastify + TypeScript), `apps/web` (React + Vite) 
 4. Elegí **una sola feature** del índice: la de estado `pendiente` con el número más bajo cuyas dependencias estén `listas`.
 5. Marcala como `en curso` en el índice antes de empezar.
 
-No arranques varias features a la vez. No declares el proyecto terminado: el índice dice qué falta.
+Trabajá una feature a la vez. El índice dice qué falta; el proyecto no se da por terminado.
 
 ## Cómo trabajar una feature
 
@@ -28,16 +28,17 @@ Por cada paso:
 2. Corré el test y verificá que falla, por el motivo correcto.
 3. Escribí la implementación mínima.
 4. Corré el test y verificá que pasa.
-5. Commiteá.
-6. Marcá el checkbox del paso en el archivo de la feature.
+5. Marcá el checkbox del paso en el archivo de la feature.
+
+Al terminar todos los pasos de la tarea, un solo commit con el código y los checkboxes.
 
 Reglas:
 
-- Un checkbox se marca solo después de correr el comando y ver que pasa. Nunca por adelantado.
-- Si un test no pasa, no sigas a la tarea siguiente.
+- Un checkbox se marca solo después de correr el comando y ver que pasa.
+- Con un test en rojo, la tarea siguiente espera.
 - Si el plan de la feature está mal o no compila, corregí el archivo de la feature y dejá escrito por qué. El plan no es sagrado; los tests sí.
 - Las features se ejecutan siempre con un subagente por tarea y una revisión después de cada una, para no llenar el contexto de la sesión principal (pedido del estudio, 2026-11-11).
-- Un commit por tarea, con mensaje en español y en modo `tipo(alcance): descripción`, por ejemplo `feat(pagos): registrar la compra de un pack`.
+- El commit va en español con el modo `tipo(alcance): descripción`, por ejemplo `feat(pagos): registrar la compra de un pack`.
 
 ## Cómo cerrar una feature
 
@@ -45,15 +46,16 @@ Reglas:
 2. Corré `pnpm test` y `pnpm typecheck` en todo el repositorio.
 3. Pasá la feature a `lista` en el índice.
 4. Agregá una línea a la bitácora del índice: fecha, feature y qué pasó, incluido lo que quedó afuera o cualquier sorpresa.
-5. Si aprendiste algo que sirve para las próximas sesiones (un comando que falla siempre, un patrón del repositorio), agregalo a este archivo.
+5. Si aprendiste algo que sirve para las próximas sesiones (un comando que falla siempre, un patrón del repositorio), agregalo al archivo de `docs/entorno/` de ese tema. Si ya hay una nota sobre lo mismo, reemplazala. Un tema nuevo es un archivo nuevo, con su línea en "Antes de tocar".
 
 ## Dónde va la documentación
 
 - **Features**: `docs/features/<nombre-de-la-feature>.md`. El nombre describe la feature, sin fecha ni número: `pagos.md`, `asistencias.md`. Cada archivo contiene el objetivo, la arquitectura, las restricciones, las tareas con sus pasos y la verificación final.
 - **Progreso**: `docs/features/index.md`. Estados, dependencias, bitácora y decisiones.
 - **Diseño**: `docs/arquitectura general.md`, `docs/arquitectura backend.md`, `docs/arquitectura frontend.md`, `docs/estructura de base de datos.md`.
+- **Trampas del entorno**: `docs/entorno/<tema>.md`.
 
-No crees carpetas nuevas de planes ni de specs. Todo lo que sea plan o spec de una feature va en `docs/features/`.
+Todo plan o spec de una feature va en `docs/features/`.
 
 ## Reglas del dominio
 
@@ -69,19 +71,19 @@ Estas reglas se rompen fácil y cuestan caro. Están explicadas en [docs/estruct
 
 ## Reglas del código
 
+- Código, commits y documentación en español, con nombres de dominio en español (`alumno`, `pago`, `asistencia`).
 - TypeScript `strict`, ESM, Node 22.
 - Capas en el backend: `routes` → `service` → `repository` → `db`. Las rutas no tienen reglas de negocio ni SQL. Los services no conocen HTTP.
 - Un módulo usa el **service** de otro módulo, nunca su repository.
 - Las operaciones que escriben en más de una tabla van en una transacción abierta en el service.
 - Los errores de negocio se lanzan con las clases de `lib/errores.ts`. No se devuelve `null` para indicar una falla.
 - La validación de entrada usa los esquemas Zod de `packages/shared`, los mismos que usa el frontend.
-- Nunca se mockea la base de datos. Los tests de integración corren contra un Postgres real con Testcontainers.
 - Nada de secretos en el repositorio. `.env` está ignorado; se versiona `.env.example`.
 - En la web, los colores salen de las variables de `apps/web/src/index.css` (`bg-panel`, `text-tenue`, `border-borde`). La paleta de Tailwind se usa solo para estados: verde, rojo y ámbar.
 - Cada pantalla usa `Pagina` de `components/ui`, y los botones de una fila van en `CeldaDeAcciones`. Un `<td>` con `display: flex` descuadra los bordes de la tabla.
 - Un ícono nuevo se agrega copiando su trazo de Tabler en `components/ui/Icono.tsx`. No se instala `@tabler/icons-react`: su índice importa miles de archivos y vuelve lentos los tests.
 
-## Tests de referencia
+## Tests
 
 Antes de escribir tests nuevos, mirá estos. Son el modelo a seguir; si un test viejo no se parece, ganan estos.
 
@@ -91,81 +93,30 @@ Antes de escribir tests nuevos, mirá estos. Son el modelo a seguir; si un test 
 | Service con base real | `apps/api/src/modules/usuarios/test/usuarios.service.test.ts` | Llamar al service directo y verificar lo persistido |
 | Unitario puro | `apps/api/src/lib/test/dinero.test.ts` | Funciones sin dependencias |
 
-Reglas que siguen:
-
+- La mayoría de los tests son de integración, con `app.inject()` contra un Postgres real con Testcontainers. Nunca se mockea la base de datos. Necesitan Docker corriendo.
 - Los tests no van al lado del código: cada carpeta con tests tiene su carpeta `test/`. Ejemplos: `modules/pagos/test/pagos.test.ts`, `features/agenda/test/agenda.test.tsx`, `lib/test/dinero.test.ts`. Los tests de `app.ts`, `tareas.ts` y `web.ts` van en `apps/api/src/test/`. No hay que confundirla con `apps/api/test/` ni con `apps/web/test/`, que tienen los ayudantes compartidos.
-- La mayoría de los tests son de integración, con `app.inject()` contra el Postgres de test.
-- Nunca `new Date()` en un test: la app se crea con `reloj: relojFijo(...)` (ver `apps/api/test/app.ts`).
+- Para el tiempo, la app se crea con `reloj: relojFijo(...)` (ver `apps/api/test/app.ts`). Nunca `new Date()` en un test.
 - Cada test tiene una razón escrita en la tabla de tests de su feature: qué cambio de código lo rompería.
 - Aserciones completas con valores escritos a mano, no chequeos de un campo suelto.
 
 ## Comandos
 
-| Comando | Qué hace |
-|---|---|
-| `pnpm install` | Instala las dependencias del monorepo |
-| `pnpm dev` | Levanta Postgres, espera el healthcheck y arranca la API y el frontend juntos |
-| `pnpm db:up` / `pnpm db:down` | Levanta o apaga Postgres en el puerto 5433 |
-| `pnpm test` | Corre los tests de todos los paquetes |
-| `pnpm typecheck` | Verifica los tipos |
-| `pnpm dev:api` | Levanta la API en el puerto 3000 |
-| `pnpm dev:web` | Levanta el frontend en el puerto 5173, con proxy de `/api` a la API |
-| `pnpm build` | Compila el frontend en `apps/web/dist` |
-| `pnpm start` | Levanta la API; con `WEB_DIST=../web/dist` también sirve el frontend |
-| `pnpm e2e` | Prueba de punta a punta con Playwright: base limpia, build y recorrido en Chromium |
-| `pnpm --filter @studio/api db:generate` | Genera una migración desde `schema.ts` |
-| `pnpm --filter @studio/api db:migrate` | Aplica las migraciones |
-| `pnpm --filter @studio/api asistente:probar [n]` | Corre las frases de prueba del asistente contra Gemini real, o solo la frase `n`. Gasta cuota |
+Los scripts están en el `package.json` de la raíz y de cada paquete. Estos tienen una trampa:
 
-Los tests de integración necesitan Docker corriendo.
+- `pnpm dev` levanta Postgres (puerto 5433), la API (3000) y el frontend (5173), pero no aplica migraciones: en la base de desarrollo corré `pnpm --filter @studio/api db:migrate`.
+- `pnpm e2e` borra y recrea la base `studio_manager_e2e`, compila el frontend y no corre dentro de `pnpm test`.
+- `pnpm --filter @studio/api asistente:probar [n]` corre las frases de prueba contra Gemini real y gasta cuota.
+- `pnpm start` sirve también el frontend si `WEB_DIST=../web/dist`.
 
-## Cosas del entorno que ya se resolvieron
+## Antes de tocar
 
-- **pnpm 12 bloquea los scripts de instalación** de las dependencias. Se aprueban o rechazan en `allowBuilds` de `pnpm-workspace.yaml`. Hoy: `esbuild` sí; `cpu-features`, `ssh2` y `protobufjs` no (vienen con testcontainers y no hacen falta).
-- **Testcontainers en Windows:** `localhost` resuelve a `::1` y Docker Desktop publica solo en IPv4. `apps/api/test/global-setup.ts` define `TESTCONTAINERS_HOST_OVERRIDE=127.0.0.1`.
-- **Node 22.12 no ejecuta `.ts` sin flag.** Los scripts usan `tsx`.
-- **Drizzle envuelve los errores del driver** en `cause`. Para detectar violaciones de `unique` usá `esViolacionUnica()` de `lib/postgres.ts`.
-- **Un test que adelanta el reloj más de 7 días** tiene que volver a loguearse con la app nueva: la sesión vence a los 7 días.
-- **Para probar un bloqueo `for update`** sin depender de la suerte: abrir una transacción que tome el bloqueo y, adentro, otra con `set local lock_timeout = '50ms'` que tiene que fallar con código `55P03`. Ver `apps/api/src/modules/pagos/test/pagos.service.test.ts`.
-- **`localhost` en Windows resuelve a `::1`** y la API escucha en IPv4: el proxy de Vite apunta a `127.0.0.1:3000`.
-- **Vite escucha solo en `[::1]:5173`.** Un `curl` a `127.0.0.1:5173` queda colgado; usá `localhost:5173`.
-- **Cortar `pnpm dev` desde una tarea en segundo plano** deja vivos la API y Vite en Windows. Buscá los PID con `netstat -ano` en los puertos 3000 y 5173 y cerralos.
-- **Tests del frontend:** `apps/web/test/render.tsx` renderiza la app completa en una ruta con `renderizarEn()`, y `conSesion()` simula `GET /api/auth/yo`. MSW falla si llega un pedido que el test no previó. No necesitan Docker.
-- **Si la sesión se reinició, Docker Desktop puede estar apagado.** Los tests de la API fallan con `Could not find a working container runtime strategy`. Hay que abrir Docker Desktop y esperar a que `docker info` responda.
-- **Tests web que pasan por `/agenda`** sin probar la agenda: llamar a `conAgendaVacia()`, si no la agenda hace un pedido que MSW no esperaba.
-- **Tests web de tablas:** `celdasDe(fila)` de `apps/web/test/tabla.ts` devuelve el texto de cada celda sin lo que es `aria-hidden` (la inicial del avatar). El listado de alumnos se simula con `unListadoDeAlumnos` y `unAlumnoEnListado` de `test/datos.ts`.
-- **Tests web de la ficha del alumno:** la ficha pide `/api/alumnos/:id` (se simula con `unaFichaDeAlumno`) y `/api/alumnos/:id/resumen` (`unResumenDeAlumno`), porque Resumen es la pestaña que se abre primero. `/api/alumnos/:id/actividad` solo se pide al hacer clic en Actividad. La tabla de pagos está en la pestaña Pagos: hay que hacer clic en ella antes de buscar filas.
-- **El alta de un alumno usa el reloj de la app:** `crearAlumno(datos, ahora)`. En los tests, `crearAlumnoDeTest(datos, ahora)` usa `AHORA` si no se le pasa otro momento.
-- **Asistencias y suplencias en fechas pasadas:** el profesor tiene que tener un porcentaje vigente desde antes de esa fecha, si no la API responde 422. En los tests, `crearProfesorDeTest` lo pone desde `2026-01-01`.
-- **`pnpm e2e` no corre dentro de `pnpm test`:** necesita Docker, compila el frontend y usa la base `studio_manager_e2e` (se borra y se crea en cada corrida). Usa el reloj real: crea la clase para el día de hoy en Buenos Aires.
-- **Un solo Postgres por corrida de tests**, archivos en serie. Cada archivo llama a `base.limpiar()` en `beforeEach`.
-- **Drizzle escribe las columnas sin la tabla** cuando la consulta es de una sola tabla. En una subconsulta con `sql`, `${profesor.id}` sale como `"id"` y puede apuntar a la tabla de adentro. Para ver el SQL sin ejecutarlo: `.toSQL()`.
-- **Git Bash convierte en ruta de Windows** cualquier argumento que empieza con `/` (`/agenda` pasa a `C:/Program Files/Git/agenda`). Se evita con `MSYS_NO_PATHCONV=1`.
-- **`curl -d` en Git Bash manda mal las tildes** y la API responde "Request body size did not match Content-Length". Para cargar datos con acentos, usar un script de Node con `fetch`.
-- **Migraciones:** `pnpm --filter @studio/api db:generate --name <nombre>` la genera desde `schema.ts`. `pnpm dev` no la aplica: en la base de desarrollo hay que correr `pnpm --filter @studio/api db:migrate`. Una tabla nueva también va en `TABLAS` de `apps/api/test/db.ts`.
-- **Tareas que corren solas** (la baja automática): `programarTareas` de `src/tareas.ts`, llamada desde `server.ts` después de `listen`. Ahí Fastify ya no deja agregar hooks, así que devuelve una función para detenerlas. Los tests usan `buildApp` y no las arrancan.
-- **El e2e borra `studio_manager_e2e`** en cada corrida. Sirve para mirar la app con datos sin tocar la base de desarrollo: API con esa base en otro puerto y `WEB_DIST=../web/dist`. Un script de capturas que vive fuera del repo carga Playwright con `createRequire('<repo>/e2e/package.json')`.
-- **`pnpm e2e` usa el puerto fijo 3100** (`PUERTO_E2E` en `e2e/entorno.ts`). Si otro proceso lo ocupa, Playwright no levanta la API. Se cambia el número para esa corrida y se vuelve atrás con `git checkout -- e2e/entorno.ts`. No se cierra un proceso que no es de este proyecto.
-- **jsdom no calcula el diseño** ni evalúa media queries como `pointer-coarse`. La posición de una lista flotante o lo que se ve en una pantalla táctil se verifica en Chromium con un script de Playwright, como en la nota anterior.
-- **Tests web de la grilla:** la grilla calcula hoy y la hora actual en el navegador, así que los tests fijan el reloj con `vi.useFakeTimers({ toFake: ['Date'] })` y `vi.setSystemTime(...)`, y lo sueltan en `afterEach`. Para tocar un hueco se simula `getBoundingClientRect` del contenedor de las columnas (el padre de cada `group` de día) y se usa `usuario.pointer` con coordenadas. El arrastre real se prueba en el e2e.
-- **Tests web del `SelectorDeHora`:** el campo es un combobox (`getByRole('combobox', { name: 'Empieza' })`) y la lista se abre en un portal sobre `document.body`, así que `screen` la encuentra y `within(fila)` no.
-- **Las clases se crean por adelantado** con `generarClases(ej, hoy)` de `modules/clases/programacion.service.ts`. En los tests de la API, `crearHorarioDeTest` crea solo el horario: para tener sus clases se llama a `generarClases(db, hoy)`, y para una semana pasada, que el generador no crea, a `abrirClase(horarioId, fecha)`. `POST /api/horarios` sí las crea.
-- **Renombrar una tabla o una columna con Drizzle:** `db:generate` pregunta en la terminal si es un renombre, y un agente no puede contestar. La migración se escribe a mano (`db:generate --custom --name <nombre>`) y el snapshot se regenera desde `schema.ts` en una carpeta temporal: `pnpm exec drizzle-kit generate --dialect postgresql --schema ./src/db/schema.ts --out <carpeta> --casing snake_case`, copiando el `id` y el `prevId` del snapshot que creó `--custom`. Hay que renombrar también las claves foráneas, las secuencias y las claves primarias. Después `db:generate` tiene que decir que no hay cambios. Ejemplo: la migración `0003_renombrar_horario_y_clase`.
-- **Un worktree nuevo no tiene `apps/api/.env`** (git lo ignora): `pnpm e2e` falla en el seed con `.env: not found`. Se copia el `.env.example` de la raíz.
-- **`vitest run --reporter=json`** escribe `.vitest/json/output.json` dentro del paquete, que git no ignora. Se pasa `--outputFile` con una ruta fuera del repositorio.
-- **El asistente y Gemini:** los tests nunca llaman a Google. `crearAppDeTest` pasa `modelo: null`, y para probar el ciclo de herramientas se usa `crearModeloFalso(guion)` de `apps/api/test/modelo-falso.ts`, que guarda cada pedido en `modelo.pedidos`. Gemini responde 400 si una llamada a función vuelve sin su `thoughtSignature`: el historial es opaco y nunca se rearma. La clave va en `GEMINI_API_KEY` de `apps/api/.env`.
-- **Cuota de Gemini gratis:** `gemini-3.5-flash` permite 20 pedidos por día y cada consulta al asistente usa de 2 a 4. Los 503 por saturación son frecuentes en los dos modelos. Antes de correr `asistente:probar`, conviene probar una sola frase.
-- **Ver el asistente en Chromium:** API con la base del e2e en otro puerto, `WEB_DIST=../web/dist` y `NODE_ENV=development`. Con `production` la cookie de sesión es `secure` y el login por http no anda. Las variables del entorno ganan sobre `--env-file`, así que `GEMINI_MODELO=...` en la línea de comando elige el modelo.
-- **Cortar una tarea en segundo plano** que levantó la API con `tsx` deja vivo el `node.exe` del servidor. Antes de volver a levantarla, buscá el PID con `netstat -ano` en ese puerto y cerralo; si no, el pedido siguiente habla con el código viejo.
-- **PowerShell 5.1 parte los argumentos con comillas dobles** que van a un programa: `git commit -m` con un mensaje que tiene `"Hoy"` falla con `pathspec ... did not match`. Se commitea desde Bash con `git commit -F -` y un heredoc. Tampoco se usa `2>&1` con `pnpm` en PowerShell: el resultado sale como error aunque el comando pase.
-- **Ver la web sin la base de desarrollo:** un script de Playwright fuera del repo puede simular la API con `page.route('**/api/**', ...)`, respondiendo `/api/auth/yo` con un admin. Sirve para capturas de una pantalla contra `pnpm dev:web`.
-- **La conversación del asistente** vive en `ProveedorDeConversacion`, montado dentro de `RequiereSesion` con la clave del usuario: navegar no la borra, recargar o cerrar sesión sí.
-- **Tests web de la agenda:** la agenda decide si el día es hoy con el reloj del navegador y se renueva cada minuto con `useAhora` (`setInterval`). Los tests fijan `vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] })` y avanzan con `act(() => vi.advanceTimersByTime(60_000))`. Para que el día que se mira no sea hoy, el reloj va en otro día.
-- **`Ventana` de `components/ui`** es el contenedor de la ficha del alumno: `role="dialog"`, tapa toda la pantalla (también el menú lateral) y cierra con el botón, Escape o un clic que empieza y termina en el fondo. Un `Dialogo` abierto adentro no la cierra. En un test se busca con `getByRole('dialog', { name: 'Ficha de ...' })`, y el e2e tiene que cerrarla antes de ir a otra pantalla.
-- **Una lista que se reemplaza entera** (las clases del mes en el resumen) no lleva una clave que se pueda repetir, como la fecha: con dos filas de la misma clave React deja una fila vieja al cambiar los datos. Se le pone `key` al contenedor para que se remonte.
-- **jsdom descarta un estilo inválido** (`height: NaNpx`): un test que busca `NaN` en el HTML no lo ve. Hay que afirmar el valor del estilo.
-- **Si el puerto 5173 está ocupado**, `pnpm dev:web` arranca en 5174 y lo dice en su salida. Un `curl` a `localhost:5173` responde igual, porque contesta el otro proceso: las capturas van al puerto que imprimió Vite.
+Leé el archivo que corresponde. Cada uno junta las trampas ya resueltas de su tema.
 
-## Estilo de escritura
+- Una terminal de Windows (Git Bash, PowerShell, `localhost`, procesos o puertos colgados, worktrees): [docs/entorno/windows.md](docs/entorno/windows.md)
+- Un test de la API (base, reloj, datos de prueba, tareas programadas): [docs/entorno/tests-api.md](docs/entorno/tests-api.md)
+- El frontend o un test web (MSW, grilla, agenda, ficha del alumno, `Ventana`): [docs/entorno/web.md](docs/entorno/web.md)
+- `schema.ts`, una migración o una consulta de Drizzle: [docs/entorno/base-de-datos.md](docs/entorno/base-de-datos.md)
+- `pnpm e2e`, capturas o mirar la app en Chromium: [docs/entorno/e2e.md](docs/entorno/e2e.md)
+- El asistente o Gemini (modelo falso, cuota, conversación): [docs/entorno/asistente.md](docs/entorno/asistente.md)
 
-En el código, los commits y la documentación: español, directo, sin relleno. Nombres de dominio en español (`alumno`, `pago`, `asistencia`), no mezclados con inglés.
+Si los tests de la API fallan con `Could not find a working container runtime strategy`, Docker Desktop está apagado: abrilo y esperá a que `docker info` responda.
