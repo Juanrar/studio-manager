@@ -103,7 +103,7 @@ describe('/alumnos', () => {
 
     const ficha = await screen.findByRole('dialog', { name: 'Ficha de Martina García' });
     expect(within(ficha).getByRole('heading', { name: 'Martina García' })).toBeInTheDocument();
-    expect(await within(ficha).findByText('Clases tomadas')).toBeInTheDocument();
+    expect(await within(ficha).findByText('Clases tomadas', { selector: 'div' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/alumnos/10');
     expect(screen.getByRole('searchbox', { name: 'Buscar alumno' })).toHaveValue('garcia');
 

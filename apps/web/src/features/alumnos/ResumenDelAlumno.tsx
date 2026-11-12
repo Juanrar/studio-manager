@@ -5,6 +5,7 @@ import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFecha, formatearPesos, haceCuanto, nombreDelDia } from '../../lib/formato.ts';
 import { useResumenDeAlumno } from './api.ts';
 import { ClasesRestantes } from './EstadoDelPack.tsx';
+import { MesAMes } from './MesAMes.tsx';
 
 const SIN_DATO = '—';
 
@@ -42,6 +43,7 @@ export function ResumenDelAlumno({ datos }: { datos: FichaDeAlumno }) {
           <Profesores profesores={resumen.data.profesores} />
         </section>
       </div>
+      <MesAMes meses={resumen.data.meses} />
     </div>
   );
 }

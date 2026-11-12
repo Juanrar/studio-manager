@@ -115,6 +115,10 @@ Las propuso el agente y el estudio las confirmó el 2026-11-11.
 | El resumen de un alumno que no existe responde 404 | Integración HTTP | Si no se busca al alumno, responde un resumen vacío |
 | La ficha se abre en una ventana con Resumen primero y muestra indicadores, profesores y el mes actual | Web | Si la pestaña inicial vuelve a ser Actividad o el mes elegido no es el actual |
 | Tocar otro mes muestra sus compras y sus clases | Web | Si el detalle queda fijo en el mes actual |
+| Una compra repetida se escribe "2 × Clase suelta" en la barra y en el detalle | Web | Si el detalle o la barra muestran solo el nombre del pack, el mes parece tener una compra y no dos |
+| Un mes con dos compras distintas muestra la primera y "+1" en la barra, y las dos en el detalle | Web | Si la barra muestra todas las compras, el texto desborda el ancho de la barra |
+| Un mes sin clases muestra "—" en la barra y "No tomó clases este mes." | Web | Si se dibuja una tabla vacía o se deja el detalle del mes anterior |
+| Con todos los meses en cero, las barras no dan `NaN` | Web | Si la escala divide por cero, la altura de las barras es `NaN` |
 | Recepción no ve "Total pagado" | Web | Si el indicador se dibuja con `null`, muestra "$0" |
 | Escape y el clic afuera cierran la ventana y vuelven a `/alumnos` | Web | Si la ventana no cierra con el teclado, queda atrapado quien no usa el mouse |
 | Con "Registrar pago" abierto, Escape y el clic en el fondo del diálogo no cierran la ventana; el clic dentro de la ventana tampoco | Web | Si el fondo de la ventana cierra con cualquier clic que le sube, cerrar un diálogo cierra también la ficha y se pierde lo que se estaba mirando |
@@ -323,15 +327,15 @@ Textos fijos: "Clases tomadas" con la nota "desde el alta"; "Por semana" con "ú
 - Debajo de la barra: el mes en tres letras y la primera compra (`veces > 1` se escribe "2 × Clase suelta"); con más de una compra distinta, "+1"; sin compras, "—".
 - El detalle: título con `formatearMes`, una insignia violeta por compra, "N clases tomadas" (singular con 1), insignia ámbar "N sin usar" si hay vencidas, y la tabla Día / Clase / Profesor. Sin clases: "No tomó clases este mes."
 
-- [ ] **Paso 1: tests** en `resumen.test.tsx`:
+- [x] **Paso 1: tests** en `resumen.test.tsx`:
   - *Se abre con el mes actual:* el detalle dice "Marzo 2026", "Pack x8", "3 clases tomadas" y tiene tres filas; la primera es `['10/03', 'Jazz', 'Julia Paz']` (con `celdasDe`).
   - *Tocar otro mes muestra sus compras y sus clases:* clic en el botón "Enero 2026: 1 clase tomada"; el detalle pasa a "Enero 2026", "Pack x4", "1 clase tomada", "3 sin usar".
   - *Un mes con dos compras distintas:* con `compras: [{ pack: 'Pack x8', veces: 1 }, { pack: 'Clase suelta', veces: 1 }]`, la barra muestra "Pack x8" y "+1", y el detalle las dos insignias.
   - *Un mes sin nada:* clic en "Abril 2025: 0 clases tomadas" muestra "No tomó clases este mes.".
-- [ ] **Paso 2:** correr y ver que fallan porque no existe el botón del mes.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr todos los tests web y `pnpm typecheck`.
-- [ ] **Paso 5:** commit `feat(alumnos): compras y clases mes a mes en el resumen`.
+- [x] **Paso 2:** correr y ver que fallan porque no existe el botón del mes.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr todos los tests web y `pnpm typecheck`.
+- [x] **Paso 5:** commit `feat(alumnos): compras y clases mes a mes en el resumen`.
 
 ### Tarea 6: cierre
 

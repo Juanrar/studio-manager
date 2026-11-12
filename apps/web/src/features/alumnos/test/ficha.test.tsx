@@ -196,7 +196,7 @@ describe('/alumnos/:id', () => {
     await usuario.click(within(dialogo).getByRole('button', { name: 'Registrar' }));
 
     expect(await within(ficha).findByText('Vigente')).toBeInTheDocument();
-    expect(within(ficha).getByText('Pack x8')).toBeInTheDocument();
+    expect(within(within(ficha).getByRole('heading', { name: 'Martina García' }).parentElement!).getByText('Pack x8')).toBeInTheDocument();
     await waitFor(() => expect(celdasDe(screen.getByRole('row', { name: /García, Martina/ }))[1]).toBe('Vigente'));
     await usuario.click(within(ficha).getByRole('tab', { name: 'Pagos' }));
     expect(await within(ficha).findByRole('row', { name: /Pack x8/ })).toBeInTheDocument();
