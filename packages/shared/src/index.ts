@@ -11,3 +11,4 @@ export * from './pagos.ts';
 export * from './asistencias.ts';
 export * from './liquidaciones.ts';
 export * from './asistente.ts';
+export * from './resumen-de-alumno.ts';

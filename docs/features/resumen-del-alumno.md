@@ -165,7 +165,7 @@ Precisiones que el tipo no dice:
 - `compras` va en el orden en que se compraron.
 - Las fechas se operan con `lib/fechas.ts`. Nunca `new Date()` sin argumento.
 
-- [ ] **Paso 1: escribir el test** `resumen.test.ts`, con `HOY = '2026-03-10'` (martes) y estos datos:
+- [x] **Paso 1: escribir el test** `resumen.test.ts`, con `HOY = '2026-03-10'` (martes) y estos datos:
 
 ```ts
 const erik = { id: 1, nombre: 'Erik', apellido: 'Zapata' };
@@ -224,10 +224,10 @@ expect(resumir(clases, pagos, HOY)).toEqual({
   - Sin clases ni pagos: `clasesTomadas: 0`, `clasesEnOchoSemanas: 0`, `ultimaClase: null`, `estiloMasTomado: null`, `sueleVenir: null`, `vencidasSinUsar: 0`, `totalPagado: 0`, `profesores: []` y 12 meses vacíos de `2025-04` a `2026-03`.
   - Empate de estilos: una clase de Jazz el `2026-03-03` y una de Salsa el `2026-03-05` dan `estiloMasTomado: 'Salsa'`.
   - Más de cuatro profesores: con cinco, vuelven los cuatro con más clases.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test src/modules/alumnos/test/resumen.test.ts` y ver que falla porque `resumir` no existe.
-- [ ] **Paso 3:** escribir el tipo en `packages/shared` y `resumir` en `resumen.ts`.
-- [ ] **Paso 4:** correr el test y ver que pasa. Correr `pnpm typecheck`.
-- [ ] **Paso 5:** commit `feat(alumnos): cuentas del resumen del alumno`.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test src/modules/alumnos/test/resumen.test.ts` y ver que falla porque `resumir` no existe.
+- [x] **Paso 3:** escribir el tipo en `packages/shared` y `resumir` en `resumen.ts`.
+- [x] **Paso 4:** correr el test y ver que pasa. Correr `pnpm typecheck`.
+- [x] **Paso 5:** commit `feat(alumnos): cuentas del resumen del alumno`.
 
 ### Tarea 2: `GET /api/alumnos/:id/resumen`
 
