@@ -299,16 +299,16 @@ export function Ventana(props: { etiqueta: string; alCerrar: () => void; encabez
 
 Textos fijos: "Clases tomadas" con la nota "desde el alta"; "Por semana" con "últimas 8 semanas" y el valor con coma y un decimal (`4 / 8` es "0,5"); "Última clase"; "Estilo que más toma"; "Suele venir" ("Martes y jueves 19:00", con `nombreDelDia`); "Vencidas sin usar" con "últimos 12 meses"; "Total pagado". Un valor que falta se muestra "—". Sin profesores: "Todavía no tomó clases". "Total pagado" no se dibuja si es `null`.
 
-- [ ] **Paso 1: tests.** En `resumen.test.tsx`, con el modelo de `ficha.test.tsx`:
+- [x] **Paso 1: tests.** En `resumen.test.tsx`, con el modelo de `ficha.test.tsx`:
   - *La ficha se abre en Resumen y muestra indicadores y profesores:* con `unResumenDeAlumno()`, se leen "6", "0,5", "Hoy", "Jazz", "Martes y jueves 19:00", "3", "$17.800" (con `formatearPesos`), y "Erik Zapata" con "Salsa · 5 clases".
   - *Recepción no ve "Total pagado":* con `totalPagado: null` no existe ese texto.
   - *Un alumno sin clases:* con el resumen vacío se ve "Todavía no tomó clases", "Por semana" dice "0" y no aparece `NaN`.
 
   En `ficha.test.tsx`, `fichaDeMartina` simula también `/api/alumnos/10/resumen` y los tests de Actividad hacen clic en la pestaña antes de buscar.
-- [ ] **Paso 2:** correr los dos archivos y ver que fallan: MSW rechaza el pedido de actividad que ya no se hace al abrir, y los nuevos no encuentran la pestaña.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr todos los tests web y `pnpm typecheck`.
-- [ ] **Paso 5:** commit `feat(alumnos): pestaña Resumen con indicadores y profesores`. Actualizar en CLAUDE.md la nota "Tests web de la ficha del alumno": la pestaña que se abre primero es Resumen y pide `/api/alumnos/:id/resumen`.
+- [x] **Paso 2:** correr los dos archivos y ver que fallan: MSW rechaza el pedido de actividad que ya no se hace al abrir, y los nuevos no encuentran la pestaña.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr todos los tests web y `pnpm typecheck`.
+- [x] **Paso 5:** commit `feat(alumnos): pestaña Resumen con indicadores y profesores`. Actualizar en CLAUDE.md la nota "Tests web de la ficha del alumno": la pestaña que se abre primero es Resumen y pide `/api/alumnos/:id/resumen`.
 
 ### Tarea 5: mes a mes
 

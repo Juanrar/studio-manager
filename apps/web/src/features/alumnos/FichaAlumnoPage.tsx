@@ -20,10 +20,12 @@ import { PagosDelAlumno, RegistrarPago } from '../pagos/PagosDelAlumno.tsx';
 import { AlumnoForm } from './AlumnoForm.tsx';
 import { useActividadDeAlumno, useActualizarAlumno, useFichaDeAlumno } from './api.ts';
 import { ClasesRestantes, EstadoDelAlumno } from './EstadoDelPack.tsx';
+import { ResumenDelAlumno } from './ResumenDelAlumno.tsx';
 
-type IdPestana = 'actividad' | 'datos' | 'pagos';
+type IdPestana = 'resumen' | 'actividad' | 'datos' | 'pagos';
 
 const PESTANAS: Pestana<IdPestana>[] = [
+  { id: 'resumen', texto: 'Resumen', icono: 'progreso' },
   { id: 'actividad', texto: 'Actividad', icono: 'lineaDeTiempo' },
   { id: 'datos', texto: 'Datos', icono: 'lista' },
   { id: 'pagos', texto: 'Pagos', icono: 'billetes' },
@@ -47,7 +49,7 @@ export function FichaAlumnoPage() {
 }
 
 function Ficha({ datos, alCerrar }: { datos: FichaDeAlumno; alCerrar: () => void }) {
-  const [pestana, setPestana] = useState<IdPestana>('actividad');
+  const [pestana, setPestana] = useState<IdPestana>('resumen');
   const nombre = `${datos.nombre} ${datos.apellido}`;
 
   const encabezado = (
@@ -68,6 +70,7 @@ function Ficha({ datos, alCerrar }: { datos: FichaDeAlumno; alCerrar: () => void
   return (
     <Ventana etiqueta={`Ficha de ${nombre}`} alCerrar={alCerrar} encabezado={encabezado}>
       <Pestanas pestanas={PESTANAS} activa={pestana} alCambiar={setPestana}>
+        {pestana === 'resumen' && <ResumenDelAlumno datos={datos} />}
         {pestana === 'actividad' && <Actividad alumnoId={datos.id} />}
         {pestana === 'datos' && <Datos datos={datos} />}
         {pestana === 'pagos' && (

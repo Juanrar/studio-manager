@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { EventoDeAlumno, FichaDeAlumno, Pago } from '@studio/shared';
-import { unAlumnoEnListado, unaFichaDeAlumno, unListadoDeAlumnos, unPack, unPago } from '../../../../test/datos.ts';
+import { unAlumnoEnListado, unaFichaDeAlumno, unListadoDeAlumnos, unPack, unPago, unResumenDeAlumno } from '../../../../test/datos.ts';
 import { RECEPCION, conSesion, renderizarEn } from '../../../../test/render.tsx';
 import { servidor } from '../../../../test/servidor.ts';
 import { celdasDe } from '../../../../test/tabla.ts';
@@ -22,6 +22,7 @@ function fichaDeMartina(respuestas: Respuestas = {}) {
       );
     }),
     http.get('/api/alumnos/10', () => HttpResponse.json(martina())),
+    http.get('/api/alumnos/10/resumen', () => HttpResponse.json(unResumenDeAlumno())),
     http.get('/api/alumnos/10/actividad', () => HttpResponse.json({ items: respuestas.actividad ?? [] })),
     http.get('/api/pagos', () => HttpResponse.json({ items: respuestas.pagos ?? [] })),
     http.get('/api/packs', () =>
@@ -38,6 +39,12 @@ function fichaDeMartina(respuestas: Respuestas = {}) {
 
 async function laFicha() {
   return screen.findByRole('dialog', { name: 'Ficha de Martina García' });
+}
+
+// La ficha se abre en Resumen: la actividad se ve después de hacer clic en su pestaña.
+async function abrirActividad(ficha: HTMLElement, usuario: ReturnType<typeof renderizarEn>['usuario']) {
+  await usuario.click(within(ficha).getByRole('tab', { name: 'Actividad' }));
+  return within(ficha).getByRole('tabpanel', { name: 'Actividad' });
 }
 
 // Cada mes de la actividad con sus hechos, como se leen en pantalla: [mes, [texto, día], ...].
@@ -61,7 +68,7 @@ function camposDe(panel: HTMLElement) {
 
 describe('/alumnos/:id', () => {
   it('la actividad agrupa los hechos por mes, con el año, del más nuevo al más viejo, y las clases futuras van como anotadas', async () => {
-    fichaDeMartina({
+    const { usuario } = fichaDeMartina({
       actividad: [
         {
           tipo: 'anotado',
@@ -87,7 +94,7 @@ describe('/alumnos/:id', () => {
       ],
     });
 
-    const actividad = within(await laFicha()).getByRole('tabpanel', { name: 'Actividad' });
+    const actividad = await abrirActividad(await laFicha(), usuario);
 
     expect(await mesesDe(actividad)).toEqual([
       [
@@ -102,7 +109,7 @@ describe('/alumnos/:id', () => {
   });
 
   it('la actividad distingue la baja automática de la baja a mano, y muestra la reactivación', async () => {
-    fichaDeMartina({
+    const { usuario } = fichaDeMartina({
       ficha: { activo: false },
       actividad: [
         { tipo: 'baja', fecha: '2026-03-10', automatica: true },
@@ -112,7 +119,7 @@ describe('/alumnos/:id', () => {
       ],
     });
 
-    const actividad = within(await laFicha()).getByRole('tabpanel', { name: 'Actividad' });
+    const actividad = await abrirActividad(await laFicha(), usuario);
 
     expect(await mesesDe(actividad)).toEqual([
       ['Marzo 2026', ['Baja automática: 2 meses sin comprar un pack', '10 mar']],

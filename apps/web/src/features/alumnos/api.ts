@@ -6,6 +6,7 @@ import type {
   EventoDeAlumno,
   FichaDeAlumno,
   ListadoDeAlumnos,
+  ResumenDeAlumno,
 } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
@@ -36,6 +37,14 @@ export function useActividadDeAlumno(id: number) {
   return useQuery({
     queryKey: ['alumnos', id, 'actividad'],
     queryFn: async () => (await api.get<{ items: EventoDeAlumno[] }>(`/alumnos/${id}/actividad`)).items,
+  });
+}
+
+// También va debajo de la ficha: registrar o anular un pago invalida ['alumnos'] y la recarga.
+export function useResumenDeAlumno(id: number) {
+  return useQuery({
+    queryKey: ['alumnos', id, 'resumen'],
+    queryFn: () => api.get<ResumenDeAlumno>(`/alumnos/${id}/resumen`),
   });
 }
 

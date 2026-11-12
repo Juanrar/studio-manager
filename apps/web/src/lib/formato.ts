@@ -160,3 +160,10 @@ export function periodoAnterior(fecha: string): string {
   const [anio, mes] = fecha.split('-').map(Number) as [number, number];
   return mes === 1 ? `${anio - 1}-12` : `${anio}-${String(mes - 1).padStart(2, '0')}`;
 }
+
+// "Hoy", "Ayer" o "Hace N días", de una fecha pasada a `hoy`.
+export function haceCuanto(fecha: string, hoy: string): string {
+  const dias = Math.round((Date.parse(hoy) - Date.parse(fecha)) / 86_400_000);
+  if (dias <= 0) return 'Hoy';
+  return dias === 1 ? 'Ayer' : `Hace ${dias} días`;
+}

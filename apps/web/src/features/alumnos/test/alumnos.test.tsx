@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { AlumnoEnListado } from '@studio/shared';
-import { unAlumno, unAlumnoEnListado, unaFichaDeAlumno, unListadoDeAlumnos } from '../../../../test/datos.ts';
+import { unAlumno, unAlumnoEnListado, unaFichaDeAlumno, unListadoDeAlumnos, unResumenDeAlumno } from '../../../../test/datos.ts';
 import { RECEPCION, conSesion, renderizarEn } from '../../../../test/render.tsx';
 import { servidor } from '../../../../test/servidor.ts';
 import { celdasDe } from '../../../../test/tabla.ts';
@@ -94,7 +94,7 @@ describe('/alumnos', () => {
         HttpResponse.json(unListadoDeAlumnos([unAlumnoEnListado({ id: 10, nombre: 'Martina', apellido: 'García' })])),
       ),
       http.get('/api/alumnos/10', () => HttpResponse.json(martina)),
-      http.get('/api/alumnos/10/actividad', () => HttpResponse.json({ items: [{ tipo: 'alta', fecha: '2025-03-10' }] })),
+      http.get('/api/alumnos/10/resumen', () => HttpResponse.json(unResumenDeAlumno())),
     );
     const { usuario, router } = renderizarEn('/alumnos');
 
@@ -103,7 +103,7 @@ describe('/alumnos', () => {
 
     const ficha = await screen.findByRole('dialog', { name: 'Ficha de Martina García' });
     expect(within(ficha).getByRole('heading', { name: 'Martina García' })).toBeInTheDocument();
-    expect(await within(ficha).findByRole('listitem')).toHaveTextContent('Alta en el estudio');
+    expect(await within(ficha).findByText('Clases tomadas')).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/alumnos/10');
     expect(screen.getByRole('searchbox', { name: 'Buscar alumno' })).toHaveValue('garcia');
 

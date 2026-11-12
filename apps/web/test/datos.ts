@@ -13,6 +13,7 @@ import type {
   Pago,
   Profesor,
   ProfesorEnListado,
+  ResumenDeAlumno,
 } from '@studio/shared';
 
 export function unAlumno(datos: Partial<Alumno> = {}): Alumno {
@@ -43,6 +44,57 @@ export function unAlumnoEnListado(datos: Partial<AlumnoEnListado> = {}): AlumnoE
 // GET /api/alumnos/:id. Por defecto, sin pack.
 export function unaFichaDeAlumno(datos: Partial<FichaDeAlumno> = {}): FichaDeAlumno {
   return { ...unAlumno(), alta: '2025-03-10', estadoPack: 'sin_pack', pagoActual: null, ...datos };
+}
+
+const erik = { id: 1, nombre: 'Erik', apellido: 'Zapata' };
+const julia = { id: 2, nombre: 'Julia', apellido: 'Paz' };
+const mesVacio = (mes: string) => ({ mes, compras: [], tomadas: 0, vencidas: 0, clases: [] });
+
+// GET /api/alumnos/:id/resumen. Por defecto, el resultado del test principal de la API (martes 10 de marzo de 2026).
+export function unResumenDeAlumno(datos: Partial<ResumenDeAlumno> = {}): ResumenDeAlumno {
+  return {
+    clasesTomadas: 6,
+    clasesEnOchoSemanas: 4,
+    ultimaClase: '2026-03-10',
+    hoy: '2026-03-10',
+    estiloMasTomado: 'Jazz',
+    sueleVenir: { diasSemana: [2, 4], horaInicio: '19:00' },
+    vencidasSinUsar: 3,
+    totalPagado: 17800,
+    profesores: [
+      { ...erik, estilo: 'Salsa', clases: 5 },
+      { ...julia, estilo: 'Jazz', clases: 1 },
+    ],
+    meses: [
+      ...['2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12'].map(mesVacio),
+      {
+        mes: '2026-01',
+        compras: [{ pack: 'Pack x4', veces: 1 }],
+        tomadas: 1,
+        vencidas: 3,
+        clases: [{ fecha: '2026-01-13', estilo: 'Salsa', profesor: erik }],
+      },
+      {
+        mes: '2026-02',
+        compras: [{ pack: 'Clase suelta', veces: 2 }],
+        tomadas: 1,
+        vencidas: 0,
+        clases: [{ fecha: '2026-02-26', estilo: 'Salsa', profesor: erik }],
+      },
+      {
+        mes: '2026-03',
+        compras: [{ pack: 'Pack x8', veces: 1 }],
+        tomadas: 3,
+        vencidas: 0,
+        clases: [
+          { fecha: '2026-03-10', estilo: 'Jazz', profesor: julia },
+          { fecha: '2026-03-05', estilo: 'Jazz', profesor: erik },
+          { fecha: '2026-03-03', estilo: 'Jazz', profesor: erik },
+        ],
+      },
+    ],
+    ...datos,
+  };
 }
 
 // El martes 10 de marzo de 2026, como el reloj de los tests de la API.
