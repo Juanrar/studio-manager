@@ -37,7 +37,7 @@ function fichaDeMartina(respuestas: Respuestas = {}) {
 }
 
 async function laFicha() {
-  return screen.findByRole('complementary', { name: 'Ficha de Martina García' });
+  return screen.findByRole('dialog', { name: 'Ficha de Martina García' });
 }
 
 // Cada mes de la actividad con sus hechos, como se leen en pantalla: [mes, [texto, día], ...].
@@ -251,6 +251,48 @@ describe('/alumnos/:id', () => {
     await usuario.click(within(dialogo).getByRole('button', { name: 'Anular pago' }));
 
     await waitFor(() => expect(cuerpoRecibido).toEqual({ motivo: 'Se cargó dos veces' }));
+    expect(screen.queryByRole('dialog', { name: 'Anular pago' })).not.toBeInTheDocument();
+  });
+
+  it('Escape cierra la ventana y vuelve al listado', async () => {
+    const { usuario } = fichaDeMartina();
+    await laFicha();
+
+    await usuario.keyboard('{Escape}');
+
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(await screen.findByRole('row', { name: /García, Martina/ })).toBeInTheDocument();
+  });
+
+  it('el clic en el fondo cierra la ventana, pero el clic dentro no', async () => {
+    const { usuario } = fichaDeMartina();
+    const ficha = await laFicha();
+
+    await usuario.click(within(ficha).getByRole('heading', { name: 'Martina García' }));
+    expect(screen.getByRole('dialog', { name: 'Ficha de Martina García' })).toBeInTheDocument();
+
+    await usuario.click(ficha.parentElement!);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('con "Registrar pago" abierto, ni Escape ni el clic en el fondo del diálogo cierran la ventana', async () => {
+    const { usuario } = fichaDeMartina();
+    const ficha = await laFicha();
+    await usuario.click(within(ficha).getByRole('button', { name: 'Registrar pago' }));
+    const dialogo = screen.getByRole('dialog', { name: 'Registrar pago' });
+
+    await usuario.keyboard('{Escape}');
+    expect(screen.getByRole('dialog', { name: 'Ficha de Martina García' })).toBeInTheDocument();
+
+    await usuario.click(dialogo.parentElement!);
+    expect(screen.queryByRole('dialog', { name: 'Registrar pago' })).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Ficha de Martina García' })).toBeInTheDocument();
+  });
+
+  it('el encabezado muestra desde cuándo es alumna', async () => {
+    fichaDeMartina();
+    const ficha = await laFicha();
+
+    expect(within(ficha).getByText('Alumna desde 10/03/2025')).toBeInTheDocument();
   });
 });

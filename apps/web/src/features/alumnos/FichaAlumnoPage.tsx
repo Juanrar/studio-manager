@@ -9,8 +9,8 @@ import {
   Dialogo,
   Icono,
   Insignia,
-  PanelLateral,
   Pestanas,
+  Ventana,
   type NombreIcono,
   type Pestana,
 } from '../../components/ui/index.tsx';
@@ -37,33 +37,36 @@ export function FichaAlumnoPage() {
 
   if (ficha.data === undefined) {
     return (
-      <PanelLateral etiqueta="Ficha del alumno" alCerrar={cerrar}>
+      <Ventana etiqueta="Ficha del alumno" alCerrar={cerrar} encabezado={<h2 className="text-lg font-semibold">Alumno</h2>}>
         <div className="p-6">{ficha.isError ? <Aviso>{mensajeDeError(ficha.error)}</Aviso> : <Cargando />}</div>
-      </PanelLateral>
+      </Ventana>
     );
   }
-  // La key reinicia el estado (pestaña y diálogos) al pasar de un alumno a otro con el panel abierto.
+  // La key reinicia el estado (pestaña y diálogos) al pasar de un alumno a otro con la ventana abierta.
   return <Ficha key={ficha.data.id} datos={ficha.data} alCerrar={cerrar} />;
 }
 
 function Ficha({ datos, alCerrar }: { datos: FichaDeAlumno; alCerrar: () => void }) {
   const [pestana, setPestana] = useState<IdPestana>('actividad');
   const nombre = `${datos.nombre} ${datos.apellido}`;
-  const acciones = <RegistrarPago alumnoId={datos.id} />;
 
-  return (
-    <PanelLateral etiqueta={`Ficha de ${nombre}`} alCerrar={alCerrar} acciones={acciones}>
-      <div className="flex items-center gap-3.5 px-6 pt-5 pb-3">
-        <Avatar nombre={datos.nombre} grande />
-        <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold">{nombre}</h2>
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            <EstadoDelAlumno activo={datos.activo} estadoPack={datos.estadoPack} />
-            {datos.pagoActual !== null && <Insignia tono="violeta">{datos.pagoActual.pack}</Insignia>}
-          </div>
+  const encabezado = (
+    <div className="flex items-center gap-3.5">
+      <Avatar nombre={datos.nombre} grande />
+      <div className="min-w-0 flex-1">
+        <h2 className="truncate text-lg font-semibold">{nombre}</h2>
+        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+          <EstadoDelAlumno activo={datos.activo} estadoPack={datos.estadoPack} />
+          {datos.pagoActual !== null && <Insignia tono="violeta">{datos.pagoActual.pack}</Insignia>}
+          <span className="text-xs text-apagado">Alumna desde {formatearFecha(datos.alta)}</span>
         </div>
       </div>
+      <RegistrarPago alumnoId={datos.id} />
+    </div>
+  );
 
+  return (
+    <Ventana etiqueta={`Ficha de ${nombre}`} alCerrar={alCerrar} encabezado={encabezado}>
       <Pestanas pestanas={PESTANAS} activa={pestana} alCambiar={setPestana}>
         {pestana === 'actividad' && <Actividad alumnoId={datos.id} />}
         {pestana === 'datos' && <Datos datos={datos} />}
@@ -73,7 +76,7 @@ function Ficha({ datos, alCerrar }: { datos: FichaDeAlumno; alCerrar: () => void
           </div>
         )}
       </Pestanas>
-    </PanelLateral>
+    </Ventana>
   );
 }
 

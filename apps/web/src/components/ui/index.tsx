@@ -7,7 +7,7 @@ import type {
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from 'react';
-import { useId } from 'react';
+import { useEffect, useId } from 'react';
 import { Link } from 'react-router';
 import { Icono, type NombreIcono } from './Icono.tsx';
 
@@ -250,29 +250,49 @@ export function Pagina({
   );
 }
 
-// Panel que se abre a la derecha, encima del contenido de la página.
-export function PanelLateral({
+// Ventana ancha centrada sobre la página. `encabezado` va a la izquierda del botón de cerrar y el
+// contenido tiene su propio scroll.
+export function Ventana({
   etiqueta,
   alCerrar,
-  acciones,
+  encabezado,
   children,
 }: {
   etiqueta: string;
   alCerrar: () => void;
-  acciones?: ReactNode;
+  encabezado: ReactNode;
   children: ReactNode;
 }) {
+  // Escape cierra la ventana solo si no hay otro diálogo encima: ese se encarga de sí mismo.
+  useEffect(() => {
+    function alTeclear(evento: globalThis.KeyboardEvent) {
+      if (evento.key === 'Escape' && document.querySelectorAll('[role="dialog"]').length === 1) alCerrar();
+    }
+    document.addEventListener('keydown', alTeclear);
+    return () => document.removeEventListener('keydown', alTeclear);
+  }, [alCerrar]);
+
   return (
-    <aside
-      aria-label={etiqueta}
-      className="absolute inset-y-0 right-0 z-10 flex w-full max-w-3xl flex-col border-l border-borde-fuerte bg-panel shadow-2xl shadow-black/60"
+    <div
+      className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 p-6"
+      // Un `Dialogo` abierto adentro es hijo en React: su clic sube hasta acá con otro `target`.
+      onClick={(evento) => {
+        if (evento.target === evento.currentTarget) alCerrar();
+      }}
     >
-      <div className="flex h-12 flex-none items-center gap-2 border-b border-borde px-2">
-        <BotonIcono icono="cerrar" etiqueta="Cerrar" onClick={alCerrar} />
-        {hayAlgo(acciones) && <div className="ml-auto flex items-center gap-2 pr-2">{acciones}</div>}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={etiqueta}
+        className="flex max-h-full w-full max-w-5xl flex-col rounded-lg border border-borde-fuerte bg-panel shadow-2xl shadow-black/60"
+      >
+        <div className="flex items-start gap-4 px-6 pt-5 pb-4">
+          <div className="min-w-0 flex-1">{encabezado}</div>
+          <BotonIcono icono="cerrar" etiqueta="Cerrar" onClick={alCerrar} />
+        </div>
+        <div className="min-h-0 flex-1 overflow-auto">{children}</div>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto">{children}</div>
-    </aside>
+    </div>
   );
 }
 

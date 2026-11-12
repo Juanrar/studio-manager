@@ -117,6 +117,8 @@ Las propuso el agente y el estudio las confirmó el 2026-11-11.
 | Tocar otro mes muestra sus compras y sus clases | Web | Si el detalle queda fijo en el mes actual |
 | Recepción no ve "Total pagado" | Web | Si el indicador se dibuja con `null`, muestra "$0" |
 | Escape y el clic afuera cierran la ventana y vuelven a `/alumnos` | Web | Si la ventana no cierra con el teclado, queda atrapado quien no usa el mouse |
+| Con "Registrar pago" abierto, Escape y el clic en el fondo del diálogo no cierran la ventana; el clic dentro de la ventana tampoco | Web | Si el fondo de la ventana cierra con cualquier clic que le sube, cerrar un diálogo cierra también la ficha y se pierde lo que se estaba mirando |
+| El encabezado dice "Alumna desde 10/03/2025" | Web | Si se pierde la fecha de alta del encabezado |
 | Un alumno sin clases muestra "—" y "Todavía no tomó clases" | Web | Si se divide por cero o se dibuja `NaN` |
 
 Los tests web de la ficha que ya existen cambian: hoy abren Actividad sin hacer clic y buscan el panel lateral.
@@ -271,13 +273,13 @@ export function Ventana(props: { etiqueta: string; alCerrar: () => void; encabez
 - En `FichaAlumnoPage`, `Ventana` reemplaza a `PanelLateral` en los dos lugares. El encabezado lleva avatar, nombre, insignias (suma `Alumna desde {formatearFecha(alta)}`) y "Registrar pago". Las pestañas no cambian en esta tarea.
 - `PanelLateral` se borra de `components/ui` si no lo usa nadie más (hoy solo la ficha).
 
-- [ ] **Paso 1: tests.** En `ficha.test.tsx`, los tests existentes buscan la ficha con `getByRole('dialog', { name: 'Ficha de Martina García' })`. Nuevos:
+- [x] **Paso 1: tests.** En `ficha.test.tsx`, los tests existentes buscan la ficha con `getByRole('dialog', { name: 'Ficha de Martina García' })`. Nuevos:
   - *Escape cierra la ventana y vuelve a `/alumnos`:* después de `usuario.keyboard('{Escape}')` no hay `dialog` y sigue la tabla del listado.
   - *Con "Registrar pago" abierto, Escape y el clic en el fondo del diálogo no cierran la ventana:* sigue en pantalla `dialog` "Ficha de Martina García".
   - *El encabezado muestra "Alumna desde 10/03/2025".*
-- [ ] **Paso 2:** correr `pnpm --filter @studio/web test src/features/alumnos/test/ficha.test.tsx` y ver que fallan por el rol `dialog`.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr todos los tests web y `pnpm typecheck`.
+- [x] **Paso 2:** correr `pnpm --filter @studio/web test src/features/alumnos/test/ficha.test.tsx` y ver que fallan por el rol `dialog`.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr todos los tests web y `pnpm typecheck`.
 - [ ] **Paso 5:** commit `feat(alumnos): la ficha se abre en una ventana`.
 
 ### Tarea 4: pestaña Resumen con indicadores y profesores

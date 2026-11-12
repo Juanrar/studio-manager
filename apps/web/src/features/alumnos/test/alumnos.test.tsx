@@ -86,7 +86,7 @@ describe('/alumnos', () => {
     expect(screen.getByText('4 alumnos · 1 con el pack vigente')).toBeInTheDocument();
   });
 
-  it('abrir un alumno muestra su ficha al costado sin perder la búsqueda, y cerrarla vuelve a la lista', async () => {
+  it('abrir un alumno muestra su ficha en una ventana sin perder la búsqueda, y cerrarla vuelve a la lista', async () => {
     conSesion(RECEPCION);
     const martina = unaFichaDeAlumno({ id: 10, nombre: 'Martina', apellido: 'García' });
     servidor.use(
@@ -101,7 +101,7 @@ describe('/alumnos', () => {
     await usuario.type(await screen.findByRole('searchbox', { name: 'Buscar alumno' }), 'garcia');
     await usuario.click(await screen.findByRole('link', { name: 'García, Martina' }));
 
-    const ficha = await screen.findByRole('complementary', { name: 'Ficha de Martina García' });
+    const ficha = await screen.findByRole('dialog', { name: 'Ficha de Martina García' });
     expect(within(ficha).getByRole('heading', { name: 'Martina García' })).toBeInTheDocument();
     expect(await within(ficha).findByRole('listitem')).toHaveTextContent('Alta en el estudio');
     expect(router.state.location.pathname).toBe('/alumnos/10');
@@ -109,7 +109,7 @@ describe('/alumnos', () => {
 
     await usuario.click(within(ficha).getByRole('button', { name: 'Cerrar' }));
 
-    expect(screen.queryByRole('complementary', { name: 'Ficha de Martina García' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Ficha de Martina García' })).not.toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/alumnos');
     expect(screen.getByRole('searchbox', { name: 'Buscar alumno' })).toHaveValue('garcia');
   });
