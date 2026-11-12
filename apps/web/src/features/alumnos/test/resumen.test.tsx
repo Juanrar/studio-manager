@@ -3,16 +3,16 @@ import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { ResumenDeAlumno } from '@studio/shared';
-import { unaFichaDeAlumno, unResumenDeAlumno } from '../../../../test/datos.ts';
-import { ADMIN, conSesion, renderizarEn } from '../../../../test/render.tsx';
+import { unaFichaDeAlumno, unListadoDeAlumnos, unResumenDeAlumno } from '../../../../test/datos.ts';
+import { ADMIN, RECEPCION, conSesion, renderizarEn } from '../../../../test/render.tsx';
 import { celdasDe } from '../../../../test/tabla.ts';
 import { servidor } from '../../../../test/servidor.ts';
 
 // Abre la ficha de Martina, que se abre en la pestaña Resumen, con el resumen que se le pase.
-function resumenDeMartina(resumen: ResumenDeAlumno) {
-  conSesion(ADMIN);
+function resumenDeMartina(resumen: ResumenDeAlumno, usuario = ADMIN) {
+  conSesion(usuario);
   servidor.use(
-    http.get('/api/alumnos', () => HttpResponse.json({ items: [], total: 0, pagina: 1, porPagina: 20, vigentes: 0, hoy: '2026-03-10' })),
+    http.get('/api/alumnos', () => HttpResponse.json(unListadoDeAlumnos([]))),
     http.get('/api/alumnos/10', () =>
       HttpResponse.json(
         unaFichaDeAlumno({
@@ -62,7 +62,7 @@ describe('pestaña Resumen', () => {
   });
 
   it('recepción no ve "Total pagado": con null no se dibuja ni como $0', async () => {
-    resumenDeMartina(unResumenDeAlumno({ totalPagado: null }));
+    resumenDeMartina(unResumenDeAlumno({ totalPagado: null }), RECEPCION);
     const resumen = await elResumen();
 
     await resumen.findByText('Clases tomadas', { selector: 'div' });
@@ -192,6 +192,40 @@ describe('pestaña Resumen', () => {
       await resumen.findByRole('button', { name: 'Marzo 2026: 0 clases tomadas' });
 
       expect(document.body.innerHTML).not.toContain('NaN');
+      // jsdom descarta `height: NaNpx`: se afirma el alto mínimo de cada barra.
+      const barras = resumen.getAllByRole('button', { name: /clases tomadas$/ }).map((boton) => boton.querySelector<HTMLElement>('span[style] > span:last-child'));
+      expect(barras).toHaveLength(12);
+      expect(barras.map((barra) => barra?.style.height)).toEqual(Array(12).fill('2px'));
+    });
+
+    it('un mes con dos clases el mismo día no deja filas de más al cambiar de mes', async () => {
+      const base = unResumenDeAlumno();
+      const personaErik = base.meses[11]!.clases[1]!.profesor;
+      const personaJulia = base.meses[11]!.clases[0]!.profesor;
+      const marzo = {
+        ...base.meses[11]!,
+        tomadas: 3,
+        clases: [
+          { fecha: '2026-03-10', estilo: 'Jazz', profesor: personaJulia },
+          { fecha: '2026-03-10', estilo: 'Salsa', profesor: personaErik },
+          { fecha: '2026-03-03', estilo: 'Jazz', profesor: personaErik },
+        ],
+      };
+      resumenDeMartina(unResumenDeAlumno({ meses: [...base.meses.slice(0, 11), marzo] }));
+      const resumen = await elResumen();
+      const filasDe = async (nombre: string) => (await detalleDe(nombre)).getAllByRole('row').slice(1).map(celdasDe);
+      const filasDeMarzo = [
+        ['10/03', 'Jazz', 'Julia Paz'],
+        ['10/03', 'Salsa', 'Erik Zapata'],
+        ['03/03', 'Jazz', 'Erik Zapata'],
+      ];
+      expect(await filasDe('Marzo 2026')).toEqual(filasDeMarzo);
+
+      await userEvent.click(resumen.getByRole('button', { name: 'Enero 2026: 1 clase tomada' }));
+      expect(await filasDe('Enero 2026')).toEqual([['13/01', 'Salsa', 'Erik Zapata']]);
+
+      await userEvent.click(resumen.getByRole('button', { name: 'Marzo 2026: 3 clases tomadas' }));
+      expect(await filasDe('Marzo 2026')).toEqual(filasDeMarzo);
     });
   });
 });

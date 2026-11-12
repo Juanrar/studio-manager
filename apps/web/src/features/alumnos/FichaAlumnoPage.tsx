@@ -60,7 +60,7 @@ function Ficha({ datos, alCerrar }: { datos: FichaDeAlumno; alCerrar: () => void
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           <EstadoDelAlumno activo={datos.activo} estadoPack={datos.estadoPack} />
           {datos.pagoActual !== null && <Insignia tono="violeta">{datos.pagoActual.pack}</Insignia>}
-          <span className="text-xs text-apagado">Alumna desde {formatearFecha(datos.alta)}</span>
+          <span className="text-xs text-apagado">En el estudio desde {formatearFecha(datos.alta)}</span>
         </div>
       </div>
       <RegistrarPago alumnoId={datos.id} />

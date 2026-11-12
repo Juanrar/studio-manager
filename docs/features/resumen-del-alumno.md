@@ -24,7 +24,7 @@ Hoy la ficha cuenta lo que pasó hecho por hecho (Actividad) y lista los pagos. 
 
 La ruta no cambia: `/alumnos/:id` sigue siendo hija del listado, que queda montado con su búsqueda. Cambia el contenedor: en lugar de `PanelLateral`, una ventana centrada de hasta `max-w-5xl` sobre un fondo oscuro.
 
-- **Encabezado:** inicial, nombre, estado del pack (o "Dado de baja"), pack en uso y "Alumna desde" con el día del alta. A la derecha, "Registrar pago" y el botón de cerrar.
+- **Encabezado:** inicial, nombre, estado del pack (o "Dado de baja"), pack en uso y "En el estudio desde" con el día del alta (no hay campo de género, así que el texto no lleva "Alumna" ni "Alumno"). A la derecha, "Registrar pago" y el botón de cerrar.
 - **Cerrar:** el botón, un clic fuera de la ventana o Escape. Vuelve a `/alumnos`.
 - **Pestañas:** Resumen (la que se abre primero), Actividad, Datos y Pagos. Las tres últimas no cambian.
 - **Resumen, arriba, en tres columnas:**
@@ -34,7 +34,7 @@ La ruta no cambia: `/alumnos/:id` sigue siendo hija del listado, que queda monta
 - **Resumen, abajo:** a la izquierda el gráfico "Mes a mes"; a la derecha, el mes elegido con lo que compró, cuántas clases tomó y la tabla de esas clases (día, estilo, profesor). Se abre con el mes actual elegido. Tocar una barra elige ese mes.
 - **Gráfico:** una barra por mes, los últimos 12 contando el actual. En azul (`bg-acento`) las clases tomadas; encima, en ámbar, las vencidas sin usar. Arriba de la barra el número de tomadas; debajo el mes y lo que compró. Sin librería de gráficos: son `div` con altura proporcional, como en el prototipo.
 - **Un mes con más de una compra** muestra debajo de la barra la primera y "+1"; el detalle de la derecha las muestra todas.
-- **Alumno sin clases ni pagos:** los indicadores muestran "—", "Toma clases con" dice "Todavía no tomó clases" y el gráfico sale con las 12 barras vacías.
+- **Alumno sin clases ni pagos:** las cantidades (Clases tomadas, Por semana, Vencidas sin usar, Total pagado) muestran 0 y lo que no tiene valor (Última clase, Estilo que más toma, Suele venir) muestra "—". Un conteo en cero es un dato; un valor que no existe no lo es. "Toma clases con" dice "Todavía no tomó clases" y el gráfico sale con las 12 barras vacías.
 
 ## Indicadores
 
@@ -118,12 +118,16 @@ Las propuso el agente y el estudio las confirmó el 2026-11-11.
 | Una compra repetida se escribe "2 × Clase suelta" en la barra y en el detalle | Web | Si el detalle o la barra muestran solo el nombre del pack, el mes parece tener una compra y no dos |
 | Un mes con dos compras distintas muestra la primera y "+1" en la barra, y las dos en el detalle | Web | Si la barra muestra todas las compras, el texto desborda el ancho de la barra |
 | Un mes sin clases muestra "—" en la barra y "No tomó clases este mes." | Web | Si se dibuja una tabla vacía o se deja el detalle del mes anterior |
-| Con todos los meses en cero, las barras no dan `NaN` | Web | Si la escala divide por cero, la altura de las barras es `NaN` |
+| Con todos los meses en cero, las barras no dan `NaN` y miden 2px | Web | Si la escala divide por cero, la altura de las barras es `NaN` (jsdom lo descarta, por eso se afirma `2px`) |
 | Recepción no ve "Total pagado" | Web | Si el indicador se dibuja con `null`, muestra "$0" |
 | Escape y el clic afuera cierran la ventana y vuelven a `/alumnos` | Web | Si la ventana no cierra con el teclado, queda atrapado quien no usa el mouse |
 | Con "Registrar pago" abierto, Escape y el clic en el fondo del diálogo no cierran la ventana; el clic dentro de la ventana tampoco | Web | Si el fondo de la ventana cierra con cualquier clic que le sube, cerrar un diálogo cierra también la ficha y se pierde lo que se estaba mirando |
-| El encabezado dice "Alumna desde 10/03/2025" | Web | Si se pierde la fecha de alta del encabezado |
+| El encabezado dice "En el estudio desde 10/03/2025" | Web | Si se pierde la fecha de alta del encabezado |
 | Un alumno sin clases muestra "—" y "Todavía no tomó clases" | Web | Si se divide por cero o se dibuja `NaN` |
+| Dos packs distintos comprados el mismo día quedan en el orden del cobro | Integración HTTP | Si los pagos se ordenan solo por día, el mes muestra primero el pack que se compró después |
+| Un mes con dos clases el mismo día no deja filas de más al cambiar de mes | Web | Si la fila usa la fecha como clave, React deja una fila fantasma al pasar de un mes a otro |
+| Un arrastre que empieza dentro de la ventana y termina en el fondo no la cierra | Web | Si el fondo cierra con cualquier clic, seleccionar el email y soltar afuera cierra la ficha |
+| Registrar un pago recarga el resumen (2 pedidos) | Web | Si el pago no invalida el resumen, la ficha muestra indicadores viejos |
 
 Los tests web de la ficha que ya existen cambian: hoy abren Actividad sin hacer clic y buscan el panel lateral.
 
@@ -274,17 +278,17 @@ export function Ventana(props: { etiqueta: string; alCerrar: () => void; encabez
 - `role="dialog"`, `aria-modal="true"`, `aria-label={etiqueta}`. Fondo `fixed inset-0 z-20 bg-black/60`, caja `max-w-5xl` con `max-h-full`, el encabezado fijo y el contenido con scroll propio. Las clases, como en `VarianteC` del prototipo.
 - El fondo cierra solo si `evento.target === evento.currentTarget`: un `Dialogo` abierto adentro es hijo en React y su clic sube hasta acá.
 - Escape cierra solo si la ventana es el único `[role="dialog"]` del documento.
-- En `FichaAlumnoPage`, `Ventana` reemplaza a `PanelLateral` en los dos lugares. El encabezado lleva avatar, nombre, insignias (suma `Alumna desde {formatearFecha(alta)}`) y "Registrar pago". Las pestañas no cambian en esta tarea.
+- En `FichaAlumnoPage`, `Ventana` reemplaza a `PanelLateral` en los dos lugares. El encabezado lleva avatar, nombre, insignias (suma `En el estudio desde {formatearFecha(alta)}`) y "Registrar pago". Las pestañas no cambian en esta tarea.
 - `PanelLateral` se borra de `components/ui` si no lo usa nadie más (hoy solo la ficha).
 
 - [x] **Paso 1: tests.** En `ficha.test.tsx`, los tests existentes buscan la ficha con `getByRole('dialog', { name: 'Ficha de Martina García' })`. Nuevos:
   - *Escape cierra la ventana y vuelve a `/alumnos`:* después de `usuario.keyboard('{Escape}')` no hay `dialog` y sigue la tabla del listado.
   - *Con "Registrar pago" abierto, Escape y el clic en el fondo del diálogo no cierran la ventana:* sigue en pantalla `dialog` "Ficha de Martina García".
-  - *El encabezado muestra "Alumna desde 10/03/2025".*
+  - *El encabezado muestra "En el estudio desde 10/03/2025".*
 - [x] **Paso 2:** correr `pnpm --filter @studio/web test src/features/alumnos/test/ficha.test.tsx` y ver que fallan por el rol `dialog`.
 - [x] **Paso 3:** implementar.
 - [x] **Paso 4:** correr todos los tests web y `pnpm typecheck`.
-- [ ] **Paso 5:** commit `feat(alumnos): la ficha se abre en una ventana`.
+- [x] **Paso 5:** commit `feat(alumnos): la ficha se abre en una ventana`.
 
 ### Tarea 4: pestaña Resumen con indicadores y profesores
 

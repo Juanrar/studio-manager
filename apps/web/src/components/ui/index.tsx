@@ -7,7 +7,7 @@ import type {
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from 'react';
-import { useEffect, useId } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { Link } from 'react-router';
 import { Icono, type NombreIcono } from './Icono.tsx';
 
@@ -272,12 +272,19 @@ export function Ventana({
     return () => document.removeEventListener('keydown', alTeclear);
   }, [alCerrar]);
 
+  // Un arrastre que empieza adentro (seleccionar el email) y termina en el fondo también dispara
+  // `click` en el fondo: solo cierra el clic que empezó en el fondo.
+  const empezoEnElFondo = useRef(false);
+
   return (
     <div
       className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 p-6"
       // Un `Dialogo` abierto adentro es hijo en React: su clic sube hasta acá con otro `target`.
+      onMouseDown={(evento) => {
+        empezoEnElFondo.current = evento.target === evento.currentTarget;
+      }}
       onClick={(evento) => {
-        if (evento.target === evento.currentTarget) alCerrar();
+        if (evento.target === evento.currentTarget && empezoEnElFondo.current) alCerrar();
       }}
     >
       <div

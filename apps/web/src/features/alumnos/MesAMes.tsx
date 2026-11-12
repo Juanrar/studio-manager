@@ -10,6 +10,7 @@ const ALTO_DEL_GRAFICO = 120;
 const ALTO_MINIMO = 2;
 
 const textoDeCompra = ({ pack, veces }: Compra) => (veces > 1 ? `${veces} × ${pack}` : pack);
+const textoDeCompras = (compras: Compra[]) => compras.map(textoDeCompra).join(', ');
 const textoDeClases = (cantidad: number) => `${cantidad} ${cantidad === 1 ? 'clase tomada' : 'clases tomadas'}`;
 
 // Los últimos meses del alumno: un gráfico a la izquierda y, a la derecha, el detalle del mes elegido.
@@ -30,7 +31,7 @@ export function MesAMes({ meses }: { meses: Mes[] }) {
       >
         <ResumenDelMes mes={mes} />
         <div className="mt-2">
-          <ClasesDelMes mes={mes} />
+          <ClasesDelMes key={mes.mes} mes={mes} />
         </div>
       </section>
     </div>
@@ -60,6 +61,7 @@ function GraficoPorMes({
               type="button"
               aria-pressed={activo}
               aria-label={`${formatearMes(mes.mes)}: ${textoDeClases(mes.tomadas)}`}
+              title={mes.compras.length > 0 ? textoDeCompras(mes.compras) : undefined}
               onClick={() => alElegir(mes.mes)}
               className={`group flex min-w-0 flex-1 flex-col items-center rounded-md px-0.5 pt-1 pb-1.5 ${activo ? 'bg-elevado' : 'hover:bg-elevado/60'}`}
             >
@@ -79,7 +81,7 @@ function GraficoPorMes({
               <span className={`mt-1.5 text-xs ${activo ? 'font-medium text-texto' : 'text-tenue'}`}>
                 {nombreDelMes(mes.mes).slice(0, 3)}
               </span>
-              <span className="h-6 w-full text-center text-[10px] leading-tight text-apagado">
+              <span className="line-clamp-2 h-[2.5em] w-full break-words text-center text-[10px] leading-tight text-apagado">
                 <ComprasDebajoDeLaBarra compras={mes.compras} />
               </span>
             </button>
@@ -125,16 +127,17 @@ function ClasesDelMes({ mes }: { mes: Mes }) {
     <table className="w-full text-left">
       <thead>
         <tr className="text-apagado">
-          <th className="h-7 w-20 font-medium">Día</th>
-          <th className="h-7 font-medium">Clase</th>
+          <th className="h-7 w-20 pr-3 font-medium">Día</th>
+          <th className="h-7 pr-3 font-medium">Clase</th>
           <th className="h-7 font-medium">Profesor</th>
         </tr>
       </thead>
       <tbody>
-        {mes.clases.map((clase) => (
-          <tr key={clase.fecha} className="border-t border-borde">
-            <td className="h-7 text-tenue">{formatearFecha(clase.fecha).slice(0, 5)}</td>
-            <td className="h-7">{clase.estilo}</td>
+        {/* Dos clases pueden caer el mismo día: la fecha no sirve de clave. */}
+        {mes.clases.map((clase, indice) => (
+          <tr key={indice} className="border-t border-borde">
+            <td className="h-7 pr-3 text-tenue">{formatearFecha(clase.fecha).slice(0, 5)}</td>
+            <td className="h-7 pr-3">{clase.estilo}</td>
             <td className="h-7 text-tenue">
               {clase.profesor.nombre} {clase.profesor.apellido}
             </td>

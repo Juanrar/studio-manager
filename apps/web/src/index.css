@@ -11,7 +11,7 @@
   --text-sm--line-height: 1.25rem;
 
   --color-fondo: #141414; /* página y barra lateral */
-  --color-panel: #1b1b1b; /* tarjeta de contenido, panel lateral y diálogos */
+  --color-panel: #1b1b1b; /* tarjeta de contenido, ventana de la ficha y diálogos */
   --color-elevado: #222222; /* entradas y filas al pasar el mouse */
   --color-resalte: #2c2c2c; /* opción activa del menú y botones al pasar el mouse */
   --color-borde: #262626; /* líneas entre celdas */

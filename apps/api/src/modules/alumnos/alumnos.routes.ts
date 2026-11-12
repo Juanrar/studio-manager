@@ -26,7 +26,7 @@ export async function rutasAlumnos(app: FastifyInstance): Promise<void> {
     return resumenDelAlumno(id, app.hoy(), request.usuario!.rol);
   });
 
-  app.post('/api/alumnos',async (request, reply) => {
+  app.post('/api/alumnos', async (request, reply) => {
     const datos = crearAlumnoSchema.parse(request.body);
     return reply.status(201).send(await crearAlumno(datos, app.reloj()));
   });

@@ -123,7 +123,7 @@ function Profesores({ profesores }: { profesores: ResumenDeAlumno['profesores'] 
             <span className="block truncate font-medium">
               {profesor.nombre} {profesor.apellido}
             </span>
-            <span className="block truncate text-xs text-apagado">
+            <span className="block text-xs text-apagado">
               {profesor.estilo} · {profesor.clases} {profesor.clases === 1 ? 'clase' : 'clases'}
             </span>
           </span>

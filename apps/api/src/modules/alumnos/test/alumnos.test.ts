@@ -375,21 +375,11 @@ describe('GET /api/alumnos/:id/resumen', () => {
     return { martina, erik, julia };
   }
 
-  it('el administrador recibe el resumen completo: sin pagos anulados, el cobro por su día, la clase anotada fuera de las cuentas y el total pagado', async () => {
-    const { martina, erik, julia } = await armarAMartina();
-    await crearUsuarioDeTest(ADMIN);
-    const cookieAdmin = await loguear(app, ADMIN.email, ADMIN.password);
-
-    const respuesta = await app.inject({
-      method: 'GET',
-      url: `/api/alumnos/${martina.id}/resumen`,
-      headers: { cookie: cookieAdmin },
-    });
-
+  // Lo que devuelve el resumen de Martina, escrito a mano. `totalPagado` depende del rol.
+  function resumenEsperadoDeMartina({ erik, julia }: { erik: { id: number }; julia: { id: number } }) {
     const personaErik = { id: erik.id, nombre: 'Erik', apellido: 'Zapata' };
     const personaJulia = { id: julia.id, nombre: 'Julia', apellido: 'Paz' };
-    expect(respuesta.statusCode).toBe(200);
-    expect(respuesta.json()).toEqual({
+    return {
       clasesTomadas: 2,
       clasesEnOchoSemanas: 2,
       ultimaClase: HOY,
@@ -416,16 +406,49 @@ describe('GET /api/alumnos/:id/resumen', () => {
         }
         return mesVacio(mes);
       }),
+    };
+  }
+
+  it('el administrador recibe el resumen completo: sin pagos anulados, el cobro por su día, la clase anotada fuera de las cuentas y el total pagado', async () => {
+    const { martina, erik, julia } = await armarAMartina();
+    await crearUsuarioDeTest(ADMIN);
+    const cookieAdmin = await loguear(app, ADMIN.email, ADMIN.password);
+
+    const respuesta = await app.inject({
+      method: 'GET',
+      url: `/api/alumnos/${martina.id}/resumen`,
+      headers: { cookie: cookieAdmin },
     });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json()).toEqual(resumenEsperadoDeMartina({ erik, julia }));
   });
 
   it('recepción recibe el mismo resumen con totalPagado en null', async () => {
-    const { martina } = await armarAMartina();
+    const { martina, erik, julia } = await armarAMartina();
 
     const respuesta = await app.inject({ method: 'GET', url: `/api/alumnos/${martina.id}/resumen`, headers: { cookie } });
 
     expect(respuesta.statusCode).toBe(200);
-    expect(respuesta.json()).toMatchObject({ clasesTomadas: 2, ultimaClase: HOY, totalPagado: null });
+    expect(respuesta.json()).toEqual({ ...resumenEsperadoDeMartina({ erik, julia }), totalPagado: null });
+  });
+
+  it('dos packs distintos comprados el mismo día quedan en el orden del cobro', async () => {
+    const packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
+    const packX8 = await crearPackDeTest({ nombre: 'Pack x8', cantidadClases: 8, precio: 9600 });
+    const martina = await crearAlumnoDeTest({}, new Date('2026-02-20T13:00:00Z'));
+    // El x4 se cobró a las 12:00 y el x8 una hora después, el mismo día.
+    await registrarPago({ alumnoId: martina.id, packId: packX4.id, medio: 'efectivo' }, recepcion.id, new Date('2026-03-02T15:00:00Z'), '2026-03-02');
+    await registrarPago({ alumnoId: martina.id, packId: packX8.id, medio: 'efectivo' }, recepcion.id, new Date('2026-03-02T16:00:00Z'), '2026-03-02');
+
+    const respuesta = await app.inject({ method: 'GET', url: `/api/alumnos/${martina.id}/resumen`, headers: { cookie } });
+
+    expect(respuesta.statusCode).toBe(200);
+    const marzo = respuesta.json().meses.find((mes: { mes: string }) => mes.mes === '2026-03');
+    expect(marzo.compras).toEqual([
+      { pack: 'Pack x4', veces: 1 },
+      { pack: 'Pack x8', veces: 1 },
+    ]);
   });
 });
 

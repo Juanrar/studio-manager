@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { EventoDeAlumno, FichaDeAlumno, Pago } from '@studio/shared';
@@ -7,7 +7,13 @@ import { RECEPCION, conSesion, renderizarEn } from '../../../../test/render.tsx'
 import { servidor } from '../../../../test/servidor.ts';
 import { celdasDe } from '../../../../test/tabla.ts';
 
-type Respuestas = { ficha?: Partial<FichaDeAlumno>; pagos?: Pago[]; actividad?: EventoDeAlumno[] };
+type Respuestas = {
+  ficha?: Partial<FichaDeAlumno>;
+  pagos?: Pago[];
+  actividad?: EventoDeAlumno[];
+  // Cuenta los pedidos al resumen: la función los suma, el test los lee.
+  pedidosDelResumen?: number;
+};
 
 // Abre la ficha de Martina encima de la lista, que también se carga. Los handlers leen `respuestas`
 // en cada pedido: un test las cambia para simular lo que devuelve la API después de una acción.
@@ -22,7 +28,10 @@ function fichaDeMartina(respuestas: Respuestas = {}) {
       );
     }),
     http.get('/api/alumnos/10', () => HttpResponse.json(martina())),
-    http.get('/api/alumnos/10/resumen', () => HttpResponse.json(unResumenDeAlumno())),
+    http.get('/api/alumnos/10/resumen', () => {
+      respuestas.pedidosDelResumen = (respuestas.pedidosDelResumen ?? 0) + 1;
+      return HttpResponse.json(unResumenDeAlumno());
+    }),
     http.get('/api/alumnos/10/actividad', () => HttpResponse.json({ items: respuestas.actividad ?? [] })),
     http.get('/api/pagos', () => HttpResponse.json({ items: respuestas.pagos ?? [] })),
     http.get('/api/packs', () =>
@@ -201,6 +210,8 @@ describe('/alumnos/:id', () => {
     await usuario.click(within(ficha).getByRole('tab', { name: 'Pagos' }));
     expect(await within(ficha).findByRole('row', { name: /Pack x8/ })).toBeInTheDocument();
     expect(cuerpoRecibido).toEqual({ alumnoId: 10, packId: 3, medio: 'transferencia' });
+    // Uno al abrir la ficha y otro al registrar el pago: el resumen se recarga.
+    expect(respuestas.pedidosDelResumen).toBe(2);
   });
 
   it('la pestaña Pagos muestra cada pago con su estado, sus clases y el monto en pesos', async () => {
@@ -296,10 +307,22 @@ describe('/alumnos/:id', () => {
     expect(screen.getByRole('dialog', { name: 'Ficha de Martina García' })).toBeInTheDocument();
   });
 
-  it('el encabezado muestra desde cuándo es alumna', async () => {
+  it('un arrastre que empieza dentro de la ventana y termina en el fondo no la cierra', async () => {
     fichaDeMartina();
     const ficha = await laFicha();
 
-    expect(within(ficha).getByText('Alumna desde 10/03/2025')).toBeInTheDocument();
+    // Seleccionar el email y soltar afuera: mousedown adentro, mouseup y click en el fondo.
+    fireEvent.mouseDown(within(ficha).getByRole('heading', { name: 'Martina García' }));
+    fireEvent.mouseUp(ficha.parentElement!);
+    fireEvent.click(ficha.parentElement!);
+
+    expect(screen.getByRole('dialog', { name: 'Ficha de Martina García' })).toBeInTheDocument();
+  });
+
+  it('el encabezado muestra desde cuándo está en el estudio', async () => {
+    fichaDeMartina();
+    const ficha = await laFicha();
+
+    expect(within(ficha).getByText('En el estudio desde 10/03/2025')).toBeInTheDocument();
   });
 });

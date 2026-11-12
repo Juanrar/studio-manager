@@ -65,6 +65,9 @@ export async function resumenDelAlumno(id: number, hoy: FechaDia, rol: Rol): Pro
   const clases = await asistenciasDeAlumno(id);
   const pagos = (await listarPagosDeAlumno(id, hoy))
     .filter((pago) => !pago.anulado)
+    // `resumir` arma las compras de cada mes en el orden de los pagos: del cobro más viejo al más nuevo,
+    // con el instante del cobro, porque dos packs pueden comprarse el mismo día.
+    .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
     .map((pago) => ({
       dia: diaDe(new Date(pago.fecha)),
       pack: pago.pack.nombre,
@@ -72,9 +75,7 @@ export async function resumenDelAlumno(id: number, hoy: FechaDia, rol: Rol): Pro
       clasesUsadas: pago.clasesUsadas,
       monto: pago.monto,
       vencido: pago.vencido,
-    }))
-    // `resumir` arma las compras de cada mes en el orden de los pagos: del cobro más viejo al más nuevo.
-    .sort((a, b) => a.dia.localeCompare(b.dia));
+    }));
 
   const resumen = resumir(clases, pagos, hoy);
   return { ...resumen, totalPagado: rol === 'admin' ? resumen.totalPagado : null };
