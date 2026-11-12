@@ -70,14 +70,24 @@ function Ficha({ datos, alCerrar }: { datos: FichaDeAlumno; alCerrar: () => void
   return (
     <Ventana etiqueta={`Ficha de ${nombre}`} alCerrar={alCerrar} encabezado={encabezado}>
       <Pestanas pestanas={PESTANAS} activa={pestana} alCambiar={setPestana}>
-        {pestana === 'resumen' && <ResumenDelAlumno datos={datos} />}
-        {pestana === 'actividad' && <Actividad alumnoId={datos.id} />}
-        {pestana === 'datos' && <Datos datos={datos} />}
-        {pestana === 'pagos' && (
-          <div className="p-4">
-            <PagosDelAlumno alumnoId={datos.id} />
+        {/* El Resumen siempre está montado y fija el tamaño de la ventana, sin scroll. Las otras
+            pestañas se apoyan encima con el mismo tamaño y scrollean por dentro si no entran. */}
+        <div className="relative">
+          <div className={pestana === 'resumen' ? '' : 'invisible'} aria-hidden={pestana !== 'resumen'} inert={pestana !== 'resumen'}>
+            <ResumenDelAlumno datos={datos} />
           </div>
-        )}
+          {pestana !== 'resumen' && (
+            <div className="absolute inset-0 overflow-auto">
+              {pestana === 'actividad' && <Actividad alumnoId={datos.id} />}
+              {pestana === 'datos' && <Datos datos={datos} />}
+              {pestana === 'pagos' && (
+                <div className="p-4">
+                  <PagosDelAlumno alumnoId={datos.id} />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </Pestanas>
     </Ventana>
   );
