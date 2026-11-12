@@ -242,14 +242,14 @@ expect(resumir(clases, pagos, HOY)).toEqual({
 
 `actividadDelAlumno` no tiene que devolver `horaInicio`: el evento de la actividad no cambia. El test de la actividad que ya existe compara la respuesta completa y lo verifica.
 
-- [ ] **Paso 1: escribir los tests** en un `describe('GET /api/alumnos/:id/resumen')` de `alumnos.test.ts`, con las mismas fábricas que el test de la actividad:
+- [x] **Paso 1: escribir los tests** en un `describe('GET /api/alumnos/:id/resumen')` de `alumnos.test.ts`, con las mismas fábricas que el test de la actividad:
   - *El resumen completo, pedido por un administrador.* Martina, alta el `2026-02-20`. Paga un Pack x4 ($5200) el `2026-02-20` y se anula. Paga un Pack x8 ($9600) con `new Date('2026-03-01T01:30:00Z')` y día `'2026-02-28'` (22:30 del 28 de febrero en Buenos Aires). Horario de Hip-Hop de Erik, martes 19:00. Asistencias el `2026-03-03`, hoy (`2026-03-10`, con Julia de suplente) y el `2026-03-17`. Se espera la respuesta completa con `toEqual`: `clasesTomadas: 2`, `clasesEnOchoSemanas: 2`, `ultimaClase: '2026-03-10'`, `hoy: '2026-03-10'`, `estiloMasTomado: 'Hip-Hop'`, `sueleVenir: { diasSemana: [2], horaInicio: '19:00' }`, `vencidasSinUsar: 0`, `totalPagado: 9600`, `profesores` con Julia y después Erik (una clase cada uno, primero la más reciente), y 12 meses donde `2026-02` tiene `compras: [{ pack: 'Pack x8', veces: 1 }]` y `tomadas: 0`, y `2026-03` tiene `compras: []`, `tomadas: 2` y sus dos clases.
   - *Recepción recibe `totalPagado: null`.* El mismo pedido con la cookie de recepción.
   - *404:* sumar `'/api/alumnos/999/resumen'` a la lista del test "la ficha y la actividad de un alumno que no existe responden 404".
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api test src/modules/alumnos/test/alumnos.test.ts` y ver que los nuevos fallan con 404 de ruta.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr todos los tests de la API (`pnpm --filter @studio/api test`) y `pnpm typecheck`.
-- [ ] **Paso 5:** commit `feat(alumnos): resumen del alumno en la API`.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api test src/modules/alumnos/test/alumnos.test.ts` y ver que los nuevos fallan con 404 de ruta.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr todos los tests de la API (`pnpm --filter @studio/api test`) y `pnpm typecheck`.
+- [x] **Paso 5:** commit `feat(alumnos): resumen del alumno en la API`.
 
 ### Tarea 3: la ficha se abre en una ventana
 

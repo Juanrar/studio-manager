@@ -2,6 +2,7 @@ import { and, asc, desc, eq, inArray, lte, max, type SQL } from 'drizzle-orm';
 import type { Asistencia, PersonaResumen } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
+import { horaHHMM } from '../../lib/postgres.ts';
 import {
   alumno,
   asistencia,
@@ -61,7 +62,7 @@ export async function ultimasFechas(
     .groupBy(asistencia.alumnoId);
 }
 
-export type ClaseDeAlumno = { fecha: FechaDia; clase: string; profesor: PersonaResumen };
+export type ClaseDeAlumno = { fecha: FechaDia; horaInicio: string; clase: string; profesor: PersonaResumen };
 
 // Las clases de un alumno, también las anotadas para más adelante, de la más nueva a la más vieja.
 // El profesor es el de la clase, que cambia si hubo suplencia; el del horario es el titular. El estilo
@@ -70,6 +71,7 @@ export async function listarDeAlumno(ej: Ejecutor, alumnoId: number): Promise<Cl
   return ej
     .select({
       fecha: clase.fecha,
+      horaInicio: horaHHMM(clase.horaInicio),
       clase: clase.estilo,
       profesor: { id: profesor.id, nombre: profesor.nombre, apellido: profesor.apellido },
     })

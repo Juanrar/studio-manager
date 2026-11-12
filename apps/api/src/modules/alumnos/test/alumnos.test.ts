@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { Alumno, Pack, UsuarioPublico } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { AHORA, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../../test/app.ts';
+import { ADMIN, AHORA, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../../test/db.ts';
 import {
   crearAlumnoDeTest,
@@ -323,12 +323,109 @@ describe('GET /api/alumnos/:id/actividad', () => {
   });
 
   it('la ficha y la actividad de un alumno que no existe responden 404', async () => {
-    for (const url of ['/api/alumnos/999', '/api/alumnos/999/actividad']) {
+    for (const url of ['/api/alumnos/999', '/api/alumnos/999/actividad', '/api/alumnos/999/resumen']) {
       const respuesta = await app.inject({ method: 'GET', url, headers: { cookie } });
 
       expect(respuesta.statusCode).toBe(404);
       expect(respuesta.json()).toEqual({ error: 'No existe el alumno 999' });
     }
+  });
+});
+
+describe('GET /api/alumnos/:id/resumen', () => {
+  // Los 12 meses del resumen de hoy (2026-03-10), del más viejo al actual, con los vacíos por defecto.
+  const MESES = [
+    '2025-04',
+    '2025-05',
+    '2025-06',
+    '2025-07',
+    '2025-08',
+    '2025-09',
+    '2025-10',
+    '2025-11',
+    '2025-12',
+    '2026-01',
+    '2026-02',
+    '2026-03',
+  ];
+  const mesVacio = (mes: string) => ({ mes, compras: [], tomadas: 0, vencidas: 0, clases: [] });
+
+  // Martina con lo mismo para los dos roles: ver el escenario de la actividad.
+  async function armarAMartina() {
+    const packX8 = await crearPackDeTest({ nombre: 'Pack x8', cantidadClases: 8, precio: 9600 });
+    const packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
+    const erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata' });
+    const julia = await crearProfesorDeTest({ nombre: 'Julia', apellido: 'Paz' });
+    const hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:00' });
+    const martina = await crearAlumnoDeTest({}, new Date('2026-02-20T13:00:00Z'));
+    const anulado = await pagar(martina, packX4, '2026-02-20');
+    await anularPago(anulado.id, 'Se cargó dos veces', AHORA, HOY);
+    // 22:30 del 28 de febrero en Buenos Aires, que en UTC ya es el 1 de marzo.
+    await registrarPago(
+      { alumnoId: martina.id, packId: packX8.id, medio: 'mercado_pago' },
+      recepcion.id,
+      new Date('2026-03-01T01:30:00Z'),
+      '2026-02-28',
+    );
+    for (const martes of ['2026-03-03', HOY, '2026-03-17']) {
+      const { clase } = await abrirClase(hipHop.id, martes);
+      if (martes === HOY) await actualizarClase(clase.id, { profesorId: julia.id }, HOY);
+      await registrarAsistencia(clase.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
+    }
+    return { martina, erik, julia };
+  }
+
+  it('el administrador recibe el resumen completo: sin pagos anulados, el cobro por su día, la clase anotada fuera de las cuentas y el total pagado', async () => {
+    const { martina, erik, julia } = await armarAMartina();
+    await crearUsuarioDeTest(ADMIN);
+    const cookieAdmin = await loguear(app, ADMIN.email, ADMIN.password);
+
+    const respuesta = await app.inject({
+      method: 'GET',
+      url: `/api/alumnos/${martina.id}/resumen`,
+      headers: { cookie: cookieAdmin },
+    });
+
+    const personaErik = { id: erik.id, nombre: 'Erik', apellido: 'Zapata' };
+    const personaJulia = { id: julia.id, nombre: 'Julia', apellido: 'Paz' };
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json()).toEqual({
+      clasesTomadas: 2,
+      clasesEnOchoSemanas: 2,
+      ultimaClase: HOY,
+      hoy: HOY,
+      estiloMasTomado: 'Hip-Hop',
+      sueleVenir: { diasSemana: [2], horaInicio: '19:00' },
+      vencidasSinUsar: 0,
+      totalPagado: 9600,
+      profesores: [
+        { ...personaJulia, estilo: 'Hip-Hop', clases: 1 },
+        { ...personaErik, estilo: 'Hip-Hop', clases: 1 },
+      ],
+      meses: MESES.map((mes) => {
+        if (mes === '2026-02') return { ...mesVacio(mes), compras: [{ pack: 'Pack x8', veces: 1 }] };
+        if (mes === '2026-03') {
+          return {
+            ...mesVacio(mes),
+            tomadas: 2,
+            clases: [
+              { fecha: HOY, estilo: 'Hip-Hop', profesor: personaJulia },
+              { fecha: '2026-03-03', estilo: 'Hip-Hop', profesor: personaErik },
+            ],
+          };
+        }
+        return mesVacio(mes);
+      }),
+    });
+  });
+
+  it('recepción recibe el mismo resumen con totalPagado en null', async () => {
+    const { martina } = await armarAMartina();
+
+    const respuesta = await app.inject({ method: 'GET', url: `/api/alumnos/${martina.id}/resumen`, headers: { cookie } });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json()).toMatchObject({ clasesTomadas: 2, ultimaClase: HOY, totalPagado: null });
   });
 });
 

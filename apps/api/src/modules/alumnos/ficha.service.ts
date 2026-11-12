@@ -1,4 +1,4 @@
-import type { EventoDeAlumno, FichaDeAlumno } from '@studio/shared';
+import type { EventoDeAlumno, FichaDeAlumno, ResumenDeAlumno, Rol } from '@studio/shared';
 import { config } from '../../config.ts';
 import { db } from '../../db/client.ts';
 import { NoEncontradoError } from '../../lib/errores.ts';
@@ -6,6 +6,7 @@ import { hoyEnEstudio, type FechaDia } from '../../lib/fechas.ts';
 import { asistenciasDeAlumno } from '../asistencias/asistencias.service.ts';
 import { listarPagosDeAlumno, resumenDePacks } from '../pagos/pagos.service.ts';
 import * as repo from './alumnos.repository.ts';
+import { resumir } from './resumen.ts';
 
 // La ficha de recepción y la actividad del alumno. Viven fuera de alumnos.service por lo mismo
 // que el listado: pagos y asistencias ya usan alumnos.service.
@@ -29,8 +30,8 @@ export async function actividadDelAlumno(id: number, hoy: FechaDia): Promise<Eve
   const cambios = await repo.listarCambiosDeEstado(db, id);
 
   const hechos: HechoConHora[] = [
-    ...asistencias.map((asistencia) => ({
-      evento: { tipo: asistencia.fecha > hoy ? ('anotado' as const) : ('asistencia' as const), ...asistencia },
+    ...asistencias.map(({ fecha, clase, profesor }) => ({
+      evento: { tipo: fecha > hoy ? ('anotado' as const) : ('asistencia' as const), fecha, clase, profesor },
       instante: null,
     })),
     ...pagos.map((pago) => {
@@ -56,6 +57,27 @@ export async function actividadDelAlumno(id: number, hoy: FechaDia): Promise<Eve
   ];
   // `sort` es estable: las clases de un mismo día quedan en el orden de la consulta, de la última a la primera.
   return hechos.sort(masNuevoPrimero).map((hecho) => hecho.evento);
+}
+
+// Las cuentas del resumen salen de `resumir`. `totalPagado` es solo para el administrador.
+export async function resumenDelAlumno(id: number, hoy: FechaDia, rol: Rol): Promise<ResumenDeAlumno> {
+  await buscarConAlta(id);
+  const clases = await asistenciasDeAlumno(id);
+  const pagos = (await listarPagosDeAlumno(id, hoy))
+    .filter((pago) => !pago.anulado)
+    .map((pago) => ({
+      dia: diaDe(new Date(pago.fecha)),
+      pack: pago.pack.nombre,
+      cantidadClases: pago.cantidadClases,
+      clasesUsadas: pago.clasesUsadas,
+      monto: pago.monto,
+      vencido: pago.vencido,
+    }))
+    // `resumir` arma las compras de cada mes en el orden de los pagos: del cobro más viejo al más nuevo.
+    .sort((a, b) => a.dia.localeCompare(b.dia));
+
+  const resumen = resumir(clases, pagos, hoy);
+  return { ...resumen, totalPagado: rol === 'admin' ? resumen.totalPagado : null };
 }
 
 async function buscarConAlta(id: number) {
