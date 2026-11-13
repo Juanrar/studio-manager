@@ -1,6 +1,6 @@
 # El horario y sus clases en un módulo
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** clases-por-adelantado, grilla-semanal, alta-de-profesor-desde-el-asistente  
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; `apps/api/src/modules/clases/programacion.service.ts` no existe; la lista de lo que una clase copia de su horario está escrita una sola vez en la API; `clases.service.ts` no importa nada de `modules/horarios`.
 
@@ -116,8 +116,8 @@ El resto de la feature se verifica con los tests que ya existen. Cambian por la 
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
-- [ ] `apps/api/src/modules/clases/programacion.service.ts` no existe y nadie lo importa.
-- [ ] `clases.service.ts` no importa nada de `modules/horarios`.
-- [ ] Buscar `horaInicio` en `apps/api/src/modules/clases` y `apps/api/src/modules/horarios`, sin los tests: la lista de lo que la clase copia aparece una sola vez. Las demás apariciones son columnas de un listado o campos de una edición.
-- [ ] `pnpm e2e` pasa.
+- [x] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio: API 251, web 198.
+- [x] `apps/api/src/modules/clases/programacion.service.ts` no existe y nadie lo importa.
+- [x] `clases.service.ts` no importa nada de `modules/horarios`.
+- [x] Buscar `horaInicio` en `apps/api/src/modules/clases` y `apps/api/src/modules/horarios`, sin los tests: la lista de lo que la clase copia aparece una sola vez. Las demás apariciones son columnas de un listado o campos de una edición.
+- [x] `pnpm e2e` pasa: 1.
