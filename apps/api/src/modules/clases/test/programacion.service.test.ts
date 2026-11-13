@@ -1,5 +1,5 @@
 import { asc, eq } from 'drizzle-orm';
-import type { Profesor } from '@studio/shared';
+import type { Clase, Profesor } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { ADMIN, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../../test/app.ts';
@@ -303,6 +303,81 @@ describe('PATCH /api/horarios/:id', () => {
     ]);
     const semana = await app.inject({ method: 'GET', url: '/api/clases?desde=2026-03-23&hasta=2026-03-29', headers: { cookie } });
     expect(semana.json().items).toEqual([expect.objectContaining({ id: delVeinticuatro, tieneCambios: false })]);
+  });
+
+  it('con una clase por cada cambio propio, siguen al horario exactamente las que la grilla mostraba sin cambios', async () => {
+    const iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni' });
+    const lucia = await crearProfesorDeTest({ nombre: 'Lucía', apellido: 'Paz' });
+    const cambiarClaseDel = async (fecha: string, cambios: Record<string, unknown>) => {
+      const { id } = await claseDel(fecha);
+      const respuesta = await app.inject({ method: 'PATCH', url: `/api/clases/${id}`, payload: cambios, headers: { cookie } });
+      expect(respuesta.statusCode).toBe(200);
+    };
+    // Lo que la clase copia de su horario, más el estado y si la grilla la marca con cambios propios.
+    const clasesDeLaGrilla = async () => {
+      const respuesta = await app.inject({ method: 'GET', url: '/api/clases?desde=2026-03-02&hasta=2026-05-03', headers: { cookie } });
+      return (respuesta.json().items as Clase[]).map((c) => ({
+        fecha: c.fecha,
+        horaInicio: c.horaInicio,
+        horaFin: c.horaFin,
+        estilo: c.estilo,
+        nivel: c.nivel,
+        profesor: c.profesor.apellido,
+        estado: c.estado,
+        tieneCambios: c.tieneCambios,
+      }));
+    };
+    const igualAlHorario = { horaInicio: '19:00', horaFin: '20:30', estilo: 'Hip-Hop', nivel: 'Inicial', profesor: 'Zapata', estado: 'programada' };
+
+    await cambiarClaseDel('2026-03-10', { fecha: '2026-03-11' });
+    await cambiarClaseDel('2026-03-17', { horaInicio: '18:00' });
+    await cambiarClaseDel('2026-03-24', { horaFin: '21:00' });
+    await cambiarClaseDel('2026-03-31', { estilo: 'Urbano' });
+    await cambiarClaseDel('2026-04-07', { nivel: 'Avanzado' });
+    await cambiarClaseDel('2026-04-14', { profesorId: iaru.id });
+    await cambiarClaseDel('2026-04-21', { estado: 'cancelada' });
+
+    const conCambiosPropios = [
+      { ...igualAlHorario, fecha: '2026-03-11', tieneCambios: true },
+      { ...igualAlHorario, fecha: '2026-03-17', horaInicio: '18:00', tieneCambios: true },
+      { ...igualAlHorario, fecha: '2026-03-24', horaFin: '21:00', tieneCambios: true },
+      { ...igualAlHorario, fecha: '2026-03-31', estilo: 'Urbano', tieneCambios: true },
+      { ...igualAlHorario, fecha: '2026-04-07', nivel: 'Avanzado', tieneCambios: true },
+      { ...igualAlHorario, fecha: '2026-04-14', profesor: 'Speroni', tieneCambios: true },
+      { ...igualAlHorario, fecha: '2026-04-21', estado: 'cancelada', tieneCambios: true },
+    ];
+    // La de la semana pasada no se compara con el horario de hoy.
+    const semanaPasada = { ...igualAlHorario, fecha: '2026-03-03', tieneCambios: false };
+    expect(await clasesDeLaGrilla()).toEqual([
+      semanaPasada,
+      ...conCambiosPropios,
+      { ...igualAlHorario, fecha: '2026-04-28', tieneCambios: false },
+    ]);
+
+    const respuesta = await cambiarHorario({
+      diaSemana: 4,
+      horaInicio: '20:00',
+      horaFin: '21:30',
+      estilo: 'Dancehall',
+      nivel: 'Intermedio',
+      profesorId: lucia.id,
+    });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(await clasesDeLaGrilla()).toEqual([
+      semanaPasada,
+      ...conCambiosPropios,
+      {
+        fecha: '2026-04-30',
+        horaInicio: '20:00',
+        horaFin: '21:30',
+        estilo: 'Dancehall',
+        nivel: 'Intermedio',
+        profesor: 'Paz',
+        estado: 'programada',
+        tieneCambios: false,
+      },
+    ]);
   });
 
   it('quitar de todas desde una semana borra esa semana y las siguientes, y deja las anteriores', async () => {

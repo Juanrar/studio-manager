@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gte, isNull, lte, sql, type SQL } from 'drizzle-orm';
+import { and, asc, count, eq, gte, lte, not, sql, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { Clase, EstadoClase } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
@@ -8,19 +8,24 @@ import type { FechaDia } from '../../lib/fechas.ts';
 
 const titular = alias(profesor, 'titular');
 
-// Una clase tiene cambios propios si difiere de su horario. Solo se mira de la semana actual en
-// adelante: una clase pasada se compararía con el horario de hoy. Una clase única, sin horario, existe
-// solo esa semana.
+// Lo que una clase copia de su horario. El día va aparte: la clase guarda una fecha y el horario un día
+// de la semana. Con esta lista se compara si la clase sigue igual y se la pone al día.
+const COPIADAS_DEL_HORARIO = ['horaInicio', 'horaFin', 'estilo', 'nivel', 'profesorId'] as const;
+
+// La única definición de "cambios propios". Necesita la fila de `horario` de la clase en la consulta.
+const difiereDeSuHorario = sql<boolean>`(extract(isodow from ${clase.fecha}) <> ${horario.diaSemana}
+  or ${sql.join(
+    COPIADAS_DEL_HORARIO.map((columna) => sql`${clase[columna]} is distinct from ${horario[columna]}`),
+    sql` or `,
+  )}
+  or ${clase.estado} <> 'programada')`;
+
+// Solo se mira de la semana actual en adelante: una clase pasada se compararía con el horario de hoy.
+// Una clase única, sin horario, existe solo esa semana.
 const tieneCambios = (lunesActual: FechaDia) => sql<boolean>`case
   when ${clase.horarioId} is null then true
   when ${clase.semana} < ${lunesActual}::date then false
-  else extract(isodow from ${clase.fecha}) <> ${horario.diaSemana}
-    or ${clase.horaInicio} <> ${horario.horaInicio}
-    or ${clase.horaFin} <> ${horario.horaFin}
-    or ${clase.estilo} <> ${horario.estilo}
-    or ${clase.nivel} is distinct from ${horario.nivel}
-    or ${clase.profesorId} <> ${horario.profesorId}
-    or ${clase.estado} <> 'programada'
+  else ${difiereDeSuHorario}
 end`;
 
 const columnas = (lunesActual: FechaDia) => ({
@@ -154,49 +159,31 @@ export async function actualizarPorcentajeDeAsistencias(
   await ej.update(asistencia).set({ porcentajeBp }).where(eq(asistencia.claseId, claseId));
 }
 
-// Lo que una clase copia de su horario: con esto se compara si sigue igual y se la actualiza.
-export type DatosDeHorario = {
-  diaSemana: number;
-  horaInicio: string;
-  horaFin: string;
-  estilo: string;
-  nivel: string | null;
-  profesorId: number;
-};
-
-// Las clases de un horario desde `desde` que todavía son iguales a él: las que no tienen cambios propios.
-export async function igualesAlHorario(
+// Las clases de un horario desde `desde` que no tienen cambios propios. Se llama antes de cambiar la
+// fila del horario: después, todas difieren de él.
+export async function sinCambiosPropiosDesde(
   ej: Ejecutor,
   horarioId: number,
-  datos: DatosDeHorario,
   desde: FechaDia,
 ): Promise<{ id: number; semana: FechaDia; fecha: FechaDia }[]> {
   return ej
     .select({ id: clase.id, semana: clase.semana, fecha: clase.fecha })
     .from(clase)
-    .where(
-      and(
-        eq(clase.horarioId, horarioId),
-        gte(clase.fecha, desde),
-        sql`extract(isodow from ${clase.fecha}) = ${datos.diaSemana}`,
-        eq(clase.horaInicio, datos.horaInicio),
-        eq(clase.horaFin, datos.horaFin),
-        eq(clase.estilo, datos.estilo),
-        datos.nivel === null ? isNull(clase.nivel) : eq(clase.nivel, datos.nivel),
-        eq(clase.profesorId, datos.profesorId),
-        eq(clase.estado, 'programada'),
-      ),
-    )
+    .innerJoin(horario, eq(horario.id, clase.horarioId))
+    .where(and(eq(clase.horarioId, horarioId), gte(clase.fecha, desde), not(difiereDeSuHorario)))
     .orderBy(asc(clase.fecha));
 }
 
-export async function copiarDelHorario(
-  ej: Ejecutor,
-  id: number,
-  fecha: FechaDia,
-  datos: Omit<DatosDeHorario, 'diaSemana'>,
-): Promise<void> {
-  await ej.update(clase).set({ fecha, ...datos }).where(eq(clase.id, id));
+// Pone en la clase la fecha y lo que copia de su horario, leído de la fila del horario.
+export async function copiarDelHorario(ej: Ejecutor, id: number, fecha: FechaDia): Promise<void> {
+  const delHorario = Object.fromEntries(
+    COPIADAS_DEL_HORARIO.map((columna) => [columna, sql`${horario[columna]}`]),
+  ) as Record<(typeof COPIADAS_DEL_HORARIO)[number], SQL>;
+  await ej
+    .update(clase)
+    .set({ fecha, ...delHorario })
+    .from(horario)
+    .where(and(eq(clase.id, id), eq(horario.id, clase.horarioId)));
 }
 
 // Si algún anotado pagó con un pack que vence antes de `fecha`, la clase no puede pasar a ese día.

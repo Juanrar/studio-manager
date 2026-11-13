@@ -41,8 +41,12 @@ Clase dada por un profesor distinto del titular.
 _Avoid_: Reemplazo
 
 **Cambios propios**:
-Diferencias de una clase respecto de su horario (día, horas, estilo, nivel, profesor o estado).
+Diferencias de una clase respecto de su horario (día, horas, estilo, nivel, profesor o estado). Una clase con cambios propios deja de seguir a su horario cuando el horario cambia.
 _Avoid_: Excepción, modificación
+
+**Horizonte**:
+Semanas hacia adelante para las que ya existen las clases de cada horario.
+_Avoid_: Ventana, rango de generación
 
 **Sesión**:
 Solo la de login de una persona del personal. Nunca se usa para una clase.

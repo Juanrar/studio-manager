@@ -69,8 +69,7 @@ export async function actualizarHorarioYSusClases(id: number, datos: ActualizarH
     const inicio = desde !== undefined && desde > hoy ? desde : hoy;
 
     if (Object.values(cambios).some((valor) => valor !== undefined)) {
-      const nuevo = await actualizarHorario(id, cambios, tx);
-      await seguirAlHorario(tx, viejo, nuevo, inicio, hoy);
+      await seguirAlHorario(tx, viejo, inicio, hoy, () => actualizarHorario(id, cambios, tx));
     }
     if (activo === false && viejo.activo) await darDeBaja(tx, viejo, inicio);
     if (activo === true && !viejo.activo) {
@@ -82,21 +81,21 @@ export async function actualizarHorarioYSusClases(id: number, datos: ActualizarH
   });
 }
 
-const datosDe = (horario: Horario): repo.DatosDeHorario => ({
-  diaSemana: horario.diaSemana,
-  horaInicio: horario.horaInicio,
-  horaFin: horario.horaFin,
-  estilo: horario.estilo,
-  nivel: horario.nivel,
-  profesorId: horario.profesor.id,
-});
-
-async function seguirAlHorario(tx: Ejecutor, viejo: Horario, nuevo: Horario, inicio: FechaDia, hoy: FechaDia): Promise<void> {
-  const { diaSemana, ...copiados } = datosDe(nuevo);
+// Busca las clases sin cambios propios antes de cambiar la fila del horario: después ya no se sabe
+// cuáles eran iguales a él. El orden queda acá adentro para que quien llama no pueda equivocarlo.
+async function seguirAlHorario(
+  tx: Ejecutor,
+  viejo: Horario,
+  inicio: FechaDia,
+  hoy: FechaDia,
+  cambiarElHorario: () => Promise<Horario>,
+): Promise<void> {
+  const clases = await repo.sinCambiosPropiosDesde(tx, viejo.id, inicio);
+  const nuevo = await cambiarElHorario();
   const cambiaElProfesor = nuevo.profesor.id !== viejo.profesor.id;
 
-  for (const clase of await repo.igualesAlHorario(tx, viejo.id, datosDe(viejo), inicio)) {
-    const fecha = sumarDias(clase.semana, diaSemana - 1);
+  for (const clase of clases) {
+    const fecha = sumarDias(clase.semana, nuevo.diaSemana - 1);
     // Una clase de esta semana no pasa a un día que ya pasó: se queda donde estaba.
     if (fecha < hoy) continue;
     if (fecha > clase.fecha && (await repo.hayAnotadosConPackQueVenceAntes(tx, clase.id, fecha))) {
@@ -104,7 +103,7 @@ async function seguirAlHorario(tx: Ejecutor, viejo: Horario, nuevo: Horario, ini
         `La clase del ${clase.fecha} tiene alumnos anotados con un pack que vence antes del ${fecha}`,
       );
     }
-    await repo.copiarDelHorario(tx, clase.id, fecha, copiados);
+    await repo.copiarDelHorario(tx, clase.id, fecha);
     // Como en una suplencia: el sueldo de la clase sigue a quien la da.
     if (cambiaElProfesor) {
       await repo.actualizarPorcentajeDeAsistencias(tx, clase.id, await porcentajeVigente(tx, nuevo.profesor.id, fecha));

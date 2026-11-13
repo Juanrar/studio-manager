@@ -56,6 +56,15 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 28 | [Alta de profesor desde el asistente](alta-de-profesor-desde-el-asistente.md) | lista | 27 |
 | 30 | [Rediseño de la pantalla del asistente](rediseno-del-asistente.md) | lista | 28 |
 
+## Arquitectura
+
+Refactors que no cambian lo que hace el sistema. Salen de la revisión de arquitectura del 2026-11-13.
+
+| # | Feature | Estado | Depende de |
+|---|---|---|---|
+| 33 | [El horario y sus clases en un módulo](horarios-y-sus-clases.md) | en curso | 25, 26, 28 |
+| 34 | [Los días del negocio en un solo módulo](dias-del-negocio.md) | pendiente | 3 |
+
 ## Bitácora
 
 Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo sin releer todo el repositorio.
