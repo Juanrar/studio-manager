@@ -4,12 +4,12 @@ import type { Horario, Profesor } from '@studio/shared';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { ADMIN, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../../test/db.ts';
-import { crearAlumnoDeTest, crearHorarioDeTest, crearPackDeTest, crearProfesorDeTest } from '../../../../test/fabricas.ts';
+import { crearAlumnoDeTest, crearClaseDeTest, crearHorarioDeTest, crearPackDeTest, crearProfesorDeTest } from '../../../../test/fabricas.ts';
 import { db } from '../../../db/client.ts';
 import { clase } from '../../../db/schema.ts';
 import { registrarAsistencia } from '../../asistencias/asistencias.service.ts';
 import { registrarPago } from '../../pagos/pagos.service.ts';
-import { abrirClase, actualizarClase } from '../clases.service.ts';
+import { actualizarClase } from '../clases.service.ts';
 import { generarClases } from '../programacion.service.ts';
 
 let base: BaseDeTest;
@@ -52,7 +52,7 @@ function pedirClases(consulta: string) {
   return app.inject({ method: 'GET', url: `/api/clases${consulta}`, headers: { cookie } });
 }
 
-// La clase de un horario en una fecha, ya creada por el generador o por `abrirClase`.
+// La clase de un horario en una fecha, ya creada por el generador o por `crearClaseDeTest`.
 async function claseDe(horarioId: number, fecha: string): Promise<number> {
   const [encontrada] = await db
     .select({ id: clase.id })
@@ -165,7 +165,7 @@ describe('GET /api/clases', () => {
 
   it('una clase de una semana anterior no marca cambios propios aunque haya tenido suplente', async () => {
     const iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni' });
-    const { clase: pasada } = await abrirClase(hipHopMartes.id, '2026-03-03');
+    const pasada = await crearClaseDeTest(hipHopMartes.id, '2026-03-03');
     await actualizarClase(pasada.id, { profesorId: iaru.id }, MARTES);
 
     const respuesta = await pedirClases('?desde=2026-03-03&hasta=2026-03-03');
@@ -183,26 +183,6 @@ describe('GET /api/clases', () => {
     const respuesta = await pedirClases(`?desde=${MIERCOLES}&hasta=${MARTES}`);
 
     expect(respuesta.statusCode).toBe(400);
-  });
-});
-
-describe('abrirClase', () => {
-  it('la clase guarda su semana y copia la hora, el estilo y el nivel del horario', async () => {
-    const { clase: abierta } = await abrirClase(hipHopMartes.id, MARTES);
-
-    const [guardada] = await db.select().from(clase).where(eq(clase.id, abierta.id));
-    expect(guardada).toEqual({
-      id: abierta.id,
-      horarioId: hipHopMartes.id,
-      semana: '2026-03-09',
-      fecha: MARTES,
-      horaInicio: '19:00:00',
-      horaFin: '20:30:00',
-      estilo: 'Hip-Hop',
-      nivel: 'Inicial',
-      profesorId: erik.id,
-      estado: 'programada',
-    });
   });
 });
 
@@ -301,7 +281,7 @@ describe('PATCH /api/clases/:id para mover una clase', () => {
   });
 
   it('responde 422 si la clase ya pasó', async () => {
-    const { clase: pasada } = await abrirClase(hipHopMartes.id, '2026-03-03');
+    const pasada = await crearClaseDeTest(hipHopMartes.id, '2026-03-03');
 
     const respuesta = await cambiar(pasada.id, { horaInicio: '20:00', horaFin: '21:30' });
 

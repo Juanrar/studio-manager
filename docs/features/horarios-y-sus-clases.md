@@ -90,13 +90,13 @@ El resto de la feature se verifica con los tests que ya existen. Cambian por la 
 - Modificar: `apps/api/src/modules/clases/clases.service.ts`, `apps/api/src/modules/clases/clases.repository.ts`, `apps/api/src/modules/clases/programacion.service.ts`, `apps/api/test/fabricas.ts`, `docs/entorno/tests-api.md`
 - Test: los seis archivos que importan `abrirClase` (`alumnos.test.ts`, `asistencias.test.ts`, `liquidaciones.test.ts`, `clases.test.ts`, `programacion.service.test.ts`)
 
-- [ ] **Paso 1:** agregar `crearClasesQueFaltan` en `clases.service.ts`, que arma las filas copiando la lista de la tarea 1; `generarClases` pasa a usarla.
-- [ ] **Paso 2:** agregar `crearClaseDeTest(horarioId, fecha)` en `fabricas.ts`, que llama a `crearClasesQueFaltan` con la semana de esa fecha y devuelve `{ id, fecha }`. Si la clase de esa semana ya existe, devuelve esa.
-- [ ] **Paso 3:** `crearHorarioDeTest` inserta la fila directo, sin `crearHorario`.
-- [ ] **Paso 4:** cambiar los usos de `abrirClase` por `crearClaseDeTest`. Borrar `abrirClase`, `ClaseAbierta`, `describe('abrirClase')`, `buscarIdPorHorarioYFecha` e `insertarSiNoExiste`. `clases.service.ts` deja de importar `horarios.service.ts`.
-- [ ] **Paso 5:** actualizar la nota de "Datos de prueba" en `docs/entorno/tests-api.md`.
-- [ ] **Paso 6:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 7:** commit `refactor(tests): abrirClase pasa a las fábricas de test`.
+- [x] **Paso 1:** agregar `crearClasesQueFaltan` en `clases.service.ts`, que arma las filas copiando la lista de la tarea 1; `generarClases` pasa a usarla.
+- [x] **Paso 2:** agregar `crearClaseDeTest(horarioId, fecha)` en `fabricas.ts`, que llama a `crearClasesQueFaltan` con la semana de esa fecha y devuelve `{ id, fecha }`. Si la clase de esa semana ya existe, devuelve esa.
+- [x] **Paso 3:** `crearHorarioDeTest` inserta la fila directo, sin `crearHorario`.
+- [x] **Paso 4:** cambiar los usos de `abrirClase` por `crearClaseDeTest`. Borrar `abrirClase`, `ClaseAbierta`, `describe('abrirClase')`, `buscarIdPorHorarioYFecha` e `insertarSiNoExiste`. `clases.service.ts` deja de importar `horarios.service.ts`.
+- [x] **Paso 5:** actualizar la nota de "Datos de prueba" en `docs/entorno/tests-api.md`.
+- [x] **Paso 6:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 7:** commit `refactor(tests): abrirClase pasa a las fábricas de test`.
 
 ### Tarea 3: El horario y la propagación en el módulo de horarios
 

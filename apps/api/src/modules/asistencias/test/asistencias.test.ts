@@ -6,13 +6,15 @@ import { AHORA, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '.
 import { levantarBaseDeTest, type BaseDeTest } from '../../../../test/db.ts';
 import {
   crearAlumnoDeTest,
+  crearClaseDeTest,
   crearHorarioDeTest,
+  type ClaseDeTest,
   crearPackDeTest,
   crearProfesorDeTest,
 } from '../../../../test/fabricas.ts';
 import { alumno } from '../../../db/schema.ts';
 import { actualizarAlumno } from '../../alumnos/alumnos.service.ts';
-import { abrirClase, actualizarClase, type ClaseAbierta } from '../../clases/clases.service.ts';
+import { actualizarClase } from '../../clases/clases.service.ts';
 import { anularPago, obtenerPago, registrarPago } from '../../pagos/pagos.service.ts';
 
 let base: BaseDeTest;
@@ -21,7 +23,7 @@ let cookie: string;
 let recepcion: UsuarioPublico;
 let erik: Profesor;
 let hipHop: Horario;
-let clase: ClaseAbierta;
+let clase: ClaseDeTest;
 let martina: Alumno;
 let packX4: Pack;
 let claseSuelta: Pack;
@@ -44,7 +46,7 @@ beforeEach(async () => {
   cookie = await loguear(app, RECEPCION.email, RECEPCION.password);
   erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata', porcentajeBp: 5000 });
   hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' });
-  clase = (await abrirClase(hipHop.id, MARTES)).clase;
+  clase = await crearClaseDeTest(hipHop.id, MARTES);
   martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García' });
   packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
   claseSuelta = await crearPackDeTest({ nombre: 'Clase suelta', cantidadClases: 1, precio: 1500 });
@@ -79,7 +81,7 @@ async function restantes(pagoId: number) {
 
 async function otraClaseDelMartes() {
   const ballet = await crearHorarioDeTest(erik.id, { estilo: 'Ballet', diaSemana: 2, horaInicio: '18:00', horaFin: '19:00' });
-  return (await abrirClase(ballet.id, MARTES)).clase;
+  return await crearClaseDeTest(ballet.id, MARTES);
 }
 
 describe('POST /api/clases/:id/asistencias', () => {
@@ -176,7 +178,7 @@ describe('POST /api/clases/:id/asistencias', () => {
     const clases = [clase];
     for (const hora of ['10', '11', '12', '13', '14']) {
       const horario = await crearHorarioDeTest(erik.id, { estilo: `Clase ${hora}`, horaInicio: `${hora}:00`, horaFin: `${hora}:50` });
-      clases.push((await abrirClase(horario.id, MARTES)).clase);
+      clases.push(await crearClaseDeTest(horario.id, MARTES));
     }
 
     const respuestas = await Promise.all(clases.map((s) => registrar(s.id, { alumnoId: martina.id })));

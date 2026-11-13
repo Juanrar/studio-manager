@@ -2,7 +2,7 @@ import { and, asc, count, eq, gte, lte, not, sql, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { Clase, EstadoClase } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
-import { asistencia, clase, horario, pago, profesor, type NuevaClase } from '../../db/schema.ts';
+import { asistencia, clase, horario, pago, profesor, type Horario as FilaHorario, type NuevaClase } from '../../db/schema.ts';
 import { horaHHMM } from '../../lib/postgres.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 
@@ -11,6 +11,18 @@ const titular = alias(profesor, 'titular');
 // Lo que una clase copia de su horario. El día va aparte: la clase guarda una fecha y el horario un día
 // de la semana. Con esta lista se compara si la clase sigue igual y se la pone al día.
 const COPIADAS_DEL_HORARIO = ['horaInicio', 'horaFin', 'estilo', 'nivel', 'profesorId'] as const;
+type CopiadaDelHorario = (typeof COPIADAS_DEL_HORARIO)[number];
+
+// Lo que hace falta de un horario para armar sus clases.
+export type HorarioDeLaClase = Pick<FilaHorario, 'id' | 'diaSemana' | CopiadaDelHorario>;
+
+// Las columnas de una clase nueva que salen de su horario.
+export function copiadasDe(delHorario: HorarioDeLaClase): Pick<NuevaClase, CopiadaDelHorario> {
+  return Object.fromEntries(COPIADAS_DEL_HORARIO.map((columna) => [columna, delHorario[columna]])) as Pick<
+    NuevaClase,
+    CopiadaDelHorario
+  >;
+}
 
 // La única definición de "cambios propios". Necesita la fila de `horario` de la clase en la consulta.
 const difiereDeSuHorario = sql<boolean>`(extract(isodow from ${clase.fecha}) <> ${horario.diaSemana}
@@ -63,14 +75,6 @@ export async function listarRango(ej: Ejecutor, desde: FechaDia, hasta: FechaDia
   return seleccionar(ej, lunesActual, and(gte(clase.fecha, desde), lte(clase.fecha, hasta)));
 }
 
-export async function buscarIdPorHorarioYFecha(ej: Ejecutor, horarioId: number, fecha: FechaDia): Promise<number | null> {
-  const [fila] = await ej
-    .select({ id: clase.id })
-    .from(clase)
-    .where(and(eq(clase.horarioId, horarioId), eq(clase.fecha, fecha)));
-  return fila?.id ?? null;
-}
-
 // Las que ya existían para ese horario y esa semana no se tocan. Devuelve cuántas se crearon.
 export async function insertarLasQueFaltan(ej: Ejecutor, filas: NuevaClase[]): Promise<number> {
   if (filas.length === 0) return 0;
@@ -93,12 +97,6 @@ export async function asignarHorario(ej: Ejecutor, id: number, horarioId: number
 
 export async function borrar(ej: Ejecutor, id: number): Promise<void> {
   await ej.delete(clase).where(eq(clase.id, id));
-}
-
-// Devuelve null si ya existía una clase para ese horario y fecha (dos pedidos a la vez).
-export async function insertarSiNoExiste(ej: Ejecutor, datos: NuevaClase): Promise<number | null> {
-  const [fila] = await ej.insert(clase).values(datos).onConflictDoNothing().returning({ id: clase.id });
-  return fila?.id ?? null;
 }
 
 export async function actualizar(
@@ -178,7 +176,7 @@ export async function sinCambiosPropiosDesde(
 export async function copiarDelHorario(ej: Ejecutor, id: number, fecha: FechaDia): Promise<void> {
   const delHorario = Object.fromEntries(
     COPIADAS_DEL_HORARIO.map((columna) => [columna, sql`${horario[columna]}`]),
-  ) as Record<(typeof COPIADAS_DEL_HORARIO)[number], SQL>;
+  ) as Record<CopiadaDelHorario, SQL>;
   await ej
     .update(clase)
     .set({ fecha, ...delHorario })

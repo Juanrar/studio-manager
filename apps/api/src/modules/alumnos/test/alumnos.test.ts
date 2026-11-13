@@ -5,12 +5,13 @@ import { ADMIN, AHORA, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } 
 import { levantarBaseDeTest, type BaseDeTest } from '../../../../test/db.ts';
 import {
   crearAlumnoDeTest,
+  crearClaseDeTest,
   crearHorarioDeTest,
   crearPackDeTest,
   crearProfesorDeTest,
 } from '../../../../test/fabricas.ts';
 import { registrarAsistencia } from '../../asistencias/asistencias.service.ts';
-import { abrirClase, actualizarClase } from '../../clases/clases.service.ts';
+import { actualizarClase } from '../../clases/clases.service.ts';
 import { actualizarHorario } from '../../horarios/horarios.service.ts';
 import { anularPago, registrarPago } from '../../pagos/pagos.service.ts';
 import { actualizarAlumno } from '../alumnos.service.ts';
@@ -158,7 +159,7 @@ describe('GET /api/alumnos', () => {
     await anularPago(anulado.id, 'Se cargó dos veces', AHORA, HOY);
     await pagar(martina, packX8, '2026-03-01');
     for (const martes of ['2026-03-03', '2026-03-17']) {
-      const { clase } = await abrirClase(hipHop.id, martes);
+      const clase = await crearClaseDeTest(hipHop.id, martes);
       await registrarAsistencia(clase.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
     }
     // Lucía: el pack venció el 10 de febrero sin que lo usara.
@@ -240,7 +241,7 @@ describe('GET /api/alumnos/:id/actividad', () => {
     );
     // Hoy la clase la da Julia como suplente. La del martes que viene ya está anotada.
     for (const martes of ['2026-03-03', HOY, '2026-03-17']) {
-      const { clase } = await abrirClase(hipHop.id, martes);
+      const clase = await crearClaseDeTest(hipHop.id, martes);
       if (martes === HOY) await actualizarClase(clase.id, { profesorId: julia.id }, HOY);
       await registrarAsistencia(clase.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
     }
@@ -284,7 +285,7 @@ describe('GET /api/alumnos/:id/actividad', () => {
     const hipHop = await crearHorarioDeTest((await crearProfesorDeTest()).id, { estilo: 'Hip-Hop', diaSemana: 2 });
     const martina = await crearAlumnoDeTest({}, new Date('2026-02-20T13:00:00Z'));
     await pagar(martina, pack, '2026-03-02');
-    const { clase } = await abrirClase(hipHop.id, '2026-03-03');
+    const clase = await crearClaseDeTest(hipHop.id, '2026-03-03');
     await registrarAsistencia(clase.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
     await actualizarHorario(hipHop.id, { estilo: 'Hip-Hop Avanzado' });
 
@@ -368,7 +369,7 @@ describe('GET /api/alumnos/:id/resumen', () => {
       '2026-02-28',
     );
     for (const martes of ['2026-03-03', HOY, '2026-03-17']) {
-      const { clase } = await abrirClase(hipHop.id, martes);
+      const clase = await crearClaseDeTest(hipHop.id, martes);
       if (martes === HOY) await actualizarClase(clase.id, { profesorId: julia.id }, HOY);
       await registrarAsistencia(clase.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
     }

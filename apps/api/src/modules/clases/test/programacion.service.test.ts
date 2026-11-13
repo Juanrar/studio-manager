@@ -4,13 +4,13 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import type { FastifyInstance } from 'fastify';
 import { ADMIN, RECEPCION, crearAppDeTest, crearUsuarioDeTest, loguear } from '../../../../test/app.ts';
 import { levantarBaseDeTest, type BaseDeTest } from '../../../../test/db.ts';
-import { crearAlumnoDeTest, crearHorarioDeTest, crearPackDeTest, crearProfesorDeTest } from '../../../../test/fabricas.ts';
+import { crearAlumnoDeTest, crearClaseDeTest, crearHorarioDeTest, crearPackDeTest, crearProfesorDeTest } from '../../../../test/fabricas.ts';
 import { db } from '../../../db/client.ts';
 import { clase } from '../../../db/schema.ts';
 import { registrarAsistencia } from '../../asistencias/asistencias.service.ts';
 import { actualizarHorario } from '../../horarios/horarios.service.ts';
 import { registrarPago } from '../../pagos/pagos.service.ts';
-import { abrirClase, actualizarClase } from '../clases.service.ts';
+import { actualizarClase } from '../clases.service.ts';
 import { generarClases } from '../programacion.service.ts';
 
 let base: BaseDeTest;
@@ -186,7 +186,7 @@ describe('PATCH /api/horarios/:id', () => {
     cookie = await loguear(app, ADMIN.email, ADMIN.password);
     hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' });
     // La semana pasada ya tuvo su clase; desde esta semana las crea el generador.
-    await abrirClase(hipHop.id, '2026-03-03');
+    await crearClaseDeTest(hipHop.id, '2026-03-03');
     await generarClases(db, MARTES);
   });
 

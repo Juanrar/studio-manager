@@ -10,6 +10,7 @@ import {
   reactivarHorario,
 } from '../horarios/horarios.service.ts';
 import { porcentajeVigente } from '../profesores/profesores.service.ts';
+import { crearClasesQueFaltan } from './clases.service.ts';
 import * as repo from './clases.repository.ts';
 
 // Lo que toca a la vez un horario y sus clases. Vive en el módulo de clases y usa el service de
@@ -20,21 +21,13 @@ import * as repo from './clases.repository.ts';
 export async function generarClases(ej: Ejecutor, hoy: FechaDia, horarioId?: number): Promise<number> {
   const horarios = await horariosParaGenerar(ej, horarioId);
   const semanas = semanasDelHorizonte(hoy);
-  const filas = horarios.flatMap((horario) =>
-    semanas
-      .filter((lunes) => lunes >= horario.vigenteDesde)
-      .map((lunes) => ({
-        horarioId: horario.id,
-        semana: lunes,
-        fecha: sumarDias(lunes, horario.diaSemana - 1),
-        horaInicio: horario.horaInicio,
-        horaFin: horario.horaFin,
-        estilo: horario.estilo,
-        nivel: horario.nivel,
-        profesorId: horario.profesorId,
-      })),
-  );
-  return repo.insertarLasQueFaltan(ej, filas);
+  let creadas = 0;
+  // Cada horario tiene sus semanas: las del horizonte desde que rige.
+  for (const horario of horarios) {
+    const suyas = semanas.filter((lunes) => lunes >= horario.vigenteDesde);
+    creadas += await crearClasesQueFaltan(ej, [horario], suyas);
+  }
+  return creadas;
 }
 
 // Un horario nuevo aparece en la agenda en el momento, sin esperar a la tarea de cada hora. Con `claseId`,

@@ -1,11 +1,10 @@
 import type { ActualizarClaseInput, Clase, ClasesDelRango, CrearClaseUnicaInput } from '@studio/shared';
 import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
-import { diaSemanaIso, finDelHorizonte, lunesDe, sumarDias, type FechaDia } from '../../lib/fechas.ts';
+import { finDelHorizonte, lunesDe, sumarDias, type FechaDia } from '../../lib/fechas.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
 import { esViolacionCheck } from '../../lib/postgres.ts';
 import { verificarMesAbierto } from '../liquidaciones/liquidaciones.service.ts';
-import { obtenerHorario } from '../horarios/horarios.service.ts';
 import { porcentajeVigente, verificarProfesorActivo } from '../profesores/profesores.service.ts';
 import * as repo from './clases.repository.ts';
 
@@ -19,35 +18,6 @@ export async function obtenerClase(id: number, hoy: FechaDia): Promise<Clase> {
   const encontrada = await repo.buscarPorId(db, id, lunesDe(hoy));
   if (encontrada === null) throw new NoEncontradoError(`No existe la clase ${id}`);
   return encontrada;
-}
-
-export type ClaseAbierta = { id: number; fecha: FechaDia };
-
-// Crea la clase de un horario en una fecha si todavía no existe. La API ya no la expone: las clases
-// se crean por adelantado con programacion.service. La usan los tests para armar semanas pasadas,
-// que el generador no crea.
-export async function abrirClase(horarioId: number, fecha: FechaDia): Promise<{ clase: ClaseAbierta; creada: boolean }> {
-  const horario = await obtenerHorario(horarioId);
-  if (!horario.activo) throw new ReglaDeNegocioError(`El horario de ${horario.estilo} está dado de baja`);
-  if (diaSemanaIso(fecha) !== horario.diaSemana) {
-    throw new ReglaDeNegocioError(`El horario de ${horario.estilo} no se dicta el ${fecha}`);
-  }
-
-  const existente = await repo.buscarIdPorHorarioYFecha(db, horarioId, fecha);
-  if (existente !== null) return { clase: { id: existente, fecha }, creada: false };
-
-  const id = await repo.insertarSiNoExiste(db, {
-    horarioId,
-    semana: lunesDe(fecha),
-    fecha,
-    horaInicio: horario.horaInicio,
-    horaFin: horario.horaFin,
-    estilo: horario.estilo,
-    nivel: horario.nivel,
-    profesorId: horario.profesor.id,
-  });
-  const clase = await repo.buscarIdPorHorarioYFecha(db, horarioId, fecha);
-  return { clase: { id: clase!, fecha }, creada: id !== null };
 }
 
 // Un suplente o una cancelación se cargan también en una clase pasada: son correcciones. Mover la clase o
@@ -126,4 +96,26 @@ export async function bloquearClase(ej: Ejecutor, id: number): Promise<repo.Clas
   const encontrada = await repo.bloquear(ej, id);
   if (encontrada === null) throw new NoEncontradoError(`No existe la clase ${id}`);
   return encontrada;
+}
+
+// Las clases de un horario
+//
+// La usa solo horarios.service. Qué horarios, qué semanas y desde cuándo lo decide quien llama.
+
+// Arma una clase por horario y semana, en el día del horario. Nunca pisa una clase que ya existe,
+// aunque se haya movido de día. Devuelve cuántas creó.
+export async function crearClasesQueFaltan(
+  ej: Ejecutor,
+  horarios: repo.HorarioDeLaClase[],
+  semanas: FechaDia[],
+): Promise<number> {
+  const filas = horarios.flatMap((horario) =>
+    semanas.map((lunes) => ({
+      horarioId: horario.id,
+      semana: lunes,
+      fecha: sumarDias(lunes, horario.diaSemana - 1),
+      ...repo.copiadasDe(horario),
+    })),
+  );
+  return repo.insertarLasQueFaltan(ej, filas);
 }

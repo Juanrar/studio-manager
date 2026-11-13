@@ -13,12 +13,13 @@ import {
 import { levantarBaseDeTest, type BaseDeTest } from '../../../../test/db.ts';
 import {
   crearAlumnoDeTest,
+  crearClaseDeTest,
   crearHorarioDeTest,
+  type ClaseDeTest,
   crearPackDeTest,
   crearProfesorDeTest,
 } from '../../../../test/fabricas.ts';
 import { registrarAsistencia } from '../../asistencias/asistencias.service.ts';
-import { abrirClase, type ClaseAbierta } from '../../clases/clases.service.ts';
 import { actualizarHorario, listarHorarios } from '../../horarios/horarios.service.ts';
 import { registrarPago } from '../../pagos/pagos.service.ts';
 
@@ -35,8 +36,8 @@ let martina: Alumno;
 let joaquin: Alumno;
 let packX4: Pack;
 let claseSuelta: Pack;
-let clase3DeMarzo: ClaseAbierta;
-let clase10DeMarzo: ClaseAbierta;
+let clase3DeMarzo: ClaseDeTest;
+let clase10DeMarzo: ClaseDeTest;
 let asistenciaDeMartinaEl10: Asistencia;
 
 beforeAll(async () => {
@@ -51,7 +52,7 @@ async function pagar(alumno: Alumno, pack: Pack, dia: string, medio: 'efectivo' 
   return registrarPago({ alumnoId: alumno.id, packId: pack.id, medio }, recepcion.id, new Date(`${dia}T15:00:00Z`), dia);
 }
 
-async function asistir(clase: ClaseAbierta, alumno: Alumno) {
+async function asistir(clase: ClaseDeTest, alumno: Alumno) {
   return registrarAsistencia(clase.id, { alumnoId: alumno.id }, recepcion.id, AHORA, '2026-03-10');
 }
 
@@ -68,9 +69,9 @@ beforeEach(async () => {
   erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata', porcentajeBp: 5000 });
   iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni', porcentajeBp: 6000 });
   const hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2 });
-  const clase24DeFebrero = (await abrirClase(hipHop.id, '2026-02-24')).clase;
-  clase3DeMarzo = (await abrirClase(hipHop.id, '2026-03-03')).clase;
-  clase10DeMarzo = (await abrirClase(hipHop.id, '2026-03-10')).clase;
+  const clase24DeFebrero = await crearClaseDeTest(hipHop.id, '2026-02-24');
+  clase3DeMarzo = await crearClaseDeTest(hipHop.id, '2026-03-03');
+  clase10DeMarzo = await crearClaseDeTest(hipHop.id, '2026-03-10');
 
   martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García' });
   joaquin = await crearAlumnoDeTest({ nombre: 'Joaquín', apellido: 'Pérez' });
