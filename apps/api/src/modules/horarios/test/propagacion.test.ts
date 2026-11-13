@@ -8,10 +8,9 @@ import { crearAlumnoDeTest, crearClaseDeTest, crearHorarioDeTest, crearPackDeTes
 import { db } from '../../../db/client.ts';
 import { clase } from '../../../db/schema.ts';
 import { registrarAsistencia } from '../../asistencias/asistencias.service.ts';
-import { actualizarHorario } from '../../horarios/horarios.service.ts';
+import { actualizarClase } from '../../clases/clases.service.ts';
 import { registrarPago } from '../../pagos/pagos.service.ts';
-import { actualizarClase } from '../clases.service.ts';
-import { generarClases } from '../programacion.service.ts';
+import { actualizarHorario, generarClases } from '../horarios.service.ts';
 
 let base: BaseDeTest;
 let erik: Profesor;
@@ -118,7 +117,7 @@ describe('generarClases', () => {
 
   it('un horario dado de baja no genera clases', async () => {
     const salsa = await salsaDelJueves();
-    await actualizarHorario(salsa.id, { activo: false });
+    await actualizarHorario(salsa.id, { activo: false }, HOY);
 
     expect(await generarClases(db, HOY)).toBe(0);
     expect(await clasesGuardadas()).toEqual([]);

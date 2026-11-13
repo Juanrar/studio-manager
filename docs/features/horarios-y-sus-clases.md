@@ -106,13 +106,13 @@ El resto de la feature se verifica con los tests que ya existen. Cambian por la 
 - Mover: `apps/api/src/modules/clases/test/programacion.service.test.ts` a `apps/api/src/modules/horarios/test/propagacion.test.ts`
 - Test: los archivos que importan `programacion.service.ts` o `actualizarHorario`
 
-- [ ] **Paso 1:** pasar a `clases.service.ts` `seguirAlHorario`, `quitarClasesDesde` y `adoptarClaseUnica`, como dice "Cómo queda".
-- [ ] **Paso 2:** dejar en `horarios.service.ts` las operaciones completas con los nombres cortos. Las que tocan solo la fila quedan privadas. `horariosParaGenerar` deja de exportarse.
-- [ ] **Paso 3:** borrar `programacion.service.ts` y actualizar los imports de `horarios.routes.ts`, `tareas.ts`, `alta-de-profesor.service.ts` y los tests.
-- [ ] **Paso 4:** mover el test de la propagación con `git mv` y arreglar sus imports. Pasar los 9 usos de `actualizarHorario` de los tests a la operación completa.
-- [ ] **Paso 5:** actualizar `docs/entorno/tests-api.md` (dónde vive `generarClases`).
-- [ ] **Paso 6:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 7:** commit `refactor(horarios): el horario y la propagación a sus clases en un módulo`.
+- [x] **Paso 1:** pasar a `clases.service.ts` `seguirAlHorario`, `quitarClasesDesde` y `adoptarClaseUnica`, como dice "Cómo queda".
+- [x] **Paso 2:** dejar en `horarios.service.ts` las operaciones completas con los nombres cortos. Las que tocan solo la fila quedan privadas. `horariosParaGenerar` deja de exportarse.
+- [x] **Paso 3:** borrar `programacion.service.ts` y actualizar los imports de `horarios.routes.ts`, `tareas.ts`, `alta-de-profesor.service.ts` y los tests.
+- [x] **Paso 4:** mover el test de la propagación con `git mv` y arreglar sus imports. Pasar los 9 usos de `actualizarHorario` de los tests a la operación completa.
+- [x] **Paso 5:** actualizar `docs/entorno/tests-api.md` (dónde vive `generarClases`).
+- [x] **Paso 6:** correr `pnpm --filter @studio/api test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 7:** commit `refactor(horarios): el horario y la propagación a sus clases en un módulo`.
 
 ## Verificación final
 

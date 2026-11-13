@@ -4,7 +4,7 @@ import { crearHorarioDeTest, crearProfesorDeTest } from '../../../../test/fabric
 import { levantarBaseDeTest, type BaseDeTest } from '../../../../test/db.ts';
 import { clase, profesor } from '../../../db/schema.ts';
 import { ReglaDeNegocioError } from '../../../lib/errores.ts';
-import { generarClases } from '../../clases/programacion.service.ts';
+import { generarClases } from '../../horarios/horarios.service.ts';
 import { actualizarProfesor } from '../../profesores/profesores.service.ts';
 import { herramientasPara } from '../herramientas.ts';
 import { PROPUESTA_MOSTRADA } from '../propuestas.ts';

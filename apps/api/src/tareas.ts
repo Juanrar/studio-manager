@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { db } from './db/client.ts';
 import { darDeBajaPorNoComprar } from './modules/alumnos/baja-automatica.service.ts';
-import { generarClases } from './modules/clases/programacion.service.ts';
+import { generarClases } from './modules/horarios/horarios.service.ts';
 
 const UNA_HORA = 60 * 60 * 1000;
 

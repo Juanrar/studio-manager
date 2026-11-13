@@ -183,7 +183,7 @@ describe('GET /api/profesores con las clases de la semana', () => {
       horaInicio: '19:00',
       horaFin: '20:30',
     });
-    await actualizarHorario(breakViernes.id, { activo: false });
+    await actualizarHorario(breakViernes.id, { activo: false }, hoyEnEstudio(AHORA));
 
     const respuesta = await pedirProfesores();
 
@@ -230,7 +230,7 @@ describe('GET /api/profesores con las clases de la semana', () => {
       horaInicio: '19:30',
       horaFin: '21:00',
     });
-    await actualizarHorario(breakLunes.id, { activo: false });
+    await actualizarHorario(breakLunes.id, { activo: false }, hoyEnEstudio(AHORA));
     // Lucía se fue y sus clases se dieron de baja: el listado la muestra, pero sin carga semanal.
     const salsaViernes = await crearHorarioDeTest(lucia.id, {
       estilo: 'Salsa',
@@ -238,7 +238,7 @@ describe('GET /api/profesores con las clases de la semana', () => {
       horaInicio: '19:00',
       horaFin: '20:30',
     });
-    await actualizarHorario(salsaViernes.id, { activo: false });
+    await actualizarHorario(salsaViernes.id, { activo: false }, hoyEnEstudio(AHORA));
     await actualizarProfesor(lucia.id, { activo: false }, hoyEnEstudio(AHORA));
 
     const respuesta = await pedirProfesores('?incluirInactivos=true');

@@ -10,7 +10,7 @@ import { clase } from '../../../db/schema.ts';
 import { registrarAsistencia } from '../../asistencias/asistencias.service.ts';
 import { registrarPago } from '../../pagos/pagos.service.ts';
 import { actualizarClase } from '../clases.service.ts';
-import { generarClases } from '../programacion.service.ts';
+import { generarClases } from '../../horarios/horarios.service.ts';
 
 let base: BaseDeTest;
 let app: FastifyInstance;

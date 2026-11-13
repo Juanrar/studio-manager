@@ -163,9 +163,9 @@ export async function sinCambiosPropiosDesde(
   ej: Ejecutor,
   horarioId: number,
   desde: FechaDia,
-): Promise<{ id: number; semana: FechaDia; fecha: FechaDia }[]> {
+): Promise<{ id: number; semana: FechaDia; fecha: FechaDia; profesorId: number }[]> {
   return ej
-    .select({ id: clase.id, semana: clase.semana, fecha: clase.fecha })
+    .select({ id: clase.id, semana: clase.semana, fecha: clase.fecha, profesorId: clase.profesorId })
     .from(clase)
     .innerJoin(horario, eq(horario.id, clase.horarioId))
     .where(and(eq(clase.horarioId, horarioId), gte(clase.fecha, desde), not(difiereDeSuHorario)))

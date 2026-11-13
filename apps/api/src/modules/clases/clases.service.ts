@@ -119,3 +119,62 @@ export async function crearClasesQueFaltan(
   );
   return repo.insertarLasQueFaltan(ej, filas);
 }
+
+// Las clases desde `inicio` que todavía eran iguales al horario siguen su cambio. Las que tienen
+// cambios propios (un suplente, una cancelación) no se tocan.
+// Busca las clases antes de cambiar la fila del horario: después ya no se sabe cuáles eran iguales a
+// él. El orden queda acá adentro para que quien llama no pueda equivocarlo. `cambiarElHorario`
+// actualiza la fila y devuelve el día y el profesor nuevos.
+export async function seguirAlHorario(
+  ej: Ejecutor,
+  horarioId: number,
+  inicio: FechaDia,
+  hoy: FechaDia,
+  cambiarElHorario: () => Promise<{ diaSemana: number; profesorId: number }>,
+): Promise<void> {
+  const clases = await repo.sinCambiosPropiosDesde(ej, horarioId, inicio);
+  const nuevo = await cambiarElHorario();
+
+  for (const clase of clases) {
+    const fecha = sumarDias(clase.semana, nuevo.diaSemana - 1);
+    // Una clase de esta semana no pasa a un día que ya pasó: se queda donde estaba.
+    if (fecha < hoy) continue;
+    if (fecha > clase.fecha && (await repo.hayAnotadosConPackQueVenceAntes(ej, clase.id, fecha))) {
+      throw new ReglaDeNegocioError(
+        `La clase del ${clase.fecha} tiene alumnos anotados con un pack que vence antes del ${fecha}`,
+      );
+    }
+    await repo.copiarDelHorario(ej, clase.id, fecha);
+    // Como en una suplencia: el sueldo de la clase sigue a quien la da. Una clase sin cambios propios
+    // tenía el profesor del horario de antes, así que alcanza con comparar contra el suyo.
+    if (nuevo.profesorId !== clase.profesorId) {
+      await repo.actualizarPorcentajeDeAsistencias(ej, clase.id, await porcentajeVigente(ej, nuevo.profesorId, fecha));
+    }
+  }
+}
+
+// Borra las clases desde `desde`: las semanas anteriores, ya creadas, quedan como estaban.
+export async function quitarClasesDesde(
+  ej: Ejecutor,
+  horario: { id: number; estilo: string },
+  desde: FechaDia,
+): Promise<void> {
+  const conAnotados = await repo.primeraConAsistenciasDesde(ej, horario.id, desde);
+  if (conAnotados !== null) {
+    throw new ReglaDeNegocioError(
+      `El horario de ${horario.estilo} tiene alumnos anotados el ${conAnotados}. Quitalos antes de darlo de baja`,
+    );
+  }
+  await repo.borrarDesde(ej, horario.id, desde);
+}
+
+// La clase única pasa a ser la primera de la serie del horario, que rige desde `semana`.
+export async function adoptarClaseUnica(ej: Ejecutor, claseId: number, horarioId: number, semana: FechaDia): Promise<void> {
+  const unica = await repo.bloquear(ej, claseId);
+  if (unica === null) throw new NoEncontradoError(`No existe la clase ${claseId}`);
+  if (unica.horarioId !== null) throw new ReglaDeNegocioError('La clase ya es de un horario');
+  if (unica.semana !== semana) {
+    throw new ReglaDeNegocioError('La clase única tiene que estar en la semana desde la que rige el horario');
+  }
+  await repo.asignarHorario(ej, unica.id, horarioId);
+}

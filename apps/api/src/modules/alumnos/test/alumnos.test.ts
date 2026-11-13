@@ -287,7 +287,7 @@ describe('GET /api/alumnos/:id/actividad', () => {
     await pagar(martina, pack, '2026-03-02');
     const clase = await crearClaseDeTest(hipHop.id, '2026-03-03');
     await registrarAsistencia(clase.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
-    await actualizarHorario(hipHop.id, { estilo: 'Hip-Hop Avanzado' });
+    await actualizarHorario(hipHop.id, { estilo: 'Hip-Hop Avanzado' }, HOY);
 
     const respuesta = await app.inject({ method: 'GET', url: `/api/alumnos/${martina.id}/actividad`, headers: { cookie } });
 

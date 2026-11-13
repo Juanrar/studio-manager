@@ -19,6 +19,7 @@ import {
   crearPackDeTest,
   crearProfesorDeTest,
 } from '../../../../test/fabricas.ts';
+import { hoyEnEstudio } from '../../../lib/fechas.ts';
 import { registrarAsistencia } from '../../asistencias/asistencias.service.ts';
 import { actualizarHorario, listarHorarios } from '../../horarios/horarios.service.ts';
 import { registrarPago } from '../../pagos/pagos.service.ts';
@@ -139,7 +140,7 @@ describe('GET /api/liquidaciones', () => {
 
   it('el detalle muestra el estilo que tuvo cada clase aunque después cambie el horario', async () => {
     const [hipHop] = await listarHorarios({ incluirInactivos: false });
-    await actualizarHorario(hipHop!.id, { estilo: 'Hip-Hop Avanzado' });
+    await actualizarHorario(hipHop!.id, { estilo: 'Hip-Hop Avanzado' }, hoyEnEstudio(CINCO_DE_ABRIL));
 
     const respuesta = await get(`/api/liquidaciones/detalle?profesorId=${erik.id}&periodo=2026-03`);
 
