@@ -63,7 +63,7 @@ Refactors que no cambian lo que hace el sistema. Salen de la revisión de arquit
 | # | Feature | Estado | Depende de |
 |---|---|---|---|
 | 33 | [El horario y sus clases en un módulo](horarios-y-sus-clases.md) | lista | 25, 26, 28 |
-| 34 | [Los días del negocio en un solo módulo](dias-del-negocio.md) | pendiente | 3 |
+| 34 | [Los días del negocio en un solo módulo](dias-del-negocio.md) | en curso | 3 |
 
 ## Bitácora
 

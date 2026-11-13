@@ -10,9 +10,12 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "echo \"sin tests\" && exit 0"
+    "test": "vitest run"
   },
   "dependencies": {
     "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
   }
 }

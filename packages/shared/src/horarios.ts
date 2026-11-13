@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { fechaDiaSchema, listadoQuerySchema, nombreSchema, textoOpcional, type PersonaResumen } from './comun.ts';
+import { diaSemanaIso, esFechaDia } from './fechas.ts';
+import { fechaDiaSchema,listadoQuerySchema, nombreSchema, textoOpcional, type PersonaResumen } from './comun.ts';
 
 // Lo que se repite cada semana: "Hip-Hop Inicial, los martes de 19:00 a 20:30".
 
@@ -16,7 +17,8 @@ export const diaSemanaSchema = z
 const idSchema = z.number().int().positive();
 
 // El lunes de una semana: desde ahí vale un cambio que se aplica a todas las semanas.
-const lunesSchema = fechaDiaSchema.refine((fecha) => new Date(`${fecha}T00:00:00Z`).getUTCDay() === 1, {
+// `diaSemanaIso` tira un error con una fecha inválida, y el refine corre aunque `fechaDiaSchema` ya la haya rechazado.
+const lunesSchema = fechaDiaSchema.refine((fecha) => esFechaDia(fecha) && diaSemanaIso(fecha) === 1, {
   message: 'Tiene que ser el lunes de una semana',
 });
 

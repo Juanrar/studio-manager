@@ -1,6 +1,6 @@
 # Los días del negocio en un solo módulo
 
-**Estado:** pendiente  
+**Estado:** en curso  
 **Depende de:** utilidades-de-dominio  
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; la aritmética de días existe una sola vez, en `packages/shared/src/fechas.ts`; `apps/web/src/lib/formato.ts` solo tiene formato de texto; `America/Argentina/Buenos_Aires` aparece una sola vez en el código que no es de test ni de configuración.
 
@@ -10,7 +10,7 @@
 
 Sale de la revisión de arquitectura del 2026-11-13. La cuenta con días del negocio está escrita tres veces:
 
-- `apps/api/src/lib/fechas.ts`, con 20 tests.
+- `apps/api/src/lib/fechas.ts`, con 21 tests.
 - `apps/web/src/lib/formato.ts`, que repite `hoyEnEstudio`, `sumarDias`, `lunesDe` y el día de la semana (ahí `diaDeLaSemana`, en la API `diaSemanaIso`), y suma `horaEnEstudio` y `periodoAnterior`. No tiene tests propios.
 - `packages/shared`, donde `fechaDiaSchema` y `lunesSchema` hacen su cuenta con `Date`.
 
@@ -48,13 +48,20 @@ Archivos de la web que usan funciones de fecha: `agenda/AgendaPage.tsx`, `asiste
 
 | Test | Tipo | Qué cambio lo rompe |
 |---|---|---|
-| Los 16 tests de `hoyEnEstudio`, `diaSemanaIso`, `sumarDias`, `sumarUnMes`, `sumarMeses`, `primerDiaDelMes`, `esFechaDia` y `lunesDe` | Unitario, mudados a `shared` sin cambiar sus aserciones | Los mismos que hoy |
+| Los 17 tests de `hoyEnEstudio`, `diaSemanaIso`, `sumarDias`, `sumarUnMes`, `sumarMeses`, `primerDiaDelMes`, `esFechaDia` y `lunesDe` | Unitario, mudados a `shared` sin cambiar sus aserciones | Los mismos que hoy |
 | `horaEnEstudio` devuelve `HH:MM` de 24 horas en la zona del estudio: las 02:30 UTC son las 23:30, y la medianoche es `00:00`, no `24:00` | Unitario, nuevo | Usar la hora del sistema o un ciclo de horas que escribe `24:00` |
 | `sumarMeses(fecha, -1)` cruza el año hacia atrás y recorta al último día: del 31 de marzo al 28 de febrero, de enero a diciembre del año anterior | Unitario, nuevo | Romper los meses negativos, de los que ahora depende el período anterior de la web |
 | `edadEn`: el día antes del cumpleaños da un año menos, el día del cumpleaños da el año nuevo, y quien nació un 29 de febrero cumple el 1 de marzo en un año no bisiesto | Unitario, nuevo | Comparar solo el año, o tomar el día del navegador |
-| `fechaDiaSchema` rechaza el 30 de febrero con "La fecha no existe" y `lunesSchema` (a través de `crearHorarioSchema`) rechaza un martes con "Tiene que ser el lunes de una semana" | Unitario, nuevo | Cambiar el mensaje o dejar de validar al pasar a las funciones compartidas |
+| `fechaDiaSchema` rechaza el 30 de febrero con "La fecha no existe", rechaza un formato inválido con "La fecha tiene que tener el formato AAAA-MM-DD" seguido de "La fecha no existe", y `lunesSchema` (a través de `crearHorarioSchema`) rechaza un martes con "Tiene que ser el lunes de una semana" | Unitario, nuevo | Cambiar el mensaje o dejar de validar al pasar a las funciones compartidas |
 
 Los 4 tests del horizonte se quedan en `apps/api/src/lib/test/fechas.test.ts`.
+
+Correcciones al plan hechas en la tarea 1 (2026-11-13):
+
+- El plan decía 20 tests en la API y 16 para mudar. Eran 21 y 17: `sumarUnMes` tiene 4 tests. La API pasa de 251 a 234 tests y `shared` queda con 29 (17 mudados y 12 nuevos).
+- `apps/api/src/lib/fechas.ts` reexporta con nombre, no con `export *`. `@studio/shared` tiene una sola entrada, y `export *` de ella sumaría todos los esquemas a `lib/fechas.ts`.
+- Con un formato inválido, `fechaDiaSchema` da dos mensajes, el del formato y "La fecha no existe": en Zod 3 el `refine` corre aunque el `regex` haya fallado. Ya era así antes del cambio y el test lo deja escrito.
+- Dos diferencias en casos de borde al pasar a las funciones compartidas. `fechaDiaSchema` ahora rechaza los años 0000 a 0099 (`Date.UTC` los toma como 1900 a 1999 y `esFechaDia` compara el año; la cuenta vieja no lo comparaba). `lunesSchema` suma su mensaje a "La fecha no existe" en toda fecha inexistente; antes no lo sumaba cuando el desborde de `Date` caía en lunes (`2026-02-30` se leía como el lunes 2 de marzo).
 
 La web no suma tests: las pantallas que usan estas funciones ya tienen los suyos, y tienen que seguir pasando sin cambios.
 
@@ -66,13 +73,13 @@ La web no suma tests: las pantallas que usan estas funciones ya tienen los suyos
 - Crear: `packages/shared/src/fechas.ts`, `packages/shared/src/test/fechas.test.ts`, `packages/shared/vitest.config.ts`
 - Modificar: `packages/shared/package.json`, `packages/shared/src/index.ts`, `packages/shared/src/comun.ts`, `packages/shared/src/horarios.ts`, `apps/api/src/lib/fechas.ts`, `apps/api/src/lib/test/fechas.test.ts`, `apps/api/src/config.ts`
 
-- [ ] **Paso 1:** agregar Vitest a `packages/shared` (misma versión que la API) y cambiar su script `test` por `vitest run`.
-- [ ] **Paso 2:** escribir en `packages/shared/src/test/fechas.test.ts` los tests nuevos de la tabla (`horaEnEstudio`, `sumarMeses` hacia atrás, `edadEn`, los dos esquemas).
-- [ ] **Paso 3:** correrlos y verificar que fallan porque `fechas.ts` no existe en `shared`.
-- [ ] **Paso 4:** crear `packages/shared/src/fechas.ts` moviendo el código de la API, sumar `horaEnEstudio` y `edadEn`, y exportarlo desde `index.ts`. `fechaDiaSchema` y `lunesSchema` pasan a usarlo.
-- [ ] **Paso 5:** mover los 16 tests que no son del horizonte de la API a `shared`. `apps/api/src/lib/fechas.ts` reexporta lo de `shared` y conserva el horizonte. `config.ts` usa la constante.
-- [ ] **Paso 6:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
-- [ ] **Paso 7:** commit `refactor(fechas): los días del negocio pasan a packages/shared`.
+- [x] **Paso 1:** agregar Vitest a `packages/shared` (misma versión que la API) y cambiar su script `test` por `vitest run`.
+- [x] **Paso 2:** escribir en `packages/shared/src/test/fechas.test.ts` los tests nuevos de la tabla (`horaEnEstudio`, `sumarMeses` hacia atrás, `edadEn`, los dos esquemas).
+- [x] **Paso 3:** correrlos y verificar que fallan porque `fechas.ts` no existe en `shared`.
+- [x] **Paso 4:** crear `packages/shared/src/fechas.ts` moviendo el código de la API, sumar `horaEnEstudio` y `edadEn`, y exportarlo desde `index.ts`. `fechaDiaSchema` y `lunesSchema` pasan a usarlo.
+- [x] **Paso 5:** mover los 17 tests que no son del horizonte de la API a `shared`. `apps/api/src/lib/fechas.ts` reexporta lo de `shared` y conserva el horizonte. `config.ts` usa la constante.
+- [x] **Paso 6:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan.
+- [x] **Paso 7:** commit `refactor(fechas): los días del negocio pasan a packages/shared`.
 
 ### Tarea 2: La web usa el módulo compartido
 
