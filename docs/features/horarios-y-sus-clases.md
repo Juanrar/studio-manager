@@ -88,7 +88,7 @@ El resto de la feature se verifica con los tests que ya existen. Cambian por la 
 
 **Archivos:**
 - Modificar: `apps/api/src/modules/clases/clases.service.ts`, `apps/api/src/modules/clases/clases.repository.ts`, `apps/api/src/modules/clases/programacion.service.ts`, `apps/api/test/fabricas.ts`, `docs/entorno/tests-api.md`
-- Test: los seis archivos que importan `abrirClase` (`alumnos.test.ts`, `asistencias.test.ts`, `liquidaciones.test.ts`, `clases.test.ts`, `programacion.service.test.ts`)
+- Test: los cinco archivos que importan `abrirClase` (`alumnos.test.ts`, `asistencias.test.ts`, `liquidaciones.test.ts`, `clases.test.ts`, `programacion.service.test.ts`)
 
 - [x] **Paso 1:** agregar `crearClasesQueFaltan` en `clases.service.ts`, que arma las filas copiando la lista de la tarea 1; `generarClases` pasa a usarla.
 - [x] **Paso 2:** agregar `crearClaseDeTest(horarioId, fecha)` en `fabricas.ts`, que llama a `crearClasesQueFaltan` con la semana de esa fecha y devuelve `{ id, fecha }`. Si la clase de esa semana ya existe, devuelve esa.
