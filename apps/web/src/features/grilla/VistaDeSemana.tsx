@@ -1,7 +1,7 @@
 import type { PointerEvent, RefObject } from 'react';
-import type { Clase } from '@studio/shared';
+import { diaSemanaIso, horaEnEstudio, type Clase } from '@studio/shared';
 import { colorDeNombre } from '../../components/ui/index.tsx';
-import { abreviaturaDelDia, diaDeLaSemana, horaEnEstudio, nombreDelDia } from '../../lib/formato.ts';
+import { abreviaturaDelDia, nombreDelDia } from '../../lib/formato.ts';
 import { acomodarEnCascada, type Lugar } from './cascada.ts';
 import { FIN_GRILLA, INICIO_GRILLA, PX_POR_MINUTO, aHora, aMinutos } from './minutos.ts';
 import type { Fantasma } from './useArrastre.ts';
@@ -66,7 +66,7 @@ export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada }
               aria-hidden="true"
               className={`py-2.5 text-center ${fecha === hoy ? 'font-semibold text-texto' : 'text-apagado'}`}
             >
-              {ancha ? nombreDelDia(diaDeLaSemana(fecha)) : abreviaturaDelDia(diaDeLaSemana(fecha))}
+              {ancha ? nombreDelDia(diaSemanaIso(fecha)) : abreviaturaDelDia(diaSemanaIso(fecha))}
               <span className="ml-1.5">{Number(fecha.slice(8))}</span>
             </div>
           ))}
@@ -99,7 +99,7 @@ export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada }
               <div
                 key={fecha}
                 role="group"
-                aria-label={`${nombreDelDia(diaDeLaSemana(fecha))} ${Number(fecha.slice(8))}`}
+                aria-label={`${nombreDelDia(diaSemanaIso(fecha))} ${Number(fecha.slice(8))}`}
                 className="relative border-l border-borde"
                 // Crear en un hueco solo con el mouse: con el dedo, apretar un hueco es empezar a desplazarse.
                 onPointerDown={

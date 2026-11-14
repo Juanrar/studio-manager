@@ -1,19 +1,11 @@
 import { useEffect, useId, useState, type ReactNode } from 'react';
-import type { FichaDeAlumno } from '@studio/shared';
+import { edadEn, hoyEnEstudio, type FichaDeAlumno } from '@studio/shared';
 import { Aviso, Boton, Dialogo, Icono, claseDeBoton } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFecha } from '../../lib/formato.ts';
 import { enlaceDeWhatsapp } from '../../lib/whatsapp.ts';
 import { AlumnoForm } from './AlumnoForm.tsx';
 import { useActualizarAlumno } from './api.ts';
-
-// Años cumplidos hoy, con el reloj del navegador.
-function edadDe(nacimiento: string): number {
-  const [anio, mes, dia] = nacimiento.split('-').map(Number) as [number, number, number];
-  const hoy = new Date();
-  const todaviaNoCumplio = hoy.getMonth() + 1 < mes || (hoy.getMonth() + 1 === mes && hoy.getDate() < dia);
-  return hoy.getFullYear() - anio - (todaviaNoCumplio ? 1 : 0);
-}
 
 function Titulo({ id, children }: { id: string; children: ReactNode }) {
   return (
@@ -130,7 +122,7 @@ export function DatosDelAlumno({ datos }: { datos: FichaDeAlumno }) {
             <Dato etiqueta="DNI" valor={datos.dni} />
             <Dato
               etiqueta="Nacimiento"
-              valor={datos.fechaNacimiento && `${formatearFecha(datos.fechaNacimiento)} · ${edadDe(datos.fechaNacimiento)} años`}
+              valor={datos.fechaNacimiento && `${formatearFecha(datos.fechaNacimiento)} · ${edadEn(datos.fechaNacimiento, hoyEnEstudio())} años`}
             />
             <Dato etiqueta="Alta" valor={formatearFecha(datos.alta)} />
           </dl>

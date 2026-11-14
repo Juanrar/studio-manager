@@ -1,6 +1,6 @@
-import type { Clase } from '@studio/shared';
+import { diaSemanaIso, sumarDias, type Clase } from '@studio/shared';
 import { colorDeNombre } from '../../components/ui/index.tsx';
-import { abreviaturaDelDia, diaDeLaSemana, nombreDelDia, sumarDias } from '../../lib/formato.ts';
+import { abreviaturaDelDia, nombreDelDia } from '../../lib/formato.ts';
 
 // El mes en semanas completas, de lunes a domingo. Cada día lista hasta 4 clases con su hora y su estilo;
 // un clic en el día lo abre en la vista Día. Los días de los meses vecinos se ven apagados.
@@ -41,7 +41,7 @@ export function VistaDelMes({
               <button
                 key={fecha}
                 type="button"
-                aria-label={`${nombreDelDia(diaDeLaSemana(fecha))} ${numero}, ${cantidad(delDia.length)}`}
+                aria-label={`${nombreDelDia(diaSemanaIso(fecha))} ${numero}, ${cantidad(delDia.length)}`}
                 onClick={() => alElegirDia(fecha)}
                 className={`flex min-w-0 flex-col gap-0.5 overflow-hidden border-r border-b border-borde p-1.5 text-left hover:bg-elevado ${
                   fecha.slice(0, 7) === mes ? '' : 'opacity-40'

@@ -86,13 +86,20 @@ La web no suma tests: las pantallas que usan estas funciones ya tienen los suyos
 **Archivos:**
 - Modificar: `apps/web/src/lib/formato.ts` y los nueve archivos de la web listados en "Cómo queda"
 
-- [ ] **Paso 1:** cambiar los imports de los nueve archivos a `@studio/shared`, con `diaSemanaIso` en lugar de `diaDeLaSemana`.
-- [ ] **Paso 2:** reemplazar `periodoAnterior` y `primeroDelMes` por `periodoDe`, `sumarMeses` y `primerDiaDelMes`.
-- [ ] **Paso 3:** `DatosDelAlumno` usa `edadEn(nacimiento, hoyEnEstudio())` y pierde su `edadDe`.
-- [ ] **Paso 4:** borrar de `formato.ts` las funciones de fecha y la zona horaria. `formatearInstante` usa `hoyEnEstudio` de `shared`.
-- [ ] **Paso 5:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan sin cambiar ningún test de la web.
-- [ ] **Paso 6:** actualizar `docs/entorno/web.md` si nombra alguna de las funciones que se mudaron.
-- [ ] **Paso 7:** commit `refactor(web): las fechas salen de formato.ts y usan el módulo compartido`.
+- [x] **Paso 1:** cambiar los imports de los nueve archivos a `@studio/shared`, con `diaSemanaIso` en lugar de `diaDeLaSemana`.
+- [x] **Paso 2:** reemplazar `periodoAnterior` y `primeroDelMes` por `periodoDe`, `sumarMeses` y `primerDiaDelMes`.
+- [x] **Paso 3:** `DatosDelAlumno` usa `edadEn(nacimiento, hoyEnEstudio())` y pierde su `edadDe`.
+- [x] **Paso 4:** borrar de `formato.ts` las funciones de fecha y la zona horaria. `formatearInstante` usa `hoyEnEstudio` de `shared`.
+- [x] **Paso 5:** correr `pnpm test` y `pnpm typecheck`, y verificar que pasan sin cambiar ningún test de la web.
+- [x] **Paso 6:** actualizar `docs/entorno/web.md` si nombra alguna de las funciones que se mudaron.
+- [x] **Paso 7:** commit `refactor(web): las fechas salen de formato.ts y usan el módulo compartido`.
+
+Notas de la tarea 2 (2026-11-14):
+
+- El grep no encontró más usos que los nueve archivos del plan. Ningún test ni ayudante de `apps/web/test/` importaba estas funciones, así que no se tocó ningún test.
+- `docs/entorno/web.md` no nombra ninguna función mudada ni `lib/formato.ts`: no cambió. Sí cambió `docs/arquitectura frontend.md`, que decía que las fechas viven en `formato.ts`.
+- Las funciones de `shared` lanzan un error con una fecha inexistente (`2026-02-30`); las de `formato.ts` la desbordaban al mes siguiente. Solo se nota en `/grilla` con una `fecha` inexistente escrita a mano en la dirección; en `/agenda` el día sale de la respuesta de la API.
+- En `formato.ts` queda `haceCuanto`, que resta dos días con `Date.parse`. No es de las funciones de esta feature y no se tocó.
 
 ## Verificación final
 

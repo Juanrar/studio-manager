@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { diaSemanaIso, esFechaDia } from './fechas.ts';
-import { fechaDiaSchema,listadoQuerySchema, nombreSchema, textoOpcional, type PersonaResumen } from './comun.ts';
+import { fechaDiaSchema, listadoQuerySchema, nombreSchema, textoOpcional, type PersonaResumen } from './comun.ts';
 
 // Lo que se repite cada semana: "Hip-Hop Inicial, los martes de 19:00 a 20:30".
 

@@ -1,5 +1,4 @@
-import type { AltaDeProfesorInput, Clase } from '@studio/shared';
-import { lunesDe, sumarDias } from '../../lib/formato.ts';
+import { lunesDe, sumarDias, type AltaDeProfesorInput, type Clase } from '@studio/shared';
 import { aMinutos } from '../grilla/minutos.ts';
 
 // Lo que el alta propone, convertido en lo que dibuja la grilla: las clases de la semana de hoy.
