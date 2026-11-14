@@ -2,6 +2,7 @@ import { useCallback, useRef, useState, type PointerEvent } from 'react';
 import { useSearchParams } from 'react-router';
 import {
   diaSemanaIso,
+  esFechaDia,
   hoyEnEstudio,
   lunesDe,
   primerDiaDelMes,
@@ -139,7 +140,9 @@ export function GrillaPage() {
   const hoy = hoyEnEstudio();
   const pedida = parametros.get('vista');
   const vista: Vista = pedida === 'dia' || pedida === 'mes' ? pedida : 'semana';
-  const fecha = parametros.get('fecha') ?? hoy;
+  // Una fecha que no existe en la dirección (escrita a mano) se ignora: las cuentas con días la rechazan.
+  const fechaPedida = parametros.get('fecha');
+  const fecha = fechaPedida !== null && esFechaDia(fechaPedida) ? fechaPedida : hoy;
   const periodo = periodoDe(vista, fecha);
   const { fechas } = periodo;
   const clases = useClasesDelRango(periodo.desde, periodo.hasta);
