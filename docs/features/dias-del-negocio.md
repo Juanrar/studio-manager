@@ -1,6 +1,6 @@
 # Los días del negocio en un solo módulo
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** utilidades-de-dominio  
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; la aritmética de días existe una sola vez, en `packages/shared/src/fechas.ts`; `apps/web/src/lib/formato.ts` solo tiene formato de texto; `America/Argentina/Buenos_Aires` aparece una sola vez en el código que no es de test ni de configuración.
 
@@ -53,6 +53,7 @@ Archivos de la web que usan funciones de fecha: `agenda/AgendaPage.tsx`, `asiste
 | `sumarMeses(fecha, -1)` cruza el año hacia atrás y recorta al último día: del 31 de marzo al 28 de febrero, de enero a diciembre del año anterior | Unitario, nuevo | Romper los meses negativos, de los que ahora depende el período anterior de la web |
 | `edadEn`: el día antes del cumpleaños da un año menos, el día del cumpleaños da el año nuevo, y quien nació un 29 de febrero cumple el 1 de marzo en un año no bisiesto | Unitario, nuevo | Comparar solo el año, o tomar el día del navegador |
 | `fechaDiaSchema` rechaza el 30 de febrero con "La fecha no existe", rechaza un formato inválido con "La fecha tiene que tener el formato AAAA-MM-DD" seguido de "La fecha no existe", y `lunesSchema` (a través de `crearHorarioSchema`) rechaza un martes con "Tiene que ser el lunes de una semana" | Unitario, nuevo | Cambiar el mensaje o dejar de validar al pasar a las funciones compartidas |
+| `/grilla?fecha=2026-02-30` muestra la semana de hoy | Web, en `grilla.test.tsx`. Sumado en la revisión final | Pasar a las cuentas con días una fecha de la dirección sin validarla: las funciones compartidas la rechazan con un error y la pantalla se rompe |
 
 Los 4 tests del horizonte se quedan en `apps/api/src/lib/test/fechas.test.ts`.
 
@@ -103,7 +104,7 @@ Notas de la tarea 2 (2026-11-14):
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio.
-- [ ] Buscar `Buenos_Aires` en `apps/*/src` y `packages/*/src`, sin los tests: aparece solo en `packages/shared/src/fechas.ts`.
-- [ ] Buscar `getUTCDay`, `Date.UTC` y `new Date(` en `apps/web/src` y `packages/shared/src`, sin los tests: lo que queda es formato de texto (`formato.ts`), el reloj (`useAhora.ts`) o `packages/shared/src/fechas.ts`.
-- [ ] `pnpm e2e` pasa.
+- [x] `pnpm test` y `pnpm typecheck` pasan en todo el repositorio: shared 29, API 234, web 199.
+- [x] Buscar `Buenos_Aires` en `apps/*/src` y `packages/*/src`, sin los tests: aparece solo en `packages/shared/src/fechas.ts`.
+- [x] Buscar `getUTCDay`, `Date.UTC` y `new Date(` en `apps/web/src` y `packages/shared/src`, sin los tests: lo que queda es formato de texto (`formato.ts`), el reloj (`useAhora.ts`) o `packages/shared/src/fechas.ts`.
+- [x] `pnpm e2e` pasa: 1.
