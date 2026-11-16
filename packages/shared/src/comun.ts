@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { esFechaDia } from './fechas.ts';
 
 export type PersonaResumen = { id: number; nombre: string; apellido: string };
 
@@ -24,11 +25,7 @@ export type ListadoQuery = z.infer<typeof listadoQuerySchema>;
 export const fechaDiaSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha tiene que tener el formato AAAA-MM-DD')
-  .refine((valor) => {
-    const [anio, mes, dia] = valor.split('-').map(Number) as [number, number, number];
-    const fecha = new Date(Date.UTC(anio, mes - 1, dia));
-    return fecha.getUTCMonth() === mes - 1 && fecha.getUTCDate() === dia;
-  }, 'La fecha no existe');
+  .refine(esFechaDia, 'La fecha no existe');
 
 const vacioANull = <T>(valor: T | '' | null | undefined): T | null | undefined =>
   valor === '' ? null : valor;

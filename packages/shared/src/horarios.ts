@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { diaSemanaIso, esFechaDia } from './fechas.ts';
 import { fechaDiaSchema, listadoQuerySchema, nombreSchema, textoOpcional, type PersonaResumen } from './comun.ts';
 
 export const horaSchema = z
@@ -13,7 +14,7 @@ export const diaSemanaSchema = z
 
 const idSchema = z.number().int().positive();
 
-const lunesSchema = fechaDiaSchema.refine((fecha) => new Date(`${fecha}T00:00:00Z`).getUTCDay() === 1, {
+const lunesSchema = fechaDiaSchema.refine((fecha) => esFechaDia(fecha) && diaSemanaIso(fecha) === 1, {
   message: 'Tiene que ser el lunes de una semana',
 });
 

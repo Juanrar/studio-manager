@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, type RefObject } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import type { Clase } from '@studio/shared';
+import { horaEnEstudio, hoyEnEstudio, sumarDias, type Clase } from '@studio/shared';
 import {
   Aviso,
   Avatar,
@@ -13,7 +13,7 @@ import {
   colorDeNombre,
 } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
-import { formatearFechaLarga, horaEnEstudio, hoyEnEstudio, sumarDias } from '../../lib/formato.ts';
+import { formatearFechaLarga } from '../../lib/formato.ts';
 import { useAhora } from '../../lib/useAhora.ts';
 import { useAgenda } from './api.ts';
 import { agruparPorHora, type GrupoDeClases } from './grupos.ts';

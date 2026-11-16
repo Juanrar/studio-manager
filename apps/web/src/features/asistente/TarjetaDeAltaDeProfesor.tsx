@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { crearProfesorSchema, type AltaDeProfesorInput } from '@studio/shared';
+import { crearProfesorSchema, hoyEnEstudio, type AltaDeProfesorInput } from '@studio/shared';
 import { Avatar, Aviso, Boton, Campo, Entrada, claseDeBoton } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
-import { formatearPorcentaje, hoyEnEstudio } from '../../lib/formato.ts';
+import { formatearPorcentaje } from '../../lib/formato.ts';
 import { VistaDeSemana } from '../grilla/VistaDeSemana.tsx';
 import { useDarDeAltaProfesor } from './api.ts';
 import { clasesDeLaPropuesta, fechasDeLaSemana, rangoDeHoras } from './grillaDeLaPropuesta.ts';

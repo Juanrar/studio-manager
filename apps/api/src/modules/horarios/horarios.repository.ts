@@ -2,7 +2,7 @@ import { and, asc, eq, type SQL } from 'drizzle-orm';
 import type { Horario } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
 import { horaHHMM } from '../../lib/postgres.ts';
-import { horario, profesor, type NuevoHorario } from '../../db/schema.ts';
+import { horario, profesor, type Horario as FilaHorario, type NuevoHorario } from '../../db/schema.ts';
 
 const columnas = {
   id: horario.id,
@@ -49,29 +49,11 @@ export async function listar(ej: Ejecutor, filtros: FiltrosDeHorarios): Promise<
   return seleccionar(ej, and(...condiciones));
 }
 
-export type HorarioParaGenerar = {
-  id: number;
-  diaSemana: number;
-  horaInicio: string;
-  horaFin: string;
-  estilo: string;
-  nivel: string | null;
-  profesorId: number;
-  vigenteDesde: string;
-};
+export type HorarioParaGenerar = FilaHorario;
 
 export async function listarParaGenerar(ej: Ejecutor, horarioId?: number): Promise<HorarioParaGenerar[]> {
   return ej
-    .select({
-      id: horario.id,
-      diaSemana: horario.diaSemana,
-      horaInicio: horaHHMM(horario.horaInicio),
-      horaFin: horaHHMM(horario.horaFin),
-      estilo: horario.estilo,
-      nivel: horario.nivel,
-      profesorId: horario.profesorId,
-      vigenteDesde: horario.vigenteDesde,
-    })
+    .select()
     .from(horario)
     .where(and(eq(horario.activo, true), horarioId === undefined ? undefined : eq(horario.id, horarioId)));
 }

@@ -21,7 +21,7 @@ Trampas de los tests de integración y de service. El modelo a seguir está en l
 
 - **El alta de un alumno usa el reloj de la app:** `crearAlumno(datos, ahora)`. En los tests, `crearAlumnoDeTest(datos, ahora)` usa `AHORA` si no se le pasa otro momento.
 - **Asistencias y suplencias en fechas pasadas:** el profesor tiene que tener un porcentaje vigente desde antes de esa fecha, si no la API responde 422. `crearProfesorDeTest` lo pone desde `2026-01-01`.
-- **Las clases se crean por adelantado** con `generarClases(ej, hoy)` de `modules/clases/programacion.service.ts`. `crearHorarioDeTest` crea solo el horario: para tener sus clases se llama a `generarClases(db, hoy)`, y para una semana pasada, que el generador no crea, a `abrirClase(horarioId, fecha)`. `POST /api/horarios` sí las crea.
+- **Las clases se crean por adelantado** con `generarClases(ej, hoy)` de `modules/horarios/horarios.service.ts`. `crearHorarioDeTest` inserta solo la fila del horario: para tener sus clases se llama a `generarClases(db, hoy)`, y para una semana pasada, que el generador no crea, a `crearClaseDeTest(horarioId, fecha)` de `apps/api/test/fabricas.ts`, que devuelve `{ id, fecha }`. `POST /api/horarios` sí las crea.
 
 ## Tareas que corren solas
 

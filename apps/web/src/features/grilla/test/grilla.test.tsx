@@ -92,6 +92,15 @@ describe('/grilla', () => {
     expect(router.state.location.search).toBe('');
   });
 
+  it('con una fecha que no existe en la dirección muestra la semana de hoy', async () => {
+    const pedidos = grillaCon([HIP_HOP]);
+    renderizarEn('/grilla?fecha=2026-02-30');
+
+    await screen.findByRole('button', { name: /Hip-Hop/ });
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Marzo 2026');
+    expect(pedidos).toEqual(['?desde=2026-03-09&hasta=2026-03-15']);
+  });
+
   it('la flecha siguiente se deshabilita en la última semana con clases creadas', async () => {
     grillaCon([], '2026-03-22');
     renderizarEn('/grilla?fecha=2026-03-16');

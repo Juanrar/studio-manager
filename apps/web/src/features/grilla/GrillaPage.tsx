@@ -1,18 +1,20 @@
 import { useCallback, useRef, useState, type PointerEvent } from 'react';
 import { useSearchParams } from 'react-router';
-import type { ActualizarClaseInput, ActualizarHorarioInput, Clase } from '@studio/shared';
-import { Aviso, Boton, BotonIcono, Flotante, Icono, Pagina, type Ancla } from '../../components/ui/index.tsx';
-import { mensajeDeError } from '../../lib/api.ts';
 import {
-  diaDeLaSemana,
-  formatearDiaYMes,
-  formatearMes,
+  diaSemanaIso,
+  esFechaDia,
   hoyEnEstudio,
   lunesDe,
-  nombreDelDia,
-  nombreDelMes,
+  primerDiaDelMes,
   sumarDias,
-} from '../../lib/formato.ts';
+  sumarMeses,
+  type ActualizarClaseInput,
+  type ActualizarHorarioInput,
+  type Clase,
+} from '@studio/shared';
+import { Aviso, Boton, BotonIcono, Flotante, Icono, Pagina, type Ancla } from '../../components/ui/index.tsx';
+import { mensajeDeError } from '../../lib/api.ts';
+import { formatearDiaYMes, formatearMes, nombreDelDia, nombreDelMes } from '../../lib/formato.ts';
 import { useBorrarClase, useCambiarClase, useCambiarHorario, useClasesDelRango, useCrearClaseUnica, useCrearHorario } from './api.ts';
 import type { Arrastre, Destino } from './arrastre.ts';
 import { AvisoDeCambio, type ContenidoDelAviso } from './AvisoDeCambio.tsx';
@@ -28,11 +30,6 @@ const VISTAS: { id: Vista; texto: string }[] = [
   { id: 'semana', texto: 'Semana' },
   { id: 'mes', texto: 'Mes' },
 ];
-
-function primeroDelMes(fecha: string, meses = 0): string {
-  const [anio, mes] = fecha.split('-').map(Number) as [number, number];
-  return new Date(Date.UTC(anio, mes - 1 + meses, 1)).toISOString().slice(0, 10);
-}
 
 function rangoDeLaSemana(lunes: string): string {
   const domingo = sumarDias(lunes, 6);
@@ -58,7 +55,7 @@ function periodoDe(vista: Vista, fecha: string): Periodo {
     return {
       etiqueta: 'Día',
       actual: 'Hoy',
-      rango: `${nombreDelDia(diaDeLaSemana(fecha))} ${Number(fecha.slice(8))}`,
+      rango: `${nombreDelDia(diaSemanaIso(fecha))} ${Number(fecha.slice(8))}`,
       desde: fecha,
       hasta: fecha,
       fechas: [fecha],
@@ -69,8 +66,8 @@ function periodoDe(vista: Vista, fecha: string): Periodo {
     };
   }
   if (vista === 'mes') {
-    const primero = primeroDelMes(fecha);
-    const ultimo = sumarDias(primeroDelMes(fecha, 1), -1);
+    const primero = primerDiaDelMes(fecha);
+    const ultimo = sumarDias(sumarMeses(primero, 1), -1);
     const semanas: string[] = [];
     for (let lunes = lunesDe(primero); lunes <= ultimo; lunes = sumarDias(lunes, 7)) semanas.push(lunes);
     return {
@@ -82,8 +79,8 @@ function periodoDe(vista: Vista, fecha: string): Periodo {
       fechas: [],
       semanas,
       mes: primero.slice(0, 7),
-      anterior: primeroDelMes(fecha, -1),
-      siguiente: primeroDelMes(fecha, 1),
+      anterior: sumarMeses(primero, -1),
+      siguiente: sumarMeses(primero, 1),
     };
   }
   const lunes = lunesDe(fecha);
@@ -106,13 +103,13 @@ type Editor =
   | { modo: 'crear'; borrador: Borrador; ancla: Ancla }
   | { modo: 'cancelada'; clase: Clase; ancla: Ancla };
 
-const diaEnTexto = (fecha: string) => nombreDelDia(diaDeLaSemana(fecha)).toLowerCase();
+const diaEnTexto = (fecha: string) => nombreDelDia(diaSemanaIso(fecha)).toLowerCase();
 const tituloDe = (clase: { estilo: string; nivel: string | null }) =>
   clase.nivel === null ? clase.estilo : `${clase.estilo} ${clase.nivel}`;
 
 function comoHorario(datos: ActualizarClaseInput): ActualizarHorarioInput {
   const { fecha, estado: _estado, ...resto } = datos;
-  return fecha === undefined ? resto : { ...resto, diaSemana: diaDeLaSemana(fecha) };
+  return fecha === undefined ? resto : { ...resto, diaSemana: diaSemanaIso(fecha) };
 }
 
 function anterioresDe(clase: Clase, datos: ActualizarClaseInput): ActualizarClaseInput {
@@ -133,7 +130,8 @@ export function GrillaPage() {
   const hoy = hoyEnEstudio();
   const pedida = parametros.get('vista');
   const vista: Vista = pedida === 'dia' || pedida === 'mes' ? pedida : 'semana';
-  const fecha = parametros.get('fecha') ?? hoy;
+  const fechaPedida = parametros.get('fecha');
+  const fecha = fechaPedida !== null && esFechaDia(fechaPedida) ? fechaPedida : hoy;
   const periodo = periodoDe(vista, fecha);
   const { fechas } = periodo;
   const clases = useClasesDelRango(periodo.desde, periodo.hasta);
@@ -243,7 +241,7 @@ export function GrillaPage() {
                 {
                   estilo: datos.estilo,
                   nivel: datos.nivel,
-                  diaSemana: diaDeLaSemana(datos.fecha),
+                  diaSemana: diaSemanaIso(datos.fecha),
                   horaInicio: datos.horaInicio,
                   horaFin: datos.horaFin,
                   profesorId: datos.profesorId,

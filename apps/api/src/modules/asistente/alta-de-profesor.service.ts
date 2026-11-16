@@ -2,7 +2,7 @@ import type { AltaDeProfesorInput, Profesor } from '@studio/shared';
 import { db } from '../../db/client.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 import { ReglaDeNegocioError } from '../../lib/errores.ts';
-import { crearHorarioConSusClasesEn } from '../clases/programacion.service.ts';
+import { crearHorarioEn } from '../horarios/horarios.service.ts';
 import { buscarHomonimo, crearProfesorEn, obtenerProfesor } from '../profesores/profesores.service.ts';
 
 export async function darDeAltaProfesor(datos: AltaDeProfesorInput, hoy: FechaDia): Promise<Profesor> {
@@ -15,7 +15,7 @@ export async function darDeAltaProfesor(datos: AltaDeProfesorInput, hoy: FechaDi
     }
     const profesorId = await crearProfesorEn(tx, datos.profesor, hoy);
     for (const horario of datos.horarios) {
-      await crearHorarioConSusClasesEn(tx, { ...horario, profesorId }, hoy);
+      await crearHorarioEn(tx, { ...horario, profesorId }, hoy);
     }
     return profesorId;
   });

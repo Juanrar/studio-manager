@@ -143,7 +143,7 @@ describe('GET /api/horarios', () => {
       horaInicio: '19:30',
       horaFin: '21:00',
     });
-    await actualizarHorario(breakLunes.id, { activo: false });
+    await actualizarHorario(breakLunes.id, { activo: false }, hoyEnEstudio(AHORA));
     await crearHorarioDeTest(lucia.id, { estilo: 'Salsa', diaSemana: 1, horaInicio: '19:00', horaFin: '20:30' });
 
     const respuesta = await pedirHorarios(`profesorId=${erik.id}`);
@@ -196,7 +196,7 @@ describe('GET /api/horarios', () => {
       horaInicio: '19:30',
       horaFin: '21:00',
     });
-    await actualizarHorario(breakLunes.id, { activo: false });
+    await actualizarHorario(breakLunes.id, { activo: false }, hoyEnEstudio(AHORA));
     await crearHorarioDeTest(lucia.id, { estilo: 'Salsa', diaSemana: 1, horaInicio: '19:00', horaFin: '20:30' });
 
     const respuesta = await pedirHorarios(`profesorId=${erik.id}&incluirInactivos=true`);
@@ -239,7 +239,7 @@ describe('GET /api/horarios', () => {
       horaInicio: '19:30',
       horaFin: '21:00',
     });
-    await actualizarHorario(breakLunes.id, { activo: false });
+    await actualizarHorario(breakLunes.id, { activo: false }, hoyEnEstudio(AHORA));
     const salsaLunes = await crearHorarioDeTest(lucia.id, {
       estilo: 'Salsa',
       nivel: null,

@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { TZ_ESTUDIO_POR_DEFECTO } from './lib/fechas.ts';
 
 const esquema = z.object({
   DATABASE_URL: z.string().url(),
   SESSION_SECRET: z.string().min(32),
-  TZ_ESTUDIO: z.string().default('America/Argentina/Buenos_Aires'),
+  TZ_ESTUDIO: z.string().default(TZ_ESTUDIO_POR_DEFECTO),
   PORT: z.coerce.number().int().positive().default(3000),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   WEB_DIST: z.string().min(1).optional(),

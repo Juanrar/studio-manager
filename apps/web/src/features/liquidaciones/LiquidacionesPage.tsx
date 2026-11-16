@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
-import type { ResumenProfesor } from '@studio/shared';
+import { hoyEnEstudio, periodoDe, sumarMeses, type ResumenProfesor } from '@studio/shared';
 import {
   Aviso,
   Boton,
@@ -20,8 +20,6 @@ import {
   formatearFecha,
   formatearPeriodo,
   formatearPesos,
-  hoyEnEstudio,
-  periodoAnterior,
 } from '../../lib/formato.ts';
 import {
   useCerrarLiquidacion,
@@ -34,7 +32,7 @@ import { descargarCsv, detalleACsv } from './csv.ts';
 
 export function LiquidacionesPage() {
   const [parametros, setParametros] = useSearchParams();
-  const periodo = parametros.get('periodo') ?? periodoAnterior(hoyEnEstudio());
+  const periodo = parametros.get('periodo') ?? periodoDe(sumarMeses(hoyEnEstudio(), -1));
 
   return (
     <Pagina

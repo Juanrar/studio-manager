@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { diaSemanaIso } from '@studio/shared';
 import { Aviso, Boton, BotonIcono, Campo, Entrada, SelectorDeHora, Selector } from '../../components/ui/index.tsx';
-import { diaDeLaSemana, nombreDelDia } from '../../lib/formato.ts';
+import { nombreDelDia } from '../../lib/formato.ts';
 import { useProfesores } from '../profesores/api.ts';
 
 export type Borrador = {
@@ -12,7 +13,7 @@ export type Borrador = {
   profesorId: number;
 };
 
-const nombreDeLaFecha = (fecha: string) => `${nombreDelDia(diaDeLaSemana(fecha))} ${Number(fecha.slice(8))}`;
+const nombreDeLaFecha = (fecha: string) => `${nombreDelDia(diaSemanaIso(fecha))} ${Number(fecha.slice(8))}`;
 
 export function EditorDeClase({
   titulo,

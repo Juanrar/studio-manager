@@ -1,23 +1,36 @@
-import { and, asc, count, eq, gte, isNull, lte, sql, type SQL } from 'drizzle-orm';
+import { and, asc, count, eq, gte, lte, not, sql, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { Clase, EstadoClase } from '@studio/shared';
 import type { Ejecutor } from '../../db/client.ts';
-import { asistencia, clase, horario, pago, profesor, type NuevaClase } from '../../db/schema.ts';
+import { asistencia, clase, horario, pago, profesor, type Horario as FilaHorario, type NuevaClase } from '../../db/schema.ts';
 import { horaHHMM } from '../../lib/postgres.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 
 const titular = alias(profesor, 'titular');
 
+const COPIADAS_DEL_HORARIO = ['horaInicio', 'horaFin', 'estilo', 'nivel', 'profesorId'] as const;
+type CopiadaDelHorario = (typeof COPIADAS_DEL_HORARIO)[number];
+
+export type HorarioDeLaClase = Pick<FilaHorario, 'id' | 'diaSemana' | CopiadaDelHorario>;
+
+export function copiadasDe(delHorario: HorarioDeLaClase): Pick<NuevaClase, CopiadaDelHorario> {
+  return Object.fromEntries(COPIADAS_DEL_HORARIO.map((columna) => [columna, delHorario[columna]])) as Pick<
+    NuevaClase,
+    CopiadaDelHorario
+  >;
+}
+
+const difiereDeSuHorario = sql<boolean>`(extract(isodow from ${clase.fecha}) <> ${horario.diaSemana}
+  or ${sql.join(
+    COPIADAS_DEL_HORARIO.map((columna) => sql`${clase[columna]} is distinct from ${horario[columna]}`),
+    sql` or `,
+  )}
+  or ${clase.estado} <> 'programada')`;
+
 const tieneCambios = (lunesActual: FechaDia) => sql<boolean>`case
   when ${clase.horarioId} is null then true
   when ${clase.semana} < ${lunesActual}::date then false
-  else extract(isodow from ${clase.fecha}) <> ${horario.diaSemana}
-    or ${clase.horaInicio} <> ${horario.horaInicio}
-    or ${clase.horaFin} <> ${horario.horaFin}
-    or ${clase.estilo} <> ${horario.estilo}
-    or ${clase.nivel} is distinct from ${horario.nivel}
-    or ${clase.profesorId} <> ${horario.profesorId}
-    or ${clase.estado} <> 'programada'
+  else ${difiereDeSuHorario}
 end`;
 
 const columnas = (lunesActual: FechaDia) => ({
@@ -55,14 +68,6 @@ export async function listarRango(ej: Ejecutor, desde: FechaDia, hasta: FechaDia
   return seleccionar(ej, lunesActual, and(gte(clase.fecha, desde), lte(clase.fecha, hasta)));
 }
 
-export async function buscarIdPorHorarioYFecha(ej: Ejecutor, horarioId: number, fecha: FechaDia): Promise<number | null> {
-  const [fila] = await ej
-    .select({ id: clase.id })
-    .from(clase)
-    .where(and(eq(clase.horarioId, horarioId), eq(clase.fecha, fecha)));
-  return fila?.id ?? null;
-}
-
 export async function insertarLasQueFaltan(ej: Ejecutor, filas: NuevaClase[]): Promise<number> {
   if (filas.length === 0) return 0;
   const creadas = await ej
@@ -84,11 +89,6 @@ export async function asignarHorario(ej: Ejecutor, id: number, horarioId: number
 
 export async function borrar(ej: Ejecutor, id: number): Promise<void> {
   await ej.delete(clase).where(eq(clase.id, id));
-}
-
-export async function insertarSiNoExiste(ej: Ejecutor, datos: NuevaClase): Promise<number | null> {
-  const [fila] = await ej.insert(clase).values(datos).onConflictDoNothing().returning({ id: clase.id });
-  return fila?.id ?? null;
 }
 
 export async function actualizar(
@@ -147,47 +147,28 @@ export async function actualizarPorcentajeDeAsistencias(
   await ej.update(asistencia).set({ porcentajeBp }).where(eq(asistencia.claseId, claseId));
 }
 
-export type DatosDeHorario = {
-  diaSemana: number;
-  horaInicio: string;
-  horaFin: string;
-  estilo: string;
-  nivel: string | null;
-  profesorId: number;
-};
-
-export async function igualesAlHorario(
+export async function sinCambiosPropiosDesde(
   ej: Ejecutor,
   horarioId: number,
-  datos: DatosDeHorario,
   desde: FechaDia,
-): Promise<{ id: number; semana: FechaDia; fecha: FechaDia }[]> {
+): Promise<{ id: number; semana: FechaDia; fecha: FechaDia; profesorId: number }[]> {
   return ej
-    .select({ id: clase.id, semana: clase.semana, fecha: clase.fecha })
+    .select({ id: clase.id, semana: clase.semana, fecha: clase.fecha, profesorId: clase.profesorId })
     .from(clase)
-    .where(
-      and(
-        eq(clase.horarioId, horarioId),
-        gte(clase.fecha, desde),
-        sql`extract(isodow from ${clase.fecha}) = ${datos.diaSemana}`,
-        eq(clase.horaInicio, datos.horaInicio),
-        eq(clase.horaFin, datos.horaFin),
-        eq(clase.estilo, datos.estilo),
-        datos.nivel === null ? isNull(clase.nivel) : eq(clase.nivel, datos.nivel),
-        eq(clase.profesorId, datos.profesorId),
-        eq(clase.estado, 'programada'),
-      ),
-    )
+    .innerJoin(horario, eq(horario.id, clase.horarioId))
+    .where(and(eq(clase.horarioId, horarioId), gte(clase.fecha, desde), not(difiereDeSuHorario)))
     .orderBy(asc(clase.fecha));
 }
 
-export async function copiarDelHorario(
-  ej: Ejecutor,
-  id: number,
-  fecha: FechaDia,
-  datos: Omit<DatosDeHorario, 'diaSemana'>,
-): Promise<void> {
-  await ej.update(clase).set({ fecha, ...datos }).where(eq(clase.id, id));
+export async function copiarDelHorario(ej: Ejecutor, id: number, fecha: FechaDia): Promise<void> {
+  const delHorario = Object.fromEntries(
+    COPIADAS_DEL_HORARIO.map((columna) => [columna, sql`${horario[columna]}`]),
+  ) as Record<CopiadaDelHorario, SQL>;
+  await ej
+    .update(clase)
+    .set({ fecha, ...delHorario })
+    .from(horario)
+    .where(and(eq(clase.id, id), eq(horario.id, clase.horarioId)));
 }
 
 export async function hayAnotadosConPackQueVenceAntes(ej: Ejecutor, claseId: number, fecha: FechaDia): Promise<boolean> {

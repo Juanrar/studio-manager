@@ -3,6 +3,7 @@
 ## `pnpm e2e`
 
 - No corre dentro de `pnpm test`. Necesita Docker, compila el frontend y usa la base `studio_manager_e2e`, que se borra y se crea en cada corrida.
+- Usa el Postgres de desarrollo (puerto 5433). Si falla con `ECONNREFUSED 127.0.0.1:5433`, el contenedor está apagado: `docker start studio-manager-db`. Desde un worktree, `docker compose up` falla porque el nombre del contenedor ya existe y deja un volumen vacío con el nombre de la carpeta.
 - Usa el reloj real: crea la clase para el día de hoy en Buenos Aires.
 - Usa el puerto fijo 3100 (`PUERTO_E2E` en `e2e/entorno.ts`). Si otro proceso lo ocupa, Playwright no levanta la API. Cambiá el número para esa corrida y volvé atrás con `git checkout -- e2e/entorno.ts`. No cierres un proceso que no es de este proyecto.
 

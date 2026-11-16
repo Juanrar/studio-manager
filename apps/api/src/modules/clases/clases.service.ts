@@ -1,11 +1,10 @@
 import type { ActualizarClaseInput, Clase, ClasesDelRango, CrearClaseUnicaInput } from '@studio/shared';
 import { db, type Ejecutor } from '../../db/client.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
-import { diaSemanaIso, finDelHorizonte, lunesDe, sumarDias, type FechaDia } from '../../lib/fechas.ts';
+import { finDelHorizonte, lunesDe, sumarDias, type FechaDia } from '../../lib/fechas.ts';
 import { sinIndefinidos } from '../../lib/objetos.ts';
 import { esViolacionCheck } from '../../lib/postgres.ts';
 import { verificarMesAbierto } from '../liquidaciones/liquidaciones.service.ts';
-import { obtenerHorario } from '../horarios/horarios.service.ts';
 import { porcentajeVigente, verificarProfesorActivo } from '../profesores/profesores.service.ts';
 import * as repo from './clases.repository.ts';
 
@@ -18,32 +17,6 @@ export async function obtenerClase(id: number, hoy: FechaDia): Promise<Clase> {
   const encontrada = await repo.buscarPorId(db, id, lunesDe(hoy));
   if (encontrada === null) throw new NoEncontradoError(`No existe la clase ${id}`);
   return encontrada;
-}
-
-export type ClaseAbierta = { id: number; fecha: FechaDia };
-
-export async function abrirClase(horarioId: number, fecha: FechaDia): Promise<{ clase: ClaseAbierta; creada: boolean }> {
-  const horario = await obtenerHorario(horarioId);
-  if (!horario.activo) throw new ReglaDeNegocioError(`El horario de ${horario.estilo} está dado de baja`);
-  if (diaSemanaIso(fecha) !== horario.diaSemana) {
-    throw new ReglaDeNegocioError(`El horario de ${horario.estilo} no se dicta el ${fecha}`);
-  }
-
-  const existente = await repo.buscarIdPorHorarioYFecha(db, horarioId, fecha);
-  if (existente !== null) return { clase: { id: existente, fecha }, creada: false };
-
-  const id = await repo.insertarSiNoExiste(db, {
-    horarioId,
-    semana: lunesDe(fecha),
-    fecha,
-    horaInicio: horario.horaInicio,
-    horaFin: horario.horaFin,
-    estilo: horario.estilo,
-    nivel: horario.nivel,
-    profesorId: horario.profesor.id,
-  });
-  const clase = await repo.buscarIdPorHorarioYFecha(db, horarioId, fecha);
-  return { clase: { id: clase!, fecha }, creada: id !== null };
 }
 
 export async function actualizarClase(id: number, datos: ActualizarClaseInput, hoy: FechaDia): Promise<void> {
@@ -114,4 +87,69 @@ export async function bloquearClase(ej: Ejecutor, id: number): Promise<repo.Clas
   const encontrada = await repo.bloquear(ej, id);
   if (encontrada === null) throw new NoEncontradoError(`No existe la clase ${id}`);
   return encontrada;
+}
+
+export async function crearClasesQueFaltan(
+  ej: Ejecutor,
+  horarios: repo.HorarioDeLaClase[],
+  semanas: FechaDia[],
+): Promise<number> {
+  const filas = horarios.flatMap((horario) =>
+    semanas.map((lunes) => ({
+      horarioId: horario.id,
+      semana: lunes,
+      fecha: sumarDias(lunes, horario.diaSemana - 1),
+      ...repo.copiadasDe(horario),
+    })),
+  );
+  return repo.insertarLasQueFaltan(ej, filas);
+}
+
+export async function seguirAlHorario(
+  ej: Ejecutor,
+  horarioId: number,
+  inicio: FechaDia,
+  hoy: FechaDia,
+  cambiarElHorario: () => Promise<{ diaSemana: number; profesorId: number }>,
+): Promise<void> {
+  const clases = await repo.sinCambiosPropiosDesde(ej, horarioId, inicio);
+  const nuevo = await cambiarElHorario();
+
+  for (const clase of clases) {
+    const fecha = sumarDias(clase.semana, nuevo.diaSemana - 1);
+    if (fecha < hoy) continue;
+    if (fecha > clase.fecha && (await repo.hayAnotadosConPackQueVenceAntes(ej, clase.id, fecha))) {
+      throw new ReglaDeNegocioError(
+        `La clase del ${clase.fecha} tiene alumnos anotados con un pack que vence antes del ${fecha}`,
+      );
+    }
+    await repo.copiarDelHorario(ej, clase.id, fecha);
+    if (nuevo.profesorId !== clase.profesorId) {
+      await repo.actualizarPorcentajeDeAsistencias(ej, clase.id, await porcentajeVigente(ej, nuevo.profesorId, fecha));
+    }
+  }
+}
+
+export async function quitarClasesDesde(
+  ej: Ejecutor,
+  horario: { id: number; estilo: string },
+  desde: FechaDia,
+): Promise<void> {
+  const conAnotados = await repo.primeraConAsistenciasDesde(ej, horario.id, desde);
+  if (conAnotados !== null) {
+    throw new ReglaDeNegocioError(
+      `El horario de ${horario.estilo} tiene alumnos anotados el ${conAnotados}. Quitalos antes de darlo de baja`,
+    );
+  }
+  await repo.borrarDesde(ej, horario.id, desde);
+}
+
+export async function adoptarClaseUnica(ej: Ejecutor, claseId: number, horarioId: number, semana: FechaDia): Promise<void> {
+  const unica = await repo.bloquear(ej, claseId);
+  if (unica === null) throw new NoEncontradoError(`No existe la clase ${claseId}`);
+  if (unica.horarioId !== null) throw new ReglaDeNegocioError('La clase ya es de un horario');
+  if (unica.semana !== semana) {
+    throw new ReglaDeNegocioError('La clase única tiene que estar en la semana desde la que rige el horario');
+  }
+  await repo.asignarHorario(ej, unica.id, horarioId);
 }

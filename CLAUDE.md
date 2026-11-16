@@ -67,7 +67,7 @@ Estas reglas se rompen fácil y cuestan caro. Están explicadas en [docs/estruct
 - **Lo que ya pasó no cambia.** `pago.monto`, `asistencia.valor_clase` y `asistencia.porcentaje_bp` se copian al momento de registrar. Un cambio de precio no altera meses anteriores.
 - **`horario` es lo que se repite cada semana; `clase` es la de una fecha.** La asistencia apunta a la clase, nunca al horario. "Sesión" es solo la del login (`sesion_usuario`).
 - **Nada con historial se borra.** Se usa `activo = false` o `anulado_en`.
-- **Las fechas del negocio son días** (`YYYY-MM-DD`) en la zona `America/Argentina/Buenos_Aires`. Pasan por `apps/api/src/lib/fechas.ts`.
+- **Las fechas del negocio son días** (`YYYY-MM-DD`) en la zona `America/Argentina/Buenos_Aires`. La cuenta con días vive en `packages/shared/src/fechas.ts`: la API la usa a través de `apps/api/src/lib/fechas.ts` y la web la importa de `@studio/shared`.
 
 ## Reglas del código
 

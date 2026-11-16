@@ -1,4 +1,4 @@
-import type { Rol } from '@studio/shared';
+import { hoyEnEstudio, type Rol } from '@studio/shared';
 
 const formateadorPesos = new Intl.NumberFormat('es-AR', {
   style: 'currency',
@@ -88,38 +88,6 @@ export function formatearPeriodo(periodo: string): string {
   return `${nombre} de ${anio}`;
 }
 
-export function hoyEnEstudio(ahora: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Argentina/Buenos_Aires',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(ahora);
-}
-
-export function horaEnEstudio(ahora: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'America/Argentina/Buenos_Aires',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).format(ahora);
-}
-
-export function sumarDias(fecha: string, dias: number): string {
-  const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
-  return new Date(Date.UTC(anio, mes - 1, dia + dias)).toISOString().slice(0, 10);
-}
-
-export function diaDeLaSemana(fecha: string): number {
-  const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
-  return ((new Date(Date.UTC(anio, mes - 1, dia)).getUTCDay() + 6) % 7) + 1;
-}
-
-export function lunesDe(fecha: string): string {
-  return sumarDias(fecha, 1 - diaDeLaSemana(fecha));
-}
-
 export const NOMBRES_ROL: Record<Rol, string> = { admin: 'Administración', recepcion: 'Recepción' };
 
 export const NOMBRES_MEDIO_DE_PAGO: Record<string, string> = {
@@ -137,11 +105,6 @@ export function textoAPorcentajeBp(texto: string): number | null {
   const numero = Number(texto.trim().replace(',', '.'));
   if (texto.trim() === '' || !Number.isFinite(numero)) return null;
   return porcentajeABp(numero);
-}
-
-export function periodoAnterior(fecha: string): string {
-  const [anio, mes] = fecha.split('-').map(Number) as [number, number];
-  return mes === 1 ? `${anio - 1}-12` : `${anio}-${String(mes - 1).padStart(2, '0')}`;
 }
 
 export function haceCuanto(fecha: string, hoy: string): string {

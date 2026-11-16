@@ -32,7 +32,7 @@ apps/web/
 │   ├── components/ui/         # componentes genéricos sin lógica de negocio
 │   ├── lib/
 │   │   ├── api.ts             # cliente HTTP y ErrorDeApi
-│   │   └── formato.ts         # pesos, fechas y porcentajes
+│   │   └── formato.ts         # pesos, fechas y porcentajes como texto
 │   ├── rutas.tsx              # árbol de rutas
 │   ├── App.tsx
 │   └── main.tsx
@@ -48,6 +48,7 @@ apps/web/
 - **Los colores salen de las variables de `index.css`** (`bg-panel`, `text-tenue`, `border-borde`), no de la paleta de Tailwind, salvo los estados: verde, rojo y ámbar.
 - **Las reglas de negocio viven en el backend.** El frontend valida formato con los esquemas compartidos, no reglas como "el pack está vencido": esas llegan como 422 y se muestran.
 - **Montos, fechas y porcentajes se muestran solo con `lib/formato.ts`.** El dinero es entero y se muestra como `$9.600`; los porcentajes vienen en puntos básicos y se muestran como `52,5%`.
+- **Las cuentas con días salen de `@studio/shared`** (`hoyEnEstudio`, `sumarDias`, `lunesDe`, `diaSemanaIso`, `sumarMeses`, `periodoDe`, `edadEn`). `lib/formato.ts` solo pasa a texto y no reexporta fechas.
 - **La sesión viaja en la cookie.** El frontend no guarda tokens. Quién está logueado sale de `GET /api/auth/yo`.
 - **En desarrollo, Vite hace de proxy de `/api` a la API** en el puerto 3000, así la cookie es del mismo origen.
 
