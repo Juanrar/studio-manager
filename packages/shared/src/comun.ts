@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// Una persona nombrada dentro de otro dato: el profesor de un horario o de una clase.
 export type PersonaResumen = { id: number; nombre: string; apellido: string };
 
 export type Listado<T> = {
@@ -14,7 +13,6 @@ export const listadoQuerySchema = z.object({
   q: z.string().trim().optional(),
   pagina: z.coerce.number().int().min(1).default(1),
   porPagina: z.coerce.number().int().min(1).max(100).default(20),
-  // z.coerce.boolean convierte 'false' en true, así que se compara el texto.
   incluirInactivos: z
     .enum(['true', 'false'])
     .optional()
@@ -32,7 +30,6 @@ export const fechaDiaSchema = z
     return fecha.getUTCMonth() === mes - 1 && fecha.getUTCDate() === dia;
   }, 'La fecha no existe');
 
-// Los campos opcionales aceptan '' (un input vacío del formulario) y lo guardan como null.
 const vacioANull = <T>(valor: T | '' | null | undefined): T | null | undefined =>
   valor === '' ? null : valor;
 

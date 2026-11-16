@@ -5,41 +5,29 @@ import { Icono } from './Icono.tsx';
 
 const dosDigitos = (numero: number) => String(numero).padStart(2, '0');
 
-// De 08:00 a 23:45 cada 15 minutos. Es una ayuda para elegir, no una regla: la API acepta cualquier HH:MM
-// y el campo deja tipear cualquier hora.
 const FRANJAS = Array.from({ length: (24 - 8) * 4 }, (_, indice) => {
   const minutosDelDia = 8 * 60 + indice * 15;
   return `${dosDigitos(Math.floor(minutosDelDia / 60))}:${dosDigitos(minutosDelDia % 60)}`;
 });
 
-// El formato de una hora completa, el mismo que valida la API.
 const HORA_COMPLETA = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-// Lo que separa la lista del campo y del borde de la ventana.
 const SEPARACION = 4;
 const MARGEN_DE_LA_VENTANA = 8;
 
 const PASO_CON_FLECHA: Record<string, number | undefined> = { ArrowDown: 1, ArrowUp: -1 };
 
-// La grilla más el valor actual si es una hora que la grilla no tiene (una clase a las 18:20), en su lugar
-// ordenado, para que abrir la lista no lo pierda. Lo que se tipea a medias ("19", "18:") no es una hora: no se agrega.
 function franjasCon(valor: string): string[] {
   if (!HORA_COMPLETA.test(valor) || FRANJAS.includes(valor)) return FRANJAS;
   return [...FRANJAS, valor].sort();
 }
 
-// Compara sin los dos puntos y desde el principio de la hora: "193" encuentra 19:30 y "21" no trae las 12:15.
-// Una cifra de 3 a 9 al principio solo puede ser la hora sin el cero de adelante: "9:30" es 09:30.
-// Si no coincide ninguna devuelve todas, así la lista nunca queda vacía.
 function filtrar(franjas: string[], escrito: string): string[] {
   const buscado = escrito.replace(/[:\s]/g, '').replace(/^[3-9]/, '0$&');
   const coinciden = franjas.filter((franja) => franja.replace(':', '').startsWith(buscado));
   return coinciden.length > 0 ? coinciden : franjas;
 }
 
-// Dónde va la lista, que puede llegar a medir `alto`, para un campo ubicado en `campo` dentro de una ventana de
-// `ventana` de alto. Debajo del campo si entra; si no, encima si entra; y si no entra en ninguno de los dos lados,
-// del lado con más lugar y tan baja como haga falta. Las coordenadas son las de la ventana: la lista es fixed.
 function ubicarLista(campo: DOMRect, alto: number, ventana: number): CSSProperties {
   const abajo = ventana - campo.bottom - SEPARACION - MARGEN_DE_LA_VENTANA;
   const arriba = campo.top - SEPARACION - MARGEN_DE_LA_VENTANA;
@@ -50,7 +38,6 @@ function ubicarLista(campo: DOMRect, alto: number, ventana: number): CSSProperti
   return abajo >= arriba ? { ...debajo, maxHeight: abajo } : { ...encima, maxHeight: arriba };
 }
 
-// offsetTop se mide desde la lista, que es la que tiene position, igual que scrollTop.
 function centrar(lista: HTMLElement, opcion: HTMLElement) {
   lista.scrollTop = Math.max(0, opcion.offsetTop - (lista.clientHeight - opcion.offsetHeight) / 2);
 }
@@ -65,29 +52,21 @@ function dejarALaVista(lista: HTMLElement, opcion: HTMLElement) {
 type Props = {
   valor: string;
   alCambiar: (valor: string) => void;
-  // Lo que lee un lector de pantalla al llegar al campo.
   etiqueta: string;
-  // Para que una <label> nombre el campo.
   id?: string | undefined;
 };
 
-// Campo de hora con un reloj que abre la lista de franjas. Es controlado: no guarda el valor, lo recibe y avisa
-// con alCambiar, también de lo que se tipea aunque todavía no sea una hora. El foco queda siempre en el campo y la
-// franja "marcada" es la que eligen Enter y las flechas.
 export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
   const base = useId();
   const idDeLista = `${base}-lista`;
   const idDeOpcion = (franja: string) => `${base}-${franja.replace(':', '')}`;
-  // Una fila tiene el reloj de inicio y el de fin: el nombre lleva la etiqueta para que se distingan.
   const nombreDelReloj = `Elegir el horario (${etiqueta})`;
   const raiz = useRef<HTMLDivElement>(null);
   const entrada = useRef<HTMLInputElement>(null);
   const lista = useRef<HTMLUListElement>(null);
 
   const [abierta, setAbierta] = useState(false);
-  // Dónde se dibuja la lista. Se calcula al abrir, con la lista ya en pantalla para saber cuánto mide.
   const [ubicacion, setUbicacion] = useState<CSSProperties | null>(null);
-  // La lista filtra solo desde que se tipea: abierta con el reloj muestra todas las franjas.
   const [filtrando, setFiltrando] = useState(false);
   const [marcada, setMarcada] = useState<string | null>(null);
 
@@ -95,19 +74,14 @@ export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
   const visibles = filtrando ? filtrar(franjas, valor) : franjas;
   const franjaMarcada = marcada !== null && visibles.includes(marcada) ? marcada : null;
   const opcionMarcada = () => (franjaMarcada === null ? null : document.getElementById(idDeOpcion(franjaMarcada)));
-  // La lista está en el body, no dentro del campo: "adentro del selector" son las dos cosas.
   const dentro = (nodo: EventTarget | null) =>
     nodo instanceof Node && (raiz.current?.contains(nodo) === true || lista.current?.contains(nodo) === true);
 
-  // Mientras está abierta, la lista se cierra con un clic fuera y con lo que la deje lejos de su campo.
-  // Para el clic no alcanza con mirar el foco: en una tablet, tocar una zona sin controles no lo saca del campo.
   useEffect(() => {
     if (!abierta) return;
     function alTocar(evento: PointerEvent) {
       if (!dentro(evento.target)) cerrar();
     }
-    // La lista es fixed: si se desplaza algo que contiene al campo, o cambia el tamaño de la ventana, queda suelta.
-    // Los scroll no burbujean, por eso se escuchan en la captura. El de la lista misma no cuenta.
     function alDesplazar(evento: Event) {
       if (evento.target instanceof Node && evento.target.contains(raiz.current)) cerrar();
     }
@@ -121,8 +95,6 @@ export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
     };
   }, [abierta]);
 
-  // Con la lista ya dibujada se sabe cuánto mide. Se cuenta lo que puede llegar a medir (su max-height) y no lo
-  // que mide ahora: al filtrar crece y se achica, y no tiene que desbordar la ventana ni cambiar de lado.
   useLayoutEffect(() => {
     if (!abierta || raiz.current === null || lista.current === null) return;
     const maximo = parseFloat(getComputedStyle(lista.current).maxHeight);
@@ -130,13 +102,11 @@ export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
     setUbicacion(ubicarLista(raiz.current.getBoundingClientRect(), alto, document.documentElement.clientHeight));
   }, [abierta]);
 
-  // Ya ubicada, la franja marcada (la del valor actual) queda en el medio de la lista.
   useLayoutEffect(() => {
     const opcion = opcionMarcada();
     if (ubicacion !== null && lista.current !== null && opcion !== null) centrar(lista.current, opcion);
   }, [ubicacion]);
 
-  // Con las flechas, la franja marcada no se sale de lo que se ve.
   useLayoutEffect(() => {
     const opcion = opcionMarcada();
     if (ubicacion !== null && lista.current !== null && opcion !== null) dejarALaVista(lista.current, opcion);
@@ -145,7 +115,6 @@ export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
   function abrir(tipeando: boolean) {
     setAbierta(true);
     setFiltrando(tipeando);
-    // Con el reloj o la flecha se marca el valor actual, para que las flechas sigan desde ahí.
     setMarcada(tipeando || !franjas.includes(valor) ? null : valor);
   }
 
@@ -162,7 +131,6 @@ export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
   }
 
   function alternar() {
-    // Sin desplazar: si el campo está cortado por el borde del área, el scroll cerraría la lista que se abre ahora.
     entrada.current?.focus({ preventScroll: true });
     if (abierta) cerrar();
     else abrir(false);
@@ -187,7 +155,6 @@ export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
       const actual = franjaMarcada === null ? -1 : visibles.indexOf(franjaMarcada);
       setMarcada(visibles[Math.min(Math.max(actual + paso, 0), visibles.length - 1)] ?? null);
     } else if (evento.key === 'Enter') {
-      // Con la lista abierta, Enter es de la lista: no tiene que enviar el formulario que contenga al campo.
       evento.preventDefault();
       if (franjaMarcada === null) cerrar();
       else elegir(franjaMarcada);
@@ -196,13 +163,10 @@ export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
     }
   }
 
-  // Al salir del campo con Tab la lista se cierra. Tocar el reloj o una franja no lo hace: ver onMouseDown.
   function alPerderElFoco(evento: FocusEvent<HTMLDivElement>) {
     if (!dentro(evento.relatedTarget)) cerrar();
   }
 
-  // El campo casi siempre tiene una hora: un clic deja el cursor al final y tipear "19" daría "18:0019". Al entrar
-  // se selecciona entera, así lo que se tipea la reemplaza.
   function alEnfocar(evento: FocusEvent<HTMLInputElement>) {
     evento.currentTarget.select();
   }
@@ -229,8 +193,6 @@ export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
         onKeyDown={alTeclear}
         className="w-14 bg-transparent py-1.5 pl-2.5 text-texto tabular-nums outline-none"
       />
-      {/* Fuera del recorrido del tabulador, como las pestañas no elegidas. onMouseDown evita que el campo
-          pierda el foco al tocar el reloj. */}
       <button
         type="button"
         tabIndex={-1}
@@ -243,11 +205,8 @@ export function SelectorDeHora({ valor, alCambiar, etiqueta, id }: Props) {
       >
         <Icono nombre="reloj" />
       </button>
-      {/* La lista va en el body con position fixed: dentro del campo la recortarían el scroll de Pagina y el
-          overflow-hidden de la tarjeta. z-30 la deja por encima de un diálogo (z-20). */}
       {abierta &&
         createPortal(
-          // Chrome deja enfocar con Tab una lista con scroll que no tiene nada enfocable adentro: tabIndex -1 la saca.
           <ul
             ref={lista}
             id={idDeLista}

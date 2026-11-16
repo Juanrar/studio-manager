@@ -24,16 +24,13 @@ export function AgendaPage() {
   const ahora = useAhora();
   const agenda = useAgenda(fecha, hoyEnEstudio(ahora));
   const irA = (nueva: string | undefined) => setParametros(nueva === undefined ? {} : { fecha: nueva });
-  // La API decide cuál es el día cuando la dirección no trae fecha: el de hoy en el estudio.
   const dia = agenda.data?.desde;
-  // El ahora solo cuenta si el día que se ve es hoy; si no, la hora es null y no se marca nada.
   const esHoy = dia !== undefined && dia === hoyEnEstudio(ahora);
   const hora = esHoy ? horaEnEstudio(ahora) : null;
   const hayClases = agenda.data !== undefined && agenda.data.items.length > 0;
   const lineaDeAhora = useRef<HTMLLIElement>(null);
-  // Baja hasta la línea cuando llegan las clases de hoy. No depende de la hora: el cambio de minuto no mueve la pantalla.
   useEffect(() => {
-    if (esHoy && hayClases) lineaDeAhora.current?.scrollIntoView?.({ block: 'center' }); // jsdom no lo implementa
+    if (esHoy && hayClases) lineaDeAhora.current?.scrollIntoView?.({ block: 'center' });
   }, [esHoy, hayClases, dia]);
   const fueraDelHorizonte = agenda.data !== undefined && agenda.data.desde > agenda.data.finDelHorizonte;
 
@@ -68,7 +65,6 @@ export function AgendaPage() {
   );
 }
 
-// Los renglones de la lista. Con `hora` (el día es hoy), la línea va antes del primer grupo con alguna clase que no terminó.
 function renglonesDelDia(grupos: GrupoDeClases[], hora: string | null, referenciaDeLinea: RefObject<HTMLLIElement | null>) {
   const posicionDeLinea =
     hora === null ? -1 : grupos.findIndex((grupo) => grupo.clases.some((clase) => !terminada(clase, hora)));
@@ -97,7 +93,6 @@ function LineaDeAhora({ referencia }: { referencia: RefObject<HTMLLIElement | nu
 
 function RenglonDeGrupo({ grupo, hora }: { grupo: GrupoDeClases; hora: string | null }) {
   const activo = hora !== null && grupo.clases.some((clase) => enCurso(clase, hora));
-  // Las clases de un grupo terminan a la misma hora: el renglón entero se apaga, hora incluida.
   const terminado = hora !== null && grupo.horaFin <= hora;
   return (
     <li

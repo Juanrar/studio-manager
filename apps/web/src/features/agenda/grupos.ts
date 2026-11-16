@@ -2,8 +2,6 @@ import type { Clase } from '@studio/shared';
 
 export type GrupoDeClases = { horaInicio: string; horaFin: string; clases: Clase[] };
 
-// Junta las clases con la misma hora de inicio y de fin. Dos clases que empiezan juntas y terminan a otra hora
-// van en grupos separados: un grupo tiene una sola hora de fin. Dentro de cada grupo conserva el orden de entrada.
 export function agruparPorHora(clases: Clase[]): GrupoDeClases[] {
   const grupos: GrupoDeClases[] = [];
   for (const clase of clases) {

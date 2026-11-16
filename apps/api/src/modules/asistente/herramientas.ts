@@ -6,10 +6,8 @@ import { proponerAltaDeProfesor, proponerClaseUnica, proponerHorario } from './p
 
 export type ContextoDeHerramienta = { hoy: FechaDia };
 
-// `resultado` vuelve al modelo. `propuesta` va a la web, que la muestra como tarjeta.
 export type SalidaDeHerramienta = { resultado: Record<string, unknown>; propuesta?: PropuestaDelAsistente };
 
-// Una herramienta lanza ZodError o un error de dominio cuando no puede: el service se lo pasa al modelo.
 export type Herramienta = DefinicionDeHerramienta & {
   soloAdmin: boolean;
   ejecutar(argumentos: Record<string, unknown>, contexto: ContextoDeHerramienta): Promise<SalidaDeHerramienta>;

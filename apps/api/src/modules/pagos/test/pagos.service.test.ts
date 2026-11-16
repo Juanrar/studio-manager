@@ -27,7 +27,6 @@ beforeEach(async () => {
 });
 
 describe('elegirPagoParaAsistencia', () => {
-  // Determinístico: el test HTTP de registros simultáneos detecta la carrera solo a veces.
   it('bloquea el pago elegido hasta que termina la transacción', async () => {
     await db.transaction(async (primera) => {
       await elegirPagoParaAsistencia(primera, alumnoId, '2026-03-10');

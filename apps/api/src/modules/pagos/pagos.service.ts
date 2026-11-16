@@ -18,9 +18,6 @@ export async function registrarPago(
   return obtenerPago(id, hoy);
 }
 
-// El pago congela el precio y la cantidad de clases del pack al momento de la compra.
-// Recibe el ejecutor para que asistencias pueda cobrar dentro de su transacción. Si el alumno estaba
-// dado de baja, comprar lo reactiva.
 export async function registrarPagoEn(
   ej: Ejecutor,
   datos: RegistrarPagoInput,
@@ -87,13 +84,11 @@ function aPago(fila: repo.FilaPago, hoy: FechaDia): Pago {
     ...resto,
     fecha: fecha.toISOString(),
     clasesRestantes: fila.cantidadClases - fila.clasesUsadas,
-    // El día del vencimiento todavía vale.
     vencido: fila.venceEl < hoy,
     anulado: anuladoEn !== null,
   };
 }
 
-// El estado del pack de varios alumnos con dos consultas, no dos por alumno.
 export async function resumenDePacks(alumnoIds: number[], hoy: FechaDia): Promise<Map<number, ResumenDelPack>> {
   const filas = await repo.listarParaEstadoDelPack(db, alumnoIds, hoy);
   const porAlumno = Map.groupBy(filas, (fila) => fila.alumnoId);
@@ -102,21 +97,16 @@ export async function resumenDePacks(alumnoIds: number[], hoy: FechaDia): Promis
 
 export type ComprasDelAlumno = { ultimaCompra: FechaDia; tienePackSinVencer: boolean };
 
-// Para la baja automática: el día del último pago no anulado de cada alumno, en la zona del estudio, y si
-// le queda alguno sin vencer. Quien no está en el mapa nunca compró o se le anularon todos los pagos.
 export async function comprasDeAlumnos(alumnoIds: number[], hoy: FechaDia): Promise<Map<number, ComprasDelAlumno>> {
   const filas = await repo.listarComprasDeAlumnos(db, alumnoIds, hoy);
   return new Map(
     filas.map((fila) => [
       fila.alumnoId,
-      // Cada fila agrupa por lo menos un pago, así que `ultimaCompra` no es null.
       { ultimaCompra: hoyEnEstudio(fila.ultimaCompra!, config.tzEstudio), tienePackSinVencer: fila.sinVencer },
     ]),
   );
 }
 
-// Primero se bloquean los pagos y después se cuentan sus asistencias: así, si otro
-// registro usó la última clase mientras se esperaba el bloqueo, la cuenta ya lo incluye.
 export async function elegirPagoParaAsistencia(
   tx: Ejecutor,
   alumnoId: number,

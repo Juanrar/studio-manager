@@ -6,7 +6,6 @@ import { unaClase, unProfesorEnListado } from '../../../../test/datos.ts';
 import { ADMIN, conSesion, renderizarEn } from '../../../../test/render.tsx';
 import { servidor } from '../../../../test/servidor.ts';
 
-// Martes 10 de marzo de 2026 a las 12:00 de Buenos Aires: el lunes 9 ya pasó.
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(new Date('2026-03-10T15:00:00Z'));
@@ -179,10 +178,8 @@ describe('/grilla: editar una semana', () => {
   it('tocar un hueco crea una clase única de una hora, y el aviso ofrece agregarla a todas las semanas', async () => {
     const { usuario, pedidos } = grillaEditable();
     const sabado = await screen.findByRole('group', { name: 'Sábado 14' });
-    // jsdom no calcula el diseño: la grilla mide 700 px de ancho (100 por día) y empieza arriba de todo.
     vi.spyOn(sabado.parentElement!, 'getBoundingClientRect').mockReturnValue({ left: 0, top: 0, width: 700, height: 945 } as DOMRect);
 
-    // Las 18:00 están 10 horas después de las 08:00, a 1,05 px por minuto.
     await usuario.pointer([
       { keys: '[MouseLeft>]', target: sabado, coords: { clientX: 550, clientY: 600 * 1.05 + 5 } },
       { keys: '[/MouseLeft]', target: sabado, coords: { clientX: 550, clientY: 600 * 1.05 + 5 } },

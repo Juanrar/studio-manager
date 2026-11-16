@@ -43,7 +43,6 @@ export function opcionesCookieSesion(expiraEn?: Date): CookieSerializeOptions {
   };
 }
 
-// `admin` incluye a `recepcion`: una ruta que pide recepción también la puede usar un admin.
 export function requerirRol(rol: Rol) {
   return async (request: FastifyRequest): Promise<void> => {
     if (request.usuario === null) {

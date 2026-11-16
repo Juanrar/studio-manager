@@ -1,8 +1,5 @@
 import { FIN_GRILLA, INICIO_GRILLA, PASO } from './minutos.ts';
 
-// Las cuentas de arrastrar en la grilla, sin React ni DOM: se prueban solas. `dia` es la columna, de 1 a la
-// cantidad de días que se muestran; los minutos se cuentan desde las 00:00.
-
 export type Caja = { left: number; top: number; width: number };
 export type Posicion = { dia: number; minutos: number };
 export type Destino = { dia: number; inicio: number; fin: number };
@@ -18,13 +15,11 @@ const redondear = (minutos: number) => Math.round(minutos / PASO) * PASO;
 const piso = (minutos: number) => Math.floor(minutos / PASO) * PASO;
 const limitar = (n: number, minimo: number, maximo: number) => Math.min(Math.max(n, minimo), maximo);
 
-// Dónde cae un punto de la pantalla: la columna del día y los minutos según la altura.
 export function posicionEnLaGrilla(caja: Caja, punto: { x: number; y: number }, cantidadDeDias: number, pxPorMinuto: number): Posicion {
   const dia = limitar(Math.floor(((punto.x - caja.left) / caja.width) * cantidadDeDias), 0, cantidadDeDias - 1) + 1;
   return { dia, minutos: INICIO_GRILLA + (punto.y - caja.top) / pxPorMinuto };
 }
 
-// Adónde va la clase según dónde está el puntero ahora. Salta de a 15 minutos y no sale de 08:00 a 23:00.
 export function destinoDelArrastre(arrastre: Arrastre, puntero: Posicion): Destino {
   if (arrastre.modo === 'mover') {
     const { clase } = arrastre;

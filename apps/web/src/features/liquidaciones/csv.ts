@@ -1,7 +1,6 @@
 import type { DetalleDeClase } from '@studio/shared';
 import { formatearFecha } from '../../lib/formato.ts';
 
-// Excel en español usa la coma como separador decimal: el CSV va separado por punto y coma.
 const SEPARADOR = ';';
 
 function celda(valor: string | number): string {
@@ -23,7 +22,6 @@ export function detalleACsv(items: DetalleDeClase[]): string {
   ].join('\r\n');
 }
 
-// El BOM hace que Excel lea el archivo como UTF-8 y muestre bien las tildes.
 export function descargarCsv(nombreArchivo: string, contenido: string): void {
   const archivo = new Blob(['\uFEFF', contenido], { type: 'text/csv;charset=utf-8' });
   const enlace = document.createElement('a');

@@ -5,7 +5,6 @@ const idSchema = z.number().int().positive();
 
 export const registrarAsistenciaSchema = z.object({
   alumnoId: idSchema,
-  // Si el alumno no tiene clases disponibles, recepción puede cobrar en el acto.
   cobrar: z
     .object({
       packId: idSchema,
@@ -14,7 +13,6 @@ export const registrarAsistenciaSchema = z.object({
     .optional(),
 });
 
-// Código de error que manda la API cuando el alumno no tiene clases para usar.
 export const SIN_CLASES_DISPONIBLES = 'SIN_CLASES_DISPONIBLES';
 
 export type RegistrarAsistenciaInput = z.infer<typeof registrarAsistenciaSchema>;

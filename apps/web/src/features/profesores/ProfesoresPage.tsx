@@ -29,12 +29,10 @@ const COLUMNAS = [
   { texto: 'Estado', icono: 'progreso' },
 ] as const;
 
-// "nunez" tiene que encontrar a Núñez: se compara sin mayúsculas ni tildes.
 function sinTildes(texto: string): string {
   return texto.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 }
 
-// Nombre completo en los dos órdenes, como el buscador de alumnos: "erik zapata" y "zapata erik" encuentran lo mismo.
 function coincide(profesor: ProfesorEnListado, busqueda: string): boolean {
   const buscado = sinTildes(busqueda.trim());
   return [

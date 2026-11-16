@@ -3,7 +3,6 @@ import { altaDeProfesorSchema } from '@studio/shared';
 import { requerirRol } from '../../plugins/autenticacion.ts';
 import { darDeAltaProfesor } from './alta-de-profesor.service.ts';
 
-// No usa el modelo: funciona aunque falte GEMINI_API_KEY.
 export async function rutasAltaDeProfesor(app: FastifyInstance): Promise<void> {
   app.post('/api/asistente/altas-de-profesor', { preHandler: requerirRol('admin') }, async (request, reply) => {
     const datos = altaDeProfesorSchema.parse(request.body);

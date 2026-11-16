@@ -23,7 +23,6 @@ export const rutas: RouteObject[] = [
       { index: true, element: <Navigate to="/agenda" replace /> },
       { path: 'agenda', element: <AgendaPage /> },
       { path: 'clases/:id', element: <ClasePage /> },
-      // La ficha se abre en un panel encima de la lista, que sigue montada con su búsqueda.
       { path: 'alumnos', element: <AlumnosPage />, children: [{ path: ':id', element: <FichaAlumnoPage /> }] },
       { path: 'asistente', element: <AsistentePage /> },
       {
@@ -31,7 +30,6 @@ export const rutas: RouteObject[] = [
         children: [
           { path: 'packs', element: <PacksPage /> },
           { path: 'profesores', element: <ProfesoresPage /> },
-          // Hermana y no hija del listado: la ficha es una página entera, no un panel encima de la lista.
           { path: 'profesores/:id', element: <FichaProfesorPage /> },
           { path: 'horarios', element: <HorariosPage /> },
           { path: 'grilla', element: <GrillaPage /> },

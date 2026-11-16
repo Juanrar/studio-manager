@@ -36,7 +36,6 @@ function asistenteQuePropone(propuesta: PropuestaDelAsistente) {
   );
 }
 
-// Una respuesta que llega recién cuando el test llama a `responder`.
 function respuestaDemorada(respuesta: () => Response) {
   const control = { pedidos: 0, responder: () => {} };
   const llegada = new Promise<void>((resolver) => {
@@ -52,7 +51,6 @@ function respuestaDemorada(respuesta: () => Response) {
   };
 }
 
-// Va a la agenda por el menú, espera que cargue y vuelve al asistente.
 async function irALaAgendaYVolver(usuario: ReturnType<typeof renderizarEn>['usuario'], enLaAgenda = () => {}) {
   await usuario.click(screen.getByRole('link', { name: 'Agenda' }));
   expect(await screen.findByText('No hay clases este día.')).toBeInTheDocument();
@@ -60,7 +58,6 @@ async function irALaAgendaYVolver(usuario: ReturnType<typeof renderizarEn>['usua
   await usuario.click(screen.getByRole('link', { name: 'Asistente' }));
 }
 
-// Responde a cada mensaje con la respuesta fija y guarda los cuerpos recibidos.
 function asistenteQueResponde(cuerpos: unknown[]) {
   servidor.use(
     http.post('/api/asistente/mensajes', async ({ request }) => {
@@ -160,7 +157,6 @@ describe('/asistente', () => {
     expect(alerta).toHaveTextContent(
       'Se alcanzó el límite de pedidos del plan gratuito. Probá en un minuto; si sigue, la cuota del día se renueva mañana.',
     );
-    // En la pantalla vacía el error va debajo de la caja.
     expect(screen.getByLabelText('Mensaje para el asistente').compareDocumentPosition(alerta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByLabelText('Mensaje para el asistente')).toHaveValue(PREGUNTA);
     expect(screen.queryByText('Pensando...')).not.toBeInTheDocument();
@@ -272,7 +268,6 @@ describe('/asistente', () => {
 
     const alerta = await screen.findByRole('alert');
     expect(alerta).toHaveTextContent('La conversación es muy larga: empezá una nueva');
-    // Con la conversación empezada el error va arriba de la caja.
     expect(campo.compareDocumentPosition(alerta) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
     expect(campo).toHaveValue('Y el viernes?');
     expect(screen.getByRole('button', { name: 'Nueva conversación' })).toHaveClass('bg-acento');
@@ -497,7 +492,6 @@ describe('/asistente', () => {
   });
 
   describe('alta de profesor', () => {
-    // Martes 13 de octubre de 2026 a las 12:00 de Buenos Aires.
     beforeEach(() => {
       vi.useFakeTimers({ toFake: ['Date'] });
       vi.setSystemTime(new Date('2026-10-13T15:00:00Z'));

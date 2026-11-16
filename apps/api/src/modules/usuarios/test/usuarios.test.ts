@@ -77,8 +77,6 @@ describe('POST /api/usuarios', () => {
 });
 
 describe('PATCH /api/usuarios/:id', () => {
-  // La búsqueda de sesión ya ignora usuarios inactivos, así que para ver que las
-  // sesiones se borraron hay que reactivar al usuario y probar la cookie vieja.
   it('desactivar a un usuario cierra sus sesiones abiertas', async () => {
     await crearUsuarioDeTest(ADMIN);
     const recepcion = await crearUsuarioDeTest(RECEPCION);

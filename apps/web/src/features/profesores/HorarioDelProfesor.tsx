@@ -6,21 +6,15 @@ import { DIAS_DE_LA_SEMANA, nombreDelDia } from '../../lib/formato.ts';
 import { useHorarios } from '../horarios/api.ts';
 import { FilaDeLectura, FilaEnEdicion } from './FilaDeHorario.tsx';
 
-// La fila que se está editando: una clase que ya existe o una nueva en un día. Hay una sola a la vez.
 type Edicion = { tipo: 'existente'; horarioId: number } | { tipo: 'nueva'; diaSemana: number } | null;
 
-// La pestaña Clases de la ficha: los siete días de la semana, siempre los siete, con las clases del profesor.
 export function HorarioDelProfesor({ profesorId }: { profesorId: number }) {
   const [incluirInactivos, setIncluirInactivos] = useState(false);
   const horarios = useHorarios({ profesorId, incluirInactivos });
   const [edicion, setEdicion] = useState<Edicion>(null);
 
-  // Cierra la edición solo si sigue siendo esa: un guardado que tarda no tiene que cerrar la fila que se abrió
-  // mientras tanto.
   const terminar = (cual: Edicion) => setEdicion((actual) => (actual === cual ? null : actual));
 
-  // El "+" de un día que ya tiene una fila nueva abierta la conserva, con lo escrito. Tiene que ser el mismo
-  // objeto: si cambiara, un guardado en curso no cerraría la fila y un segundo "Guardar" crearía la clase dos veces.
   const agregar = (diaSemana: number) =>
     setEdicion((actual) =>
       actual?.tipo === 'nueva' && actual.diaSemana === diaSemana ? actual : { tipo: 'nueva', diaSemana },
@@ -81,7 +75,6 @@ function DiaDelHorario({
       aria-labelledby={idTitulo}
       className="flex items-start gap-4 border-b border-borde px-4 py-3 last:border-b-0"
     >
-      {/* El padding centra el nombre y el "+" con la primera fila, que mide 44px. */}
       <h3 id={idTitulo} className="w-28 flex-none pt-3 font-medium">
         {nombre}
       </h3>

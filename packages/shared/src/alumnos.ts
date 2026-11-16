@@ -48,15 +48,10 @@ export type Alumno = {
   activo: boolean;
 };
 
-// Una fila del listado de recepción: el alumno, el pack que está usando y el día de su última clase.
 export type AlumnoEnListado = Alumno & ResumenDelPack & { ultimaClase: string | null };
 
-// GET /api/alumnos/:id: el alumno, el día de su alta en la zona del estudio y el pack que está usando.
 export type FichaDeAlumno = Alumno & ResumenDelPack & { alta: string };
 
-// Un hecho de la historia del alumno, para la pestaña Actividad de la ficha. `fecha` es un día.
-// Una clase es `asistencia` hasta hoy y `anotado` si es de un día posterior. `profesor` es quien
-// la da: el suplente, si hubo. Una baja `automatica` la hizo el sistema por falta de compras.
 export type EventoDeAlumno =
   | { tipo: 'asistencia' | 'anotado'; fecha: string; clase: string; profesor: PersonaResumen }
   | { tipo: 'pago'; fecha: string; pack: string; monto: number; medio: MedioPago; anulado: boolean }
@@ -64,6 +59,4 @@ export type EventoDeAlumno =
   | { tipo: 'reactivacion'; fecha: string }
   | { tipo: 'alta'; fecha: string };
 
-// `vigentes` cuenta los alumnos activos del filtro con el pack vigente, en todas las páginas.
-// `hoy` es el día del estudio para el que se calcularon los estados.
 export type ListadoDeAlumnos = Listado<AlumnoEnListado> & { vigentes: number; hoy: string };

@@ -1,6 +1,3 @@
-// Prueba el asistente contra Gemini con frases reales. Gasta cuota del plan gratuito. Uso:
-//   pnpm --filter @studio/api asistente:probar [número de frase ...]
-// Sin argumentos corre todas. Solo lee la base de desarrollo: toma el primer profesor activo.
 import type { Rol } from '@studio/shared';
 import { config } from '../config.ts';
 import { sql } from '../db/client.ts';
@@ -31,7 +28,6 @@ try {
     throw new Error('Falta GEMINI_API_KEY en apps/api/.env');
   }
   const hoy = hoyEnEstudio(new Date(), config.tzEstudio);
-  // Sin los inactivos, la lista trae solo profesores activos.
   const [profesor] = await listarProfesores(false, hoy);
   if (!profesor) {
     throw new Error('La base de desarrollo no tiene ningún profesor activo: cargá uno antes de probar.');
@@ -58,7 +54,6 @@ try {
       console.log(`Texto: ${respuesta.texto}`);
       console.log(`Propuestas: ${JSON.stringify(respuesta.propuestas, null, 2)}\n`);
     } catch (error) {
-      // Un error de dominio (cuota, saturación, las 6 vueltas) es el resultado de esta frase: se sigue con las demás.
       if (!esErrorDeDominio(error)) throw error;
       const codigo = error.codigo === undefined ? '' : ` ${error.codigo}`;
       console.log(`Error ${error.codigoHttp}${codigo}: ${error.message}\n`);

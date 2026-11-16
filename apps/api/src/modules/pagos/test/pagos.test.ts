@@ -33,7 +33,6 @@ afterAll(async () => {
   await base.cerrar();
 });
 
-// AHORA es el martes 2026-03-10 a las 12:00 en Buenos Aires.
 beforeEach(async () => {
   await base.limpiar();
   app = await crearAppDeTest();
@@ -141,7 +140,6 @@ describe('vencimiento', () => {
   ])('%s', async (_caso, momento, vencido) => {
     await registrarPago({ alumnoId: martina.id, packId: packX8.id, medio: 'efectivo' });
 
-    // La sesión dura 7 días: un mes después hay que volver a loguearse.
     const appMasTarde = await crearAppDeTest({ reloj: relojFijo(new Date(momento)) });
     const cookieMasTarde = await loguear(appMasTarde, RECEPCION.email, RECEPCION.password);
     const [pago] = await pagosDeMartina(appMasTarde, cookieMasTarde);

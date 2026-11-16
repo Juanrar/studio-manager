@@ -1,13 +1,9 @@
 import { useEffect, type ReactNode } from 'react';
 
-// Un rectángulo de la pantalla junto al que se abre la caja: el de la clase que se tocó, por ejemplo.
 export type Ancla = { left: number; right: number; top: number };
 
 const MARGEN = 8;
 
-// Una caja chica junto a algo de la pantalla, en lugar de un diálogo en el centro. Se abre a la derecha del
-// ancla y se corre a la izquierda si no entra. Un clic afuera o Escape la cierran. Va en z-20, como un
-// diálogo: la lista del selector de hora (z-30) se abre por encima.
 export function Flotante({
   ancla,
   ancho,

@@ -25,8 +25,6 @@ export function CajaDeMensaje({
     }
   }
 
-  // Borde de 1px con degradé: un fondo pintado detrás de la caja, que la deja ver por el relleno.
-  // El brillo alrededor es solo de la caja grande: con la conversación empezada se apaga.
   return (
     <div
       className={`rounded-xl p-px transition-shadow duration-700 motion-reduce:transition-none ${grande ? 'shadow-[0_0_48px_-14px_color-mix(in_oklab,var(--color-acento)_55%,transparent)] focus-within:shadow-[0_0_56px_-10px_color-mix(in_oklab,var(--color-acento)_70%,transparent)]' : 'focus-within:shadow-[0_0_0_1px_var(--color-acento)]'}`}

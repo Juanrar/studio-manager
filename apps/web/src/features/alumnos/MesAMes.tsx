@@ -13,8 +13,6 @@ const textoDeCompra = ({ pack, veces }: Compra) => (veces > 1 ? `${veces} × ${p
 const textoDeCompras = (compras: Compra[]) => compras.map(textoDeCompra).join(', ');
 const textoDeClases = (cantidad: number) => `${cantidad} ${cantidad === 1 ? 'clase tomada' : 'clases tomadas'}`;
 
-// Los últimos meses del alumno: un gráfico a la izquierda y, a la derecha, el detalle del mes elegido.
-// El mes elegido es estado local y empieza en el último.
 export function MesAMes({ meses }: { meses: Mes[] }) {
   const [elegido, setElegido] = useState<string | null>(null);
   const mes = meses.find((m) => m.mes === elegido) ?? meses[meses.length - 1];
@@ -38,7 +36,6 @@ export function MesAMes({ meses }: { meses: Mes[] }) {
   );
 }
 
-// Una barra por mes: las clases que tomó y, encima, las que se le vencieron. Debajo, lo que compró.
 function GraficoPorMes({
   meses,
   elegido,
@@ -48,7 +45,6 @@ function GraficoPorMes({
   elegido: string;
   alElegir: (mes: string) => void;
 }) {
-  // Con todos los meses en cero no hay escala: se divide por 1 y cada barra queda en el mínimo.
   const maximo = Math.max(1, ...meses.map((mes) => mes.tomadas + mes.vencidas));
   return (
     <div>
@@ -133,7 +129,6 @@ function ClasesDelMes({ mes }: { mes: Mes }) {
         </tr>
       </thead>
       <tbody>
-        {/* Dos clases pueden caer el mismo día: la fecha no sirve de clave. */}
         {mes.clases.map((clase, indice) => (
           <tr key={indice} className="border-t border-borde">
             <td className="h-7 pr-3 text-tenue">{formatearFecha(clase.fecha).slice(0, 5)}</td>

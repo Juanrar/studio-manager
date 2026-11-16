@@ -6,12 +6,10 @@ const formateadorPesos = new Intl.NumberFormat('es-AR', {
   maximumFractionDigits: 0,
 });
 
-// El dinero es entero, en pesos: 9600 se muestra como $9.600.
 export function formatearPesos(monto: number): string {
   return formateadorPesos.format(monto).replace(/\s/g, '');
 }
 
-// Los porcentajes vienen en puntos básicos: 5250 se muestra como 52,5%.
 export function formatearPorcentaje(puntosBasicos: number): string {
   return `${(puntosBasicos / 100).toLocaleString('es-AR', { maximumFractionDigits: 2 })}%`;
 }
@@ -20,13 +18,11 @@ export function porcentajeABp(porcentaje: number): number {
   return Math.round(porcentaje * 100);
 }
 
-// AAAA-MM-DD a DD/MM/AAAA.
 export function formatearFecha(fecha: string): string {
   const [anio, mes, dia] = fecha.split('-');
   return `${dia}/${mes}/${anio}`;
 }
 
-// AAAA-MM-DD a "martes 10 de marzo". Se calcula en UTC porque la fecha no tiene hora.
 export function formatearFechaLarga(fecha: string): string {
   const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
   return new Intl.DateTimeFormat('es-AR', {
@@ -37,7 +33,6 @@ export function formatearFechaLarga(fecha: string): string {
   }).format(new Date(Date.UTC(anio, mes - 1, dia)));
 }
 
-// Propios y no de Intl: según la versión, Intl escribe "sept" o agrega "de".
 const MESES = [
   'enero',
   'febrero',
@@ -54,32 +49,27 @@ const MESES = [
 ];
 const MESES_CORTOS = MESES.map((mes) => mes.slice(0, 3));
 
-// AAAA-MM-DD a "18 oct", sin el año.
 export function formatearDiaYMes(fecha: string): string {
   const [, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
   return `${dia} ${MESES_CORTOS[mes - 1]}`;
 }
 
-// AAAA-MM-DD a "18 oct". Si no es del año de `hoy`, lleva el año: "20 dic 2025".
 export function formatearFechaCorta(fecha: string, hoy: string): string {
   const anio = fecha.slice(0, 4);
   return anio === hoy.slice(0, 4) ? formatearDiaYMes(fecha) : `${formatearDiaYMes(fecha)} ${anio}`;
 }
 
-// AAAA-MM a "Septiembre", sin el año.
 export function nombreDelMes(periodo: string): string {
   const nombre = MESES[Number(periodo.slice(5, 7)) - 1] ?? '';
   return `${nombre.charAt(0).toUpperCase()}${nombre.slice(1)}`;
 }
 
-// AAAA-MM a "Septiembre 2026", como título de un mes.
 export function formatearMes(periodo: string): string {
   return `${nombreDelMes(periodo)} ${periodo.slice(0, 4)}`;
 }
 
 export const DIAS_DE_LA_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-// 1 es lunes, 7 es domingo (ISO), igual que la API.
 export function nombreDelDia(diaSemana: number): string {
   return DIAS_DE_LA_SEMANA[diaSemana - 1] ?? '';
 }
@@ -98,7 +88,6 @@ export function formatearPeriodo(periodo: string): string {
   return `${nombre} de ${anio}`;
 }
 
-// Día de hoy en la zona del estudio, como AAAA-MM-DD.
 export function hoyEnEstudio(ahora: Date = new Date()): string {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Argentina/Buenos_Aires',
@@ -108,7 +97,6 @@ export function hoyEnEstudio(ahora: Date = new Date()): string {
   }).format(ahora);
 }
 
-// La hora de ahora en la zona del estudio, como HH:MM de 24 horas.
 export function horaEnEstudio(ahora: Date = new Date()): string {
   return new Intl.DateTimeFormat('en-GB', {
     timeZone: 'America/Argentina/Buenos_Aires',
@@ -123,13 +111,11 @@ export function sumarDias(fecha: string, dias: number): string {
   return new Date(Date.UTC(anio, mes - 1, dia + dias)).toISOString().slice(0, 10);
 }
 
-// 1 es lunes, 7 es domingo (ISO), igual que la API.
 export function diaDeLaSemana(fecha: string): number {
   const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
   return ((new Date(Date.UTC(anio, mes - 1, dia)).getUTCDay() + 6) % 7) + 1;
 }
 
-// La semana del estudio va de lunes a domingo.
 export function lunesDe(fecha: string): string {
   return sumarDias(fecha, 1 - diaDeLaSemana(fecha));
 }
@@ -143,25 +129,21 @@ export const NOMBRES_MEDIO_DE_PAGO: Record<string, string> = {
   otro: 'Otro',
 };
 
-// Un instante ISO a DD/MM/AAAA, con el día del estudio.
 export function formatearInstante(instante: string): string {
   return formatearFecha(hoyEnEstudio(new Date(instante)));
 }
 
-// "52,5" o "52.5" a 5250 puntos básicos. Devuelve null si no es un número.
 export function textoAPorcentajeBp(texto: string): number | null {
   const numero = Number(texto.trim().replace(',', '.'));
   if (texto.trim() === '' || !Number.isFinite(numero)) return null;
   return porcentajeABp(numero);
 }
 
-// El mes anterior al de la fecha, como AAAA-MM: es el que se liquida.
 export function periodoAnterior(fecha: string): string {
   const [anio, mes] = fecha.split('-').map(Number) as [number, number];
   return mes === 1 ? `${anio - 1}-12` : `${anio}-${String(mes - 1).padStart(2, '0')}`;
 }
 
-// "Hoy", "Ayer" o "Hace N días", de una fecha pasada a `hoy`.
 export function haceCuanto(fecha: string, hoy: string): string {
   const dias = Math.round((Date.parse(hoy) - Date.parse(fecha)) / 86_400_000);
   if (dias <= 0) return 'Hoy';

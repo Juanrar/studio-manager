@@ -25,7 +25,6 @@ describe('/alumnos', () => {
     await usuario.type(await screen.findByRole('searchbox', { name: 'Buscar alumno' }), 'garcia');
 
     expect(await screen.findByRole('link', { name: 'García, Martina' })).toBeInTheDocument();
-    // La primera carga va sin filtro y después una sola búsqueda, no una por tecla.
     expect(busquedas).toEqual([null, 'garcia']);
   });
 

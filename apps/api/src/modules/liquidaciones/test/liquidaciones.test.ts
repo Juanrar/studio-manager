@@ -22,7 +22,6 @@ import { abrirClase, type ClaseAbierta } from '../../clases/clases.service.ts';
 import { actualizarHorario, listarHorarios } from '../../horarios/horarios.service.ts';
 import { registrarPago } from '../../pagos/pagos.service.ts';
 
-// Los tests corren el 5 de abril de 2026, con marzo ya terminado.
 const CINCO_DE_ABRIL = new Date('2026-04-05T15:00:00Z');
 
 let base: BaseDeTest;
@@ -55,9 +54,6 @@ async function asistir(clase: ClaseAbierta, alumno: Alumno) {
   return registrarAsistencia(clase.id, { alumnoId: alumno.id }, recepcion.id, AHORA, '2026-03-10');
 }
 
-// Erik (50%) da Hip-Hop los martes. Martina usa un pack x4 ($1300 la clase) el 24/2, el 3/3 y el 10/3.
-// Joaquín paga una clase suelta ($1500) el 10/3. Iaru (60%) no tiene clases.
-// Erik en marzo: 650 + 650 + 750 = 2050.
 beforeEach(async () => {
   await base.limpiar();
   app = await crearAppDeTest({ reloj: relojFijo(CINCO_DE_ABRIL) });
@@ -231,7 +227,6 @@ describe('con el mes liquidado', () => {
 
 describe('GET /api/pagos/ingresos', () => {
   it('suma por medio los pagos del mes según el día del estudio, sin los anulados', async () => {
-    // El 31 de marzo a las 23:00 en Buenos Aires ya es 1 de abril en UTC.
     await registrarPago(
       { alumnoId: martina.id, packId: packX4.id, medio: 'transferencia' },
       recepcion.id,
@@ -248,7 +243,6 @@ describe('GET /api/pagos/ingresos', () => {
 
     const respuesta = await get('/api/pagos/ingresos?periodo=2026-03');
 
-    // Queda afuera el pack x4 de Martina del 20 de febrero.
     expect(respuesta.json()).toEqual({
       periodo: '2026-03',
       total: 6700,

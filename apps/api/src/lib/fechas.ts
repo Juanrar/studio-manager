@@ -32,7 +32,6 @@ export function sumarUnMes(fecha: FechaDia): FechaDia {
   return sumarMeses(fecha, 1);
 }
 
-// Si el mes de destino es más corto, recorta a su último día: el 31 de enero más un mes es el 28 de febrero.
 export function sumarMeses(fecha: FechaDia, meses: number): FechaDia {
   const [anio, mes, dia] = partes(fecha);
   const mesesDesdeElAnio = mes - 1 + meses;
@@ -53,19 +52,15 @@ export function primerDiaDelMes(fecha: FechaDia): FechaDia {
   return formatear(anio, mes, 1);
 }
 
-// La semana del estudio va de lunes a domingo, como `dia_semana`.
 export function lunesDe(fecha: FechaDia): FechaDia {
   return sumarDias(fecha, 1 - diaSemanaIso(fecha));
 }
 
-// Las clases se crean por adelantado hasta el domingo de la semana que contiene el último día del mes
-// siguiente: el estudio arma la grilla, como mucho, hasta el mes que viene.
 export function finDelHorizonte(hoy: FechaDia): FechaDia {
   const ultimoDelMesSiguiente = sumarDias(sumarMeses(primerDiaDelMes(hoy), 2), -1);
   return sumarDias(lunesDe(ultimoDelMesSiguiente), 6);
 }
 
-// El lunes de cada semana del horizonte, desde la semana de hoy.
 export function semanasDelHorizonte(hoy: FechaDia): FechaDia[] {
   const semanas: FechaDia[] = [];
   const fin = finDelHorizonte(hoy);
@@ -89,10 +84,8 @@ function formatear(anio: number, mes: number, dia: number): FechaDia {
   return `${String(anio).padStart(4, '0')}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
 }
 
-// Un período es un mes: `AAAA-MM`.
 export type Periodo = string;
 
-// Del primer día del mes (incluido) al primer día del mes siguiente (excluido).
 export function rangoDelPeriodo(periodo: Periodo): { desde: FechaDia; hasta: FechaDia } {
   const desde = `${periodo}-01`;
   return { desde, hasta: sumarUnMes(desde) };

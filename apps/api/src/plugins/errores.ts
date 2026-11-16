@@ -2,7 +2,6 @@ import type { FastifyInstance } from 'fastify';
 import { ZodError } from 'zod';
 import { esErrorDeDominio } from '../lib/errores.ts';
 
-// Con `sirveFrontend`, una ruta desconocida fuera de /api/ devuelve index.html: la resuelve el router del frontend.
 export function registrarManejoDeErrores(app: FastifyInstance, { sirveFrontend = false } = {}): void {
   app.setErrorHandler((error, request, reply) => {
     if (esErrorDeDominio(error)) {
@@ -21,7 +20,6 @@ export function registrarManejoDeErrores(app: FastifyInstance, { sirveFrontend =
       });
     }
 
-    // Errores propios de Fastify con código 4xx: JSON mal formado, cuerpo demasiado grande.
     const codigo = (error as { statusCode?: unknown }).statusCode;
     if (typeof codigo === 'number' && codigo >= 400 && codigo < 500) {
       return reply.status(codigo).send({ error: (error as Error).message });

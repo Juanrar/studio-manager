@@ -15,7 +15,6 @@ afterAll(async () => {
   await base.cerrar();
 });
 
-// Alta el 1 de enero con 50%, y desde el 1 de marzo pasa a 60%.
 beforeEach(async () => {
   await base.limpiar();
   const profesor = await crearProfesor(

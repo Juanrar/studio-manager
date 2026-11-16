@@ -7,7 +7,6 @@ import { esViolacionUnica } from '../../lib/postgres.ts';
 import { listarProfesores, obtenerProfesor } from '../profesores/profesores.service.ts';
 import * as repo from './liquidaciones.repository.ts';
 
-// La parte del profesor se calcula por asistencia, con el porcentaje que quedó guardado en cada una.
 function montoDe(asistencias: repo.AsistenciaLiquidable[]): number {
   return asistencias.reduce((total, a) => total + aplicarPorcentaje(a.valorClase, a.porcentajeBp), 0);
 }
@@ -89,7 +88,6 @@ export async function marcarPagada(id: number, ahora: Date): Promise<Liquidacion
   return liquidacion;
 }
 
-// Asistencias y clases la llaman antes de tocar algo que cambia el sueldo de un profesor.
 export async function verificarMesAbierto(ej: Ejecutor, profesorId: number, fecha: FechaDia): Promise<void> {
   const periodo = periodoDe(fecha);
   const cerrada = await repo.buscarCerrada(ej, profesorId, `${periodo}-01`);

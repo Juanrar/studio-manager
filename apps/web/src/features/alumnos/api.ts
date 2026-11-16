@@ -32,7 +32,6 @@ export function useFichaDeAlumno(id: number) {
   return useQuery({ queryKey: ['alumnos', id], queryFn: () => api.get<FichaDeAlumno>(`/alumnos/${id}`) });
 }
 
-// Va debajo de la ficha en la clave: lo que recarga las consultas de alumnos también la recarga.
 export function useActividadDeAlumno(id: number) {
   return useQuery({
     queryKey: ['alumnos', id, 'actividad'],
@@ -40,7 +39,6 @@ export function useActividadDeAlumno(id: number) {
   });
 }
 
-// También va debajo de la ficha: registrar o anular un pago invalida ['alumnos'] y la recarga.
 export function useResumenDeAlumno(id: number) {
   return useQuery({
     queryKey: ['alumnos', id, 'resumen'],

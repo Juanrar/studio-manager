@@ -8,7 +8,6 @@ const MAX_DIAS_QUE_SUELE_VENIR = 2;
 
 export type ClaseParaResumen = { fecha: FechaDia; horaInicio: string; clase: string; profesor: PersonaResumen };
 
-// Solo pagos no anulados. `dia` es el día del cobro en la zona del estudio.
 export type PagoParaResumen = {
   dia: FechaDia;
   pack: string;
@@ -18,19 +17,17 @@ export type PagoParaResumen = {
   vencido: boolean;
 };
 
-// `totalPagado` siempre viene calculado; el service lo pasa a null para recepción.
 export function resumir(
   clases: ClaseParaResumen[],
   pagos: PagoParaResumen[],
   hoy: FechaDia,
 ): ResumenDeAlumno & { totalPagado: number } {
-  // De la más nueva a la más vieja. Las anotadas para más adelante todavía no pasaron.
   const tomadas = clases.filter((c) => c.fecha <= hoy).sort((a, b) => b.fecha.localeCompare(a.fecha));
 
   const primerMes = primerDiaDelMes(sumarMeses(primerDiaDelMes(hoy), -(MESES_DEL_GRAFICO - 1)));
   const meses = Array.from({ length: MESES_DEL_GRAFICO }, (_, i) => periodoDe(sumarMeses(primerMes, i)));
 
-  const desdeOchoSemanas = sumarDias(hoy, -DIAS_DE_ACTIVIDAD_RECIENTE); // la fecha misma no cuenta
+  const desdeOchoSemanas = sumarDias(hoy, -DIAS_DE_ACTIVIDAD_RECIENTE);
   const enOchoSemanas = tomadas.filter((c) => c.fecha > desdeOchoSemanas);
   const enDoceMeses = tomadas.filter((c) => c.fecha >= primerMes);
 
@@ -68,8 +65,6 @@ export function resumir(
   };
 }
 
-// Claves ordenadas de más a menos clases. Ante un empate va primero la de la clase más reciente.
-// Las clases tienen que venir de la más nueva a la más vieja.
 function masFrecuente<T>(
   clases: T[],
   clave: (clase: T) => string,
@@ -79,7 +74,6 @@ function masFrecuente<T>(
     const k = clave(clase);
     grupos.set(k, [...(grupos.get(k) ?? []), clase]);
   }
-  // `sort` es estable y los grupos se crean en el orden de su clase más reciente.
   return [...grupos.entries()]
     .map(([k, delGrupo]) => ({ clave: k, cantidad: delGrupo.length, clases: delGrupo }))
     .sort((a, b) => b.cantidad - a.cantidad);

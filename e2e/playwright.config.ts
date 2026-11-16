@@ -13,7 +13,6 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  // La API sirve el frontend compilado, como en producción, contra la base de e2e.
   webServer: {
     command: 'pnpm --filter @studio/api start',
     cwd: '..',

@@ -6,7 +6,6 @@ import { unaClase } from '../../../../test/datos.ts';
 import { ADMIN, conSesion, renderizarEn } from '../../../../test/render.tsx';
 import { servidor } from '../../../../test/servidor.ts';
 
-// Martes 10 de marzo de 2026 a las 12:00 de Buenos Aires.
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(new Date('2026-03-10T15:00:00Z'));
@@ -16,7 +15,6 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-// Cinco clases el martes 10, en orden de hora, y una el jueves 12.
 const DEL_MARTES = ['09:00', '11:00', '17:00', '19:00', '21:00'].map((hora, indice) =>
   unaClase({ id: 70 + indice, fecha: '2026-03-10', estilo: `Clase ${indice + 1}`, nivel: null, horaInicio: hora, horaFin: `${String(Number(hora.slice(0, 2)) + 1).padStart(2, '0')}:00` }),
 );
@@ -50,7 +48,6 @@ describe('/grilla: vistas de día y de mes', () => {
 
     const martes = await screen.findByRole('button', { name: 'Martes 10, 5 clases' });
 
-    // El 1 de marzo es domingo: el mes empieza el lunes 23 de febrero y termina el domingo 5 de abril.
     expect(pedidos).toEqual(['?desde=2026-02-23&hasta=2026-04-05']);
     expect(within(martes).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
       '09:00 Clase 1',
@@ -107,7 +104,6 @@ describe('/grilla: vistas de día y de mes', () => {
     expect(screen.getByText('30 mar – 5 abr')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Volver a esta semana' })).toBeInTheDocument();
 
-    // El 30 de marzo es de marzo: el mes de hoy, aunque la semana termine en abril.
     await usuario.click(screen.getByRole('button', { name: 'Mes' }));
     await screen.findByRole('button', { name: 'Martes 10, sin clases' });
     expect(screen.getByText('Marzo')).toBeInTheDocument();

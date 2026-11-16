@@ -69,7 +69,6 @@ export async function listarAsistenciasDeClase(claseId: number): Promise<Asisten
   return repo.listarDeClase(db, claseId);
 }
 
-// Para el listado de alumnos: el día de la última clase de cada uno hasta hoy.
 export async function ultimasClases(alumnoIds: number[], hoy: FechaDia): Promise<Map<number, FechaDia>> {
   const ultimas = new Map<number, FechaDia>();
   for (const { alumnoId, fecha } of await repo.ultimasFechas(db, alumnoIds, hoy)) {
@@ -78,12 +77,10 @@ export async function ultimasClases(alumnoIds: number[], hoy: FechaDia): Promise
   return ultimas;
 }
 
-// Para la actividad de la ficha: las clases del alumno, de la más nueva a la más vieja.
 export async function asistenciasDeAlumno(alumnoId: number): Promise<repo.ClaseDeAlumno[]> {
   return repo.listarDeAlumno(db, alumnoId);
 }
 
-// Borrarla devuelve la clase al pack: las clases restantes se calculan contando asistencias.
 export async function borrarAsistencia(id: number): Promise<void> {
   await db.transaction(async (tx) => {
     const clase = await repo.buscarClaseDe(tx, id);

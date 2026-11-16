@@ -8,9 +8,6 @@ import type { FechaDia } from '../../lib/fechas.ts';
 
 const titular = alias(profesor, 'titular');
 
-// Una clase tiene cambios propios si difiere de su horario. Solo se mira de la semana actual en
-// adelante: una clase pasada se compararía con el horario de hoy. Una clase única, sin horario, existe
-// solo esa semana.
 const tieneCambios = (lunesActual: FechaDia) => sql<boolean>`case
   when ${clase.horarioId} is null then true
   when ${clase.semana} < ${lunesActual}::date then false
@@ -66,7 +63,6 @@ export async function buscarIdPorHorarioYFecha(ej: Ejecutor, horarioId: number, 
   return fila?.id ?? null;
 }
 
-// Las que ya existían para ese horario y esa semana no se tocan. Devuelve cuántas se crearon.
 export async function insertarLasQueFaltan(ej: Ejecutor, filas: NuevaClase[]): Promise<number> {
   if (filas.length === 0) return 0;
   const creadas = await ej
@@ -90,7 +86,6 @@ export async function borrar(ej: Ejecutor, id: number): Promise<void> {
   await ej.delete(clase).where(eq(clase.id, id));
 }
 
-// Devuelve null si ya existía una clase para ese horario y fecha (dos pedidos a la vez).
 export async function insertarSiNoExiste(ej: Ejecutor, datos: NuevaClase): Promise<number | null> {
   const [fila] = await ej.insert(clase).values(datos).onConflictDoNothing().returning({ id: clase.id });
   return fila?.id ?? null;
@@ -123,7 +118,6 @@ export type ClaseBloqueada = {
   profesorId: number;
 };
 
-// `for update`: mientras dura la transacción nadie más modifica la clase.
 export async function bloquear(ej: Ejecutor, id: number): Promise<ClaseBloqueada | null> {
   const [fila] = await ej
     .select({
@@ -145,7 +139,6 @@ export async function contarAsistencias(ej: Ejecutor, claseId: number): Promise<
   return fila?.total ?? 0;
 }
 
-// Una suplencia registrada después de tomar asistencia: el sueldo sigue a quien dio la clase.
 export async function actualizarPorcentajeDeAsistencias(
   ej: Ejecutor,
   claseId: number,
@@ -154,7 +147,6 @@ export async function actualizarPorcentajeDeAsistencias(
   await ej.update(asistencia).set({ porcentajeBp }).where(eq(asistencia.claseId, claseId));
 }
 
-// Lo que una clase copia de su horario: con esto se compara si sigue igual y se la actualiza.
 export type DatosDeHorario = {
   diaSemana: number;
   horaInicio: string;
@@ -164,7 +156,6 @@ export type DatosDeHorario = {
   profesorId: number;
 };
 
-// Las clases de un horario desde `desde` que todavía son iguales a él: las que no tienen cambios propios.
 export async function igualesAlHorario(
   ej: Ejecutor,
   horarioId: number,
@@ -199,7 +190,6 @@ export async function copiarDelHorario(
   await ej.update(clase).set({ fecha, ...datos }).where(eq(clase.id, id));
 }
 
-// Si algún anotado pagó con un pack que vence antes de `fecha`, la clase no puede pasar a ese día.
 export async function hayAnotadosConPackQueVenceAntes(ej: Ejecutor, claseId: number, fecha: FechaDia): Promise<boolean> {
   const [fila] = await ej
     .select({ id: asistencia.id })
@@ -210,7 +200,6 @@ export async function hayAnotadosConPackQueVenceAntes(ej: Ejecutor, claseId: num
   return fila !== undefined;
 }
 
-// La primera clase de un horario desde `desde` con alguien anotado, o null.
 export async function primeraConAsistenciasDesde(ej: Ejecutor, horarioId: number, desde: FechaDia): Promise<FechaDia | null> {
   const [fila] = await ej
     .select({ fecha: clase.fecha })
@@ -222,8 +211,6 @@ export async function primeraConAsistenciasDesde(ej: Ejecutor, horarioId: number
   return fila?.fecha ?? null;
 }
 
-// Borra las clases de un horario desde `desde`. Quien la llama ya verificó que no tienen asistencias:
-// una clase futura sin asistencias no tiene historial.
 export async function borrarDesde(ej: Ejecutor, horarioId: number, desde: FechaDia): Promise<void> {
   await ej.delete(clase).where(and(eq(clase.horarioId, horarioId), gte(clase.fecha, desde)));
 }

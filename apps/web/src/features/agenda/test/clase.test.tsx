@@ -8,7 +8,6 @@ import { servidor } from '../../../../test/servidor.ts';
 
 const HIP_HOP_DEL_10 = unaClase();
 
-// La clase de Hip-Hop del martes 10, con la lista de asistencias que el test va cambiando.
 function claseDeHipHop(asistencias: Asistencia[]) {
   conSesion(RECEPCION);
   servidor.use(

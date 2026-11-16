@@ -12,11 +12,6 @@ import {
 import { porcentajeVigente } from '../profesores/profesores.service.ts';
 import * as repo from './clases.repository.ts';
 
-// Lo que toca a la vez un horario y sus clases. Vive en el módulo de clases y usa el service de
-// horarios: clases.service ya importa horarios.service, y al revés sería un ciclo.
-
-// Crea las clases de cada horario activo para las semanas del horizonte desde su `vigente_desde`.
-// Nunca pisa una clase que ya existe, aunque se haya movido de día. Devuelve cuántas creó.
 export async function generarClases(ej: Ejecutor, hoy: FechaDia, horarioId?: number): Promise<number> {
   const horarios = await horariosParaGenerar(ej, horarioId);
   const semanas = semanasDelHorizonte(hoy);
@@ -37,13 +32,10 @@ export async function generarClases(ej: Ejecutor, hoy: FechaDia, horarioId?: num
   return repo.insertarLasQueFaltan(ej, filas);
 }
 
-// Un horario nuevo aparece en la agenda en el momento, sin esperar a la tarea de cada hora. Con `claseId`,
-// esa clase única pasa a ser la primera de la serie ("Agregar a todas las semanas" en la grilla).
 export async function crearHorarioConSusClases(datos: CrearHorarioInput, hoy: FechaDia): Promise<Horario> {
   return db.transaction((tx) => crearHorarioConSusClasesEn(tx, datos, hoy));
 }
 
-// Recibe el ejecutor para que el asistente cree un profesor y todos sus horarios en una sola transacción.
 export async function crearHorarioConSusClasesEn(ej: Ejecutor, datos: CrearHorarioInput, hoy: FechaDia): Promise<Horario> {
   const creado = await crearHorario(datos, hoy, ej);
   if (datos.claseId !== undefined) {
@@ -59,9 +51,6 @@ export async function crearHorarioConSusClasesEn(ej: Ejecutor, datos: CrearHorar
   return creado;
 }
 
-// Cambiar un horario cambia también sus clases desde la semana `desde` (o desde hoy) que todavía eran
-// iguales a él. Las que ya pasaron y las que tienen cambios propios (un suplente, una cancelación) no se
-// tocan. Es "Aplicar a todas las semanas" en la grilla; sin `desde`, la pantalla de horarios.
 export async function actualizarHorarioYSusClases(id: number, datos: ActualizarHorarioInput, hoy: FechaDia): Promise<Horario> {
   return db.transaction(async (tx) => {
     const viejo = await obtenerHorario(id, tx);
@@ -97,7 +86,6 @@ async function seguirAlHorario(tx: Ejecutor, viejo: Horario, nuevo: Horario, ini
 
   for (const clase of await repo.igualesAlHorario(tx, viejo.id, datosDe(viejo), inicio)) {
     const fecha = sumarDias(clase.semana, diaSemana - 1);
-    // Una clase de esta semana no pasa a un día que ya pasó: se queda donde estaba.
     if (fecha < hoy) continue;
     if (fecha > clase.fecha && (await repo.hayAnotadosConPackQueVenceAntes(tx, clase.id, fecha))) {
       throw new ReglaDeNegocioError(
@@ -105,14 +93,12 @@ async function seguirAlHorario(tx: Ejecutor, viejo: Horario, nuevo: Horario, ini
       );
     }
     await repo.copiarDelHorario(tx, clase.id, fecha, copiados);
-    // Como en una suplencia: el sueldo de la clase sigue a quien la da.
     if (cambiaElProfesor) {
       await repo.actualizarPorcentajeDeAsistencias(tx, clase.id, await porcentajeVigente(tx, nuevo.profesor.id, fecha));
     }
   }
 }
 
-// Borra las clases desde `desde`: las semanas anteriores, ya creadas, quedan como estaban.
 async function darDeBaja(tx: Ejecutor, horario: Horario, desde: FechaDia): Promise<void> {
   const conAnotados = await repo.primeraConAsistenciasDesde(tx, horario.id, desde);
   if (conAnotados !== null) {

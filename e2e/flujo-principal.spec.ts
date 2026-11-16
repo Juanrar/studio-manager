@@ -1,7 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { ADMIN_E2E } from './entorno.ts';
 
-// La API usa el reloj real, así que la clase se crea para el día de hoy en Buenos Aires.
 function hoyEnBuenosAires(): string {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Argentina/Buenos_Aires',
@@ -19,7 +18,6 @@ function nombreDelDia(fecha: string): string {
   return DIAS[diaUtc === 0 ? 6 : diaUtc - 1]!;
 }
 
-// Navega por el menú lateral: otras partes de la pantalla pueden tener un link con el mismo nombre.
 async function irA(page: Page, pantalla: string) {
   await page.getByRole('navigation', { name: 'Menú' }).getByRole('link', { name: pantalla }).click();
 }
@@ -74,8 +72,6 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
     const clase = page.getByRole('button', { name: /^Hip-Hop, 19:00 a 20:30/ });
     await clase.scrollIntoViewIfNeeded();
     const caja = (await clase.boundingBox())!;
-    // Una hora son 63 px en la grilla. Se arrastra dentro del mismo día: el reloj es el real y un domingo
-    // no tiene día siguiente en su semana.
     await page.mouse.move(caja.x + caja.width / 2, caja.y + 10);
     await page.mouse.down();
     await page.mouse.move(caja.x + caja.width / 2, caja.y + 40, { steps: 5 });
@@ -101,7 +97,6 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
     await expect(ficha.getByText('Vigente')).toBeVisible();
     await ficha.getByRole('tab', { name: 'Pagos' }).click();
     await expect(ficha.getByRole('row', { name: /Pack x4/ })).toContainText('4 de 4');
-    // La ventana cubre el menú: se cierra antes de ir a otra pantalla.
     await ficha.getByRole('button', { name: 'Cerrar' }).click();
   });
 
@@ -130,7 +125,6 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
 
   await test.step('ver el sueldo del profesor y los ingresos del mes', async () => {
     await page.goto(`/liquidaciones?periodo=${hoy.slice(0, 7)}`);
-    // Pack x4: $1.300 la clase, 50% = $650. Clase suelta: $1.500, 50% = $750.
     const erik = page.getByRole('row', { name: /Zapata/ });
     await expect(erik).toContainText('$1.400');
     await expect(erik).toContainText('Abierta');

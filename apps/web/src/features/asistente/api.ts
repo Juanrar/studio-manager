@@ -8,7 +8,6 @@ export function useConversar() {
   });
 }
 
-// El alta crea un profesor, sus horarios y sus clases: cambia lo mismo que cambia la grilla, más los profesores.
 export function useDarDeAltaProfesor() {
   const clienteQuery = useQueryClient();
   return useMutation({

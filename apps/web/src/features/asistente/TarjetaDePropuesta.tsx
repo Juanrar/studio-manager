@@ -5,8 +5,6 @@ import { mensajeDeError } from '../../lib/api.ts';
 import { formatearFechaLarga, nombreDelDia } from '../../lib/formato.ts';
 import { useCrearClaseUnica, useCrearHorario } from '../grilla/api.ts';
 
-// Cada tarjeta tiene su propia mutación: crear una propuesta no deshabilita las otras. Que ya se creó lo
-// guarda la conversación, no la mutación: la tarjeta se desmonta al ir a otra pantalla.
 export function TarjetaDePropuesta({
   propuesta,
   creada,
@@ -22,13 +20,11 @@ export function TarjetaDePropuesta({
   const { datos } = propuesta;
   const enlace = propuesta.tipo === 'claseUnica' ? `/grilla?fecha=${propuesta.datos.fecha}` : '/grilla';
 
-  // La promesa se cumple aunque la tarjeta ya no esté montada; los callbacks de `mutate` no se llaman.
   async function crear() {
     try {
       if (propuesta.tipo === 'claseUnica') await crearClaseUnica.mutateAsync(propuesta.datos);
       else await crearHorario.mutateAsync(propuesta.datos);
     } catch {
-      // El motivo se muestra con `mutacion.error`.
       return;
     }
     alCrearse(enlace);

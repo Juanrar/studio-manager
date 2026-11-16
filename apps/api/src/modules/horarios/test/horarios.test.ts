@@ -79,7 +79,6 @@ describe('POST /api/horarios', () => {
     const respuesta = await crearHorario(cookieAdmin, { ...HIP_HOP_MARTES, profesorId: erik.id });
 
     const [guardado] = await db.select().from(tablaHorario).where(eq(tablaHorario.id, respuesta.json().id));
-    // El reloj de los tests marca el martes 2026-03-10.
     expect(guardado?.vigenteDesde).toBe('2026-03-09');
   });
 
@@ -123,7 +122,6 @@ describe('PATCH /api/horarios/:id', () => {
 describe('GET /api/horarios', () => {
   it('con profesorId trae solo los horarios activos de ese profesor, ordenados por día y hora', async () => {
     const lucia = await crearProfesorDeTest({ nombre: 'Lucía', apellido: 'Paz' });
-    // Las de Erik se crean fuera de orden: el orden de la respuesta no puede salir de los ids.
     const hipHopMartes = await crearHorarioDeTest(erik.id, HIP_HOP_MARTES);
     const jazzLunes = await crearHorarioDeTest(erik.id, {
       estilo: 'Jazz',

@@ -5,10 +5,6 @@ import { generarClases } from './modules/clases/programacion.service.ts';
 
 const UNA_HORA = 60 * 60 * 1000;
 
-// Lo que la API hace sola mientras está levantada: la baja automática de quien no compra y las clases
-// del horizonte, que avanza una semana cuando empieza otra. Corren al arrancar y cada hora; las dos
-// dependen solo del día, así que repetirlas no cambia nada.
-// La llama server.ts, no buildApp: los tests no quedan con tareas corriendo. Devuelve cómo detenerlas.
 export function programarTareas(app: FastifyInstance): () => void {
   const darDeBaja = async () => {
     try {
@@ -35,7 +31,6 @@ export function programarTareas(app: FastifyInstance): () => void {
 
   correr();
   const intervalo = setInterval(correr, UNA_HORA);
-  // No mantiene vivo el proceso por su cuenta: de eso se encarga el servidor HTTP.
   intervalo.unref();
   return () => clearInterval(intervalo);
 }

@@ -8,7 +8,6 @@ import { crearAppDeTest } from '../../test/app.ts';
 let directorioWeb: string;
 let app: FastifyInstance;
 
-// Un frontend compilado mínimo: index.html y un archivo en assets/.
 beforeAll(async () => {
   directorioWeb = await mkdtemp(join(tmpdir(), 'studio-web-'));
   await mkdir(join(directorioWeb, 'assets'));
@@ -48,7 +47,6 @@ describe('frontend compilado', () => {
     expect(respuesta.json()).toEqual({ error: 'Ruta no encontrada' });
   });
 
-  // El README usa WEB_DIST=../web/dist: una ruta relativa al directorio de la API.
   it('acepta la carpeta como ruta relativa', async () => {
     const appRelativa = await crearAppDeTest({ directorioWeb: relative(process.cwd(), directorioWeb) });
     const raiz = await appRelativa.inject({ method: 'GET', url: '/' });

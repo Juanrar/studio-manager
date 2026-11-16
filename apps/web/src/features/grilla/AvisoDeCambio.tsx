@@ -1,7 +1,5 @@
 import { useEffect } from 'react';
 
-// Lo que muestra el aviso de abajo después de un cambio en la grilla: qué pasó, y cómo llevarlo a todas
-// las semanas o deshacerlo. Un error de la API también sale acá, con su motivo.
 export type ContenidoDelAviso =
   | {
       tipo: 'cambio';

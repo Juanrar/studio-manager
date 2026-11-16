@@ -72,6 +72,7 @@ Estas reglas se rompen fácil y cuestan caro. Están explicadas en [docs/estruct
 ## Reglas del código
 
 - Código, commits y documentación en español, con nombres de dominio en español (`alumno`, `pago`, `asistencia`).
+- El código no lleva comentarios (`//`, `/* */`, JSDoc, `{/* */}`). Si algo necesita explicación, se renombra o se extrae a una función con nombre claro; el porqué va en `docs/`. Los agentes que escriben código, incluidos los subagentes, siguen esta regla. Las únicas excepciones son las directivas que una herramienta exige (`@ts-expect-error`, `/// <reference>`).
 - TypeScript `strict`, ESM, Node 22.
 - Capas en el backend: `routes` → `service` → `repository` → `db`. Las rutas no tienen reglas de negocio ni SQL. Los services no conocen HTTP.
 - Un módulo usa el **service** de otro módulo, nunca su repository.

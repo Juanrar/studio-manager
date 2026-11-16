@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SelectorDeHora } from '../SelectorDeHora.tsx';
 
-// Las franjas de la lista, escritas a mano: de 08:00 a 23:45 cada 15 minutos, 64 en total.
 const FRANJAS = [
   '08:00', '08:15', '08:30', '08:45',
   '09:00', '09:15', '09:30', '09:45',
@@ -24,8 +23,6 @@ const FRANJAS = [
   '23:00', '23:15', '23:30', '23:45',
 ];
 
-// Controlado como en la ficha: guarda el valor y avisa de cada cambio. Está dentro de un formulario
-// para ver si Enter lo envía, y tiene un botón después para ver adónde va el foco con Tab.
 function CampoDeHora({
   inicial = '',
   alCambiar,
@@ -61,8 +58,6 @@ const reloj = () => screen.getByRole('button', { name: 'Elegir el horario (Hora 
 const franjasVisibles = () => screen.getAllByRole('option').map((franja) => franja.textContent);
 const franjaMarcada = () => screen.getByRole('option', { selected: true }).textContent;
 
-// jsdom no calcula el diseño. Esto simula franjas de 28px dentro de una lista que muestra 8,
-// que es lo que hace falta para mirar hasta dónde se desplaza la lista.
 const ALTO_DE_FRANJA = 28;
 const ALTO_DE_LA_LISTA = 8 * ALTO_DE_FRANJA;
 
@@ -74,11 +69,8 @@ function simularMedidas() {
   vi.spyOn(Element.prototype, 'clientHeight', 'get').mockReturnValue(ALTO_DE_LA_LISTA);
 }
 
-// La ventana de jsdom no tiene alto: se simula una baja, de 500px, para que la lista (256px) no entre en cualquier lado.
 const ALTO_DE_VENTANA = 500;
 
-// Tampoco sabe dónde está el campo: se lo simula de 34px de alto y 90 de ancho, a 100px del borde izquierdo y a `arriba`
-// del borde de arriba, con una lista que mide ahora `altoDeLaLista` (256px es lo que da el max-h-64 de una lista llena).
 function simularCampoEn(arriba: number, altoDeLaLista = 256) {
   vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, arriba, 90, 34));
   vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(altoDeLaLista);
@@ -146,7 +138,6 @@ describe('SelectorDeHora', () => {
     await usuario.type(campo(), '19');
 
     expect(franjasVisibles()).toEqual(['19:00', '19:15', '19:30', '19:45']);
-    // Lo tipeado se avisa aunque todavía no sea una hora: validar el formato no es cosa del selector.
     expect(alCambiar.mock.calls).toEqual([['1'], ['19']]);
   });
 
@@ -154,7 +145,6 @@ describe('SelectorDeHora', () => {
     const usuario = userEvent.setup();
     render(<CampoDeHora inicial="18:00" />);
 
-    // Un clic deja el cursor al final del texto, como en el navegador.
     await usuario.click(campo());
     await usuario.keyboard('19');
 
@@ -220,8 +210,6 @@ describe('SelectorDeHora', () => {
 
     await usuario.click(reloj());
 
-    // La de las 21:00 es la franja 52: sin desplazar la lista, en pantalla estarían solo las 8 primeras.
-    // Empieza a 52 × 28px = 1456 del borde de arriba y la lista se corre 98px menos, la mitad de lo que sobra.
     expect(screen.getByRole('listbox').scrollTop).toBe(1358);
     expect(franjaMarcada()).toBe('21:00');
   });
@@ -232,7 +220,6 @@ describe('SelectorDeHora', () => {
     render(<CampoDeHora inicial="08:00" />);
     await usuario.click(campo());
 
-    // La primera flecha abre la lista; las doce siguientes bajan hasta las 11:00.
     await usuario.keyboard('{ArrowDown}');
     await usuario.keyboard('{ArrowDown}'.repeat(12));
 
@@ -269,7 +256,6 @@ describe('SelectorDeHora', () => {
     render(<CampoDeHora alCambiar={alCambiar} />);
 
     await usuario.type(campo(), '21');
-    // La primera flecha marca 21:00 y la segunda, 21:15.
     await usuario.keyboard('{ArrowDown}{ArrowDown}{Enter}');
 
     expect(alCambiar.mock.calls).toEqual([['2'], ['21'], ['21:15']]);
@@ -356,7 +342,6 @@ describe('SelectorDeHora', () => {
     render(<CampoDeHora inicial={hora} />);
     await usuario.click(campo());
 
-    // La primera flecha abre la lista con la franja del valor actual marcada.
     await usuario.keyboard('{ArrowDown}');
     expect(franjaMarcada()).toBe(hora);
     await usuario.keyboard(`{${flecha}}`);
@@ -369,7 +354,6 @@ describe('SelectorDeHora', () => {
     render(
       <>
         <CampoDeHora inicial="18:00" />
-        {/* Una zona que no toma el foco, como pasa al tocar la pantalla de una tablet. */}
         <p onMouseDown={(evento) => evento.preventDefault()}>Afuera</p>
       </>,
     );
@@ -392,7 +376,6 @@ describe('SelectorDeHora', () => {
     const usuario = userEvent.setup();
     render(<CampoDeHora inicial="18:00" />);
     await usuario.click(reloj());
-    // Chrome deja enfocar con Tab una lista con scroll que no tiene nada enfocable adentro; jsdom no.
     expect(screen.getByRole('listbox')).toHaveAttribute('tabindex', '-1');
 
     await usuario.tab();
@@ -439,7 +422,6 @@ describe('SelectorDeHora', () => {
     expect(lista.style.maxHeight).toBe('');
   });
 
-  // Con el campo en 250 quedan 204px abajo y 238px arriba; con el campo en 200, 254px abajo y 188px arriba.
   it.each<[string, number, Record<string, string>]>([
     ['encima', 250, { bottom: '254px', maxHeight: '238px' }],
     ['debajo', 200, { top: '238px', maxHeight: '254px' }],
@@ -456,8 +438,6 @@ describe('SelectorDeHora', () => {
   });
 
   it('cuenta lo que la lista puede llegar a medir según su max-height, no un alto copiado ni el de ahora', async () => {
-    // El max-h-64 de la lista pasa a medir 300px. Con el campo en 174 quedan 280px debajo: ya no entra,
-    // aunque ahora la lista mida solo 122px, como si estuviera filtrada.
     const estilo = document.createElement('style');
     estilo.textContent = '.max-h-64 { max-height: 300px; }';
     document.head.append(estilo);

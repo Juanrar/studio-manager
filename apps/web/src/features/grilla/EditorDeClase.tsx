@@ -3,7 +3,6 @@ import { Aviso, Boton, BotonIcono, Campo, Entrada, SelectorDeHora, Selector } fr
 import { diaDeLaSemana, nombreDelDia } from '../../lib/formato.ts';
 import { useProfesores } from '../profesores/api.ts';
 
-// Lo que se edita de una clase en la grilla. `nivel` vacío es sin nivel.
 export type Borrador = {
   fecha: string;
   horaInicio: string;
@@ -15,8 +14,6 @@ export type Borrador = {
 
 const nombreDeLaFecha = (fecha: string) => `${nombreDelDia(diaDeLaSemana(fecha))} ${Number(fecha.slice(8))}`;
 
-// El editor chico que se abre junto a la clase. `fechas` son los días de la semana a los que se la puede
-// llevar: los de hoy en adelante.
 export function EditorDeClase({
   titulo,
   inicial,
@@ -38,10 +35,8 @@ export function EditorDeClase({
   const [borrador, setBorrador] = useState(inicial);
   const [error, setError] = useState<string | null>(null);
   const cambiar = (cambios: Partial<Borrador>) => setBorrador((anterior) => ({ ...anterior, ...cambios }));
-  // Un profesor dado de baja no aparece en la lista, pero si es el de la clase se conserva.
   const opciones = profesores.data ?? [];
   const incluyeActual = opciones.some((profesor) => profesor.id === borrador.profesorId);
-  // Una clase nueva arranca sin profesor: toma el primero de la lista cuando llega.
   const primero = opciones[0]?.id;
   useEffect(() => {
     if (primero !== undefined) setBorrador((anterior) => (anterior.profesorId === 0 ? { ...anterior, profesorId: primero } : anterior));
@@ -51,7 +46,6 @@ export function EditorDeClase({
     evento.preventDefault();
     if (borrador.estilo.trim() === '') return setError('El estilo es obligatorio');
     if (borrador.profesorId === 0) return setError('Elegí quién da la clase');
-    // Las horas HH:MM se pueden comparar como texto.
     if (borrador.horaFin <= borrador.horaInicio) return setError('La hora de fin tiene que ser posterior a la de inicio');
     alGuardar({ ...borrador, estilo: borrador.estilo.trim(), nivel: borrador.nivel.trim() });
   }

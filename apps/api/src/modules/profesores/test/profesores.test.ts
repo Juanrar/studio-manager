@@ -77,7 +77,6 @@ describe('/api/profesores', () => {
 
   it('cada profesor trae su propio porcentaje vigente, en el listado y en GET /api/profesores/:id', async () => {
     const erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata', porcentajeBp: 5000 });
-    // Malena entra por la API, con el reloj de la app: su porcentaje es más nuevo que el de Erik.
     const malena = (await crearProfesor(cookieAdmin, MALENA)).json();
 
     const listado = await pedirProfesores();
@@ -167,7 +166,6 @@ describe('GET /api/profesores con las clases de la semana', () => {
   it('trae clasesPorSemana y diasConClase sin repetir y ordenados, y en 0 y [] para quien no tiene clases', async () => {
     const erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata' });
     const lucia = await crearProfesorDeTest({ nombre: 'Lucía', apellido: 'Paz' });
-    // Las de Erik se crean fuera de orden: el listado no puede depender del orden de los ids.
     await crearHorarioDeTest(erik.id, {
       estilo: 'Contemporáneo',
       diaSemana: 3,
@@ -176,7 +174,6 @@ describe('GET /api/profesores con las clases de la semana', () => {
     });
     await crearHorarioDeTest(erik.id, { estilo: 'Jazz', diaSemana: 1, horaInicio: '21:00', horaFin: '22:30' });
     await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 1, horaInicio: '18:00', horaFin: '19:30' });
-    // Un viernes dado de baja: no suma una clase ni agrega el día.
     const breakViernes = await crearHorarioDeTest(erik.id, {
       estilo: 'Break',
       diaSemana: 5,
@@ -231,7 +228,6 @@ describe('GET /api/profesores con las clases de la semana', () => {
       horaFin: '21:00',
     });
     await actualizarHorario(breakLunes.id, { activo: false });
-    // Lucía se fue y sus clases se dieron de baja: el listado la muestra, pero sin carga semanal.
     const salsaViernes = await crearHorarioDeTest(lucia.id, {
       estilo: 'Salsa',
       diaSemana: 5,

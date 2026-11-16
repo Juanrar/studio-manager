@@ -35,7 +35,6 @@ export async function buscarConAlta(ej: Ejecutor, id: number): Promise<(Alumno &
   return fila ?? null;
 }
 
-// Para cambiar `activo` sin que otro pedido lo cambie en el medio.
 export async function bloquear(ej: Ejecutor, id: number): Promise<{ activo: boolean } | null> {
   const [fila] = await ej.select({ activo: alumno.activo }).from(alumno).where(eq(alumno.id, id)).for('update');
   return fila ?? null;
@@ -46,7 +45,6 @@ export async function registrarCambiosDeEstado(ej: Ejecutor, cambios: NuevoCambi
   await ej.insert(cambioEstadoAlumno).values(cambios);
 }
 
-// Para la actividad de la ficha, del más nuevo al más viejo.
 export async function listarCambiosDeEstado(
   ej: Ejecutor,
   alumnoId: number,
@@ -62,7 +60,6 @@ export async function listarCambiosDeEstado(
     .orderBy(desc(cambioEstadoAlumno.registradoEn), desc(cambioEstadoAlumno.id));
 }
 
-// Los alumnos activos con su alta y su última reactivación: si no compró después, se cuenta desde ahí.
 export async function listarActivosParaBaja(
   ej: Ejecutor,
 ): Promise<{ id: number; creadoEn: Date; reactivadoEn: Date | null }[]> {
@@ -75,7 +72,6 @@ export async function listarActivosParaBaja(
     .orderBy(alumno.id);
 }
 
-// Solo los que siguen activos: si otro pedido ya dio de baja a alguno, no se registra dos veces.
 export async function darDeBaja(ej: Ejecutor, ids: number[]): Promise<number[]> {
   const filas = await ej
     .update(alumno)
@@ -100,7 +96,6 @@ function filtroDe(filtros: ListadoQuery): SQL | undefined {
   if (!filtros.incluirInactivos) condiciones.push(eq(alumno.activo, true));
   if (filtros.q) {
     const patron = patronContiene(filtros.q);
-    // Nombre completo en los dos órdenes, así "martina garcia" y "garcia martina" encuentran lo mismo.
     condiciones.push(
       or(
         sql`unaccent(lower(${alumno.nombre} || ' ' || ${alumno.apellido})) like unaccent(lower(${patron}))`,
@@ -129,7 +124,6 @@ export async function listar(
   return { items, total: conteo?.total ?? 0 };
 }
 
-// Todos los alumnos del filtro, sin paginar: para contar cuántos tienen el pack vigente.
 export async function listarTodos(ej: Ejecutor, filtros: ListadoQuery): Promise<{ id: number; activo: boolean }[]> {
   return ej.select({ id: alumno.id, activo: alumno.activo }).from(alumno).where(filtroDe(filtros));
 }

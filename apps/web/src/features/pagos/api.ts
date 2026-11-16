@@ -9,7 +9,6 @@ export function usePagosDeAlumno(alumnoId: number) {
   });
 }
 
-// Un pago cambia el estado del pack: se recargan sus pagos y las consultas de alumnos (lista, ficha y actividad).
 function recargarDespuesDeUnPago(clienteQuery: QueryClient, alumnoId: number) {
   return Promise.all([
     clienteQuery.invalidateQueries({ queryKey: ['pagos', alumnoId] }),

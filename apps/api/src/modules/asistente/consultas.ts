@@ -9,7 +9,6 @@ import { sinTildes } from '../../lib/texto.ts';
 
 const DIAS_MAXIMOS = 31;
 
-// Solo id, nombre y apellido: el plan gratuito de Gemini no puede recibir datos personales.
 export const buscarProfesores: Herramienta = {
   nombre: 'buscar_profesores',
   descripcion: 'Busca profesores activos por nombre, apellido o los dos. Devuelve su id, que piden las demás funciones.',

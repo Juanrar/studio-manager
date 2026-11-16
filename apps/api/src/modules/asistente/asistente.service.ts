@@ -13,7 +13,6 @@ import { herramientasPara, type ContextoDeHerramienta, type Herramienta, type Sa
 import { instrucciones } from './instrucciones.ts';
 import type { LlamadaAHerramienta, ModeloDeLenguaje, ResultadoDeHerramienta } from './modelo.ts';
 
-// Cada vuelta es un pedido al modelo y gasta cuota: un pedido normal usa 2 a 4.
 const VUELTAS_MAXIMAS = 6;
 
 export async function conversar(
@@ -45,7 +44,6 @@ export async function conversar(
   throw new ReglaDeNegocioError('El asistente no llegó a una respuesta. Probá con un pedido más concreto.');
 }
 
-// Un error esperable vuelve al modelo para que se lo explique al usuario. Uno inesperado corta el pedido.
 async function ejecutar(
   herramientas: Herramienta[],
   llamada: LlamadaAHerramienta,

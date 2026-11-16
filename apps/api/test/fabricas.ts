@@ -1,5 +1,3 @@
-// Datos de prueba creados con los services, igual que en producción.
-// Cada fábrica tiene valores por defecto válidos; el test pisa solo lo que le importa.
 import type {
   Alumno,
   CrearAlumnoInput,
@@ -16,14 +14,12 @@ import { crearProfesor } from '../src/modules/profesores/profesores.service.ts';
 import { hoyEnEstudio } from '../src/lib/fechas.ts';
 import { AHORA } from './app.ts';
 
-// El porcentaje inicial queda vigente desde esta fecha, antes del AHORA de los tests.
 export const ALTA_PROFESORES = '2026-01-01';
 
 export async function crearProfesorDeTest(datos: Partial<CrearProfesorInput> = {}): Promise<Profesor> {
   return crearProfesor({ nombre: 'Erik', apellido: 'Zapata', porcentajeBp: 5000, ...datos }, ALTA_PROFESORES);
 }
 
-// El horario rige desde la semana de `hoy`; por defecto, la del AHORA de los tests.
 export async function crearHorarioDeTest(
   profesorId: number,
   datos: Partial<CrearHorarioInput> = {},
@@ -40,7 +36,6 @@ export async function crearHorarioDeTest(
   }, hoy);
 }
 
-// `ahora` es el momento del alta.
 export async function crearAlumnoDeTest(datos: Partial<CrearAlumnoInput> = {}, ahora: Date = AHORA): Promise<Alumno> {
   return crearAlumno({ nombre: 'Martina', apellido: 'García', ...datos }, ahora);
 }

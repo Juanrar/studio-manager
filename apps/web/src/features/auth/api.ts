@@ -4,7 +4,6 @@ import { api, ErrorDeApi } from '../../lib/api.ts';
 
 const CLAVE_SESION = ['sesion'] as const;
 
-// Un 401 no es un error: significa que no hay nadie logueado.
 export function useSesion() {
   return useQuery({
     queryKey: CLAVE_SESION,
@@ -33,7 +32,6 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => api.post<void>('/auth/logout'),
     onSuccess: () => {
-      // Se descarta todo lo cargado: el próximo usuario no tiene que ver datos del anterior.
       clienteQuery.clear();
       clienteQuery.setQueryData(CLAVE_SESION, null);
     },

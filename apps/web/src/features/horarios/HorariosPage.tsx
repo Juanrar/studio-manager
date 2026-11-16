@@ -30,7 +30,6 @@ export function HorariosPage() {
   const actualizar = useActualizarHorario();
   const [editando, setEditando] = useState<Horario | 'nueva' | null>(null);
 
-  // La API ya las devuelve ordenadas por día y hora; acá solo se agrupan por día.
   const porDia = Map.groupBy(horarios.data ?? [], (horario) => horario.diaSemana);
 
   return (
@@ -145,7 +144,6 @@ function HorarioForm({
         </Campo>
         <Campo etiqueta="Día" error={errors.diaSemana?.message}>
           {(id) => (
-            // El valor es el número ISO del día: lunes 1, domingo 7, igual que la API.
             <Selector id={id} {...formulario.register('diaSemana', { valueAsNumber: true })}>
               {DIAS_DE_LA_SEMANA.map((nombre, indice) => (
                 <option key={nombre} value={indice + 1}>

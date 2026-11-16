@@ -16,7 +16,6 @@ import { generarClases } from '../programacion.service.ts';
 let base: BaseDeTest;
 let erik: Profesor;
 
-// Jueves 8 de octubre de 2026: el horizonte va de la semana del 5 de octubre a la del 30 de noviembre.
 const HOY = '2026-10-08';
 const JUEVES_DEL_HORIZONTE = [
   '2026-10-08',
@@ -87,7 +86,6 @@ describe('generarClases', () => {
   it('una clase movida a otro día de su semana no hace que se cree otra en el día del horario', async () => {
     await salsaDelJueves();
     await generarClases(db, HOY);
-    // La feature 26 mueve clases desde la grilla; acá se mueve con un update directo.
     await db.update(clase).set({ fecha: '2026-10-16' }).where(eq(clase.fecha, '2026-10-15'));
 
     await generarClases(db, HOY);
@@ -108,7 +106,6 @@ describe('generarClases', () => {
   });
 
   it('no crea clases en semanas pasadas, aunque el horario rija desde antes', async () => {
-    // Rige desde la semana del 9 de marzo, el AHORA de los tests.
     await salsaDelJueves();
 
     await generarClases(db, HOY);
@@ -148,7 +145,6 @@ describe('POST /api/horarios', () => {
     });
     await app.close();
 
-    // El reloj de los tests marca el martes 10 de marzo: el horizonte llega a la semana del 27 de abril.
     expect(respuesta.statusCode).toBe(201);
     expect((await clasesGuardadas()).map((c) => c.fecha)).toEqual([
       '2026-03-10',
@@ -164,7 +160,6 @@ describe('POST /api/horarios', () => {
 });
 
 describe('PATCH /api/horarios/:id', () => {
-  // El reloj de los tests marca el martes 10 de marzo: hoy hay clase, y el horizonte llega al 28 de abril.
   const MARTES = '2026-03-10';
   const MARTES_DEL_HORIZONTE = [
     '2026-03-10',
@@ -185,7 +180,6 @@ describe('PATCH /api/horarios/:id', () => {
     await crearUsuarioDeTest(ADMIN);
     cookie = await loguear(app, ADMIN.email, ADMIN.password);
     hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2, horaInicio: '19:00', horaFin: '20:30' });
-    // La semana pasada ya tuvo su clase; desde esta semana las crea el generador.
     await abrirClase(hipHop.id, '2026-03-03');
     await generarClases(db, MARTES);
   });
@@ -203,7 +197,6 @@ describe('PATCH /api/horarios/:id', () => {
     return encontrada!;
   }
 
-  // Martina compra un pack x4 hoy (vence el 10 de abril) y se anota en la clase de `fecha`.
   async function anotarAMartinaEl(fecha: string) {
     const recepcion = await crearUsuarioDeTest(RECEPCION);
     const martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García' });
@@ -231,7 +224,6 @@ describe('PATCH /api/horarios/:id', () => {
   it('cambiar el día mueve cada clase a ese día de su semana, sin pasar a días que ya pasaron', async () => {
     const respuesta = await cambiarHorario({ diaSemana: 1 });
 
-    // El lunes de esta semana ya pasó: la clase de hoy se queda el martes.
     expect(respuesta.statusCode).toBe(200);
     expect((await clasesGuardadas()).map((c) => c.fecha)).toEqual([
       '2026-03-03',
@@ -283,7 +275,6 @@ describe('PATCH /api/horarios/:id', () => {
   it('aplicar a todas desde una semana cambia esa semana y las siguientes; las anteriores y la que tiene suplente quedan', async () => {
     const iaru = await crearProfesorDeTest({ nombre: 'Iaru', apellido: 'Speroni' });
     await actualizarClase((await claseDel('2026-04-07')).id, { profesorId: iaru.id }, MARTES);
-    // Primero se movió la clase de la semana del 23 en la grilla; el aviso ofrece aplicarlo a todas.
     const delVeinticuatro = (await claseDel('2026-03-24')).id;
     await actualizarClase(delVeinticuatro, { horaInicio: '20:00', horaFin: '21:30' }, MARTES);
 

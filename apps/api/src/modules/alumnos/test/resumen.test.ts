@@ -1,20 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { resumir, type ClaseParaResumen, type PagoParaResumen } from '../resumen.ts';
 
-// Martes 10 de marzo de 2026, igual que el reloj de los tests de integración.
 const HOY = '2026-03-10';
 
 const erik = { id: 1, nombre: 'Erik', apellido: 'Zapata' };
 const julia = { id: 2, nombre: 'Julia', apellido: 'Paz' };
 
 const clases: ClaseParaResumen[] = [
-  { fecha: '2026-03-17', horaInicio: '19:00', clase: 'Jazz', profesor: erik }, // anotada, no pasó
-  { fecha: '2026-03-10', horaInicio: '19:00', clase: 'Jazz', profesor: julia }, // hoy, martes
-  { fecha: '2026-03-05', horaInicio: '19:00', clase: 'Jazz', profesor: erik }, // jueves
-  { fecha: '2026-03-03', horaInicio: '19:00', clase: 'Jazz', profesor: erik }, // martes
+  { fecha: '2026-03-17', horaInicio: '19:00', clase: 'Jazz', profesor: erik },
+  { fecha: '2026-03-10', horaInicio: '19:00', clase: 'Jazz', profesor: julia },
+  { fecha: '2026-03-05', horaInicio: '19:00', clase: 'Jazz', profesor: erik },
+  { fecha: '2026-03-03', horaInicio: '19:00', clase: 'Jazz', profesor: erik },
   { fecha: '2026-02-26', horaInicio: '18:00', clase: 'Salsa', profesor: erik },
-  { fecha: '2026-01-13', horaInicio: '19:00', clase: 'Salsa', profesor: erik }, // hace justo 56 días
-  { fecha: '2025-03-20', horaInicio: '19:00', clase: 'Salsa', profesor: erik }, // fuera de los 12 meses
+  { fecha: '2026-01-13', horaInicio: '19:00', clase: 'Salsa', profesor: erik },
+  { fecha: '2025-03-20', horaInicio: '19:00', clase: 'Salsa', profesor: erik },
 ];
 
 const pagos: PagoParaResumen[] = [

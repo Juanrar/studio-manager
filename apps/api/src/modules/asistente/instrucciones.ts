@@ -13,7 +13,6 @@ Para sumar un profesor nuevo usá proponer_alta_de_profesor. No pidas DNI, email
 const PARA_RECEPCION = `No podés crear ni cambiar clases. Si te lo piden, decí que lo tiene que hacer un administrador
 desde la grilla.`;
 
-// El texto que recibe el modelo en cada pedido: fijo, con la fecha de hoy y la parte que corresponde al rol.
 export function instrucciones(hoy: FechaDia, rol: Rol): string {
   const dia = DIAS[diaSemanaIso(hoy) - 1];
   return `Sos el asistente de Studio Manager, el sistema de gestión de un estudio de danza. Hablás con el personal

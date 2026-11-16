@@ -9,7 +9,6 @@ import { servidor } from '../../../../test/servidor.ts';
 const ERIK = { id: 1, nombre: 'Erik', apellido: 'Zapata' };
 const IARU = { id: 2, nombre: 'Iaru', apellido: 'Speroni' };
 
-// Martes 10 de marzo: Ballet sin asistentes, Hip-Hop con suplente y 4 asistentes, Salsa cancelada.
 const CLASES_DEL_10: ClasesDelRango = {
   desde: '2026-03-10',
   hasta: '2026-03-10',
@@ -40,7 +39,6 @@ const CLASES_DEL_10: ClasesDelRango = {
   ],
 };
 
-// Devuelve la respuesta pedida y anota los parámetros de cada pedido.
 function agendaQueDevuelve(respuesta: ClasesDelRango) {
   conSesion(RECEPCION);
   const pedidos: string[] = [];
@@ -53,7 +51,6 @@ function agendaQueDevuelve(respuesta: ClasesDelRango) {
   return pedidos;
 }
 
-// El texto de cada renglón de la agenda, sin lo decorativo (aria-hidden). La línea se lee "Ahora".
 function renglones(): string[] {
   const lista = screen.getByRole('list', { name: 'Clases del día' });
   return [...lista.children].map((renglon) => {
@@ -72,7 +69,6 @@ const G3 = '21:00 a 22:00 Salsa Erik Zapata cancelada';
 
 describe('/agenda', () => {
   beforeEach(() => {
-    // El día 11: así el 10 de marzo no es hoy.
     vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] });
     vi.setSystemTime(new Date('2026-03-11T15:00:00Z'));
   });
@@ -113,7 +109,6 @@ describe('/agenda', () => {
   });
 
   it('sin fecha, al pasar la medianoche la agenda pide el día nuevo', async () => {
-    // 23:59:30 del 10 en el estudio.
     vi.setSystemTime(new Date('2026-03-11T02:59:30Z'));
     const pedidos = agendaQueDevuelve(CLASES_DEL_10);
     renderizarEn('/agenda');
@@ -169,7 +164,6 @@ describe('/agenda', () => {
   it('tocar una clase lleva a su asistencia, que ya existe: no la abre con un POST', async () => {
     agendaQueDevuelve(CLASES_DEL_10);
     servidor.use(
-      // La pantalla de la clase carga sus datos al llegar. MSW falla si llega un POST que el test no previó.
       http.get('/api/clases/49', () => HttpResponse.json(CLASES_DEL_10.items[0])),
       http.get('/api/clases/49/asistencias', () => HttpResponse.json({ items: [] })),
       http.get('/api/profesores', () => HttpResponse.json({ items: [] })),

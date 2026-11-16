@@ -23,9 +23,7 @@ describe('dividirEnPartes', () => {
   });
 
   it('redondea al peso más cercano cuando no es exacto', () => {
-    // 5200 dividido en 3 da 1733,33 y redondea para abajo
     expect(dividirEnPartes(5200, 3)).toBe(1733);
-    // 1001 dividido en 2 da 500,5 y redondea para arriba
     expect(dividirEnPartes(1001, 2)).toBe(501);
   });
 
@@ -49,14 +47,11 @@ describe('aplicarPorcentaje', () => {
   });
 
   it('acepta porcentajes con decimales expresados en puntos básicos', () => {
-    // 52,5% de 1200 es 630
     expect(aplicarPorcentaje(1200, 5250)).toBe(630);
   });
 
   it('redondea al peso más cercano', () => {
-    // 60% de 1733 es 1039,8 y redondea a 1040
     expect(aplicarPorcentaje(1733, 6000)).toBe(1040);
-    // 33,33% de 1 peso redondea a 0
     expect(aplicarPorcentaje(1, 3333)).toBe(0);
   });
 

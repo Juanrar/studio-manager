@@ -42,7 +42,6 @@ export function FichaAlumnoPage() {
       </Ventana>
     );
   }
-  // La key reinicia el estado (pestaña y diálogos) al pasar de un alumno a otro con la ventana abierta.
   return <Ficha key={ficha.data.id} datos={ficha.data} alCerrar={cerrar} />;
 }
 
@@ -68,8 +67,6 @@ function Ficha({ datos, alCerrar }: { datos: FichaDeAlumno; alCerrar: () => void
   return (
     <Ventana etiqueta={`Ficha de ${nombre}`} alCerrar={alCerrar} encabezado={encabezado}>
       <Pestanas pestanas={PESTANAS} activa={pestana} alCambiar={setPestana}>
-        {/* El Resumen siempre está montado y fija el tamaño de la ventana, sin scroll. Las otras
-            pestañas se apoyan encima con el mismo tamaño y scrollean por dentro si no entran. */}
         <div className="relative">
           <div className={pestana === 'resumen' ? '' : 'invisible'} aria-hidden={pestana !== 'resumen'} inert={pestana !== 'resumen'}>
             <ResumenDelAlumno datos={datos} />
@@ -108,8 +105,6 @@ function Actividad({ alumnoId }: { alumnoId: number }) {
       <div className="p-6">{actividad.isError ? <Aviso>{mensajeDeError(actividad.error)}</Aviso> : <Cargando />}</div>
     );
   }
-  // La API manda los hechos del más nuevo al más viejo, así que los meses quedan en ese orden.
-  // Sin Map.groupBy: los navegadores para los que compila Vite no lo tienen.
   const meses = new Map<string, EventoDeAlumno[]>();
   for (const hecho of actividad.data) {
     const mes = hecho.fecha.slice(0, 7);
@@ -124,7 +119,6 @@ function Actividad({ alumnoId }: { alumnoId: number }) {
   );
 }
 
-// Los hechos de un mes unidos por una línea, con el ícono de cada tipo y el día a la derecha.
 function MesDeActividad({ mes, hechos }: { mes: string; hechos: EventoDeAlumno[] }) {
   const idTitulo = useId();
   return (
@@ -157,7 +151,6 @@ function MesDeActividad({ mes, hechos }: { mes: string; hechos: EventoDeAlumno[]
   );
 }
 
-// Con "otro" no se dice cómo pagó.
 const COMO_PAGO: Record<MedioPago, string | null> = {
   efectivo: 'en efectivo',
   transferencia: 'por transferencia',

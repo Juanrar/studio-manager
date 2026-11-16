@@ -6,14 +6,8 @@ import { acomodarEnCascada, type Lugar } from './cascada.ts';
 import { FIN_GRILLA, INICIO_GRILLA, PX_POR_MINUTO, aHora, aMinutos } from './minutos.ts';
 import type { Fantasma } from './useArrastre.ts';
 
-// La grilla de horas: una columna por día y cada clase ubicada por su horario, con el aspecto de DayFlow.
-// Sirve para la semana (siete columnas) y para un día (una columna ancha). Los días que ya pasaron se ven
-// igual pero no se editan.
-
 const SANGRIA = 10;
 
-// El texto en el color del estilo, más claro para que se lea sobre el fondo oscuro. El fondo se mezcla con
-// el del panel y es opaco: una clase encima de otra no deja ver la de abajo.
 const colorDeTexto = (color: string) => `color-mix(in oklab, ${color} 62%, white)`;
 const colorDeFondo = (color: string) => `color-mix(in oklab, ${color} 17%, var(--color-panel))`;
 
@@ -33,8 +27,6 @@ export type InteraccionesDeLaGrilla = {
   alApretarHueco: (evento: PointerEvent, fecha: string) => void;
 };
 
-// Sin `incrustada` es la grilla de la página, editable. Con `incrustada` es de solo lectura, con ese rango de horas
-// (minutos desde las 00:00), para mostrarla dentro de otra pantalla.
 type PropsDeVistaDeSemana = { fechas: string[]; clases: Clase[]; hoy: string } & (
   | { interacciones: InteraccionesDeLaGrilla; incrustada?: undefined }
   | { incrustada: { inicio: number; fin: number }; interacciones?: undefined }
@@ -51,7 +43,6 @@ export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada }
   );
   const columnas = { gridTemplateColumns: `repeat(${fechas.length}, minmax(0, 1fr))` };
   const fantasma = interacciones?.fantasma ?? null;
-  // La etiqueta verde de la hora actual tapa la hora en punto que tenga cerca: esa no se escribe.
   const ahora = !incrustada && fechas.includes(hoy) ? aMinutos(horaEnEstudio()) : null;
   const horasConEtiqueta = horas.filter((minutos) => ahora === null || Math.abs(minutos - ahora) >= 15);
 
@@ -101,7 +92,6 @@ export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada }
                 role="group"
                 aria-label={`${nombreDelDia(diaDeLaSemana(fecha))} ${Number(fecha.slice(8))}`}
                 className="relative border-l border-borde"
-                // Crear en un hueco solo con el mouse: con el dedo, apretar un hueco es empezar a desplazarse.
                 onPointerDown={
                   interacciones
                     ? (evento) => {
@@ -198,7 +188,6 @@ function ClaseEnLaGrilla({
         zIndex: lugar.sangria + 1,
         backgroundColor: colorDeFondo(color),
         color: colorDeTexto(color),
-        // La barra de color a la izquierda, y un borde del color del panel que separa una clase de la que tiene abajo.
         boxShadow: `inset 3px 0 0 ${color}${lugar.sangria > 0 ? ', 0 0 0 1px var(--color-panel)' : ''}`,
       }}
     >

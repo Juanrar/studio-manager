@@ -9,7 +9,6 @@ function unAlta(horarios: { diaSemana: number; horaInicio: string; horaFin: stri
   } as AltaDeProfesorInput;
 }
 
-// Martes 13 de octubre de 2026.
 const HOY = '2026-10-13';
 
 function unaClaseDe(horaInicio: string, horaFin: string): Clase {

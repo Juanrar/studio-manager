@@ -4,7 +4,6 @@ import type { FechaDia } from '../../lib/fechas.ts';
 import { asistencia, pack, pago, usuario, type NuevoPago } from '../../db/schema.ts';
 import type { PagoDeAlumno } from './estado-del-pack.ts';
 
-// Las clases usadas se cuentan cada vez: no hay un contador que se pueda desincronizar.
 export const clasesUsadasSql = sql<number>`(
   select count(*) from ${asistencia} where ${asistencia.pagoId} = ${pago.id}
 )`.mapWith(Number);
@@ -84,8 +83,6 @@ export async function actualizar(
 
 export type PagoUsable = { id: number; monto: number; cantidadClases: number };
 
-// Pagos no anulados y no vencidos en esa fecha, del que vence primero al último.
-// `for update`: si otro registro está usando uno, se espera a que termine.
 export async function bloquearValidos(ej: Ejecutor, alumnoId: number, fecha: FechaDia): Promise<PagoUsable[]> {
   return ej
     .select({ id: pago.id, monto: pago.monto, cantidadClases: pago.cantidadClases })
@@ -95,9 +92,6 @@ export async function bloquearValidos(ej: Ejecutor, alumnoId: number, fecha: Fec
     .for('update');
 }
 
-// Lo que necesita el estado del pack: los pagos no anulados que no vencieron y el último de cada alumno.
-// El join con pack también hace que Drizzle escriba `"pago"."id"` en `clasesUsadasSql`: sin join lo
-// escribiría `"id"`, y dentro de la subconsulta sería el id de la asistencia.
 export async function listarParaEstadoDelPack(
   ej: Ejecutor,
   alumnoIds: number[],
@@ -130,7 +124,6 @@ export async function listarParaEstadoDelPack(
   return [...sinVencer, ...ultimos.filter((fila) => !yaEstan.has(fila.id))];
 }
 
-// Para la baja automática: el último cobro no anulado de cada alumno y si le queda algún pago sin vencer.
 export async function listarComprasDeAlumnos(
   ej: Ejecutor,
   alumnoIds: number[],
@@ -153,7 +146,6 @@ export async function contarAsistencias(ej: Ejecutor, pagoId: number): Promise<n
   return fila?.total ?? 0;
 }
 
-// El día de un pago se toma en la zona del estudio: un cobro a las 23:00 del 31 es de ese mes.
 export async function ingresosPorMedio(
   ej: Ejecutor,
   desde: FechaDia,

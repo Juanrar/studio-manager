@@ -184,7 +184,6 @@ describe('un alta con el DNI de otro profesor', () => {
 
 describe('darDeAltaProfesor', () => {
   it('si el segundo horario viola el check, no queda ni el profesor ni el primer horario', async () => {
-    // Sin Zod: el esquema ya frena este horario, así que se llama al service directo para probar la transacción.
     const datos = {
       profesor: { nombre: 'Lucía', apellido: 'Fernández', porcentajeBp: 5000 },
       horarios: [

@@ -48,7 +48,6 @@ export const proponerHorario: Herramienta = {
   },
   soloAdmin: true,
   async ejecutar(argumentos) {
-    // Desde qué semana rige no lo elige el modelo: desde esta.
     const { desde: _desde, claseId: _claseId, ...datos } = crearHorarioSchema.parse(argumentos);
     const profesor = await verificarProfesorActivo(db, datos.profesorId);
     return { resultado: PROPUESTA_MOSTRADA, propuesta: { tipo: 'horario', datos, profesor } };
@@ -91,7 +90,6 @@ export const proponerAltaDeProfesor: Herramienta = {
   soloAdmin: true,
   async ejecutar(argumentos, { hoy }) {
     const { nombre, apellido, porcentaje, horarios } = argumentosDelAltaSchema.parse(argumentos);
-    // Los porcentajes se guardan en puntos básicos: 50% es 5000.
     const datos = altaDeProfesorSchema.parse({ profesor: { nombre, apellido, porcentajeBp: porcentaje * 100 }, horarios });
     const repetido = await buscarHomonimo(db, datos.profesor.nombre, datos.profesor.apellido, hoy);
     if (repetido !== null) {

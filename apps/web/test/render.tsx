@@ -24,7 +24,6 @@ export const RECEPCION: UsuarioPublico = {
   activo: true,
 };
 
-// Responde `GET /api/auth/yo` con ese usuario, o con 401 si es null.
 export function conSesion(usuario: UsuarioPublico | null) {
   servidor.use(
     http.get('/api/auth/yo', () =>
@@ -35,7 +34,6 @@ export function conSesion(usuario: UsuarioPublico | null) {
   );
 }
 
-// Simula la sesión del servidor: el login la abre y el logout la cierra.
 export function sesionDelServidor(usuarioAlLoguear: UsuarioPublico, logueadoAlEmpezar = false) {
   let logueado = logueadoAlEmpezar;
   const registro = { logoutLlamado: false };
@@ -58,7 +56,6 @@ export function sesionDelServidor(usuarioAlLoguear: UsuarioPublico, logueadoAlEm
   return registro;
 }
 
-// Renderiza la app completa en una ruta, con el mismo árbol de rutas que producción.
 export function renderizarEn(ruta: string) {
   const router = createMemoryRouter(rutas, { initialEntries: [ruta] });
   render(
@@ -69,7 +66,6 @@ export function renderizarEn(ruta: string) {
   return { router, usuario: userEvent.setup() };
 }
 
-// Para tests que pasan por /agenda sin que la agenda sea lo que prueban.
 export function conAgendaVacia(fecha = '2026-03-10') {
   servidor.use(
     http.get('/api/clases', () => HttpResponse.json({ desde: fecha, hasta: fecha, finDelHorizonte: '2026-05-03', items: [] })),

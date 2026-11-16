@@ -9,7 +9,6 @@ const ERIK = { id: 1, nombre: 'Erik', apellido: 'Zapata' };
 const IARU = { id: 2, nombre: 'Iaru', apellido: 'Speroni' };
 const MALENA = { id: 3, nombre: 'Malena', apellido: 'Rosas' };
 
-// Marzo: Erik abierto, Iaru cerrado con un monto guardado distinto del calculado, Malena pagada.
 const RESUMEN_DE_MARZO: ResumenDelPeriodo = {
   periodo: '2026-03',
   items: [

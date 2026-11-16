@@ -25,7 +25,6 @@ const estilosBoton: Record<VarianteBoton, string> = {
 
 export const enfoque = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento';
 
-// También sirve para que un Link se vea como botón.
 export function claseDeBoton(variante: VarianteBoton = 'primario') {
   return `inline-flex h-8 items-center gap-1.5 rounded-md px-3 font-medium whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-50 ${enfoque} ${estilosBoton[variante]}`;
 }
@@ -39,7 +38,6 @@ export function Boton({
   return <button type={type} className={`${claseDeBoton(variante)} ${className}`} {...props} />;
 }
 
-// Botón con solo un ícono: la etiqueta es lo que lee un lector de pantalla y lo que aparece al pasar el mouse.
 export function BotonIcono({
   icono,
   etiqueta,
@@ -62,7 +60,6 @@ export function BotonIcono({
 const estiloEntrada =
   'w-full rounded-md border border-borde-fuerte bg-elevado px-2.5 py-1.5 text-texto placeholder:text-apagado focus:border-acento focus:outline-none focus:ring-1 focus:ring-acento';
 
-// Etiqueta, control y mensaje de error. El control recibe el id para que la etiqueta lo nombre.
 export function Campo({
   etiqueta,
   error,
@@ -132,7 +129,6 @@ export function Aviso({ tipo = 'error', children }: { tipo?: 'error' | 'exito'; 
 
 type Columna = string | { texto: string; icono: NombreIcono };
 
-// Tabla densa: filas de 32px y bordes finos entre celdas. Una columna puede llevar ícono en el encabezado.
 export function Tabla({ columnas, children }: { columnas: readonly Columna[]; children: ReactNode }) {
   return (
     <div className="overflow-x-auto rounded-md border border-borde">
@@ -168,7 +164,6 @@ export function Celda({ children, className = '' }: { children: ReactNode; class
   return <td className={`${estiloCelda} ${className}`}>{children}</td>;
 }
 
-// Los botones de una fila son más bajos que los de la página para no agrandar la fila.
 export function CeldaDeAcciones({ children }: { children: ReactNode }) {
   return (
     <td className={estiloCelda}>
@@ -208,11 +203,8 @@ export function Dialogo({
   );
 }
 
-// Como en JSX, `false` y `null` no muestran nada: permite pasar `condicion && <Algo />`.
 const hayAlgo = (nodo: ReactNode) => nodo !== undefined && nodo !== null && nodo !== false;
 
-// Una pantalla dentro de la tarjeta de contenido: barra con título y acciones, barra opcional para
-// búsqueda y filtros, y el contenido con scroll propio. `volverA` pone antes del título la pantalla de la que se vino.
 export function Pagina({
   titulo,
   volverA,
@@ -250,8 +242,6 @@ export function Pagina({
   );
 }
 
-// Ventana ancha centrada sobre la página. `encabezado` va a la izquierda del botón de cerrar y el
-// contenido tiene su propio scroll.
 export function Ventana({
   etiqueta,
   alCerrar,
@@ -263,7 +253,6 @@ export function Ventana({
   encabezado: ReactNode;
   children: ReactNode;
 }) {
-  // Escape cierra la ventana solo si no hay otro diálogo encima: ese se encarga de sí mismo.
   useEffect(() => {
     function alTeclear(evento: globalThis.KeyboardEvent) {
       if (evento.key === 'Escape' && document.querySelectorAll('[role="dialog"]').length === 1) alCerrar();
@@ -272,14 +261,11 @@ export function Ventana({
     return () => document.removeEventListener('keydown', alTeclear);
   }, [alCerrar]);
 
-  // Un arrastre que empieza adentro (seleccionar el email) y termina en el fondo también dispara
-  // `click` en el fondo: solo cierra el clic que empezó en el fondo.
   const empezoEnElFondo = useRef(false);
 
   return (
     <div
       className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 p-6"
-      // Un `Dialogo` abierto adentro es hijo en React: su clic sube hasta acá con otro `target`.
       onMouseDown={(evento) => {
         empezoEnElFondo.current = evento.target === evento.currentTarget;
       }}
@@ -307,8 +293,6 @@ export type Pestana<T extends string> = { id: T; texto: string; icono: NombreIco
 
 const PASO_CON_FLECHA: Record<string, number | undefined> = { ArrowRight: 1, ArrowLeft: -1 };
 
-// Pestañas con el patrón de ARIA: las flechas pasan de una a otra y el lector de pantalla
-// anuncia cuál está elegida. `children` es el contenido de la elegida.
 export function Pestanas<T extends string>({
   pestanas,
   activa,
@@ -387,14 +371,11 @@ export function Insignia({ children, tono = 'gris' }: { children: ReactNode; ton
 
 const COLORES_AVATAR = ['#e5484d', '#f76b15', '#d9a400', '#30a46c', '#12a594', '#0090ff', '#3e63dd', '#8e4ec6', '#d6409f', '#978365'];
 
-// Un color que sale del texto: el mismo nombre da siempre el mismo color. Es un color de dato, como el
-// del avatar o el de un estilo en la grilla, no un color de estado.
 export function colorDeNombre(nombre: string): string {
   const indice = [...nombre].reduce((suma, letra) => suma + letra.charCodeAt(0), 0) % COLORES_AVATAR.length;
   return COLORES_AVATAR[indice]!;
 }
 
-// La inicial sobre un color que sale del nombre, así cada persona tiene siempre el mismo.
 export function Avatar({ nombre, grande = false }: { nombre: string; grande?: boolean }) {
   return (
     <span

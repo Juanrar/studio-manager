@@ -1,5 +1,3 @@
-// Constructores de respuestas de la API para los handlers de MSW.
-// Devuelven la misma forma que la API real; el test pisa solo lo que le importa.
 import type {
   Alumno,
   AlumnoEnListado,
@@ -36,12 +34,10 @@ export function unListado<T>(items: T[], datos: Partial<Listado<T>> = {}): Lista
   return { items, total: items.length, pagina: 1, porPagina: 20, ...datos };
 }
 
-// Una fila de GET /api/alumnos. Por defecto, sin pack y sin clases.
 export function unAlumnoEnListado(datos: Partial<AlumnoEnListado> = {}): AlumnoEnListado {
   return { ...unAlumno(), estadoPack: 'sin_pack', pagoActual: null, ultimaClase: null, ...datos };
 }
 
-// GET /api/alumnos/:id. Por defecto, sin pack.
 export function unaFichaDeAlumno(datos: Partial<FichaDeAlumno> = {}): FichaDeAlumno {
   return { ...unAlumno(), alta: '2025-03-10', estadoPack: 'sin_pack', pagoActual: null, ...datos };
 }
@@ -50,7 +46,6 @@ const erik = { id: 1, nombre: 'Erik', apellido: 'Zapata' };
 const julia = { id: 2, nombre: 'Julia', apellido: 'Paz' };
 const mesVacio = (mes: string) => ({ mes, compras: [], tomadas: 0, vencidas: 0, clases: [] });
 
-// GET /api/alumnos/:id/resumen. Por defecto, el resultado del test principal de la API (martes 10 de marzo de 2026).
 export function unResumenDeAlumno(datos: Partial<ResumenDeAlumno> = {}): ResumenDeAlumno {
   return {
     clasesTomadas: 6,
@@ -97,7 +92,6 @@ export function unResumenDeAlumno(datos: Partial<ResumenDeAlumno> = {}): Resumen
   };
 }
 
-// El martes 10 de marzo de 2026, como el reloj de los tests de la API.
 export function unListadoDeAlumnos(
   items: AlumnoEnListado[],
   datos: Partial<ListadoDeAlumnos> = {},
@@ -144,12 +138,10 @@ export function unProfesor(datos: Partial<Profesor> = {}): Profesor {
   };
 }
 
-// Una fila de GET /api/profesores. Por defecto, sin clases.
 export function unProfesorEnListado(datos: Partial<ProfesorEnListado> = {}): ProfesorEnListado {
   return { ...unProfesor(), clasesPorSemana: 0, diasConClase: [], ...datos };
 }
 
-// Un horario de GET /api/horarios. Por defecto, el de Erik Zapata los lunes de 18:00 a 19:30.
 export function unHorario(datos: Partial<Horario> = {}): Horario {
   return {
     id: 1,
@@ -164,7 +156,6 @@ export function unHorario(datos: Partial<Horario> = {}): Horario {
   };
 }
 
-// Una clase de GET /api/clases. Por defecto, Hip-Hop del martes 10 de marzo con Erik, sin cambios ni asistentes.
 export function unaClase(datos: Partial<Clase> = {}): Clase {
   const erik = { id: 1, nombre: 'Erik', apellido: 'Zapata' };
   return {

@@ -57,7 +57,6 @@ function Suplencia({ clase }: { clase: Clase }) {
   const actualizar = useActualizarClase(clase.id);
   const [elegido, setElegido] = useState(String(clase.profesor.id));
   const opciones = profesores.data ?? [];
-  // El profesor actual siempre aparece, aunque esté dado de baja.
   const incluyeActual = opciones.some((profesor) => profesor.id === clase.profesor.id);
 
   return (

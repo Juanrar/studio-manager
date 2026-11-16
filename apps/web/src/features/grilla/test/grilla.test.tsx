@@ -6,7 +6,6 @@ import { unaClase } from '../../../../test/datos.ts';
 import { ADMIN, conSesion, renderizarEn } from '../../../../test/render.tsx';
 import { servidor } from '../../../../test/servidor.ts';
 
-// Martes 10 de marzo de 2026 a las 12:00 de Buenos Aires.
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(new Date('2026-03-10T15:00:00Z'));
@@ -30,7 +29,6 @@ const SALSA = unaClase({
 });
 const BALLET = unaClase({ id: 52, horarioId: 4, fecha: '2026-03-12', estilo: 'Ballet', nivel: 'Inicial', horaInicio: '10:00', horaFin: '11:00' });
 
-// Responde las clases que caen en el rango pedido y anota cada pedido.
 function grillaCon(clases: Clase[], finDelHorizonte = '2026-05-03') {
   conSesion(ADMIN);
   const pedidos: string[] = [];

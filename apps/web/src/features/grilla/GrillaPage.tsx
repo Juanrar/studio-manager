@@ -29,22 +29,17 @@ const VISTAS: { id: Vista; texto: string }[] = [
   { id: 'mes', texto: 'Mes' },
 ];
 
-// El primer día del mes `meses` meses después del de `fecha`.
 function primeroDelMes(fecha: string, meses = 0): string {
   const [anio, mes] = fecha.split('-').map(Number) as [number, number];
   return new Date(Date.UTC(anio, mes - 1 + meses, 1)).toISOString().slice(0, 10);
 }
 
-// "9 – 15 mar", o "30 mar – 5 abr" si la semana cruza de mes.
 function rangoDeLaSemana(lunes: string): string {
   const domingo = sumarDias(lunes, 6);
   const desde = lunes.slice(5, 7) === domingo.slice(5, 7) ? String(Number(lunes.slice(8))) : formatearDiaYMes(lunes);
   return `${desde} – ${formatearDiaYMes(domingo)}`;
 }
 
-// Lo que muestra cada vista alrededor de `fecha`: el rango que se pide, los días de la grilla (o las
-// semanas del mes), adónde llevan las flechas, el mes del título, el período escrito entre las flechas y
-// cómo se llama el período de hoy.
 type Periodo = {
   etiqueta: string;
   actual: string;
@@ -115,13 +110,11 @@ const diaEnTexto = (fecha: string) => nombreDelDia(diaDeLaSemana(fecha)).toLower
 const tituloDe = (clase: { estilo: string; nivel: string | null }) =>
   clase.nivel === null ? clase.estilo : `${clase.estilo} ${clase.nivel}`;
 
-// Los mismos datos, como cambio del horario: la fecha pasa a ser el día de la semana.
 function comoHorario(datos: ActualizarClaseInput): ActualizarHorarioInput {
   const { fecha, estado: _estado, ...resto } = datos;
   return fecha === undefined ? resto : { ...resto, diaSemana: diaDeLaSemana(fecha) };
 }
 
-// Lo que tenía la clase en los mismos campos que se cambian: es lo que manda "Deshacer".
 function anterioresDe(clase: Clase, datos: ActualizarClaseInput): ActualizarClaseInput {
   const actuales: ActualizarClaseInput = {
     fecha: clase.fecha,
@@ -135,10 +128,6 @@ function anterioresDe(clase: Clase, datos: ActualizarClaseInput): ActualizarClas
   return Object.fromEntries(Object.keys(datos).map((clave) => [clave, actuales[clave as keyof ActualizarClaseInput]]));
 }
 
-// La grilla de clases para el administrador. `vista` en la dirección elige Día, Semana o Mes, y `fecha` el
-// día alrededor del que se muestra; sin ellas, la semana de hoy.
-// Arrastrar una clase la mueve, su borde de abajo cambia cuánto dura y arrastrar sobre un hueco crea una.
-// Cada cambio vale solo esa semana; el aviso de abajo ofrece llevarlo a todas o deshacerlo.
 export function GrillaPage() {
   const [parametros, setParametros] = useSearchParams();
   const hoy = hoyEnEstudio();
@@ -156,9 +145,7 @@ export function GrillaPage() {
       ...(destino.fecha === undefined ? {} : { fecha: destino.fecha }),
     });
   };
-  // Después del horizonte no hay clases creadas: la grilla de ese período todavía no está armada.
   const ultimoPeriodo = clases.data !== undefined && periodo.siguiente > clases.data.finDelHorizonte;
-  // En el mes compara el lunes de la primera semana, que es distinto para cada mes.
   const enElPresente = periodoDe(vista, hoy).desde === periodo.desde;
   const volver = `Volver a ${periodo.actual.toLowerCase()}`;
 
@@ -175,7 +162,6 @@ export function GrillaPage() {
   const cambiarHorario = useCambiarHorario();
   const crearHorario = useCrearHorario();
 
-  // Cambia una clase sola y deja en el aviso cómo llevar el cambio a todas las semanas o deshacerlo.
   function cambiarSoloEsta(clase: Clase, datos: ActualizarClaseInput, texto: string) {
     setEditor(null);
     const anteriores = anterioresDe(clase, datos);
@@ -207,7 +193,6 @@ export function GrillaPage() {
   function quitar(clase: Clase) {
     setEditor(null);
     if (clase.horarioId === null) {
-      // Una clase única se borra; "Deshacer" la vuelve a crear.
       const { fecha, horaInicio, horaFin, estilo, nivel } = clase;
       borrar.mutate(clase.id, {
         onSuccess: () =>
@@ -283,7 +268,6 @@ export function GrillaPage() {
     cambiarSoloEsta(clase, datos, texto);
   }
 
-  // Dónde se abre el editor de una clase nueva: junto a su lugar en la grilla.
   function anclaDe(destino: Destino): Ancla {
     const caja = columnas.current!.getBoundingClientRect();
     const ancho = caja.width / fechas.length;
@@ -309,7 +293,6 @@ export function GrillaPage() {
     cantidadDeDias: fechas.length,
     alTocar: (arrastre: Arrastre, _destino: Destino, id: number | null) => {
       if (arrastre.modo === 'crear') {
-        // Un toque en un hueco propone una clase de una hora en esa franja.
         const inicio = Math.min(Math.floor(arrastre.minutosAlEmpezar / PASO) * PASO, FIN_GRILLA - 60);
         abrirNueva({ dia: arrastre.dia, inicio: Math.max(inicio, INICIO_GRILLA), fin: Math.max(inicio, INICIO_GRILLA) + 60 });
         return;
@@ -339,7 +322,6 @@ export function GrillaPage() {
   });
 
   function alApretarClase(evento: PointerEvent, clase: Clase) {
-    // Lo que ya pasó se ve pero no se edita desde la grilla.
     if (clase.fecha < hoy) return;
     const caja = (evento.currentTarget as HTMLElement).getBoundingClientRect();
     anclaApretada.current = { left: caja.left, right: caja.right, top: caja.top };
@@ -351,7 +333,6 @@ export function GrillaPage() {
       titulo={<span className="text-lg font-bold">{formatearMes(periodo.mes)}</span>}
       acciones={
         <>
-          {/* Centrado sobre la tarjeta de contenido, como en DayFlow. */}
           <div className="absolute left-1/2 flex -translate-x-1/2 rounded-lg bg-elevado p-0.5">
             {VISTAS.map((opcion) => (
               <button
@@ -370,7 +351,6 @@ export function GrillaPage() {
               </button>
             ))}
           </div>
-          {/* Debajo de 1280 px el texto pisaría "Día / Semana / Mes": "Volver" queda en el ícono y la marca se esconde. */}
           {enElPresente ? (
             <span className="hidden h-8 items-center gap-1.5 px-2 text-apagado xl:flex">
               <span aria-hidden="true" className="size-1.5 rounded-full bg-acento" />

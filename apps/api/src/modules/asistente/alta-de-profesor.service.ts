@@ -5,10 +5,8 @@ import { ReglaDeNegocioError } from '../../lib/errores.ts';
 import { crearHorarioConSusClasesEn } from '../clases/programacion.service.ts';
 import { buscarHomonimo, crearProfesorEn, obtenerProfesor } from '../profesores/profesores.service.ts';
 
-// El profesor, su porcentaje, sus horarios y sus clases, todo o nada.
 export async function darDeAltaProfesor(datos: AltaDeProfesorInput, hoy: FechaDia): Promise<Profesor> {
   const id = await db.transaction(async (tx) => {
-    // La propuesta ya lo controló, pero dos tarjetas de la misma persona pueden estar abiertas a la vez.
     const repetido = await buscarHomonimo(tx, datos.profesor.nombre, datos.profesor.apellido, hoy);
     if (repetido !== null) {
       throw new ReglaDeNegocioError(

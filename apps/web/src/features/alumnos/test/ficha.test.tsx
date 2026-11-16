@@ -11,12 +11,9 @@ type Respuestas = {
   ficha?: Partial<FichaDeAlumno>;
   pagos?: Pago[];
   actividad?: EventoDeAlumno[];
-  // Cuenta los pedidos al resumen: la función los suma, el test los lee.
   pedidosDelResumen?: number;
 };
 
-// Abre la ficha de Martina encima de la lista, que también se carga. Los handlers leen `respuestas`
-// en cada pedido: un test las cambia para simular lo que devuelve la API después de una acción.
 function fichaDeMartina(respuestas: Respuestas = {}) {
   conSesion(RECEPCION);
   const martina = () => unaFichaDeAlumno({ id: 10, nombre: 'Martina', apellido: 'García', ...respuestas.ficha });
@@ -50,13 +47,11 @@ async function laFicha() {
   return screen.findByRole('dialog', { name: 'Ficha de Martina García' });
 }
 
-// La ficha se abre en Resumen: la actividad se ve después de hacer clic en su pestaña.
 async function abrirActividad(ficha: HTMLElement, usuario: ReturnType<typeof renderizarEn>['usuario']) {
   await usuario.click(within(ficha).getByRole('tab', { name: 'Actividad' }));
   return within(ficha).getByRole('tabpanel', { name: 'Actividad' });
 }
 
-// Cada mes de la actividad con sus hechos, como se leen en pantalla: [mes, [texto, día], ...].
 async function mesesDe(actividad: HTMLElement) {
   const meses = await within(actividad).findAllByRole('region');
   return meses.map((mes) => [
@@ -67,7 +62,6 @@ async function mesesDe(actividad: HTMLElement) {
   ]);
 }
 
-// Cada dato como [etiqueta, valor].
 function camposDe(panel: HTMLElement) {
   const valores = within(panel).getAllByRole('definition');
   return within(panel)
@@ -164,14 +158,12 @@ describe('/alumnos/:id', () => {
       const { usuario } = fichaDeMartina({ ficha });
       const ventana = await laFicha();
       await usuario.click(within(ventana).getByRole('tab', { name: 'Datos' }));
-      // El Resumen sigue montado debajo (fija el tamaño de la ventana): se busca solo en el grupo de Datos.
       return { usuario, panel: within(within(ventana).getByRole('tabpanel', { name: 'Datos' })).getByRole('group', { name: 'Datos' }) };
     }
 
     afterEach(() => vi.useRealTimers());
 
     it('muestra la identidad con la edad y "Vacío" en lo que falta, sin repetir el pack', async () => {
-      // El día del cumpleaños todavía no llegó: 27 años, no 28.
       vi.useFakeTimers({ toFake: ['Date'] });
       vi.setSystemTime(new Date(2026, 4, 3, 12));
       const { panel } = await abrirDatos(DATOS);
@@ -282,7 +274,6 @@ describe('/alumnos/:id', () => {
     await usuario.click(within(ficha).getByRole('tab', { name: 'Pagos' }));
     expect(await within(ficha).findByRole('row', { name: /Pack x8/ })).toBeInTheDocument();
     expect(cuerpoRecibido).toEqual({ alumnoId: 10, packId: 3, medio: 'transferencia' });
-    // Uno al abrir la ficha y otro al registrar el pago: el resumen se recarga.
     expect(respuestas.pedidosDelResumen).toBe(2);
   });
 
@@ -383,7 +374,6 @@ describe('/alumnos/:id', () => {
     fichaDeMartina();
     const ficha = await laFicha();
 
-    // Seleccionar el email y soltar afuera: mousedown adentro, mouseup y click en el fondo.
     fireEvent.mouseDown(within(ficha).getByRole('heading', { name: 'Martina García' }));
     fireEvent.mouseUp(ficha.parentElement!);
     fireEvent.click(ficha.parentElement!);

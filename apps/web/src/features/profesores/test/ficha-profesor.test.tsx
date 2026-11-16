@@ -8,9 +8,6 @@ import { servidor } from '../../../../test/servidor.ts';
 
 type Pedido = [metodo: string, ruta: string, cuerpo: unknown];
 
-// Abre la ficha de Erik Zapata (id 1) con sus clases. Los handlers leen y cambian `clases` como lo haría la API,
-// así la recarga después de guardar trae lo guardado. `pedidos` anota lo que la pantalla manda. Con `altaDemorada`,
-// el alta no responde hasta que esa promesa se cumple: sirve para tocar la pantalla mientras se guarda.
 function fichaDeErik(clasesIniciales: Horario[], { altaDemorada }: { altaDemorada?: Promise<void> } = {}) {
   conSesion(ADMIN);
   let horarios = clasesIniciales;
@@ -20,15 +17,12 @@ function fichaDeErik(clasesIniciales: Horario[], { altaDemorada }: { altaDemorad
     http.get('/api/profesores/1', () =>
       HttpResponse.json(unProfesor({ id: 1, nombre: 'Erik', apellido: 'Zapata', porcentajeVigenteBp: 5000 })),
     ),
-    // MSW compara la ruta sin la query: el filtro por profesor se controla acá. Sin él, la ficha mostraría
-    // las clases de todo el estudio.
     http.get('/api/horarios', ({ request }) => {
       const url = new URL(request.url);
       consultasDeHorarios.push(url.search);
       if (url.searchParams.get('profesorId') !== '1') {
         return HttpResponse.json({ error: `Faltó filtrar por el profesor: ${url.search}` }, { status: 400 });
       }
-      // Como la API: las dadas de baja vienen solo con incluirInactivos=true.
       const incluirInactivos = url.searchParams.get('incluirInactivos') === 'true';
       return HttpResponse.json({ items: horarios.filter((horario) => incluirInactivos || horario.activo) });
     }),
@@ -57,7 +51,6 @@ function fichaDeErik(clasesIniciales: Horario[], { altaDemorada }: { altaDemorad
   return { ...renderizarEn('/profesores/1'), pedidos, consultasDeHorarios };
 }
 
-// Lo que se lee de una fila: el texto de cada pieza, sin los íconos. Los campos de una fila en edición no tienen texto.
 function piezasDe(fila: HTMLElement): string[] {
   return [...fila.querySelectorAll('*')]
     .filter((nodo) => nodo.children.length === 0 && nodo.closest('[aria-hidden="true"]') === null)
@@ -69,7 +62,6 @@ const elDia = (nombre: string) => screen.getByRole('region', { name: nombre });
 const filasDe = (nombre: string) => within(elDia(nombre)).queryAllByRole('listitem');
 const clasesDe = (nombre: string) => filasDe(nombre).map(piezasDe);
 
-// Cada día de la pestaña Horario, en orden, con sus clases o con el texto del día vacío.
 function semana() {
   return within(screen.getByRole('tabpanel'))
     .getAllByRole('region')
@@ -125,7 +117,6 @@ describe('/profesores/:id', () => {
       '4 clases por semana',
     ]);
     expect(consultasDeHorarios).toEqual(['?profesorId=1']);
-    // La pestaña que se abre primero es la del horario semanal.
     expect(screen.getByRole('tab', { selected: true })).toHaveTextContent('Horario');
   });
 
@@ -334,7 +325,6 @@ describe('/profesores/:id', () => {
       http.post('/api/profesores/1/porcentajes', async ({ request }) => {
         cuerpoRecibido = await request.json();
         const nuevo = { id: 2, porcentajeBp: 6000, vigenteDesde: '2026-04-01' };
-        // Como la API, que ordena del más nuevo al más viejo.
         porcentajes = [nuevo, ...porcentajes];
         return HttpResponse.json(nuevo, { status: 201 });
       }),

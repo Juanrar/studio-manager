@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { correspondeBajaAutomatica, type AlumnoParaBaja } from '../baja-automatica.ts';
 
-// Martes 10 de marzo de 2026, igual que el reloj de los tests de integración.
 const HOY = '2026-03-10';
 
 function alumno(datos: Partial<AlumnoParaBaja>): AlumnoParaBaja {

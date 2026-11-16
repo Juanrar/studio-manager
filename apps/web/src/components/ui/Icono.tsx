@@ -1,4 +1,3 @@
-// Trazos de Tabler Icons (MIT, https://tabler.io/icons), copiados para no importar el paquete entero.
 const TRAZOS = {
   agenda: [
     'M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z',
@@ -173,7 +172,6 @@ const TRAZOS = {
 
 export type NombreIcono = keyof typeof TRAZOS;
 
-// Decorativo: el texto o el aria-label del control que lo contiene es lo que se lee.
 export function Icono({ nombre, className = 'size-4' }: { nombre: NombreIcono; className?: string }) {
   return (
     <svg

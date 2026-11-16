@@ -1,7 +1,3 @@
-// Cómo se dibujan las clases que se superponen en un día, como en DayFlow y Google Calendar: si dos
-// empiezan con menos de 30 minutos de diferencia van lado a lado (carriles); si una empieza más tarde,
-// se dibuja encima de la que sigue corriendo, corrida a la derecha (sangría).
-
 export type ClaseParaAcomodar = { id: number; fecha: string; inicio: number; fin: number };
 export type Lugar = { sangria: number; carril: number; carriles: number };
 
@@ -9,7 +5,6 @@ const LADO_A_LADO = 30;
 
 export function acomodarEnCascada(clases: ClaseParaAcomodar[]): Map<number, Lugar> {
   const lugares = new Map<number, Lugar>();
-  // Por día, después por hora; la más larga primero, así queda debajo.
   const ordenadas = [...clases].sort(
     (a, b) => a.fecha.localeCompare(b.fecha) || a.inicio - b.inicio || b.fin - a.fin,
   );

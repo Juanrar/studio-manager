@@ -32,7 +32,6 @@ const PESTANAS: Pestana<IdPestana>[] = [
 
 const VOLVER = { ruta: '/profesores', texto: 'Profesores' };
 
-// Una página entera y no un panel como la del alumno: el horario es una pantalla de trabajo y necesita el ancho.
 export function FichaProfesorPage() {
   const id = Number(useParams().id);
   const profesor = useProfesor(id);
@@ -44,21 +43,17 @@ export function FichaProfesorPage() {
       </Pagina>
     );
   }
-  // La key reinicia la pestaña y lo que se estaba editando al pasar de un profesor a otro.
   return <Ficha key={profesor.data.id} profesor={profesor.data} />;
 }
 
 function Ficha({ profesor }: { profesor: Profesor }) {
   const [pestana, setPestana] = useState<IdPestana>('horario');
-  // La misma consulta que la pestaña Horario con la casilla sin marcar: se pide una sola vez.
   const horarios = useHorarios({ profesorId: profesor.id });
   const nombre = `${profesor.nombre} ${profesor.apellido}`;
   const porSemana = horarios.data?.filter((horario) => horario.activo).length;
 
   return (
     <Pagina titulo={nombre} volverA={VOLVER}>
-      {/* Pagina deja un margen alrededor del contenido. El encabezado y la línea de las pestañas van de borde
-          a borde, como en la ficha del alumno; cada pestaña pone su propio margen. */}
       <div className="-m-4">
         <div className="flex items-center gap-3.5 px-6 pt-5 pb-3">
           <Avatar nombre={profesor.nombre} grande />
@@ -81,7 +76,6 @@ function Ficha({ profesor }: { profesor: Profesor }) {
         <Pestanas pestanas={PESTANAS} activa={pestana} alCambiar={setPestana}>
           {pestana === 'horario' && <HorarioDelProfesor profesorId={profesor.id} />}
           {pestana === 'datos' && <Datos profesor={profesor} />}
-          {/* El formulario venía de un diálogo angosto: a todo el ancho los dos campos quedan demasiado largos. */}
           {pestana === 'porcentajes' && (
             <div className="max-w-xl p-4">
               <HistorialDePorcentajes profesorId={profesor.id} />

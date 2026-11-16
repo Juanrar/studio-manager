@@ -8,8 +8,6 @@ const scrypt = promisify(scryptConCallback) as (
   opciones: ScryptOptions,
 ) => Promise<Buffer>;
 
-// Costo de scrypt. El formato guardado incluye los parámetros,
-// así se pueden subir más adelante sin invalidar los hashes existentes.
 const N = 32_768;
 const R = 8;
 const P = 1;

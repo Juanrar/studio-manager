@@ -2,7 +2,6 @@ import { count } from 'drizzle-orm';
 import { db, sql as cliente } from './client.ts';
 import { pack } from './schema.ts';
 
-// Precios de ejemplo en pesos enteros. El administrador los cambia desde la aplicación.
 const PACKS = [
   { nombre: 'Clase suelta', cantidadClases: 1, precio: 1500 },
   { nombre: 'Pack x4', cantidadClases: 4, precio: 5200 },

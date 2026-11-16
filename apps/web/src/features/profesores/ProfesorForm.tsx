@@ -7,7 +7,6 @@ import { textoAPorcentajeBp } from '../../lib/formato.ts';
 import { mostrarErrorDeApi } from '../../lib/formularios.ts';
 import { useActualizarProfesor, useCrearProfesor } from './api.ts';
 
-// El porcentaje se escribe como "52,5" y se manda en puntos básicos (5250).
 export const porcentajeEscritoSchema = z.string().transform((texto, contexto) => {
   const resultado = porcentajeBpSchema.safeParse(textoAPorcentajeBp(texto));
   if (!resultado.success) {

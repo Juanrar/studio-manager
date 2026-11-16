@@ -1,7 +1,6 @@
 export abstract class ErrorDeDominio extends Error {
   abstract readonly codigoHttp: number;
 
-  // `codigo` es para el frontend: decide con él, no comparando el texto del mensaje.
   constructor(
     mensaje: string,
     readonly codigo?: string,
@@ -27,7 +26,6 @@ export class SinPermisoError extends ErrorDeDominio {
   override readonly codigoHttp = 403;
 }
 
-// Un servicio externo no responde: la cuota del asistente se terminó o el modelo está saturado.
 export class ServicioNoDisponibleError extends ErrorDeDominio {
   override readonly codigoHttp = 503;
 }

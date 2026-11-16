@@ -17,17 +17,14 @@ export function AsistentePage() {
   const esAdmin = sesion.data?.rol === 'admin';
   const nombre = sesion.data?.nombre.split(' ')[0] ?? '';
   const vacia = mensajes.length === 0 && !esperando;
-  // La API no acepta más historial: el botón se resalta porque es la única forma de seguir.
   const conversacionLarga = error instanceof ErrorDeApi && error.codigo === CONVERSACION_LARGA;
 
   useEffect(() => {
-    // jsdom no implementa scrollIntoView.
     final.current?.scrollIntoView?.({ block: 'end' });
   }, [mensajes, esperando]);
 
   function enviar() {
     conversacion.enviar();
-    // El clic en Enviar deja el foco en el botón, que se deshabilita.
     campo.current?.focus();
   }
 
@@ -59,10 +56,8 @@ export function AsistentePage() {
         )
       }
     >
-      {/* El resplandor queda siempre montado, fuera del contenido que cambia, para poder desvanecerse. */}
       <div className="relative flex min-h-full flex-col">
         <Resplandor visible={vacia} />
-        {/* La caja ocupa siempre el mismo lugar del árbol: así el campo no se vuelve a montar ni pierde el foco al empezar. */}
         <div
           className={`relative mx-auto flex w-full max-w-2xl flex-1 flex-col ${vacia ? 'justify-center gap-6 py-10' : ''}`}
         >
@@ -79,7 +74,6 @@ export function AsistentePage() {
             {vacia && aviso}
           </div>
           {vacia && <Sugerencias esAdmin={esAdmin} alUsar={usarSugerencia} />}
-          {/* Después de la caja fija: si no, al bajar el último mensaje queda detrás de ella. */}
           {!vacia && <div ref={final} />}
         </div>
       </div>

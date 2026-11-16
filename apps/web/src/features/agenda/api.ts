@@ -2,8 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ActualizarClaseInput, Asistencia, Clase, ClasesDelRango, RegistrarAsistenciaInput } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
-// Las clases de un día, ya creadas por adelantado. Sin fecha, la API usa el día de hoy en el estudio.
-// La clave lleva el día de hoy: al pasar la medianoche cambia y la pantalla pide el día nuevo.
 export function useAgenda(fecha: string | undefined, hoy: string) {
   return useQuery({
     queryKey: ['agenda', fecha ?? `hoy-${hoy}`],
@@ -22,7 +20,6 @@ export function useAsistencias(claseId: number) {
   });
 }
 
-// Una asistencia cambia la clase (asistentes), la agenda y los pagos del alumno.
 function useRecargarClase(claseId: number) {
   const clienteQuery = useQueryClient();
   return () =>

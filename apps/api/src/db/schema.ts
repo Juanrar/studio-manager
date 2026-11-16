@@ -69,7 +69,6 @@ export const alumno = pgTable(
   (t) => [index('alumno_busqueda_idx').on(sql`lower(${t.apellido})`, sql`lower(${t.nombre})`)],
 );
 
-// Cada baja y cada reactivación de un alumno. `registradoPor` es null cuando la baja la hizo el sistema.
 export const cambioEstadoAlumno = pgTable(
   'cambio_estado_alumno',
   {
@@ -168,7 +167,6 @@ export const horario = pgTable(
       .notNull()
       .references(() => profesor.id),
     activo: boolean().notNull().default(true),
-    // Lunes de la primera semana en que se dicta: un horario nuevo no aparece en las semanas anteriores.
     vigenteDesde: date().notNull(),
   },
   (t) => [
@@ -178,15 +176,11 @@ export const horario = pgTable(
   ],
 );
 
-// La clase de una fecha. Copia la hora, el estilo y el nivel de su horario al crearse: si el horario
-// cambia, las semanas que ya pasaron siguen mostrando lo que pasó.
 export const clase = pgTable(
   'clase',
   {
     id: id(),
-    // Nulo en una clase única, que no sale de ningún horario.
     horarioId: referencia().references(() => horario.id),
-    // Lunes de la semana de la clase. Un horario tiene una sola clase por semana, aunque se mueva de día.
     semana: date().notNull(),
     fecha: date().notNull(),
     horaInicio: time().notNull(),

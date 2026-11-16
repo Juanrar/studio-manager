@@ -2,9 +2,6 @@ import type { Clase } from '@studio/shared';
 import { colorDeNombre } from '../../components/ui/index.tsx';
 import { abreviaturaDelDia, diaDeLaSemana, nombreDelDia, sumarDias } from '../../lib/formato.ts';
 
-// El mes en semanas completas, de lunes a domingo. Cada día lista hasta 4 clases con su hora y su estilo;
-// un clic en el día lo abre en la vista Día. Los días de los meses vecinos se ven apagados.
-
 const POR_DIA = 4;
 
 const cantidad = (n: number) => (n === 0 ? 'sin clases' : n === 1 ? '1 clase' : `${n} clases`);

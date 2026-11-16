@@ -51,7 +51,6 @@ export function UsuariosPage() {
                   <Boton variante="secundario" onClick={() => setEditando(usuario)}>
                     Editar
                   </Boton>
-                  {/* Desactivarse a uno mismo dejaría la sesión cerrada y quizás el sistema sin admin. */}
                   {!esUnoMismo && (
                     <Boton
                       variante="secundario"
@@ -130,7 +129,6 @@ function NuevoUsuarioForm({ alTerminar }: { alTerminar: () => void }) {
   );
 }
 
-// La contraseña nueva es opcional: vacía no se cambia.
 const editarUsuarioSchema = z.object({
   nombre: z.string().trim().min(1, 'Es obligatorio'),
   rol: z.enum(ROLES),

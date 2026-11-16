@@ -13,7 +13,6 @@ let base: BaseDeTest;
 let recepcion: UsuarioPublico;
 let pack: Pack;
 
-// AHORA es el martes 2026-03-10.
 const HOY = '2026-03-10';
 
 beforeAll(async () => {
@@ -30,7 +29,6 @@ beforeEach(async () => {
   pack = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
 });
 
-// El día `dia` a las 12:00 de Buenos Aires.
 function aLas12(dia: string): Date {
   return new Date(`${dia}T15:00:00Z`);
 }
@@ -53,27 +51,20 @@ async function bajasAutomaticas() {
 
 describe('darDeBajaPorNoComprar', () => {
   it('da de baja a quien pasó 2 meses sin comprar, ignora pagos anulados y a los ya dados de baja, lo registra como automático y no repite nada si corre otra vez', async () => {
-    // Compró hace 2 meses justos.
     const lucia = await crearAlumnoDeTest({ nombre: 'Lucía' }, aLas12('2025-12-01'));
     await comprar(lucia, '2026-01-10');
-    // Compró un día después: todavía no le toca.
     const martina = await crearAlumnoDeTest({ nombre: 'Martina' }, aLas12('2025-12-01'));
     await comprar(martina, '2026-01-11');
-    // Nunca compró y se anotó hace 2 meses.
     const joaquin = await crearAlumnoDeTest({ nombre: 'Joaquín' }, aLas12('2026-01-10'));
-    // Compró en diciembre, pero el admin le extendió el pack hasta el 20 de marzo.
     const paula = await crearAlumnoDeTest({ nombre: 'Paula' }, aLas12('2025-10-01'));
     const extendido = await comprar(paula, '2025-12-01');
     await extenderVencimiento(extendido.id, '2026-03-20', HOY);
-    // Compró en noviembre, pero se lo reactivó el 20 de enero.
     const tomas = await crearAlumnoDeTest({ nombre: 'Tomás' }, aLas12('2025-10-01'));
     await comprar(tomas, '2025-11-01');
     await actualizarAlumno(tomas.id, { activo: false }, recepcion.id, aLas12('2025-12-15'));
     await actualizarAlumno(tomas.id, { activo: true }, recepcion.id, aLas12('2026-01-20'));
-    // Ya estaba dada de baja a mano.
     const valentina = await crearAlumnoDeTest({ nombre: 'Valentina' }, aLas12('2025-06-01'));
     await actualizarAlumno(valentina.id, { activo: false }, recepcion.id, aLas12('2025-09-01'));
-    // Su pago de febrero se anuló: la última compra es la de diciembre.
     const sofia = await crearAlumnoDeTest({ nombre: 'Sofía' }, aLas12('2025-10-01'));
     await comprar(sofia, '2025-12-01');
     const anulado = await comprar(sofia, '2026-02-20');

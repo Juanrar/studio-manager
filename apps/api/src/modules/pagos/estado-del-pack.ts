@@ -1,11 +1,9 @@
 import type { PagoActual, ResumenDelPack } from '@studio/shared';
 import { sumarDias, type FechaDia } from '../../lib/fechas.ts';
 
-// Decisión por defecto de v1 (ver el índice de features): se avisa cuando queda una clase o una semana.
 const CLASES_PARA_AVISAR = 1;
 const DIAS_PARA_AVISAR = 7;
 
-// Un pago no anulado del alumno. Las clases usadas se cuentan en la base.
 export type PagoDeAlumno = {
   id: number;
   pack: string;
@@ -14,16 +12,12 @@ export type PagoDeAlumno = {
   venceEl: FechaDia;
 };
 
-// Recibe los pagos no anulados del alumno: por lo menos los que no vencieron y el último.
 export function estadoDelPack(pagos: PagoDeAlumno[], hoy: FechaDia): ResumenDelPack {
-  // El día del vencimiento todavía vale, igual que al registrar una asistencia.
   const sinVencer = pagos.filter((pago) => pago.venceEl >= hoy);
-  // Mismo orden que usa la asistencia para elegir el pago: el que vence primero.
   const queSirven = sinVencer.filter((pago) => restantes(pago) > 0).sort(porVencimiento);
 
   const enUso = queSirven[0];
   if (enUso !== undefined) {
-    // Se miran todos los que sirven: a quien ya pagó el pack siguiente no hay que cobrarle.
     const clasesQueLeQuedan = queSirven.reduce((suma, pago) => suma + restantes(pago), 0);
     const ultimoVencimiento = queSirven.at(-1)!.venceEl;
     const porVencer =
@@ -44,7 +38,6 @@ function restantes(pago: PagoDeAlumno): number {
   return pago.cantidadClases - pago.clasesUsadas;
 }
 
-// Los ids crecen con la fecha de cobro: a igual vencimiento, primero el que se pagó antes.
 function porVencimiento(a: PagoDeAlumno, b: PagoDeAlumno): number {
   if (a.venceEl !== b.venceEl) return a.venceEl < b.venceEl ? -1 : 1;
   return a.id - b.id;

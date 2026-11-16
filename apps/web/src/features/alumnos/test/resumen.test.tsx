@@ -8,7 +8,6 @@ import { ADMIN, RECEPCION, conSesion, renderizarEn } from '../../../../test/rend
 import { celdasDe } from '../../../../test/tabla.ts';
 import { servidor } from '../../../../test/servidor.ts';
 
-// Abre la ficha de Martina, que se abre en la pestaña Resumen, con el resumen que se le pase.
 function resumenDeMartina(resumen: ResumenDeAlumno, usuario = ADMIN) {
   conSesion(usuario);
   servidor.use(
@@ -35,7 +34,6 @@ async function elResumen() {
   return within(await within(ficha).findByRole('tabpanel', { name: 'Resumen' }));
 }
 
-// El valor y la nota de un indicador, juntos, como se leen en pantalla.
 function indicador(panel: ReturnType<typeof within>, etiqueta: string) {
   return panel.getByText(etiqueta, { selector: 'div' }).parentElement?.textContent;
 }
@@ -192,7 +190,6 @@ describe('pestaña Resumen', () => {
       await resumen.findByRole('button', { name: 'Marzo 2026: 0 clases tomadas' });
 
       expect(document.body.innerHTML).not.toContain('NaN');
-      // jsdom descarta `height: NaNpx`: se afirma el alto mínimo de cada barra.
       const barras = resumen.getAllByRole('button', { name: /clases tomadas$/ }).map((boton) => boton.querySelector<HTMLElement>('span[style] > span:last-child'));
       expect(barras).toHaveLength(12);
       expect(barras.map((barra) => barra?.style.height)).toEqual(Array(12).fill('2px'));

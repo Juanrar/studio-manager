@@ -104,7 +104,6 @@ describe('/profesores', () => {
 
     await usuario.type(await screen.findByRole('searchbox', { name: 'Buscar profesor' }), busqueda);
 
-    // La primera fila es la de los encabezados.
     const filas = screen.getAllByRole('row').slice(1);
     expect(filas.map((fila) => celdasDe(fila)[0])).toEqual(esperados);
   });

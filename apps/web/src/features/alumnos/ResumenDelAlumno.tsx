@@ -9,7 +9,6 @@ import { MesAMes } from './MesAMes.tsx';
 
 const SIN_DATO = '—';
 
-// La fila de arriba de la pestaña Resumen: contacto y pack, indicadores de actividad y profesores.
 export function ResumenDelAlumno({ datos }: { datos: FichaDeAlumno }) {
   const resumen = useResumenDeAlumno(datos.id);
 
@@ -80,7 +79,6 @@ function Indicador({ etiqueta, valor, nota }: { etiqueta: string; valor: ReactNo
   );
 }
 
-// "Martes 19:00" o "Martes y jueves 19:00".
 function textoSueleVenir({ diasSemana, horaInicio }: NonNullable<ResumenDeAlumno['sueleVenir']>): string {
   const dias = diasSemana.map((dia, indice) => (indice === 0 ? nombreDelDia(dia) : nombreDelDia(dia).toLowerCase()));
   return `${dias.join(' y ')} ${horaInicio}`;

@@ -14,13 +14,11 @@ import { esViolacionUnica } from '../../lib/postgres.ts';
 import { normalizarNombre } from '../../lib/texto.ts';
 import * as repo from './profesores.repository.ts';
 
-// El porcentaje inicial queda vigente desde el día del alta.
 export async function crearProfesor(datos: CrearProfesorInput, hoy: FechaDia): Promise<Profesor> {
   const id = await db.transaction((tx) => crearProfesorEn(tx, datos, hoy));
   return obtenerProfesor(id, hoy);
 }
 
-// Recibe el ejecutor para que el asistente cree al profesor y sus horarios en una sola transacción.
 export async function crearProfesorEn(ej: Ejecutor, datos: CrearProfesorInput, hoy: FechaDia): Promise<number> {
   const { porcentajeBp, ...personales } = datos;
   let id: number;
@@ -41,7 +39,6 @@ export async function crearProfesorEn(ej: Ejecutor, datos: CrearProfesorInput, h
   return id;
 }
 
-// Compara el nombre completo con todos los profesores, activos o no.
 export async function buscarHomonimo(
   ej: Ejecutor,
   nombre: string,
@@ -92,7 +89,6 @@ export async function listarPorcentajes(profesorId: number): Promise<PorcentajeP
   return repo.listarPorcentajes(db, profesorId);
 }
 
-// La usa asistencias dentro de su transacción, por eso recibe el ejecutor.
 export async function porcentajeVigente(ej: Ejecutor, profesorId: number, fecha: FechaDia): Promise<number> {
   const porcentaje = await repo.buscarPorcentajeVigente(ej, profesorId, fecha);
   if (porcentaje === null) {
@@ -101,7 +97,6 @@ export async function porcentajeVigente(ej: Ejecutor, profesorId: number, fecha:
   return porcentaje;
 }
 
-// Para horarios y clases: el profesor tiene que existir y estar activo.
 export async function verificarProfesorActivo(ej: Ejecutor, id: number): Promise<PersonaResumen> {
   const encontrado = await repo.buscarResumen(ej, id);
   if (encontrado === null) throw new ReglaDeNegocioError(`No existe el profesor ${id}`);

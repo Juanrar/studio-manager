@@ -19,8 +19,6 @@ const personalesSchema = crearProfesorSchema.pick({ dni: true, email: true, tele
 
 type Personales = Record<(typeof CAMPOS_PERSONALES)[number]['campo'], string>;
 
-// Los datos personales se completan acá y van directo a la API del estudio: no pasan por el asistente.
-// Que ya se creó lo guarda la conversación, no la mutación: la tarjeta se desmonta al ir a otra pantalla.
 export function TarjetaDeAltaDeProfesor({
   propuesta,
   creada,
@@ -38,7 +36,6 @@ export function TarjetaDeAltaDeProfesor({
   const hoy = hoyEnEstudio();
   const clases = clasesDeLaPropuesta(datos, hoy);
 
-  // La promesa se cumple aunque la tarjeta ya no esté montada; los callbacks de `mutate` no se llaman.
   async function crear() {
     const validacion = personalesSchema.safeParse(personales);
     if (!validacion.success) {
@@ -56,7 +53,6 @@ export function TarjetaDeAltaDeProfesor({
       const profesor = await darDeAlta.mutateAsync({ ...datos, profesor: { ...datos.profesor, ...personales } });
       alCrearse(`/profesores/${profesor.id}`);
     } catch {
-      // El motivo se muestra con `darDeAlta.error`.
     }
   }
 

@@ -14,7 +14,6 @@ export function AnotarAlumno({ claseId }: { claseId: number }) {
   const [texto, setTexto] = useState('');
   const q = useDemorado(texto.trim());
   const buscando = q.length >= 2;
-  // Incluye a los dados de baja: al pagar su clase vuelven a estar activos.
   const sugerencias = useAlumnos({ q, pagina: 1, incluirInactivos: true }, { habilitado: buscando });
   const registrar = useRegistrarAsistencia(claseId);
   const [sinClases, setSinClases] = useState<{ alumno: Alumno; mensaje: string } | null>(null);
@@ -26,7 +25,6 @@ export function AnotarAlumno({ claseId }: { claseId: number }) {
       {
         onSuccess: () => setTexto(''),
         onError: (error) => {
-          // Sin clases disponibles no es un error para recepción: ofrece cobrar en el acto.
           if (error instanceof ErrorDeApi && error.codigo === SIN_CLASES_DISPONIBLES) {
             setSinClases({ alumno, mensaje: error.message });
           }
@@ -90,7 +88,6 @@ function CobrarYAnotar({
   const claseSuelta = packs.data?.find((pack) => pack.cantidadClases === 1);
   const [packElegido, setPackElegido] = useState<string | null>(null);
   const [medio, setMedio] = useState<MedioPago>('efectivo');
-  // Por defecto, la clase suelta: es lo que se cobra en recepción cuando alguien no tiene pack.
   const packId = packElegido ?? (claseSuelta === undefined ? '' : String(claseSuelta.id));
 
   return (

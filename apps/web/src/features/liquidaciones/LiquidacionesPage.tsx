@@ -110,7 +110,6 @@ function Sueldos({ periodo }: { periodo: string }) {
                 </Celda>
                 <Celda>{fila.asistencias}</Celda>
                 <Celda>
-                  {/* Cerrada, vale el monto guardado; si las asistencias cambiaron después, se avisa. */}
                   {formatearPesos(liquidacion?.monto ?? fila.montoCalculado)}
                   {liquidacion !== null && liquidacion.monto !== fila.montoCalculado && (
                     <span className="block text-xs text-amber-300">

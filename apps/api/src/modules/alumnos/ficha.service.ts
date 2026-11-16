@@ -8,9 +8,6 @@ import { listarPagosDeAlumno, resumenDePacks } from '../pagos/pagos.service.ts';
 import * as repo from './alumnos.repository.ts';
 import { resumir } from './resumen.ts';
 
-// La ficha de recepción y la actividad del alumno. Viven fuera de alumnos.service por lo mismo
-// que el listado: pagos y asistencias ya usan alumnos.service.
-
 export async function obtenerFicha(id: number, hoy: FechaDia): Promise<FichaDeAlumno> {
   const { creadoEn, ...alumno } = await buscarConAlta(id);
   const packs = await resumenDePacks([id], hoy);
@@ -18,11 +15,8 @@ export async function obtenerFicha(id: number, hoy: FechaDia): Promise<FichaDeAl
   return { ...alumno, alta: diaDe(creadoEn), ...packs.get(id)! };
 }
 
-// Un hecho y el momento en que pasó, para ordenar los de un mismo día. Las clases no tienen hora en la
-// actividad (`null`): van antes que el resto de su día, porque se toman con el alumno ya en el estudio.
 type HechoConHora = { evento: EventoDeAlumno; instante: Date | null };
 
-// Del hecho más nuevo al más viejo. Una clase de un día posterior a hoy todavía no pasó: está anotada.
 export async function actividadDelAlumno(id: number, hoy: FechaDia): Promise<EventoDeAlumno[]> {
   const { creadoEn } = await buscarConAlta(id);
   const asistencias = await asistenciasDeAlumno(id);
@@ -55,18 +49,14 @@ export async function actividadDelAlumno(id: number, hoy: FechaDia): Promise<Eve
     }),
     { evento: { tipo: 'alta', fecha: diaDe(creadoEn) }, instante: creadoEn },
   ];
-  // `sort` es estable: las clases de un mismo día quedan en el orden de la consulta, de la última a la primera.
   return hechos.sort(masNuevoPrimero).map((hecho) => hecho.evento);
 }
 
-// Las cuentas del resumen salen de `resumir`. `totalPagado` es solo para el administrador.
 export async function resumenDelAlumno(id: number, hoy: FechaDia, rol: Rol): Promise<ResumenDeAlumno> {
   await buscarConAlta(id);
   const clases = await asistenciasDeAlumno(id);
   const pagos = (await listarPagosDeAlumno(id, hoy))
     .filter((pago) => !pago.anulado)
-    // `resumir` arma las compras de cada mes en el orden de los pagos: del cobro más viejo al más nuevo,
-    // con el instante del cobro, porque dos packs pueden comprarse el mismo día.
     .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
     .map((pago) => ({
       dia: diaDe(new Date(pago.fecha)),

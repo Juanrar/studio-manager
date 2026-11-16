@@ -47,7 +47,6 @@ export async function listarDeClase(ej: Ejecutor, claseId: number): Promise<Asis
   return seleccionar(ej, eq(asistencia.claseId, claseId)).orderBy(asc(alumno.apellido), asc(alumno.nombre));
 }
 
-// El día de la última clase de cada alumno hasta `hasta`: no cuentan las anotadas para más adelante.
 export async function ultimasFechas(
   ej: Ejecutor,
   alumnoIds: number[],
@@ -64,9 +63,6 @@ export async function ultimasFechas(
 
 export type ClaseDeAlumno = { fecha: FechaDia; horaInicio: string; clase: string; profesor: PersonaResumen };
 
-// Las clases de un alumno, también las anotadas para más adelante, de la más nueva a la más vieja.
-// El profesor es el de la clase, que cambia si hubo suplencia; el del horario es el titular. El estilo
-// es el de la clase: si después cambia el horario, lo que pasó se sigue viendo como fue.
 export async function listarDeAlumno(ej: Ejecutor, alumnoId: number): Promise<ClaseDeAlumno[]> {
   return ej
     .select({

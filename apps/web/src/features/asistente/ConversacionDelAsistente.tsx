@@ -2,7 +2,6 @@ import { createContext, use, useRef, useState, type ReactNode } from 'react';
 import type { PropuestaDelAsistente } from '@studio/shared';
 import { useConversar } from './api.ts';
 
-// `creada` aparece cuando el usuario tocó "Crear" y la API respondió bien.
 export type PropuestaDelChat = { propuesta: PropuestaDelAsistente; creada?: { enlace: string } };
 
 export type MensajeDelChat = { id: number; autor: 'usuario' | 'asistente'; texto: string; propuestas: PropuestaDelChat[] };
@@ -20,8 +19,6 @@ type Conversacion = {
 
 const ContextoDeConversacion = createContext<Conversacion | null>(null);
 
-// La conversación vive acá y no en la página: ir a otra pantalla no la borra, y una respuesta que llega
-// mientras tanto no se pierde. Todo queda en memoria: recargar la página o cerrar sesión empieza de cero.
 export function ProveedorDeConversacion({ children }: { children: ReactNode }) {
   const conversar = useConversar();
   const [historial, setHistorial] = useState<unknown[]>([]);
@@ -52,7 +49,6 @@ export function ProveedorDeConversacion({ children }: { children: ReactNode }) {
         },
         onError: () => {
           setMensajes((actuales) => actuales.filter((m) => m.id !== idDelUsuario));
-          // Lo enviado vuelve al campo sin pisar lo que el usuario escribió mientras esperaba.
           setBorrador((actual) => (actual.trim() === '' ? mensaje : `${mensaje}\n${actual}`));
         },
       },
@@ -69,8 +65,6 @@ export function ProveedorDeConversacion({ children }: { children: ReactNode }) {
     );
   }
 
-  // Lo escrito en el campo queda, para mandarlo en la conversación nueva. `reset` borra el error y descarta
-  // una respuesta que todavía no llegó: sus callbacks no se llaman.
   function empezarDeNuevo() {
     conversar.reset();
     setHistorial([]);

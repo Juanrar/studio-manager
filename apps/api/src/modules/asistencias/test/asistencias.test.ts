@@ -26,7 +26,6 @@ let martina: Alumno;
 let packX4: Pack;
 let claseSuelta: Pack;
 
-// Martes 2026-03-10: la clase de Hip-Hop de las 19:00 con Erik (50%).
 const MARTES = '2026-03-10';
 
 beforeAll(async () => {
@@ -54,7 +53,6 @@ afterEach(async () => {
   await app.close();
 });
 
-// Registra un pago como si se hubiera cobrado el día `dia` (a las 12:00 de Buenos Aires).
 async function pagar(pack: Pack, dia = MARTES) {
   return registrarPago(
     { alumnoId: martina.id, packId: pack.id, medio: 'efectivo' },
@@ -111,9 +109,9 @@ describe('POST /api/clases/:id/asistencias', () => {
   });
 
   it('no usa pagos vencidos, anulados ni sin clases restantes', async () => {
-    await pagar(packX4, '2026-02-01'); // venció el 2026-03-01
+    await pagar(packX4, '2026-02-01');
     await pagar(claseSuelta);
-    await registrar((await otraClaseDelMartes()).id, { alumnoId: martina.id }); // usa la clase suelta
+    await registrar((await otraClaseDelMartes()).id, { alumnoId: martina.id });
     const anulado = await pagar(packX4);
     await anularPago(anulado.id, 'Error de carga', AHORA, MARTES);
 
@@ -172,7 +170,6 @@ describe('POST /api/clases/:id/asistencias', () => {
 
   it('registros simultáneos no pueden usar la misma última clase', async () => {
     await pagar(claseSuelta);
-    // Seis clases del martes, una por hora, y un intento de asistencia en cada una a la vez.
     const clases = [clase];
     for (const hora of ['10', '11', '12', '13', '14']) {
       const horario = await crearHorarioDeTest(erik.id, { estilo: `Clase ${hora}`, horaInicio: `${hora}:00`, horaFin: `${hora}:50` });

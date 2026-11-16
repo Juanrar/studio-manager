@@ -21,7 +21,6 @@ let app: FastifyInstance;
 let cookie: string;
 let recepcion: UsuarioPublico;
 
-// AHORA es el martes 2026-03-10.
 const HOY = '2026-03-10';
 
 beforeAll(async () => {
@@ -53,7 +52,6 @@ async function listar(query: string) {
   return respuesta.json();
 }
 
-// Registra un pago como si se hubiera cobrado el día `dia` (a las 12:00 de Buenos Aires).
 async function pagar(alumno: Alumno, pack: Pack, dia: string) {
   return registrarPago(
     { alumnoId: alumno.id, packId: pack.id, medio: 'efectivo' },
@@ -153,7 +151,6 @@ describe('GET /api/alumnos', () => {
     const joaquin = await crearAlumnoDeTest({ nombre: 'Joaquín', apellido: 'Pérez' });
     const paula = await crearAlumnoDeTest({ nombre: 'Paula', apellido: 'Morales' });
 
-    // Martina: un pack x4 anulado que vencía antes que el x8, y en el x8 una clase dada y otra anotada para el martes que viene.
     const anulado = await pagar(martina, packX4, '2026-02-25');
     await anularPago(anulado.id, 'Se cargó dos veces', AHORA, HOY);
     await pagar(martina, packX8, '2026-03-01');
@@ -161,9 +158,7 @@ describe('GET /api/alumnos', () => {
       const { clase } = await abrirClase(hipHop.id, martes);
       await registrarAsistencia(clase.id, { alumnoId: martina.id }, recepcion.id, AHORA, HOY);
     }
-    // Lucía: el pack venció el 10 de febrero sin que lo usara.
     await pagar(lucia, packX4, '2026-01-10');
-    // Paula: tiene el pack vigente, pero está dada de baja.
     await pagar(paula, packX8, '2026-03-05');
     await actualizarAlumno(paula.id, { activo: false }, recepcion.id, AHORA);
 
@@ -204,7 +199,6 @@ describe('GET /api/alumnos', () => {
 describe('GET /api/alumnos/:id', () => {
   it('devuelve la ficha: el alumno, el día de su alta en la zona del estudio y el estado de su pack', async () => {
     const packX8 = await crearPackDeTest({ nombre: 'Pack x8', cantidadClases: 8, precio: 9600 });
-    // Se cargó el 5 de marzo a las 23:30 de Buenos Aires, que en UTC ya es el 6.
     const martina = await crearAlumnoDeTest({}, new Date('2026-03-06T02:30:00Z'));
     await pagar(martina, packX8, '2026-03-06');
 
@@ -227,18 +221,15 @@ describe('GET /api/alumnos/:id/actividad', () => {
     const erik = await crearProfesorDeTest({ nombre: 'Erik', apellido: 'Zapata' });
     const julia = await crearProfesorDeTest({ nombre: 'Julia', apellido: 'Paz' });
     const hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2 });
-    // El 20 de febrero se anotó a las 10:00 y pagó un pack x4 a las 12:00, que después se anuló.
     const martina = await crearAlumnoDeTest({}, new Date('2026-02-20T13:00:00Z'));
     const anulado = await pagar(martina, packX4, '2026-02-20');
     await anularPago(anulado.id, 'Se cargó dos veces', AHORA, HOY);
-    // El x8 se cobró el 2 de marzo a las 22:30 de Buenos Aires, que en UTC ya es el 3.
     await registrarPago(
       { alumnoId: martina.id, packId: packX8.id, medio: 'mercado_pago' },
       recepcion.id,
       new Date('2026-03-03T01:30:00Z'),
       '2026-03-02',
     );
-    // Hoy la clase la da Julia como suplente. La del martes que viene ya está anotada.
     for (const martes of ['2026-03-03', HOY, '2026-03-17']) {
       const { clase } = await abrirClase(hipHop.id, martes);
       if (martes === HOY) await actualizarClase(clase.id, { profesorId: julia.id }, HOY);
@@ -296,12 +287,10 @@ describe('GET /api/alumnos/:id/actividad', () => {
   it('las bajas y reactivaciones, a mano o automáticas, aparecen en la actividad por hora dentro del día; editar otros datos no registra nada', async () => {
     const packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
     const martina = await crearAlumnoDeTest({}, new Date('2025-12-01T15:00:00Z'));
-    // El 5 de enero pagó a las 12:00 y a las 18:00 se la dio de baja. El 8 se la reactivó.
     await pagar(martina, packX4, '2026-01-05');
     await actualizarAlumno(martina.id, { activo: false }, recepcion.id, new Date('2026-01-05T21:00:00Z'));
     await actualizarAlumno(martina.id, { activo: true }, recepcion.id, new Date('2026-01-08T13:00:00Z'));
     await actualizarAlumno(martina.id, { activo: true, telefono: '11 5555-0000' }, recepcion.id, AHORA);
-    // Dos meses después de la reactivación, sin comprar.
     await darDeBajaPorNoComprar(AHORA, HOY);
 
     const respuesta = await app.inject({
@@ -333,7 +322,6 @@ describe('GET /api/alumnos/:id/actividad', () => {
 });
 
 describe('GET /api/alumnos/:id/resumen', () => {
-  // Los 12 meses del resumen de hoy (2026-03-10), del más viejo al actual, con los vacíos por defecto.
   const MESES = [
     '2025-04',
     '2025-05',
@@ -350,7 +338,6 @@ describe('GET /api/alumnos/:id/resumen', () => {
   ];
   const mesVacio = (mes: string) => ({ mes, compras: [], tomadas: 0, vencidas: 0, clases: [] });
 
-  // Martina con lo mismo para los dos roles: ver el escenario de la actividad.
   async function armarAMartina() {
     const packX8 = await crearPackDeTest({ nombre: 'Pack x8', cantidadClases: 8, precio: 9600 });
     const packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
@@ -360,7 +347,6 @@ describe('GET /api/alumnos/:id/resumen', () => {
     const martina = await crearAlumnoDeTest({}, new Date('2026-02-20T13:00:00Z'));
     const anulado = await pagar(martina, packX4, '2026-02-20');
     await anularPago(anulado.id, 'Se cargó dos veces', AHORA, HOY);
-    // 22:30 del 28 de febrero en Buenos Aires, que en UTC ya es el 1 de marzo.
     await registrarPago(
       { alumnoId: martina.id, packId: packX8.id, medio: 'mercado_pago' },
       recepcion.id,
@@ -375,7 +361,6 @@ describe('GET /api/alumnos/:id/resumen', () => {
     return { martina, erik, julia };
   }
 
-  // Lo que devuelve el resumen de Martina, escrito a mano. `totalPagado` depende del rol.
   function resumenEsperadoDeMartina({ erik, julia }: { erik: { id: number }; julia: { id: number } }) {
     const personaErik = { id: erik.id, nombre: 'Erik', apellido: 'Zapata' };
     const personaJulia = { id: julia.id, nombre: 'Julia', apellido: 'Paz' };
@@ -437,7 +422,6 @@ describe('GET /api/alumnos/:id/resumen', () => {
     const packX4 = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
     const packX8 = await crearPackDeTest({ nombre: 'Pack x8', cantidadClases: 8, precio: 9600 });
     const martina = await crearAlumnoDeTest({}, new Date('2026-02-20T13:00:00Z'));
-    // El x4 se cobró a las 12:00 y el x8 una hora después, el mismo día.
     await registrarPago({ alumnoId: martina.id, packId: packX4.id, medio: 'efectivo' }, recepcion.id, new Date('2026-03-02T15:00:00Z'), '2026-03-02');
     await registrarPago({ alumnoId: martina.id, packId: packX8.id, medio: 'efectivo' }, recepcion.id, new Date('2026-03-02T16:00:00Z'), '2026-03-02');
 

@@ -18,14 +18,12 @@ const BUSCAR: DefinicionDeHerramienta = {
 
 type PedidoGrabado = { url: string; cuerpo: unknown };
 
-// Un `Error` hace que el fetch rechace, como con la red caída o un timeout.
 type RespuestaFalsa = { status: number; cuerpo: unknown } | Error;
 
 const URL_PRINCIPAL = 'https://generativelanguage.googleapis.com/v1beta/models/principal:generateContent';
 const URL_RESPALDO = 'https://generativelanguage.googleapis.com/v1beta/models/respaldo:generateContent';
 const HOLA = { status: 200, cuerpo: { candidates: [{ content: { role: 'model', parts: [{ text: 'Hola' }] } }] } };
 
-// Responde en orden con `respuestas` y guarda lo que recibió y lo que devolvió.
 function fetchFalso(respuestas: RespuestaFalsa[]) {
   const pedidos: PedidoGrabado[] = [];
   const signals: Array<AbortSignal | null | undefined> = [];

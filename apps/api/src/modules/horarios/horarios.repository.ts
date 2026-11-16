@@ -46,11 +46,9 @@ export async function listar(ej: Ejecutor, filtros: FiltrosDeHorarios): Promise<
   const condiciones: SQL[] = [];
   if (!filtros.incluirInactivos) condiciones.push(eq(horario.activo, true));
   if (filtros.profesorId !== undefined) condiciones.push(eq(horario.profesorId, filtros.profesorId));
-  // Sin condiciones, and() devuelve undefined y la consulta no lleva where.
   return seleccionar(ej, and(...condiciones));
 }
 
-// Lo que el generador copia en cada clase, de los horarios activos.
 export type HorarioParaGenerar = {
   id: number;
   diaSemana: number;

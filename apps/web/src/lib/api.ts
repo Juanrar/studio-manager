@@ -1,12 +1,10 @@
 export type DetalleError = { campo: string; mensaje: string };
 
-// Todo error de la API llega así: el status, el mensaje de `{ error }` y los campos inválidos.
 export class ErrorDeApi extends Error {
   constructor(
     readonly status: number,
     mensaje: string,
     readonly detalles: DetalleError[] = [],
-    // Algunos errores de negocio traen un código para que la pantalla decida qué ofrecer.
     readonly codigo?: string,
   ) {
     super(mensaje);

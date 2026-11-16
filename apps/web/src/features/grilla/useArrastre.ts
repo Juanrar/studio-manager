@@ -2,9 +2,6 @@ import { useState, type PointerEvent as EventoDePuntero, type RefObject } from '
 import { destinoDelArrastre, posicionEnLaGrilla, type Arrastre, type Destino } from './arrastre.ts';
 import { PX_POR_MINUTO } from './minutos.ts';
 
-// Arrastrar en la grilla con eventos de puntero, sin librerías: anda con el mouse y con el dedo. Mientras
-// se arrastra, `fantasma` dice dónde caería la clase. Un toque sin moverse es un clic.
-
 const UMBRAL = 4;
 
 export type Fantasma = Destino & { id: number | null };
@@ -25,8 +22,6 @@ export function useArrastre({
   const posicion = (x: number, y: number) =>
     posicionEnLaGrilla(columnas.current!.getBoundingClientRect(), { x, y }, cantidadDeDias, PX_POR_MINUTO);
 
-  // `crearArrastre` recibe dónde se apretó, para el modo que lo necesita. `id` es el de la clase que se
-  // arrastra, o null si se apretó un hueco.
   function empezar(evento: EventoDePuntero, crearArrastre: (apretado: { dia: number; minutos: number }) => Arrastre, id: number | null) {
     if (evento.button !== 0) return;
     evento.preventDefault();

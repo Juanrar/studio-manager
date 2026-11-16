@@ -19,8 +19,6 @@ let cookieAdmin: string;
 let erik: Profesor;
 let hipHopMartes: Horario;
 
-// 2026-03-10 es martes; 2026-03-11, miércoles. Es el día del reloj de los tests: el horizonte llega
-// hasta el domingo 3 de mayo, el de la semana que contiene el 30 de abril.
 const MARTES = '2026-03-10';
 const MIERCOLES = '2026-03-11';
 const FIN_DEL_HORIZONTE = '2026-05-03';
@@ -52,7 +50,6 @@ function pedirClases(consulta: string) {
   return app.inject({ method: 'GET', url: `/api/clases${consulta}`, headers: { cookie } });
 }
 
-// La clase de un horario en una fecha, ya creada por el generador o por `abrirClase`.
 async function claseDe(horarioId: number, fecha: string): Promise<number> {
   const [encontrada] = await db
     .select({ id: clase.id })
@@ -323,7 +320,6 @@ describe('PATCH /api/clases/:id para mover una clase', () => {
     const martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García' });
     const pack = await crearPackDeTest({ nombre: 'Pack x4', cantidadClases: 4, precio: 5200 });
     const ahora = new Date(`${MARTES}T15:00:00Z`);
-    // Comprado hoy, vence el 10 de abril.
     await registrarPago({ alumnoId: martina.id, packId: pack.id, medio: 'efectivo' }, recepcion.id, ahora, MARTES);
     const id = await claseDe(hipHopMartes.id, '2026-04-07');
     await registrarAsistencia(id, { alumnoId: martina.id }, recepcion.id, ahora, MARTES);
@@ -352,7 +348,6 @@ describe('PATCH /api/clases/:id para mover una clase', () => {
 });
 
 describe('POST /api/clases: una clase única', () => {
-  // Sábado 14 de marzo: un workshop que no sale de ningún horario.
   const WORKSHOP = { fecha: '2026-03-14', horaInicio: '18:00', horaFin: '20:00', estilo: 'Tango', nivel: 'Workshop' };
 
   function crearUnica(datos: Record<string, unknown>, conCookie = cookieAdmin) {
@@ -412,7 +407,6 @@ describe('POST /api/clases: una clase única', () => {
       headers: { cookie: cookieAdmin },
     });
 
-    // Pack x4 de $5.200: $1.300 la clase, el 50% para Erik.
     expect(detalle.json()).toEqual({
       items: [{ claseId: workshop.id, fecha: '2026-03-14', estilo: 'Tango', asistentes: 1, monto: 650 }],
     });

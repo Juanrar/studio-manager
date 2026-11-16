@@ -14,7 +14,6 @@ import {
 
 describe('hoyEnEstudio', () => {
   it('devuelve el día en la zona del estudio, no en UTC', () => {
-    // 2026-03-10T02:00:00Z son las 23:00 del 9 de marzo en Buenos Aires
     const instante = new Date('2026-03-10T02:00:00Z');
     expect(hoyEnEstudio(instante)).toBe('2026-03-09');
   });
@@ -72,7 +71,6 @@ describe('sumarMeses', () => {
 
   it('recorta al último día del mes de destino, sin pasar por el mes del medio', () => {
     expect(sumarMeses('2026-12-31', 2)).toBe('2027-02-28');
-    // Sumando de a un mes daría el 28 de marzo.
     expect(sumarMeses('2027-01-31', 2)).toBe('2027-03-31');
   });
 });
@@ -97,9 +95,9 @@ describe('esFechaDia', () => {
 
 describe('lunesDe', () => {
   it('devuelve el lunes de la semana, que va de lunes a domingo', () => {
-    expect(lunesDe('2026-10-08')).toBe('2026-10-05'); // jueves
-    expect(lunesDe('2026-10-05')).toBe('2026-10-05'); // el mismo lunes
-    expect(lunesDe('2026-10-11')).toBe('2026-10-05'); // domingo: es el fin de esa semana, no el comienzo de otra
+    expect(lunesDe('2026-10-08')).toBe('2026-10-05');
+    expect(lunesDe('2026-10-05')).toBe('2026-10-05');
+    expect(lunesDe('2026-10-11')).toBe('2026-10-05');
   });
 
   it('cruza al mes y al año anteriores', () => {
@@ -110,17 +108,14 @@ describe('lunesDe', () => {
 
 describe('finDelHorizonte', () => {
   it('es el domingo de la semana que contiene el último día del mes siguiente', () => {
-    // El 30 de noviembre es lunes: la semana va hasta el domingo 6 de diciembre.
     expect(finDelHorizonte('2026-10-08')).toBe('2026-12-06');
   });
 
   it('en diciembre, el mes siguiente es enero del año que viene', () => {
-    // El 31 de enero de 2027 es domingo: la semana termina ese mismo día.
     expect(finDelHorizonte('2026-12-15')).toBe('2027-01-31');
   });
 
   it('un 31 de enero mira el fin de febrero, no un 31 de febrero que no existe', () => {
-    // El 28 de febrero de 2026 es sábado: la semana termina el domingo 1 de marzo.
     expect(finDelHorizonte('2026-01-31')).toBe('2026-03-01');
   });
 });

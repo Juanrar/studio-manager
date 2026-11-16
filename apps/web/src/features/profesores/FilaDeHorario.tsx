@@ -4,8 +4,6 @@ import { Boton, BotonIcono, Entrada, Insignia, SelectorDeHora } from '../../comp
 import { mensajeDeError } from '../../lib/api.ts';
 import { useActualizarHorario, useCrearHorario } from '../horarios/api.ts';
 
-// La fila en lectura y en edición comparten el alto y el ancho de cada columna, así nada se corre al entrar a
-// editar. El borde está en las dos: en lectura es transparente.
 const FILA = 'flex min-h-11 items-center gap-3 rounded-md border px-2 py-1';
 const COLUMNA_HORARIO = 'flex w-60 flex-none items-center';
 const COLUMNA_ESTILO = 'w-44 flex-none';
@@ -14,7 +12,6 @@ const ACCIONES = 'ml-auto flex flex-none items-center gap-1.5';
 
 const aMinutos = (hora: string) => Number(hora.slice(0, 2)) * 60 + Number(hora.slice(3, 5));
 
-// 90 minutos se leen "1 h 30 min", una hora justa "1 h" y menos de una hora "45 min".
 function duracion(inicio: string, fin: string): string {
   const minutos = aMinutos(fin) - aMinutos(inicio);
   const horas = Math.floor(minutos / 60);
@@ -32,7 +29,6 @@ function ErrorDeLaFila({ children }: { children: ReactNode }) {
 
 export function FilaDeLectura({ horario, alEditar }: { horario: Horario; alEditar: () => void }) {
   const actualizar = useActualizarHorario();
-  // Dar de baja no pide confirmación: se deshace con "Reactivar".
   const cambiarEstado = (activo: boolean) => actualizar.mutate({ id: horario.id, datos: { activo } });
 
   return (
@@ -49,8 +45,6 @@ export function FilaDeLectura({ horario, alEditar }: { horario: Horario; alEdita
           {horario.nivel === null ? <span className="text-apagado">—</span> : <Insignia tono="violeta">{horario.nivel}</Insignia>}
         </span>
         {!horario.activo && <Insignia>Dada de baja</Insignia>}
-        {/* Aparecen al pasar el mouse o al llegar con el teclado a uno de los botones. Invisibles igual reciben el
-            toque: en una pantalla táctil, sin mouse que las muestre, se ven siempre. */}
         <div
           className={`${ACCIONES} opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100`}
         >
@@ -69,8 +63,6 @@ export function FilaDeLectura({ horario, alEditar }: { horario: Horario; alEdita
   );
 }
 
-// Una clase que se edita en su lugar, o una nueva si no hay `clase`. El día y el profesor no se editan acá: salen
-// de la fila y de la ficha.
 export function FilaEnEdicion({
   horario,
   diaSemana,
@@ -92,8 +84,6 @@ export function FilaEnEdicion({
 
   async function guardar(evento: FormEvent) {
     evento.preventDefault();
-    // Se valida como una clase entera, con el día de la fila y el profesor de la ficha, para que la hora de fin
-    // se compare con la de inicio también al editar.
     const validada = crearHorarioSchema.safeParse({ estilo, nivel, diaSemana, horaInicio, horaFin, profesorId });
     if (!validada.success) {
       setError(validada.error.issues[0]?.message ?? 'Revisá los datos de la clase');
@@ -105,7 +95,6 @@ export function FilaEnEdicion({
       if (horario === undefined) {
         await crear.mutateAsync(datos);
       } else {
-        // Sin el día ni el profesor: un PATCH con ellos podría mudar la clase sin querer.
         await actualizar.mutateAsync({
           id: horario.id,
           datos: { horaInicio: datos.horaInicio, horaFin: datos.horaFin, estilo: datos.estilo, nivel: datos.nivel },

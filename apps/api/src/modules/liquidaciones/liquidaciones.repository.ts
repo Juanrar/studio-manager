@@ -4,7 +4,6 @@ import type { Ejecutor } from '../../db/client.ts';
 import { asistencia, clase, liquidacion, profesor, type NuevaLiquidacion } from '../../db/schema.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 
-// Este módulo es de reportes: lee asistencias y clases para sumar, nunca las modifica.
 export type AsistenciaLiquidable = {
   profesorId: number;
   claseId: number;
@@ -27,7 +26,6 @@ export async function listarAsistenciasDelPeriodo(
       profesorId: clase.profesorId,
       claseId: clase.id,
       fecha: clase.fecha,
-      // El estilo de la clase y no el del horario: el detalle de un mes no cambia si después cambia el horario.
       estilo: clase.estilo,
       valorClase: asistencia.valorClase,
       porcentajeBp: asistencia.porcentajeBp,

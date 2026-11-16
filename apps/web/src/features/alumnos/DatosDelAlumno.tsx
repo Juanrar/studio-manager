@@ -7,7 +7,6 @@ import { enlaceDeWhatsapp } from '../../lib/whatsapp.ts';
 import { AlumnoForm } from './AlumnoForm.tsx';
 import { useActualizarAlumno } from './api.ts';
 
-// Años cumplidos hoy, con el reloj del navegador.
 function edadDe(nacimiento: string): number {
   const [anio, mes, dia] = nacimiento.split('-').map(Number) as [number, number, number];
   const hoy = new Date();
@@ -32,7 +31,6 @@ function Dato({ etiqueta, valor }: { etiqueta: string; valor: ReactNode }) {
   );
 }
 
-// Copia el texto al portapapeles y durante dos segundos dice "Copiado".
 function BotonCopiar({ texto }: { texto: string }) {
   const [copiado, setCopiado] = useState(false);
   useEffect(() => {
@@ -54,7 +52,6 @@ function BotonCopiar({ texto }: { texto: string }) {
   );
 }
 
-// wa.me abre la app de WhatsApp si está instalada y, si no, WhatsApp Web.
 function BotonWhatsapp({ telefono }: { telefono: string }) {
   const enlace = enlaceDeWhatsapp(telefono);
   if (enlace === null) {
@@ -86,8 +83,6 @@ function FilaDeContacto({ icono, etiqueta, valor, accion }: { icono: 'telefono' 
   );
 }
 
-// Lo que el personal hace con los datos: contactar al alumno, avisar en una emergencia, leer las notas.
-// El pack no está acá: ya se ve en el encabezado y en el Resumen.
 export function DatosDelAlumno({ datos }: { datos: FichaDeAlumno }) {
   const actualizar = useActualizarAlumno(datos.id);
   const [editando, setEditando] = useState(false);
@@ -100,7 +95,6 @@ export function DatosDelAlumno({ datos }: { datos: FichaDeAlumno }) {
     <div className="grid grid-cols-2 gap-8 p-6">
       <div>
         <section aria-labelledby={idContacto}>
-          {/* El botón es más alto que el título: el margen va en la fila, si no la lista queda pegada al botón. */}
           <div className="mb-2.5 flex items-center justify-between [&>h3]:mb-0">
             <Titulo id={idContacto}>Contacto</Titulo>
             <Boton variante="secundario" onClick={() => setEditando(true)}>

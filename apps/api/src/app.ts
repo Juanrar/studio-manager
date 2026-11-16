@@ -21,18 +21,14 @@ import { registrarAutenticacion } from './plugins/autenticacion.ts';
 import { registrarManejoDeErrores } from './plugins/errores.ts';
 
 export type OpcionesApp = {
-  // Los tests pasan un reloj fijo. En producción es la hora real.
   reloj?: () => Date;
-  // Carpeta del frontend compilado. Si viene, la API también sirve la app web.
   directorioWeb?: string | undefined;
-  // El modelo del asistente. Sin `modelo`, se arma con la configuración; `null` lo deja apagado.
   modelo?: ModeloDeLenguaje | null;
 };
 
 declare module 'fastify' {
   interface FastifyInstance {
     reloj: () => Date;
-    // El día actual en la zona del estudio, según el reloj de la app.
     hoy: () => FechaDia;
   }
 }

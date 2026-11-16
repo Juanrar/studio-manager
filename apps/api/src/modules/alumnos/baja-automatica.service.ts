@@ -5,9 +5,6 @@ import { comprasDeAlumnos } from '../pagos/pagos.service.ts';
 import * as repo from './alumnos.repository.ts';
 import { correspondeBajaAutomatica } from './baja-automatica.ts';
 
-// Da de baja a los alumnos activos que pasaron 2 meses sin comprar y devuelve a quiénes. La baja queda
-// registrada sin usuario: la hizo el sistema. Vive fuera de alumnos.service porque usa pagos.service,
-// que ya usa alumnos.service.
 export async function darDeBajaPorNoComprar(ahora: Date, hoy: FechaDia): Promise<number[]> {
   const activos = await repo.listarActivosParaBaja(db);
   const compras = await comprasDeAlumnos(activos.map((alumno) => alumno.id), hoy);
@@ -17,7 +14,6 @@ export async function darDeBajaPorNoComprar(ahora: Date, hoy: FechaDia): Promise
       const delAlumno = compras.get(alumno.id);
       return correspondeBajaAutomatica(
         {
-          // Una reactivación siempre es posterior al alta.
           activoDesde: hoyEnEstudio(alumno.reactivadoEn ?? alumno.creadoEn, config.tzEstudio),
           ultimaCompra: delAlumno?.ultimaCompra ?? null,
           tienePackSinVencer: delAlumno?.tienePackSinVencer ?? false,

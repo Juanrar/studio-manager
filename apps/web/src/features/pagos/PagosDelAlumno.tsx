@@ -23,7 +23,6 @@ import {
 import { usePacks } from '../packs/api.ts';
 import { useAnularPago, usePagosDeAlumno, useRegistrarPago } from './api.ts';
 
-// Un pago anulado o vencido ya no se puede usar, aunque le queden clases.
 function EstadoDelPago({ pago }: { pago: Pago }) {
   if (pago.anulado) return <Insignia tono="rojo">Anulado</Insignia>;
   if (pago.vencido) return <Insignia>Vencido</Insignia>;
@@ -42,7 +41,6 @@ const COLUMNAS = [
   '',
 ] as const;
 
-// El botón va en la barra de la ficha: se cobra desde cualquier pestaña.
 export function RegistrarPago({ alumnoId }: { alumnoId: number }) {
   const [registrando, setRegistrando] = useState(false);
   return (
@@ -78,7 +76,6 @@ export function PagosDelAlumno({ alumnoId }: { alumnoId: number }) {
               <Celda>{NOMBRES_MEDIO_DE_PAGO[pago.medio]}</Celda>
               <Celda>
                 <EstadoDelPago pago={pago} />
-                {/* El motivo puede partirse en líneas: si no, ensancha la columna y "Anular" queda fuera del panel. */}
                 {pago.motivoAnulacion !== null && (
                   <span className="ml-2 text-xs whitespace-normal text-apagado">{pago.motivoAnulacion}</span>
                 )}

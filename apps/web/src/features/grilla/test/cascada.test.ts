@@ -26,7 +26,6 @@ describe('acomodarEnCascada', () => {
 
     expect(lugares.get(1)).toEqual({ sangria: 0, carril: 0, carriles: 1 });
     expect(lugares.get(2)).toEqual({ sangria: 1, carril: 0, carriles: 1 });
-    // A las 20:00 la primera ya terminó, pero la segunda sigue: va una sangría más adentro.
     expect(lugares.get(3)).toEqual({ sangria: 2, carril: 0, carriles: 1 });
   });
 
@@ -37,7 +36,6 @@ describe('acomodarEnCascada', () => {
   });
 
   it('clases de días distintos no se mezclan aunque tengan la misma hora', () => {
-    // El prototipo ordenaba sin el día y dos clases de días distintos compartían carril.
     const lugares = acomodarEnCascada([clase(1, '2026-10-05', '10:00', '11:00'), clase(2, '2026-10-06', '10:00', '11:00')]);
 
     expect(lugares.get(1)).toEqual({ sangria: 0, carril: 0, carriles: 1 });

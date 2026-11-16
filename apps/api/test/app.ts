@@ -3,7 +3,6 @@ import type { CrearUsuarioInput, UsuarioPublico } from '@studio/shared';
 import { buildApp, type OpcionesApp } from '../src/app.ts';
 import { crearUsuario } from '../src/modules/usuarios/usuarios.service.ts';
 
-// Martes 10 de marzo de 2026, 12:00 en Buenos Aires.
 export const AHORA = new Date('2026-03-10T15:00:00Z');
 
 export function relojFijo(fecha: Date = AHORA): () => Date {
@@ -34,7 +33,6 @@ export async function crearUsuarioDeTest(datos: CrearUsuarioInput): Promise<Usua
   return crearUsuario(datos);
 }
 
-// Devuelve el valor del header `cookie` para usar en los requests siguientes.
 export async function loguear(app: FastifyInstance, email: string, password: string): Promise<string> {
   const respuesta = await app.inject({
     method: 'POST',

@@ -3,7 +3,6 @@ import { destinoDelArrastre, posicionEnLaGrilla } from '../arrastre.ts';
 import { aMinutos } from '../minutos.ts';
 
 describe('posicionEnLaGrilla', () => {
-  // Siete días de 100 px desde x = 100, y la grilla empieza a las 08:00 en y = 50, con 1 px por minuto.
   const caja = { left: 100, top: 50, width: 700 };
 
   it('da el día por la columna y los minutos por la altura', () => {
@@ -20,7 +19,6 @@ describe('destinoDelArrastre', () => {
   const salsa = { dia: 2, inicio: aMinutos('19:00'), fin: aMinutos('20:00') };
 
   it('mover conserva dónde se agarró la clase y salta de a 15 minutos, también a otro día', () => {
-    // Se agarró a las 19:10 y el puntero llegó a las 20:23 del jueves: se corrió 73 minutos, que redondean a 75.
     const destino = destinoDelArrastre(
       { modo: 'mover', clase: salsa, minutosAlEmpezar: aMinutos('19:10') },
       { dia: 4, minutos: aMinutos('20:23') },
@@ -47,7 +45,6 @@ describe('destinoDelArrastre', () => {
     const corta = destinoDelArrastre({ modo: 'estirar', clase: salsa }, { dia: 5, minutos: aMinutos('19:05') });
     const larga = destinoDelArrastre({ modo: 'estirar', clase: salsa }, { dia: 5, minutos: aMinutos('23:40') });
 
-    // El día no cambia aunque el puntero pase a otra columna.
     expect(corta).toEqual({ dia: 2, inicio: aMinutos('19:00'), fin: aMinutos('19:15') });
     expect(larga).toEqual({ dia: 2, inicio: aMinutos('19:00'), fin: aMinutos('23:00') });
   });

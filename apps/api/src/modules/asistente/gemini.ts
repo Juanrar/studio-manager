@@ -3,10 +3,8 @@ import type { EsquemaDeCampo, LlamadaAHerramienta, ModeloDeLenguaje } from './mo
 
 const URL_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-// Sin límite, Node espera hasta 300 segundos las cabeceras de la respuesta.
 const TIEMPO_MAXIMO_POR_PEDIDO = 45_000;
 
-// Fallas pasajeras de Google: se reintentan con el respaldo, igual que un pedido que no llegó por red o timeout.
 const ESTADOS_DE_SATURACION = [500, 503, 504];
 
 type Falla = 'cuota' | 'saturado';
@@ -22,18 +20,13 @@ type Contenido = { role: string; parts?: Parte[] };
 export type OpcionesGemini = {
   clave: string;
   modelo: string;
-  // Tiene su propia cuota: se usa cuando el principal responde 429, 500, 503 o 504, o no responde.
   respaldo: string;
-  // Los tests pasan un fetch falso y nunca llaman a Google.
   fetch?: typeof fetch;
 };
 
-// Usa generateContent sin estado. Gemini firma cada llamada a función (`thoughtSignature`) y responde 400
-// si no recibe la firma en la vuelta siguiente: el `content` del modelo se guarda tal cual en el historial.
 export function crearModeloGemini(opciones: OpcionesGemini): ModeloDeLenguaje {
   const pedirHttp = opciones.fetch ?? fetch;
 
-  // Devuelve la respuesta, o la falla si conviene probar con el otro modelo.
   const generar = async (modelo: string, cuerpo: unknown): Promise<Response | Falla> => {
     let respuesta: Response;
     try {
@@ -47,7 +40,6 @@ export function crearModeloGemini(opciones: OpcionesGemini): ModeloDeLenguaje {
       return 'saturado';
     }
     if (respuesta.status !== 429 && !ESTADOS_DE_SATURACION.includes(respuesta.status)) return respuesta;
-    // El cuerpo no se lee: se cancela para liberar la conexión.
     await respuesta.body?.cancel();
     return respuesta.status === 429 ? 'cuota' : 'saturado';
   };
@@ -113,8 +105,6 @@ export function crearModeloGemini(opciones: OpcionesGemini): ModeloDeLenguaje {
         .map((parte) => parte.text ?? '')
         .join('')
         .trim();
-      // Sin texto ni llamadas no hay nada que mostrar, y un turno vacío en el historial hace fallar el pedido
-      // siguiente: no se guarda.
       if (contenido === undefined || (texto === '' && llamadas.length === 0)) {
         throw new ServicioNoDisponibleError('El asistente no pudo responder. Probá con otras palabras.', 'SIN_RESPUESTA');
       }
@@ -123,7 +113,6 @@ export function crearModeloGemini(opciones: OpcionesGemini): ModeloDeLenguaje {
   };
 }
 
-// Gemini escribe los tipos en mayúsculas: 'string' pasa a 'STRING'. Con minúsculas no se probó.
 function aEsquemaDeGemini(esquema: EsquemaDeCampo): Record<string, unknown> {
   const base = {
     type: esquema.type.toUpperCase(),

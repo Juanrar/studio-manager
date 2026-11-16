@@ -2,8 +2,6 @@ import type { LlamadaAHerramienta, ModeloDeLenguaje, PedidoAlModelo } from '../s
 
 export type TurnoGuionado = { texto?: string; llamadas?: Omit<LlamadaAHerramienta, 'id'>[] };
 
-// Responde con los turnos del guion, en orden, y guarda cada pedido para que el test lo mire. Su historial
-// es legible ({ rol, ... }), no el de Gemini.
 export function crearModeloFalso(guion: TurnoGuionado[]): ModeloDeLenguaje & { pedidos: PedidoAlModelo[] } {
   const pendientes = [...guion];
   const pedidos: PedidoAlModelo[] = [];

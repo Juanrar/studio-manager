@@ -125,7 +125,6 @@ export function AlumnosPage() {
   );
 }
 
-// `hoy` viene de la API: con él se decide si una fecha lleva el año.
 function FilaDeAlumno({ alumno, hoy, abierto }: { alumno: AlumnoEnListado; hoy: string; abierto: boolean }) {
   const { pagoActual: pago } = alumno;
 

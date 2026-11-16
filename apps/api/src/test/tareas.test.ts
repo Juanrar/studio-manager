@@ -30,7 +30,6 @@ afterEach(async () => {
 
 describe('programarTareas', () => {
   it('al arrancar da de baja a quien pasó 2 meses sin comprar', async () => {
-    // AHORA es el 2026-03-10. Lucía se anotó en enero y nunca compró; Martina se anotó hoy.
     const lucia = await crearAlumnoDeTest({ nombre: 'Lucía' }, new Date('2026-01-05T15:00:00Z'));
     const martina = await crearAlumnoDeTest({ nombre: 'Martina' });
 

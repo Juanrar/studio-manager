@@ -42,7 +42,6 @@ export async function actualizarUsuario(
     if (actualizado === null) {
       throw new NoEncontradoError(`No existe el usuario ${id}`);
     }
-    // Un usuario dado de baja o con contraseña nueva no sigue logueado con sesiones viejas.
     if (datos.activo === false || datos.password !== undefined) {
       await cerrarSesionesDeUsuario(tx, id);
     }

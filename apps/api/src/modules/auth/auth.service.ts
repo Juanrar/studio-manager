@@ -8,8 +8,6 @@ import * as repo from './sesiones.repository.ts';
 const DURACION_SESION_MS = 7 * 24 * 60 * 60 * 1000;
 const MENSAJE_CREDENCIALES = 'Email o contraseña incorrectos';
 
-// Si el email no existe se verifica igual contra este hash de relleno,
-// para que la respuesta tarde lo mismo y no revele qué emails existen.
 let hashDeRelleno: Promise<string> | undefined;
 
 export type SesionIniciada = { sesionId: string; usuario: UsuarioPublico; expiraEn: Date };
