@@ -1,6 +1,6 @@
 # Grilla para recepción
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** navegacion-de-la-grilla  
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; recepción entra a `/grilla`, ve las clases en Día, Semana y Mes, y no puede crear, mover, estirar ni editar ninguna.
 
@@ -45,4 +45,4 @@ Los tests de administración que ya existen (`grilla.test.tsx`, `grilla-edicion.
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan: shared 29, API 234, web 203.
