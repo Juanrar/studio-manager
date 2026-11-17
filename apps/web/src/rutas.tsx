@@ -25,6 +25,7 @@ export const rutas: RouteObject[] = [
       { path: 'clases/:id', element: <ClasePage /> },
       { path: 'alumnos', element: <AlumnosPage />, children: [{ path: ':id', element: <FichaAlumnoPage /> }] },
       { path: 'asistente', element: <AsistentePage /> },
+      { path: 'grilla', element: <GrillaPage /> },
       {
         element: <SoloAdmin />,
         children: [
@@ -32,7 +33,6 @@ export const rutas: RouteObject[] = [
           { path: 'profesores', element: <ProfesoresPage /> },
           { path: 'profesores/:id', element: <FichaProfesorPage /> },
           { path: 'horarios', element: <HorariosPage /> },
-          { path: 'grilla', element: <GrillaPage /> },
           { path: 'usuarios', element: <UsuariosPage /> },
           { path: 'liquidaciones', element: <LiquidacionesPage /> },
         ],

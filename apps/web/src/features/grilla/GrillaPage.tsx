@@ -14,6 +14,7 @@ import {
 } from '@studio/shared';
 import { Aviso, Boton, BotonIcono, Flotante, Icono, Pagina, type Ancla } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
+import { useSesion } from '../auth/api.ts';
 import { formatearDiaYMes, formatearMes, nombreDelDia, nombreDelMes } from '../../lib/formato.ts';
 import { useBorrarClase, useCambiarClase, useCambiarHorario, useClasesDelRango, useCrearClaseUnica, useCrearHorario } from './api.ts';
 import type { Arrastre, Destino } from './arrastre.ts';
@@ -128,6 +129,7 @@ function anterioresDe(clase: Clase, datos: ActualizarClaseInput): ActualizarClas
 export function GrillaPage() {
   const [parametros, setParametros] = useSearchParams();
   const hoy = hoyEnEstudio();
+  const puedeEditar = useSesion().data?.rol === 'admin';
   const pedida = parametros.get('vista');
   const vista: Vista = pedida === 'dia' || pedida === 'mes' ? pedida : 'semana';
   const fechaPedida = parametros.get('fecha');
@@ -395,15 +397,19 @@ export function GrillaPage() {
           fechas={fechas}
           clases={items}
           hoy={hoy}
-          interacciones={{
-            columnas,
-            fantasma,
-            idElegido: editor !== null && editor.modo !== 'crear' ? editor.clase.id : null,
-            alApretarClase,
-            alEstirarClase: (evento, clase) => empezar(evento, () => ({ modo: 'estirar', clase: enLaGrilla(clase) }), clase.id),
-            alApretarHueco: (evento) =>
-              empezar(evento, (apretado) => ({ modo: 'crear', dia: apretado.dia, minutosAlEmpezar: apretado.minutos }), null),
-          }}
+          interacciones={
+            puedeEditar
+              ? {
+                  columnas,
+                  fantasma,
+                  idElegido: editor !== null && editor.modo !== 'crear' ? editor.clase.id : null,
+                  alApretarClase,
+                  alEstirarClase: (evento, clase) => empezar(evento, () => ({ modo: 'estirar', clase: enLaGrilla(clase) }), clase.id),
+                  alApretarHueco: (evento) =>
+                    empezar(evento, (apretado) => ({ modo: 'crear', dia: apretado.dia, minutosAlEmpezar: apretado.minutos }), null),
+                }
+              : undefined
+          }
         />
       )}
 

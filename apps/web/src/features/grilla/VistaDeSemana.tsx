@@ -27,10 +27,13 @@ export type InteraccionesDeLaGrilla = {
   alApretarHueco: (evento: PointerEvent, fecha: string) => void;
 };
 
-type PropsDeVistaDeSemana = { fechas: string[]; clases: Clase[]; hoy: string } & (
-  | { interacciones: InteraccionesDeLaGrilla; incrustada?: undefined }
-  | { incrustada: { inicio: number; fin: number }; interacciones?: undefined }
-);
+type PropsDeVistaDeSemana = {
+  fechas: string[];
+  clases: Clase[];
+  hoy: string;
+  interacciones?: InteraccionesDeLaGrilla | undefined;
+  incrustada?: { inicio: number; fin: number } | undefined;
+};
 
 export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada }: PropsDeVistaDeSemana) {
   const inicioDelRango = incrustada?.inicio ?? INICIO_GRILLA;

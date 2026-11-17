@@ -13,6 +13,7 @@ const SECCIONES: { titulo: string; rol: Rol; opciones: Opcion[] }[] = [
     rol: 'recepcion',
     opciones: [
       { ruta: '/agenda', texto: 'Agenda', icono: 'agenda' },
+      { ruta: '/grilla', texto: 'Grilla', icono: 'grilla' },
       { ruta: '/alumnos', texto: 'Alumnos', icono: 'alumnos' },
       { ruta: '/asistente', texto: 'Asistente', icono: 'asistente' },
     ],
@@ -24,7 +25,6 @@ const SECCIONES: { titulo: string; rol: Rol; opciones: Opcion[] }[] = [
       { ruta: '/packs', texto: 'Packs', icono: 'packs' },
       { ruta: '/profesores', texto: 'Profesores', icono: 'profesores' },
       { ruta: '/horarios', texto: 'Horarios', icono: 'horarios' },
-      { ruta: '/grilla', texto: 'Grilla', icono: 'grilla' },
       { ruta: '/usuarios', texto: 'Usuarios', icono: 'usuarios' },
       { ruta: '/liquidaciones', texto: 'Liquidaciones', icono: 'liquidaciones' },
     ],
