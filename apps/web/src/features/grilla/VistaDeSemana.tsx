@@ -129,7 +129,7 @@ export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada, 
                   <div
                     className="pointer-events-none absolute inset-x-1 z-30 rounded border border-dashed border-acento/70 bg-acento/15 px-2 py-1 text-xs font-medium"
                     style={{
-                  top: (fantasma.inicio - inicioDelRango) * PX_POR_MINUTO,
+                      top: (fantasma.inicio - inicioDelRango) * PX_POR_MINUTO,
                       height: (fantasma.fin - fantasma.inicio) * PX_POR_MINUTO - 2,
                     }}
                   >
