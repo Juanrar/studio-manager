@@ -1,4 +1,5 @@
 import type { PointerEvent, RefObject } from 'react';
+import { Link } from 'react-router';
 import { diaSemanaIso, horaEnEstudio, type Clase } from '@studio/shared';
 import { colorDeNombre } from '../../components/ui/index.tsx';
 import { abreviaturaDelDia, nombreDelDia } from '../../lib/formato.ts';
@@ -33,9 +34,10 @@ type PropsDeVistaDeSemana = {
   hoy: string;
   interacciones?: InteraccionesDeLaGrilla | undefined;
   incrustada?: { inicio: number; fin: number } | undefined;
+  enlaceDeClase?: ((clase: Clase) => string) | undefined;
 };
 
-export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada }: PropsDeVistaDeSemana) {
+export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada, enlaceDeClase }: PropsDeVistaDeSemana) {
   const inicioDelRango = incrustada?.inicio ?? INICIO_GRILLA;
   const finDelRango = incrustada?.fin ?? FIN_GRILLA;
   const alto = (finDelRango - inicioDelRango) * PX_POR_MINUTO;
@@ -120,14 +122,14 @@ export function VistaDeSemana({ fechas, clases, hoy, interacciones, incrustada }
                             alApretar: (evento: PointerEvent) => interacciones.alApretarClase(evento, clase),
                             alEstirar: (evento: PointerEvent) => interacciones.alEstirarClase(evento, clase),
                           }
-                        : { soloLectura: true })}
+                        : { soloLectura: true, enlace: enlaceDeClase?.(clase) })}
                     />
                   ))}
                 {fantasma && fantasma.dia === indice + 1 && (
                   <div
                     className="pointer-events-none absolute inset-x-1 z-30 rounded border border-dashed border-acento/70 bg-acento/15 px-2 py-1 text-xs font-medium"
                     style={{
-                      top: (fantasma.inicio - inicioDelRango) * PX_POR_MINUTO,
+                  top: (fantasma.inicio - inicioDelRango) * PX_POR_MINUTO,
                       height: (fantasma.fin - fantasma.inicio) * PX_POR_MINUTO - 2,
                     }}
                   >
@@ -160,8 +162,14 @@ function ClaseEnLaGrilla({
   editable: boolean;
   atenuada: boolean;
 } & (
-  | { soloLectura?: undefined; elegida: boolean; alApretar: (evento: PointerEvent) => void; alEstirar: (evento: PointerEvent) => void }
-  | { soloLectura: true; elegida?: undefined; alApretar?: undefined; alEstirar?: undefined }
+  | {
+      soloLectura?: undefined;
+      enlace?: undefined;
+      elegida: boolean;
+      alApretar: (evento: PointerEvent) => void;
+      alEstirar: (evento: PointerEvent) => void;
+    }
+  | { soloLectura: true; enlace: string | undefined; elegida?: undefined; alApretar?: undefined; alEstirar?: undefined }
 )) {
   const color = colorDeNombre(clase.estilo);
   const inicio = aMinutos(clase.horaInicio);
@@ -169,31 +177,26 @@ function ClaseEnLaGrilla({
   const corrimiento = lugar.sangria * SANGRIA;
   const cancelada = clase.estado === 'cancelada';
   const profesor = `${clase.profesor.nombre} ${clase.profesor.apellido}`;
-  const { soloLectura, elegida, alApretar, alEstirar } = resto;
+  const { soloLectura, enlace, elegida, alApretar, alEstirar } = resto;
   const arrastrable = !soloLectura && editable && !cancelada;
-
-  return (
-    <div
-      {...(soloLectura ? {} : { role: 'button', tabIndex: 0 })}
-      aria-label={nombreDeLaClase(clase)}
-      data-clase={clase.id}
-      onPointerDown={soloLectura ? undefined : alApretar}
-      className={`absolute overflow-hidden rounded py-1 pr-1.5 pl-2.5 text-xs leading-snug ${
-        cancelada ? 'line-through opacity-50 hover:opacity-80' : soloLectura ? '' : 'hover:brightness-125'
-      } ${arrastrable ? 'cursor-grab touch-none active:cursor-grabbing' : !soloLectura && editable ? 'cursor-pointer' : ''} ${
-        atenuada ? 'opacity-30' : ''
-      } ${elegida ? 'ring-1 ring-white/50' : ''}`}
-      style={{
-        top: (inicio - inicioDelRango) * PX_POR_MINUTO + 1,
-        height: alto,
-        left: `calc(${corrimiento}px + (100% - ${corrimiento}px) * ${lugar.carril / lugar.carriles} + 2px)`,
-        width: `calc((100% - ${corrimiento}px) / ${lugar.carriles} - 4px)`,
-        zIndex: lugar.sangria + 1,
-        backgroundColor: colorDeFondo(color),
-        color: colorDeTexto(color),
-        boxShadow: `inset 3px 0 0 ${color}${lugar.sangria > 0 ? ', 0 0 0 1px var(--color-panel)' : ''}`,
-      }}
-    >
+  const resaltaAlPasar = !soloLectura || enlace !== undefined;
+  const clasesDeEstilo = `absolute overflow-hidden rounded py-1 pr-1.5 pl-2.5 text-xs leading-snug ${
+    cancelada ? 'line-through opacity-50 hover:opacity-80' : resaltaAlPasar ? 'hover:brightness-125' : ''
+  } ${arrastrable ? 'cursor-grab touch-none active:cursor-grabbing' : !soloLectura && editable ? 'cursor-pointer' : ''} ${
+    enlace === undefined ? '' : 'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-acento'
+  } ${atenuada ? 'opacity-30' : ''} ${elegida ? 'ring-1 ring-white/50' : ''}`;
+  const estilo = {
+    top: (inicio - inicioDelRango) * PX_POR_MINUTO + 1,
+    height: alto,
+    left: `calc(${corrimiento}px + (100% - ${corrimiento}px) * ${lugar.carril / lugar.carriles} + 2px)`,
+    width: `calc((100% - ${corrimiento}px) / ${lugar.carriles} - 4px)`,
+    zIndex: lugar.sangria + 1,
+    backgroundColor: colorDeFondo(color),
+    color: colorDeTexto(color),
+    boxShadow: `inset 3px 0 0 ${color}${lugar.sangria > 0 ? ', 0 0 0 1px var(--color-panel)' : ''}`,
+  };
+  const contenido = (
+    <>
       {clase.tieneCambios && !cancelada && (
         <span title="Cambio solo de esta semana" className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-amber-400" />
       )}
@@ -206,6 +209,27 @@ function ClaseEnLaGrilla({
       )}
       {!ancha && alto >= 64 && <p className="truncate opacity-70">{profesor}</p>}
       {arrastrable && alEstirar && <div onPointerDown={alEstirar} className="absolute inset-x-0 bottom-0 h-2 cursor-ns-resize" />}
+    </>
+  );
+
+  if (enlace !== undefined) {
+    return (
+      <Link to={enlace} aria-label={nombreDeLaClase(clase)} data-clase={clase.id} className={clasesDeEstilo} style={estilo}>
+        {contenido}
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      {...(soloLectura ? {} : { role: 'button', tabIndex: 0 })}
+      aria-label={nombreDeLaClase(clase)}
+      data-clase={clase.id}
+      onPointerDown={soloLectura ? undefined : alApretar}
+      className={clasesDeEstilo}
+      style={estilo}
+    >
+      {contenido}
     </div>
   );
 }

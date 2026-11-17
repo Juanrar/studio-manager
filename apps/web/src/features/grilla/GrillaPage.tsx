@@ -410,6 +410,7 @@ export function GrillaPage() {
                 }
               : undefined
           }
+          enlaceDeClase={puedeEditar ? undefined : (clase) => `/clases/${clase.id}`}
         />
       )}
 

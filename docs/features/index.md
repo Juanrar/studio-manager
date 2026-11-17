@@ -48,6 +48,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 26 | [Grilla semanal](grilla-semanal.md) | lista | 25 |
 | 29 | [Navegación de la grilla](navegacion-de-la-grilla.md) | lista | 26 |
 | 35 | [Grilla para recepción](grilla-para-recepcion.md) | lista | 29 |
+| 36 | [Asistencia desde la grilla](asistencia-desde-la-grilla.md) | en curso | 35 |
 
 ## Asistente
 

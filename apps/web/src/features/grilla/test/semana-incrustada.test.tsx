@@ -13,6 +13,7 @@ describe('VistaDeSemana incrustada', () => {
     const enLaGrilla = screen.getByLabelText(/^Salsa, 19:00 a 20:30/);
     expect(within(martes).getByLabelText(/^Salsa, 19:00 a 20:30/)).toBe(enLaGrilla);
     expect(screen.queryAllByRole('button')).toEqual([]);
+    expect(screen.queryAllByRole('link')).toEqual([]);
     expect(screen.getByText('18:00')).toBeInTheDocument();
     expect(screen.getByText('22:00')).toBeInTheDocument();
     expect(screen.queryByText('08:00')).not.toBeInTheDocument();

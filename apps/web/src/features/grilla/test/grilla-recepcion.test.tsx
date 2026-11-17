@@ -15,8 +15,17 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+const SALSA_PASADA = unaClase({ id: 48, horarioId: 1, fecha: '2026-03-09', estilo: 'Salsa', nivel: null, horaInicio: '18:00', horaFin: '19:00' });
 const HIP_HOP = unaClase({ id: 50, horarioId: 2, fecha: '2026-03-10' });
 const BALLET = unaClase({ id: 52, horarioId: 4, fecha: '2026-03-12', estilo: 'Ballet', nivel: 'Inicial', horaInicio: '10:00', horaFin: '11:00' });
+
+function conLaPantallaDeLaClase(clase: Clase) {
+  servidor.use(
+    http.get(`/api/clases/${clase.id}`, () => HttpResponse.json(clase)),
+    http.get(`/api/clases/${clase.id}/asistencias`, () => HttpResponse.json({ items: [] })),
+    http.get('/api/profesores', () => HttpResponse.json({ items: [] })),
+  );
+}
 
 function grillaDeRecepcion(clases: Clase[]) {
   conSesion(RECEPCION);
@@ -61,10 +70,11 @@ describe('/grilla para recepción', () => {
     expect(screen.getByRole('link', { name: 'Grilla' })).toHaveAttribute('aria-current', 'page');
   });
 
-  it('apretar un hueco de un día futuro no abre "Nueva clase" y apretar una clase no abre su editor', async () => {
+  it('apretar un hueco de un día futuro no abre "Nueva clase" y apretar una clase lleva a su asistencia sin abrir su editor', async () => {
     grillaDeRecepcion([HIP_HOP, BALLET]);
-    const { usuario } = renderizarEn('/grilla');
-    const ballet = await screen.findByLabelText('Ballet Inicial, 10:00 a 11:00, Erik Zapata');
+    conLaPantallaDeLaClase(BALLET);
+    const { usuario, router } = renderizarEn('/grilla');
+    const ballet = await screen.findByRole('link', { name: 'Ballet Inicial, 10:00 a 11:00, Erik Zapata' });
     const sabado = screen.getByRole('group', { name: 'Sábado 14' });
     vi.spyOn(sabado.parentElement!, 'getBoundingClientRect').mockReturnValue({ left: 0, top: 0, width: 700, height: 945 } as DOMRect);
 
@@ -72,9 +82,34 @@ describe('/grilla para recepción', () => {
       { keys: '[MouseLeft>]', target: sabado, coords: { clientX: 550, clientY: 600 * 1.05 + 5 } },
       { keys: '[/MouseLeft]', target: sabado, coords: { clientX: 550, clientY: 600 * 1.05 + 5 } },
     ]);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await usuario.click(ballet);
 
+    await screen.findByRole('heading', { name: /Asistencia/ });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/clases/52');
+  });
+
+  it('cada clase de la semana, también la de un día pasado, es un enlace a su asistencia', async () => {
+    grillaDeRecepcion([SALSA_PASADA, HIP_HOP, BALLET]);
+    conLaPantallaDeLaClase(SALSA_PASADA);
+    const { usuario, router } = renderizarEn('/grilla');
+    await screen.findByLabelText('Hip-Hop Inicial, 19:00 a 20:30, Erik Zapata');
+
+    const enlacesDeClase = screen
+      .getAllByRole('group')
+      .flatMap((dia) => within(dia).queryAllByRole('link'))
+      .map((enlace) => [enlace.getAttribute('aria-label'), enlace.getAttribute('href')]);
+    expect(enlacesDeClase).toEqual([
+      ['Salsa, 18:00 a 19:00, Erik Zapata', '/clases/48'],
+      ['Hip-Hop Inicial, 19:00 a 20:30, Erik Zapata', '/clases/50'],
+      ['Ballet Inicial, 10:00 a 11:00, Erik Zapata', '/clases/52'],
+    ]);
+
+    await usuario.click(screen.getByRole('link', { name: 'Salsa, 18:00 a 19:00, Erik Zapata' }));
+
+    await screen.findByRole('heading', { name: /Asistencia/ });
+    expect(router.state.location.pathname).toBe('/clases/48');
   });
 
   it('recepción pasa de semana con las flechas y va a la vista Mes', async () => {
