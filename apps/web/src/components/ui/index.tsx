@@ -129,10 +129,25 @@ export function Aviso({ tipo = 'error', children }: { tipo?: 'error' | 'exito'; 
 
 type Columna = string | { texto: string; icono: NombreIcono };
 
-export function Tabla({ columnas, children }: { columnas: readonly Columna[]; children: ReactNode }) {
+export function Tabla({
+  columnas,
+  anchos,
+  children,
+}: {
+  columnas: readonly Columna[];
+  anchos?: readonly string[];
+  children: ReactNode;
+}) {
   return (
     <div className="overflow-x-auto rounded-md border border-borde">
-      <table className="w-full border-collapse text-left">
+      <table className={`w-full border-collapse text-left ${anchos === undefined ? '' : 'min-w-3xl table-fixed'}`}>
+        {anchos !== undefined && (
+          <colgroup>
+            {anchos.map((ancho, indice) => (
+              <col key={indice} style={{ width: ancho }} />
+            ))}
+          </colgroup>
+        )}
         <thead>
           <tr>
             {columnas.map((columna) => {

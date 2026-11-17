@@ -51,4 +51,40 @@ describe('/horarios', () => {
       }),
     );
   });
+
+  it('las tablas de cada día usan los mismos anchos de columna para que queden alineadas', async () => {
+    conSesion(ADMIN);
+    const delLunes: Horario = {
+      id: 1,
+      estilo: 'HIP HOP',
+      nivel: 'intermedio',
+      diaSemana: 1,
+      horaInicio: '17:00',
+      horaFin: '18:00',
+      profesor: { id: 1, nombre: 'Erik Nicolas', apellido: 'Zapata' },
+      activo: true,
+    };
+    const delMiercoles: Horario = {
+      id: 2,
+      estilo: 'Urbano',
+      nivel: 'Inicial',
+      diaSemana: 3,
+      horaInicio: '18:00',
+      horaFin: '19:30',
+      profesor: { id: 2, nombre: 'Juan Carlos', apellido: 'Lorenzo' },
+      activo: true,
+    };
+    servidor.use(http.get('/api/horarios', () => HttpResponse.json({ items: [delLunes, delMiercoles] })));
+    renderizarEn('/horarios');
+
+    await screen.findByText('Juan Carlos Lorenzo');
+    const tablas = screen.getAllByRole('table');
+    const anchosDe = (tabla: HTMLElement) =>
+      [...tabla.querySelectorAll('col')].map((columna) => columna.style.width);
+
+    expect(tablas).toHaveLength(2);
+    expect(tablas.map((tabla) => tabla.classList.contains('table-fixed'))).toEqual([true, true]);
+    expect(anchosDe(tablas[0]!)).toEqual(['14%', '16%', '14%', '22%', '14%', '20%']);
+    expect(anchosDe(tablas[1]!)).toEqual(['14%', '16%', '14%', '22%', '14%', '20%']);
+  });
 });

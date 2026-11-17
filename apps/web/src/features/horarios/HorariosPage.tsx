@@ -51,7 +51,10 @@ export function HorariosPage() {
       {[...porDia.entries()].map(([dia, delDia]) => (
         <div key={dia} className="mb-6">
           <h2 className="mb-2 text-base font-semibold">{nombreDelDia(dia)}</h2>
-          <Tabla columnas={['Horario', 'Estilo', 'Nivel', 'Profesor titular', 'Estado', '']}>
+          <Tabla
+            columnas={['Horario', 'Estilo', 'Nivel', 'Profesor titular', 'Estado', '']}
+            anchos={['14%', '16%', '14%', '22%', '14%', '20%']}
+          >
             {delDia.map((horario) => (
               <tr key={horario.id}>
                 <Celda>
