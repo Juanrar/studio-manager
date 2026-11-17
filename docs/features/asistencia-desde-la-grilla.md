@@ -1,6 +1,6 @@
 # Asistencia desde la grilla
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** grilla-para-recepcion  
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; en `/grilla`, recepción toca una clase y llega a `/clases/:id`, la pantalla de su asistencia.
 
@@ -44,4 +44,4 @@ Los tests de administración (`grilla-edicion.test.tsx`) siguen pasando sin camb
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm test` y `pnpm typecheck` pasan: shared 29, API 234, web 204.
