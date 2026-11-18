@@ -154,11 +154,11 @@ Los tests de `csv.test.ts` siguen sin cambios.
 - Modificar: `apps/web/src/features/liquidaciones/api.ts`, `LiquidacionesPage.tsx`.
 - Test: `apps/web/src/components/ui/test/graficos.test.tsx`, `apps/web/src/features/liquidaciones/test/variacion.test.ts`, `tablero.test.tsx`; mover los tests de cerrar y marcar pagada de `liquidaciones.test.tsx` a `tablero.test.tsx`.
 
-- [ ] **Paso 1:** escribir los tests de variación, gráficos y resumen.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(liquidaciones): tablero con el resumen del mes`.
+- [x] **Paso 1:** escribir los tests de variación, gráficos y resumen.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(liquidaciones): tablero con el resumen del mes`.
 
 ### Tarea 4: Pantalla de la ficha del profesor
 

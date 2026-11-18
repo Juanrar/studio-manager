@@ -14,6 +14,7 @@ import { Icono, type NombreIcono } from './Icono.tsx';
 export { Icono, type NombreIcono } from './Icono.tsx';
 export { Flotante, type Ancla } from './Flotante.tsx';
 export { SelectorDeHora } from './SelectorDeHora.tsx';
+export { BarraApilada, BarrasConLinea } from './Graficos.tsx';
 
 type VarianteBoton = 'primario' | 'secundario' | 'peligro';
 
