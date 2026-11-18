@@ -171,13 +171,18 @@ export async function tableroDelProfesor(
     repo.listarAsistenciasDelProfesor(db, profesorId, desde, hasta),
     repo.contarSuplenciasRecibidas(db, profesorId, desde, hasta, hoy),
     detalleDelPeriodo(profesorId, periodo),
-    Promise.all(periodosDeSueldo.map((p) => sueldoDelProfesor(profesorId, p, hoy))),
+    Promise.all(
+      periodosDeSueldo.map((p) => (p === periodo ? null : sueldoDelProfesor(profesorId, p, hoy))),
+    ),
   ]);
   const item = resumen.items.find((i) => i.profesor.id === profesorId);
+  const sueldoDelMes = item === undefined ? 0 : sueldoDe(item);
+  const clasesConAsistencia = new Set(asistenciasDelMes.map((a) => a.claseId));
   const canceladas = clasesDelMes.filter((c) => c.estado === 'cancelada');
-  const dictadas = clasesDelMes.filter((c) => c.estado !== 'cancelada' && c.fecha <= hoy);
-  const idsDictadas = new Set(dictadas.map((c) => c.id));
-  const asistencias = asistenciasDelMes.filter((a) => idsDictadas.has(a.claseId));
+  const dictadas = clasesDelMes.filter(
+    (c) => c.estado !== 'cancelada' && (c.fecha <= hoy || clasesConAsistencia.has(c.id)),
+  );
+  const asistencias = asistenciasDelMes;
 
   return {
     periodo,
@@ -196,7 +201,10 @@ export async function tableroDelProfesor(
     alumnosDistintos: new Set(asistencias.map((a) => a.alumnoId)).size,
     suplenciasDadas: dictadas.filter((c) => c.titularId !== null && c.titularId !== profesorId).length,
     suplenciasRecibidas: recibidas,
-    sueldoPorMes: periodosDeSueldo.map((p, i) => ({ periodo: p, monto: sueldos[i]! })),
+    sueldoPorMes: periodosDeSueldo.map((p, i) => ({
+      periodo: p,
+      monto: sueldos[i] ?? sueldoDelMes,
+    })),
     porHorario: ordenarFilasPorHorario(
       [...Map.groupBy(dictadas, (c) => c.horarioId).values()].map((deHorario) =>
         filaPorHorario(deHorario, asistencias),

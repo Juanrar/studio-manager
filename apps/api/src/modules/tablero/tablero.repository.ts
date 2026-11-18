@@ -1,4 +1,4 @@
-import { and, count, eq, gte, lt, lte, ne } from 'drizzle-orm';
+import { and, count, eq, exists, gte, lt, lte, ne, or } from 'drizzle-orm';
 import type { Ejecutor } from '../../db/client.ts';
 import { asistencia, clase, horario } from '../../db/schema.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
@@ -89,7 +89,10 @@ export async function contarSuplenciasRecibidas(
         ne(clase.estado, 'cancelada'),
         gte(clase.fecha, desde),
         lt(clase.fecha, hasta),
-        lte(clase.fecha, hoy),
+        or(
+          lte(clase.fecha, hoy),
+          exists(ej.select({ uno: asistencia.id }).from(asistencia).where(eq(asistencia.claseId, clase.id))),
+        ),
       ),
     );
   return fila?.total ?? 0;

@@ -54,12 +54,12 @@ Selector de mes arriba, como hoy. Por defecto, el mes anterior.
 | Indicador | Cálculo |
 |---|---|
 | Sueldo | Guardado si está cerrada; calculado si no. Si difieren, se muestran los dos (regla de hoy) |
-| Clases dictadas | Clases del mes con ese `profesor_id`, no canceladas y con fecha `<= hoy` |
+| Clases dictadas | Clases del mes con ese `profesor_id`, no canceladas y con fecha `<= hoy` o con al menos una asistencia (recepción puede registrar asistencia en una clase futura). Asistencias, alumnos distintos y las filas por horario cuentan todas las asistencias del mes, así que la suma de los montos por horario es el monto calculado |
 | Clases canceladas | Clases del mes con ese `profesor_id` y estado `cancelada` |
 | Asistentes por clase | Asistencias dividido clases dictadas, con un decimal. Las clases sin nadie cuentan |
 | Alumnos distintos | Alumnos distintos en sus clases del mes |
-| Suplencias dadas | Clases del mes que dio y cuyo horario tiene otro titular |
-| Suplencias recibidas | Clases del mes de horarios donde es titular y que dio otro profesor |
+| Suplencias dadas | Clases dictadas del mes (misma regla) cuyo horario tiene otro titular |
+| Suplencias recibidas | Clases dictadas del mes (misma regla) de horarios donde es titular y que dio otro profesor |
 
 **Sueldo de los últimos 6 meses:** barras, terminando en el mes elegido. Cada mes usa el guardado si está cerrado y el calculado si no.
 
@@ -75,7 +75,7 @@ Selector de mes arriba, como hoy. Por defecto, el mes anterior.
 - **La comparación es contra el mes anterior completo**, también cuando el mes elegido está en curso. La web muestra "mes en curso" al lado del título para que no se lea como una caída.
 - **Variación sin base:** si el mes anterior es 0, la web muestra "—" en lugar de un porcentaje.
 - **El titular de una suplencia es el titular actual del horario.** El horario no guarda la historia de su profesor. Si cambió de titular a mitad de mes, las suplencias de ese mes se cuentan contra el nuevo.
-- **Gráficos en SVG escrito a mano**, en `components/ui/Graficos.tsx`. No se instala una biblioteca de gráficos, por el mismo motivo que los íconos: menos dependencias y tests rápidos. Dos componentes: `BarrasConLinea` y `BarraApilada`. Los colores salen de las variables de `index.css`; los estados de la barra de alumnos usan verde, ámbar y rojo.
+- **Gráficos en SVG escrito a mano**, en `components/ui/Graficos.tsx`. No se instala una biblioteca de gráficos, por el mismo motivo que los íconos: menos dependencias y tests rápidos. Tres componentes: `BarrasConLinea`, `Barras` y `BarraApilada`. Los colores salen de las variables de `index.css`; los estados de la barra de alumnos usan verde, ámbar y rojo.
 - **Módulo `tablero` en la API**, de solo lectura. Su repository lee `asistencia`, `clase` y `horario`, como ya hace `liquidaciones`. Lo de pagos sale de funciones nuevas en `pagos.service`, los sueldos de `liquidaciones.service` y los ids de alumnos activos de `alumnos.service`.
 
 ## API
@@ -94,7 +94,7 @@ Formas, en `packages/shared/src/tablero.ts`:
 
 `porDia` trae todos los días del mes, con 0 en los días sin actividad. `sueldoPorMes` trae 6 meses, del más viejo al elegido.
 
-`GET /api/liquidaciones/detalle` queda: lo usa el CSV.
+`GET /api/liquidaciones/detalle` sigue en la API, pero la web ya no lo llama: el CSV se arma con `clases` de la ficha.
 
 ## Tests
 
@@ -188,4 +188,4 @@ Propuesto en la misma conversación y dejado afuera de esta feature para que la 
 
 - [ ] `pnpm test` y `pnpm typecheck` pasan.
 - [ ] `pnpm e2e` pasa: recorre la liquidación y tiene que seguir encontrando cerrar y marcar pagada.
-- [ ] Mirar `/liquidaciones` y una ficha en Chromium con la base de desarrollo, en tema claro y oscuro.
+- [ ] Mirar `/liquidaciones` y una ficha en Chromium con la base de desarrollo, en el tema existente (`index.css` solo define el oscuro).

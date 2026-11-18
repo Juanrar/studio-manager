@@ -44,7 +44,6 @@ const TABLERO_DE_MARZO: TableroDelMes = {
     { medio: 'transferencia', cantidad: 1, total: 5200 },
   ],
   profesores: [
-    { profesor: ERIK, asistencias: 3, asistenciasMesAnterior: 0, montoCalculado: 2050, liquidacion: null },
     {
       profesor: IARU,
       asistencias: 5,
@@ -52,6 +51,7 @@ const TABLERO_DE_MARZO: TableroDelMes = {
       montoCalculado: 4000,
       liquidacion: { id: 70, profesorId: 2, periodo: '2026-03', monto: 3600, pagadoEn: null },
     },
+    { profesor: ERIK, asistencias: 3, asistenciasMesAnterior: 0, montoCalculado: 2050, liquidacion: null },
     {
       profesor: MALENA,
       asistencias: 2,
@@ -113,7 +113,7 @@ describe('/liquidaciones', () => {
     expect(celdasDe(within(ingresos).getByRole('row', { name: /Transferencia/ }))).toEqual(['Transferencia', '1', '$5.200']);
   });
 
-  it('ordena el ranking por asistencias y muestra variación, sueldo y estado de cada profesor', async () => {
+  it('muestra el ranking en el orden que manda la API con variación, sueldo y estado de cada profesor', async () => {
     marzo();
 
     const ranking = await screen.findByRole('region', { name: 'Ranking de profesores' });
@@ -135,7 +135,7 @@ describe('/liquidaciones', () => {
   it('muestra la barra de alumnos por estado agrupando los vencidos y sin clases', async () => {
     marzo();
 
-    const estado = await screen.findByRole('region', { name: 'Estado de los alumnos' });
+    const estado = await screen.findByRole('region', { name: 'Estado de los alumnos hoy' });
     expect(within(estado).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
       'Al día: 3',
       'Por vencer: 1',

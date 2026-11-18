@@ -85,7 +85,7 @@ function Resumen({ tablero, periodo }: { tablero: TableroDelMes; periodo: string
         <Ingresos tablero={tablero} />
       </div>
       <Ranking profesores={tablero.profesores} periodo={periodo} />
-      <Panel id="titulo-alumnos" titulo="Estado de los alumnos">
+      <Panel id="titulo-alumnos" titulo="Estado de los alumnos hoy">
         <BarraApilada
           etiqueta="Alumnos activos por estado del pack"
           segmentos={[
@@ -198,14 +198,13 @@ function Ingresos({ tablero }: { tablero: TableroDelMes }) {
 function Ranking({ profesores, periodo }: { profesores: FilaDelRanking[]; periodo: string }) {
   const cerrar = useCerrarLiquidacion(periodo);
   const pagar = useMarcarPagada(periodo);
-  const ordenados = [...profesores].sort((a, b) => b.asistencias - a.asistencias);
 
   return (
     <Panel id="titulo-ranking" titulo="Ranking de profesores">
       {cerrar.isError && <Aviso>{mensajeDeError(cerrar.error)}</Aviso>}
       {pagar.isError && <Aviso>{mensajeDeError(pagar.error)}</Aviso>}
       <Tabla columnas={['Profesor', 'Asistencias', 'Contra el mes anterior', 'Sueldo', 'Estado', '']}>
-        {ordenados.map((fila) => {
+        {profesores.map((fila) => {
           const { liquidacion } = fila;
           return (
             <tr key={fila.profesor.id}>

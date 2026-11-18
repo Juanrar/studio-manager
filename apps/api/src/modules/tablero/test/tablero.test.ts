@@ -155,6 +155,16 @@ describe('GET /api/tablero', () => {
     });
   });
 
+  it('cuenta como perdidas solo las clases de packs que ya vencieron dentro del mes pedido', async () => {
+    const carlos = await crearAlumnoDeTest({ nombre: 'Carlos', apellido: 'Luna' });
+    await pagar(carlos, packX4, '2026-03-02');
+
+    const respuesta = await get('/api/tablero?periodo=2026-04');
+
+    expect(respuesta.json().actual.clasesPerdidas).toBe(4);
+    expect(respuesta.json().actual.valorPerdido).toBe(5200);
+  });
+
   it('trae los indicadores del mes anterior y cuenta como nuevo a quien pagó por primera vez en ese mes', async () => {
     const respuesta = await get('/api/tablero?periodo=2026-03');
 
@@ -275,7 +285,7 @@ async function armarAbrilDeErik() {
   const funk = await crearHorarioDeTest(erik.id, { estilo: 'Funk', diaSemana: 5 });
   const salsa = await crearHorarioDeTest(erik.id, { estilo: 'Salsa', diaSemana: 4 });
   const clasePrincipal = await crearClaseDeTest(contemporaneo.id, '2026-04-01');
-  await crearClaseDeTest(hipHop.id, '2026-04-07');
+  const claseDeHipHop = await crearClaseDeTest(hipHop.id, '2026-04-07');
   const claseCancelada = await crearClaseDeTest(funk.id, '2026-04-03');
   await db.update(clase).set({ estado: 'cancelada' }).where(eq(clase.id, claseCancelada.id));
   const claseDeSalsa = await crearClaseDeTest(salsa.id, '2026-04-02');
@@ -300,7 +310,7 @@ async function armarAbrilDeErik() {
   await registrarAsistencia(clasePrincipal.id, { alumnoId: lucia.id }, recepcion.id, AHORA, hoy);
   await registrarAsistencia(suplenciaDeJazz.id, { alumnoId: martina.id }, recepcion.id, AHORA, hoy);
   await registrarAsistencia(unica!.id, { alumnoId: lucia.id }, recepcion.id, AHORA, hoy);
-  return { contemporaneo, suplenciaDeJazz, unica: unica!, clasePrincipal };
+  return { contemporaneo, suplenciaDeJazz, unica: unica!, clasePrincipal, claseDeHipHop };
 }
 
 describe('GET /api/tablero/profesores/:id', () => {
@@ -358,6 +368,58 @@ describe('GET /api/tablero/profesores/:id', () => {
         { claseId: unica.id, fecha: '2026-04-04', estilo: 'Taller', asistentes: 1, monto: 1040 },
       ],
     });
+  });
+
+  it('cuenta como dictada una clase futura con asistencias y suma todas las asistencias del mes en la ficha', async () => {
+    const { contemporaneo, claseDeHipHop } = await armarAbrilDeErik();
+    const futura = await crearClaseDeTest(contemporaneo.id, '2026-04-08');
+    const suplenciaFutura = await crearClaseDeTest(jazzDeIaru, '2026-04-09');
+    await db.update(clase).set({ profesorId: erik.id }).where(eq(clase.id, suplenciaFutura.id));
+    await db.update(clase).set({ profesorId: iaru.id }).where(eq(clase.id, claseDeHipHop.id));
+    const hoy = '2026-04-05';
+    await registrarAsistencia(claseDeHipHop.id, { alumnoId: martina.id }, recepcion.id, AHORA, hoy);
+    await registrarAsistencia(futura.id, { alumnoId: lucia.id }, recepcion.id, AHORA, hoy);
+    await registrarAsistencia(suplenciaFutura.id, { alumnoId: lucia.id }, recepcion.id, AHORA, hoy);
+
+    const respuesta = await get(`/api/tablero/profesores/${erik.id}?periodo=2026-04`);
+
+    const cuerpo = respuesta.json();
+    expect(cuerpo.montoCalculado).toBe(6240);
+    expect(cuerpo.clasesDictadas).toBe(5);
+    expect(cuerpo.clasesCanceladas).toBe(1);
+    expect(cuerpo.asistencias).toBe(6);
+    expect(cuerpo.alumnosDistintos).toBe(2);
+    expect(cuerpo.suplenciasDadas).toBe(2);
+    expect(cuerpo.suplenciasRecibidas).toBe(2);
+    expect(cuerpo.porHorario).toEqual([
+      {
+        horarioId: contemporaneo.id,
+        estilo: 'Contemporáneo',
+        diaSemana: 3,
+        horaInicio: '19:00',
+        clases: 2,
+        asistencias: 3,
+        monto: 3120,
+      },
+      {
+        horarioId: jazzDeIaru,
+        estilo: 'Jazz',
+        diaSemana: 4,
+        horaInicio: '19:00',
+        clases: 2,
+        asistencias: 2,
+        monto: 2080,
+      },
+      {
+        horarioId: null,
+        estilo: 'Clases únicas',
+        diaSemana: null,
+        horaInicio: null,
+        clases: 1,
+        asistencias: 1,
+        monto: 1040,
+      },
+    ]);
   });
 
   it('trae 6 meses de sueldo, del más viejo al elegido, con el guardado en el cerrado y el calculado en los abiertos', async () => {
