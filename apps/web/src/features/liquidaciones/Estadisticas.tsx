@@ -8,8 +8,7 @@ import { descargarCsv, detalleACsv, nombreDelCsv } from './csv.ts';
 import type { PropsDeSolapa } from './LiquidacionesPage.tsx';
 import { ListaDeProfesores } from './ListaDeProfesores.tsx';
 import { Panel } from './Panel.tsx';
-
-const SIN_DATO = '—';
+import { calculadoHoy, SIN_DATO, sueldoDe } from './sueldo.ts';
 
 const formateadorDecimal = new Intl.NumberFormat('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
@@ -38,7 +37,7 @@ export function Estadisticas({ tablero, periodo, profesorId, alElegir }: PropsDe
       sinElegido="Elegí un profesor de la lista para ver sus estadísticas del mes."
     >
       {elegida === undefined ? (
-        <p className="text-apagado">Ese profesor no tiene liquidación en este mes.</p>
+        <p className="text-apagado">Ese profesor no tiene datos en este mes.</p>
       ) : (
         <EstadisticasDelProfesor key={elegida.profesor.id} fila={elegida} periodo={periodo} />
       )}
@@ -77,16 +76,13 @@ function DatosDeCobro({ ficha }: { ficha: TableroDelProfesor }) {
 }
 
 function Contenido({ ficha }: { ficha: TableroDelProfesor }) {
-  const { liquidacion } = ficha;
-  const hayDiferencia = liquidacion !== null && liquidacion.monto !== ficha.montoCalculado;
-
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Indicador
           nombre="Sueldo"
-          valor={formatearPesos(liquidacion?.monto ?? ficha.montoCalculado)}
-          detalle={hayDiferencia ? `Calculado hoy: ${formatearPesos(ficha.montoCalculado)}` : undefined}
+          valor={formatearPesos(sueldoDe(ficha))}
+          detalle={calculadoHoy(ficha) ?? undefined}
         />
         <Indicador nombre="Clases dictadas" valor={String(ficha.clasesDictadas)} />
         <Indicador nombre="Clases canceladas" valor={String(ficha.clasesCanceladas)} />

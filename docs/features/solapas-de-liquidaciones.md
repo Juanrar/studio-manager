@@ -48,6 +48,7 @@
 - Cada profesor es un botón con "Apellido, Nombre", su sueldo debajo y un dato a la derecha que pone la solapa. El elegido lleva `aria-current="true"` y fondo `bg-resalte`.
 - Orden por apellido y nombre, con `localeCompare(..., 'es')`.
 - Sin coincidencias: "Ningún profesor con ese nombre."
+- Si el mes no tiene profesores: "No hay profesores en este mes."
 - Sin profesor elegido, el panel derecho muestra el texto de la solapa.
 
 **Liquidar:**
@@ -66,6 +67,7 @@
 **Estadísticas:**
 - En la lista, el dato a la derecha es "{n} asistencia(s)".
 - Texto sin elegido: "Elegí un profesor de la lista para ver sus estadísticas del mes."
+- Si el profesor de la dirección no está en la lista del mes: "Ese profesor no tiene datos en este mes."
 - El panel muestra:
   - nombre, "Porcentaje: {p} · Alias o CBU: {alias}" y "Descargar CSV";
   - los indicadores, el sueldo de 6 meses y la tabla por horario que hoy tiene la ficha;

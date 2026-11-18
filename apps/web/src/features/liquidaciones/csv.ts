@@ -36,7 +36,7 @@ export function nombreDelCsv(ficha: TableroDelProfesor): string {
 }
 
 export function descargarCsv(nombreArchivo: string, contenido: string): void {
-  const archivo = new Blob(['﻿', contenido], { type: 'text/csv;charset=utf-8' });
+  const archivo = new Blob(['\uFEFF', contenido], { type: 'text/csv;charset=utf-8' });
   const enlace = document.createElement('a');
   enlace.href = URL.createObjectURL(archivo);
   enlace.download = nombreArchivo;

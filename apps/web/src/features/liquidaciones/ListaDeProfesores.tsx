@@ -2,21 +2,18 @@ import { useState, type ReactNode } from 'react';
 import type { FilaDelRanking } from '@studio/shared';
 import { Entrada, Icono } from '../../components/ui/index.tsx';
 import { formatearPesos } from '../../lib/formato.ts';
+import { sueldoDe } from './sueldo.ts';
 
 function sinTildes(texto: string): string {
   return texto.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 }
 
-export function coincideConBusqueda(fila: FilaDelRanking, busqueda: string): boolean {
+function coincideConBusqueda(fila: FilaDelRanking, busqueda: string): boolean {
   const nombre = sinTildes(`${fila.profesor.nombre} ${fila.profesor.apellido}`);
   return sinTildes(busqueda)
     .split(/\s+/)
     .filter((palabra) => palabra !== '')
     .every((palabra) => nombre.includes(palabra));
-}
-
-export function sueldoDe(fila: FilaDelRanking): number {
-  return fila.liquidacion?.monto ?? fila.montoCalculado;
 }
 
 function apellidoYNombre(fila: FilaDelRanking): string {
@@ -65,7 +62,11 @@ export function ListaDeProfesores({
             }}
           />
         </div>
-        {filtrados.length === 0 && <p className="px-3 py-2 text-apagado">Ningún profesor con ese nombre.</p>}
+        {filtrados.length === 0 && (
+          <p className="px-3 py-2 text-apagado">
+            {profesores.length === 0 ? 'No hay profesores en este mes.' : 'Ningún profesor con ese nombre.'}
+          </p>
+        )}
         <ul aria-label="Profesores" className="flex flex-col overflow-hidden rounded-md border border-borde empty:hidden">
           {filtrados.map((fila) => {
             const activo = fila.profesor.id === elegido;

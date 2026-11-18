@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 import type { TableroDelMes, TableroDelProfesor } from '@studio/shared';
@@ -109,10 +109,10 @@ const FICHAS: Record<number, TableroDelProfesor> = {
   }),
 };
 
-function abrirLiquidar(profesor?: number) {
+function abrirLiquidar(profesor?: number, tablero: TableroDelMes = TABLERO_DE_MARZO) {
   conSesion(ADMIN);
   servidor.use(
-    http.get('/api/tablero', () => HttpResponse.json(TABLERO_DE_MARZO)),
+    http.get('/api/tablero', () => HttpResponse.json(tablero)),
     http.get('/api/tablero/profesores/:id', ({ params }) => HttpResponse.json(FICHAS[Number(params['id'])])),
   );
   const profesorEnLaDireccion = profesor === undefined ? '' : `&profesor=${profesor}`;
@@ -264,6 +264,30 @@ describe('solapa Liquidar', () => {
     expect(await (await panelCargado()).findByRole('alert')).toHaveTextContent('No se puede cerrar un mes que no terminó');
   });
 
+  it('el error de cerrar de un mes no pasa al panel del mismo profesor en otro mes ya cargado', async () => {
+    const { usuario } = abrirLiquidar(1);
+    servidor.use(
+      http.post('/api/liquidaciones', () =>
+        HttpResponse.json({ error: 'No se puede cerrar un mes que no terminó' }, { status: 400 }),
+      ),
+    );
+    await (await panelCargado()).findByText('03/03');
+    fireEvent.change(screen.getByLabelText('Mes'), { target: { value: '2026-02' } });
+    await (await panelCargado()).findByText('03/03');
+    fireEvent.change(screen.getByLabelText('Mes'), { target: { value: '2026-03' } });
+
+    await usuario.click(await (await panelCargado()).findByRole('button', { name: 'Cerrar liquidación' }));
+    await usuario.click(
+      within(screen.getByRole('dialog', { name: 'Cerrar liquidación' })).getByRole('button', { name: 'Cerrar liquidación' }),
+    );
+    expect(await (await panelCargado()).findByRole('alert')).toHaveTextContent('No se puede cerrar un mes que no terminó');
+
+    fireEvent.change(screen.getByLabelText('Mes'), { target: { value: '2026-02' } });
+
+    expect(await (await panelCargado()).findByText('03/03')).toBeInTheDocument();
+    expect(panel().queryByRole('alert')).not.toBeInTheDocument();
+  });
+
   it('una cerrada muestra "Marcar como pagada", llama a pagar y avisa el calculado de hoy', async () => {
     let pagada: string | null = null;
     const { usuario } = abrirLiquidar(2);
@@ -291,6 +315,15 @@ describe('solapa Liquidar', () => {
     expect(await (await panelCargado()).findByText('No dio clases con asistentes este mes.')).toBeInTheDocument();
     expect(pasos()).toEqual(['Abierta: hecho', 'Cerrada: hecho', 'Pagada: hecho']);
     expect(panel().getAllByRole('button').map((boton) => boton.textContent)).toEqual(['Descargar CSV']);
+    expect(dato('Sueldo')).toBe('Sueldo$1.300');
+    expect(panel().queryByText(/Calculado hoy/)).not.toBeInTheDocument();
+  });
+
+  it('un mes sin profesores lo dice en vez de hablar de una búsqueda', async () => {
+    abrirLiquidar(undefined, { ...TABLERO_DE_MARZO, profesores: [] });
+
+    expect(await screen.findByText('No hay profesores en este mes.')).toBeInTheDocument();
+    expect(screen.queryByText('Ningún profesor con ese nombre.')).not.toBeInTheDocument();
   });
 
   it('un profesor de la dirección que no está en el mes muestra el aviso', async () => {

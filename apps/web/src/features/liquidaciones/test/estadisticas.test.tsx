@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TableroDelMes, TableroDelProfesor } from '@studio/shared';
 import { ADMIN, conSesion, renderizarEn } from '../../../../test/render.tsx';
 import { servidor } from '../../../../test/servidor.ts';
@@ -112,6 +112,10 @@ function panel() {
 function indicador(nombre: string) {
   return within(screen.getByRole('group', { name: nombre }));
 }
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe('solapa Estadísticas', () => {
   it('lista los profesores con sus asistencias y muestra el texto sin elegido', async () => {
@@ -246,6 +250,12 @@ describe('solapa Estadísticas', () => {
     expect(indicador('Sueldo').getByText('Calculado hoy: $4.000')).toBeInTheDocument();
   });
 
+  it('un profesor de la dirección que no está en el mes muestra el aviso', async () => {
+    abrirEstadisticas(FICHA_DE_IARU, '/liquidaciones?periodo=2026-03&solapa=estadisticas&profesor=9');
+
+    expect(await screen.findByText('Ese profesor no tiene datos en este mes.')).toBeInTheDocument();
+  });
+
   it('no tiene botones de cerrar ni de pagar', async () => {
     abrirEstadisticas({
       ...FICHA_DE_IARU,
@@ -304,5 +314,14 @@ describe('/liquidaciones/:profesorId', () => {
     expect(await screen.findByRole('heading', { name: 'Iaru Speroni' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Estadísticas' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('heading', { name: 'Liquidaciones de marzo de 2026' })).toBeInTheDocument();
+  });
+
+  it('sin mes en la dirección redirige al mes anterior al de hoy', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-04-15T15:00:00Z'));
+    const { router } = abrirEstadisticas(FICHA_DE_IARU, '/liquidaciones/2');
+
+    expect(await screen.findByRole('heading', { name: 'Liquidaciones de marzo de 2026' })).toBeInTheDocument();
+    expect(router.state.location.search).toBe('?periodo=2026-03&solapa=estadisticas&profesor=2');
   });
 });

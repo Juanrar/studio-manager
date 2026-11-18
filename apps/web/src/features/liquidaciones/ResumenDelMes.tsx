@@ -3,6 +3,7 @@ import { BarrasConLinea, Celda, Tabla } from '../../components/ui/index.tsx';
 import { NOMBRES_MEDIO_DE_PAGO, formatearDiaYMes, formatearPesos } from '../../lib/formato.ts';
 import type { PropsDeSolapa } from './LiquidacionesPage.tsx';
 import { Panel } from './Panel.tsx';
+import { calculadoHoy, sueldoDe } from './sueldo.ts';
 import { variacion } from './variacion.ts';
 
 export function ResumenDelMes({ tablero }: PropsDeSolapa) {
@@ -131,7 +132,7 @@ function Ranking({ profesores }: { profesores: FilaDelRanking[] }) {
     <Panel id="titulo-ranking" titulo="Ranking de profesores">
       <Tabla columnas={['Profesor', 'Asistencias', 'Contra el mes anterior', 'Sueldo']}>
         {profesores.map((fila) => {
-          const { liquidacion } = fila;
+          const textoCalculadoHoy = calculadoHoy(fila);
           return (
             <tr key={fila.profesor.id}>
               <Celda>
@@ -140,10 +141,8 @@ function Ranking({ profesores }: { profesores: FilaDelRanking[] }) {
               <Celda>{fila.asistencias}</Celda>
               <Celda>{variacion(fila.asistencias, fila.asistenciasMesAnterior)}</Celda>
               <Celda>
-                {formatearPesos(liquidacion?.monto ?? fila.montoCalculado)}
-                {liquidacion !== null && liquidacion.monto !== fila.montoCalculado && (
-                  <span className="block text-xs text-amber-300">Calculado hoy: {formatearPesos(fila.montoCalculado)}</span>
-                )}
+                {formatearPesos(sueldoDe(fila))}
+                {textoCalculadoHoy !== null && <span className="block text-xs text-amber-300">{textoCalculadoHoy}</span>}
               </Celda>
             </tr>
           );

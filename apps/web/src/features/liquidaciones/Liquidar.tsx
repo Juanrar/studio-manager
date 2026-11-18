@@ -6,13 +6,12 @@ import { formatearFecha, formatearPesos, formatearPorcentaje } from '../../lib/f
 import { useCerrarLiquidacion, useMarcarPagada, useTableroDelProfesor } from './api.ts';
 import { cantidadDeAlumnos, descargarCsv, detalleACsv, nombreDelCsv } from './csv.ts';
 import type { PropsDeSolapa } from './LiquidacionesPage.tsx';
-import { ListaDeProfesores, sueldoDe } from './ListaDeProfesores.tsx';
+import { ListaDeProfesores } from './ListaDeProfesores.tsx';
+import { calculadoHoy, SIN_DATO, sueldoDe } from './sueldo.ts';
 
 type EstadoDeLiquidacion = 'abierta' | 'cerrada' | 'pagada';
 
-const SIN_DATO = '—';
-
-export function estadoDeLiquidacion(liquidacion: Liquidacion | null): EstadoDeLiquidacion {
+function estadoDeLiquidacion(liquidacion: Liquidacion | null): EstadoDeLiquidacion {
   if (liquidacion === null) return 'abierta';
   return liquidacion.pagadoEn === null ? 'cerrada' : 'pagada';
 }
@@ -50,7 +49,7 @@ export function Liquidar({ tablero, periodo, profesorId, alElegir }: PropsDeSola
         {elegida === undefined ? (
           <p className="text-apagado">Ese profesor no tiene liquidación en este mes.</p>
         ) : (
-          <LiquidacionDelProfesor key={elegida.profesor.id} fila={elegida} periodo={periodo} />
+          <LiquidacionDelProfesor key={`${periodo}-${elegida.profesor.id}`} fila={elegida} periodo={periodo} />
         )}
       </ListaDeProfesores>
     </div>
@@ -66,6 +65,7 @@ function LiquidacionDelProfesor({ fila, periodo }: { fila: FilaDelRanking; perio
   const estado = estadoDeLiquidacion(liquidacion);
   const nombre = `${fila.profesor.nombre} ${fila.profesor.apellido}`;
   const sueldo = sueldoDe(fila);
+  const textoCalculadoHoy = calculadoHoy(fila);
   const porcentajeBp = ficha.data?.profesor.porcentajeBp ?? null;
 
   function confirmarCierre() {
@@ -102,9 +102,7 @@ function LiquidacionDelProfesor({ fila, periodo }: { fila: FilaDelRanking; perio
       {pagar.isError && <Aviso>{mensajeDeError(pagar.error)}</Aviso>}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Dato nombre="Sueldo" valor={formatearPesos(sueldo)} grande>
-          {liquidacion !== null && liquidacion.monto !== fila.montoCalculado && (
-            <p className="text-xs text-amber-300">{`Calculado hoy: ${formatearPesos(fila.montoCalculado)}`}</p>
-          )}
+          {textoCalculadoHoy !== null && <p className="text-xs text-amber-300">{textoCalculadoHoy}</p>}
         </Dato>
         <Dato nombre="Clases dictadas" valor={ficha.data === undefined ? SIN_DATO : String(ficha.data.clasesDictadas)} />
         <Dato nombre="Porcentaje" valor={porcentajeBp === null ? SIN_DATO : formatearPorcentaje(porcentajeBp)} />
