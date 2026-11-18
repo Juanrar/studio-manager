@@ -2,7 +2,7 @@
 
 > **Para agentes:** usá superpowers:subagent-driven-development, con un subagente por tarea y una revisión después de cada una (pedido del estudio, 2026-11-11). Los pasos usan checkbox (`- [ ]`). Leé primero [CLAUDE.md](../../CLAUDE.md), [el índice](index.md) y `docs/entorno/web.md` y `docs/entorno/tests-api.md`.
 
-**Estado:** pendiente  
+**Estado:** lista  
 **Depende de:** tablero-de-liquidaciones  
 **Listo cuando:** `pnpm test`, `pnpm typecheck` y `pnpm e2e` pasan. Un admin entra a `/liquidaciones` y ve tres solapas. Resumen muestra el mes sin acciones. En Liquidar busca un profesor, lo cierra y lo marca pagado. En Estadísticas busca un profesor, ve sus números y abre los alumnos de cada clase con su pack. El CSV trae cada clase con sus alumnos debajo.
 
@@ -231,7 +231,7 @@ Casos que la tabla cubre por pedido de esta sección, por si un revisor los busc
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
-- [ ] `pnpm e2e` pasa.
-- [ ] Mirar las tres solapas en Chromium con datos simulados (`docs/entorno/e2e.md`): pasos centrados, "Detalle" abierto en Estadísticas y la pantalla angosta con la lista arriba.
-- [ ] Bitácora del índice y nota en `docs/entorno/web.md` si apareció alguna trampa nueva.
+- [x] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm e2e` pasa.
+- [x] Mirar las tres solapas en Chromium con datos simulados (`docs/entorno/e2e.md`): pasos centrados, "Detalle" abierto en Estadísticas y la pantalla angosta con la lista arriba.
+- [x] Bitácora del índice y nota en `docs/entorno/e2e.md` si apareció alguna trampa nueva.

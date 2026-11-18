@@ -17,6 +17,8 @@ Un script de capturas que vive fuera del repo carga Playwright con `createRequir
 
 Un script de Playwright fuera del repo puede simular la API con `page.route('**/api/**', ...)`, respondiendo `/api/auth/yo` con un admin. Sirve para capturas de una pantalla contra `pnpm dev:web`.
 
+`fullPage: true` no muestra lo que queda abajo: el contenido de `Pagina` scrollea dentro de su contenedor, no la página. Para ver el final, hacé scroll de los `.overflow-auto` con `page.evaluate` antes de la captura.
+
 Si el puerto 5173 está ocupado, `pnpm dev:web` arranca en 5174 y lo dice en su salida. Un `curl` a `localhost:5173` responde igual, porque contesta el otro proceso: las capturas van al puerto que imprimió Vite.
 
 ## Qué se verifica acá y no en jsdom
