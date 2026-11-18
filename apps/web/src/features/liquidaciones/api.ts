@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { DetalleDeClase, Liquidacion, TableroDelMes } from '@studio/shared';
+import type { Liquidacion, TableroDelMes, TableroDelProfesor } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
 export function useTablero(periodo: string) {
@@ -9,11 +9,10 @@ export function useTablero(periodo: string) {
   });
 }
 
-export function useDetalleDeSueldo(profesorId: number, periodo: string) {
+export function useTableroDelProfesor(profesorId: number, periodo: string) {
   return useQuery({
-    queryKey: ['liquidaciones', periodo, 'detalle', profesorId],
-    queryFn: async () =>
-      (await api.get<{ items: DetalleDeClase[] }>(conQuery('/liquidaciones/detalle', { profesorId, periodo }))).items,
+    queryKey: ['tablero', periodo, 'profesor', profesorId],
+    queryFn: () => api.get<TableroDelProfesor>(conQuery(`/tablero/profesores/${profesorId}`, { periodo })),
   });
 }
 

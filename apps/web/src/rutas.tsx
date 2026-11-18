@@ -8,6 +8,7 @@ import { LoginPage } from './features/auth/LoginPage.tsx';
 import { RequiereSesion, SoloAdmin } from './features/auth/RequiereSesion.tsx';
 import { GrillaPage } from './features/grilla/GrillaPage.tsx';
 import { HorariosPage } from './features/horarios/HorariosPage.tsx';
+import { FichaLiquidacionPage } from './features/liquidaciones/FichaLiquidacionPage.tsx';
 import { LiquidacionesPage } from './features/liquidaciones/LiquidacionesPage.tsx';
 import { PacksPage } from './features/packs/PacksPage.tsx';
 import { FichaProfesorPage } from './features/profesores/FichaProfesorPage.tsx';
@@ -35,6 +36,7 @@ export const rutas: RouteObject[] = [
           { path: 'horarios', element: <HorariosPage /> },
           { path: 'usuarios', element: <UsuariosPage /> },
           { path: 'liquidaciones', element: <LiquidacionesPage /> },
+          { path: 'liquidaciones/:profesorId', element: <FichaLiquidacionPage /> },
         ],
       },
     ],

@@ -167,11 +167,11 @@ Los tests de `csv.test.ts` siguen sin cambios.
 - Modificar: `apps/web/src/rutas.tsx` (`liquidaciones/:profesorId` dentro de `SoloAdmin`), `api.ts`; quitar el diálogo de detalle de `LiquidacionesPage.tsx`.
 - Test: `apps/web/src/features/liquidaciones/test/ficha-liquidacion.test.tsx`
 
-- [ ] **Paso 1:** escribir el test de la ficha.
-- [ ] **Paso 2:** correrlo y verificar que falla.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr el test y verificar que pasa.
-- [ ] **Paso 5:** commit `feat(liquidaciones): ficha del profesor en el mes`.
+- [x] **Paso 1:** escribir el test de la ficha.
+- [x] **Paso 2:** correrlo y verificar que falla.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr el test y verificar que pasa.
+- [x] **Paso 5:** commit `feat(liquidaciones): ficha del profesor en el mes`.
 
 ## Queda para después
 

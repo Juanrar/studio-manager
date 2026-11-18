@@ -1,4 +1,3 @@
-import { useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import {
   hoyEnEstudio,
@@ -6,7 +5,6 @@ import {
   sumarMeses,
   type FilaDelRanking,
   type Indicadores,
-  type ResumenProfesor,
   type TableroDelMes,
 } from '@studio/shared';
 import {
@@ -17,7 +15,6 @@ import {
   Cargando,
   Celda,
   CeldaDeAcciones,
-  Dialogo,
   Entrada,
   Insignia,
   Pagina,
@@ -28,12 +25,11 @@ import {
   NOMBRES_MEDIO_DE_PAGO,
   formatearDiaYMes,
   formatearInstante,
-  formatearFecha,
   formatearPeriodo,
   formatearPesos,
 } from '../../lib/formato.ts';
-import { useCerrarLiquidacion, useDetalleDeSueldo, useMarcarPagada, useTablero } from './api.ts';
-import { descargarCsv, detalleACsv } from './csv.ts';
+import { useCerrarLiquidacion, useMarcarPagada, useTablero } from './api.ts';
+import { Panel } from './Panel.tsx';
 import { variacion } from './variacion.ts';
 
 export function LiquidacionesPage() {
@@ -101,17 +97,6 @@ function Resumen({ tablero, periodo }: { tablero: TableroDelMes; periodo: string
         />
       </Panel>
     </div>
-  );
-}
-
-function Panel({ id, titulo, children }: { id: string; titulo: string; children: ReactNode }) {
-  return (
-    <section aria-labelledby={id} className="rounded-md border border-borde p-4">
-      <h2 id={id} className="mb-3 text-base font-semibold">
-        {titulo}
-      </h2>
-      {children}
-    </section>
   );
 }
 
@@ -213,7 +198,6 @@ function Ingresos({ tablero }: { tablero: TableroDelMes }) {
 function Ranking({ profesores, periodo }: { profesores: FilaDelRanking[]; periodo: string }) {
   const cerrar = useCerrarLiquidacion(periodo);
   const pagar = useMarcarPagada(periodo);
-  const [detalle, setDetalle] = useState<ResumenProfesor | null>(null);
   const ordenados = [...profesores].sort((a, b) => b.asistencias - a.asistencias);
 
   return (
@@ -246,9 +230,6 @@ function Ranking({ profesores, periodo }: { profesores: FilaDelRanking[]; period
                 )}
               </Celda>
               <CeldaDeAcciones>
-                <Boton variante="secundario" onClick={() => setDetalle(fila)}>
-                  Detalle
-                </Boton>
                 {liquidacion === null && (
                   <Boton disabled={cerrar.isPending} onClick={() => cerrar.mutate(fila.profesor.id)}>
                     Cerrar
@@ -264,45 +245,6 @@ function Ranking({ profesores, periodo }: { profesores: FilaDelRanking[]; period
           );
         })}
       </Tabla>
-
-      <Dialogo
-        titulo={detalle === null ? '' : `${detalle.profesor.nombre} ${detalle.profesor.apellido} · ${formatearPeriodo(periodo)}`}
-        abierto={detalle !== null}
-        alCerrar={() => setDetalle(null)}
-      >
-        {detalle !== null && <DetalleDeSueldo fila={detalle} periodo={periodo} />}
-      </Dialogo>
     </Panel>
-  );
-}
-
-function DetalleDeSueldo({ fila, periodo }: { fila: ResumenProfesor; periodo: string }) {
-  const detalle = useDetalleDeSueldo(fila.profesor.id, periodo);
-  if (detalle.isPending) return <Cargando />;
-  if (detalle.isError) return <Aviso>{mensajeDeError(detalle.error)}</Aviso>;
-
-  const nombreArchivo = `sueldo-${fila.profesor.apellido}-${fila.profesor.nombre}-${periodo}.csv`.toLowerCase();
-
-  return (
-    <div className="flex flex-col gap-3">
-      {detalle.data.length === 0 && <p className="text-apagado">No dio clases con asistentes este mes.</p>}
-      {detalle.data.length > 0 && (
-        <Tabla columnas={['Fecha', 'Clase', 'Asistentes', 'Monto']}>
-          {detalle.data.map((item) => (
-            <tr key={item.claseId}>
-              <Celda>{formatearFecha(item.fecha)}</Celda>
-              <Celda>{item.estilo}</Celda>
-              <Celda>{item.asistentes}</Celda>
-              <Celda>{formatearPesos(item.monto)}</Celda>
-            </tr>
-          ))}
-        </Tabla>
-      )}
-      <div className="flex justify-end">
-        <Boton variante="secundario" onClick={() => descargarCsv(nombreArchivo, detalleACsv(detalle.data))}>
-          Descargar CSV
-        </Boton>
-      </div>
-    </div>
   );
 }

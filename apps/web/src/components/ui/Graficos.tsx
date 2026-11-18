@@ -7,6 +7,45 @@ function redondear(valor: number): number {
   return Math.round(valor * 100) / 100;
 }
 
+type DatoDeBarra = { etiqueta: string; barra: number };
+
+function RectasDeBarras({ datos, texto }: { datos: readonly DatoDeBarra[]; texto: (valor: number) => string }) {
+  const ranura = ANCHO / Math.max(datos.length, 1);
+  const maximo = Math.max(...datos.map((dato) => dato.barra), 0) || 1;
+  return datos.map((dato, indice) => {
+    const alto = redondear((dato.barra / maximo) * ALTO_UTIL);
+    return (
+      <rect
+        key={indice}
+        x={redondear(ranura * indice + ranura * 0.2)}
+        y={redondear(ALTO - MARGEN - alto)}
+        width={redondear(ranura * 0.6)}
+        height={alto}
+        className="fill-acento/50"
+      >
+        <title>{`${dato.etiqueta}: ${texto(dato.barra)}`}</title>
+      </rect>
+    );
+  });
+}
+
+export function Barras({
+  etiqueta,
+  datos,
+  textoBarra,
+}: {
+  etiqueta: string;
+  datos: readonly DatoDeBarra[];
+  textoBarra: (valor: number) => string;
+}) {
+  return (
+    <svg viewBox={`0 0 ${ANCHO} ${ALTO}`} role="group" aria-label={etiqueta} className="h-auto w-full">
+      <line x1="0" x2={ANCHO} y1={ALTO - MARGEN} y2={ALTO - MARGEN} className="stroke-borde-fuerte" />
+      <RectasDeBarras datos={datos} texto={textoBarra} />
+    </svg>
+  );
+}
+
 export type DatoDelDia = { etiqueta: string; barra: number; linea: number };
 
 export function BarrasConLinea({
@@ -21,7 +60,6 @@ export function BarrasConLinea({
   textoLinea: (valor: number) => string;
 }) {
   const ranura = ANCHO / Math.max(datos.length, 1);
-  const maximoBarra = Math.max(...datos.map((dato) => dato.barra), 0) || 1;
   const maximoLinea = Math.max(...datos.map((dato) => dato.linea), 0) || 1;
   const centro = (indice: number) => redondear(ranura * indice + ranura / 2);
   const alturaLinea = (valor: number) => redondear(ALTO - MARGEN - (valor / maximoLinea) * ALTO_UTIL);
@@ -30,21 +68,7 @@ export function BarrasConLinea({
   return (
     <svg viewBox={`0 0 ${ANCHO} ${ALTO}`} role="group" aria-label={etiqueta} className="h-auto w-full">
       <line x1="0" x2={ANCHO} y1={ALTO - MARGEN} y2={ALTO - MARGEN} className="stroke-borde-fuerte" />
-      {datos.map((dato, indice) => {
-        const alto = redondear((dato.barra / maximoBarra) * ALTO_UTIL);
-        return (
-          <rect
-            key={indice}
-            x={redondear(ranura * indice + ranura * 0.2)}
-            y={redondear(ALTO - MARGEN - alto)}
-            width={redondear(ranura * 0.6)}
-            height={alto}
-            className="fill-acento/50"
-          >
-            <title>{`${dato.etiqueta}: ${dato.barra} ${unidadBarra}`}</title>
-          </rect>
-        );
-      })}
+      <RectasDeBarras datos={datos} texto={(valor) => `${valor} ${unidadBarra}`} />
       <polyline points={puntos.join(' ')} fill="none" strokeWidth="2" strokeLinejoin="round" className="stroke-texto" />
       {datos.map((dato, indice) => (
         <circle key={indice} cx={centro(indice)} cy={alturaLinea(dato.linea)} r="3" className="fill-texto">

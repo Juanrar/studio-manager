@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { BarraApilada, BarrasConLinea } from '../Graficos.tsx';
+import { BarraApilada, Barras, BarrasConLinea } from '../Graficos.tsx';
 
 const DATOS = [
   { etiqueta: '1 mar', barra: 4, linea: 0 },
@@ -66,6 +66,28 @@ describe('BarrasConLinea', () => {
 
     expect(container.querySelector('rect')).toHaveAttribute('height', '0');
     expect(container.querySelector('polyline')).toHaveAttribute('points', '300,152');
+  });
+});
+
+describe('Barras', () => {
+  it('dibuja una barra por dato con su valor en el título y escala al máximo', () => {
+    render(
+      <Barras
+        etiqueta="Sueldo por mes"
+        datos={[
+          { etiqueta: 'Enero 2026', barra: 1000 },
+          { etiqueta: 'Febrero 2026', barra: 4000 },
+          { etiqueta: 'Marzo 2026', barra: 0 },
+        ]}
+        textoBarra={(valor) => `$${valor}`}
+      />,
+    );
+
+    expect(screen.getByRole('group', { name: 'Sueldo por mes' })).toBeInTheDocument();
+    const alturas = ['Enero 2026: $1000', 'Febrero 2026: $4000', 'Marzo 2026: $0'].map((titulo) =>
+      screen.getByText(titulo).parentElement!.getAttribute('height'),
+    );
+    expect(alturas).toEqual(['36', '144', '0']);
   });
 });
 

@@ -119,9 +119,9 @@ describe('/liquidaciones', () => {
     const ranking = await screen.findByRole('region', { name: 'Ranking de profesores' });
     const filas = within(ranking).getAllByRole('row').slice(1);
     expect(filas.map(celdasDe)).toEqual([
-      ['Speroni, Iaru', '5', '+25%', '$3.600Calculado hoy: $4.000', 'Cerrada', 'DetalleMarcar pagada'],
-      ['Zapata, Erik', '3', '—', '$2.050', 'Abierta', 'DetalleCerrar'],
-      ['Rosas, Malena', '2', '-50%', '$1.300', 'Pagada el 02/04/2026', 'Detalle'],
+      ['Speroni, Iaru', '5', '+25%', '$3.600Calculado hoy: $4.000', 'Cerrada', 'Marcar pagada'],
+      ['Zapata, Erik', '3', '—', '$2.050', 'Abierta', 'Cerrar'],
+      ['Rosas, Malena', '2', '-50%', '$1.300', 'Pagada el 02/04/2026', ''],
     ]);
   });
 
