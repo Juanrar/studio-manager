@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Liquidacion, TableroDelMes, TableroDelProfesor } from '@studio/shared';
 import { api, conQuery } from '../../lib/api.ts';
 
@@ -6,7 +6,6 @@ export function useTablero(periodo: string) {
   return useQuery({
     queryKey: ['tablero', periodo],
     queryFn: () => api.get<TableroDelMes>(conQuery('/tablero', { periodo })),
-    placeholderData: keepPreviousData,
   });
 }
 
@@ -14,7 +13,6 @@ export function useTableroDelProfesor(profesorId: number, periodo: string) {
   return useQuery({
     queryKey: ['tablero', periodo, 'profesor', profesorId],
     queryFn: () => api.get<TableroDelProfesor>(conQuery(`/tablero/profesores/${profesorId}`, { periodo })),
-    placeholderData: keepPreviousData,
   });
 }
 
