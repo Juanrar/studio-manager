@@ -145,12 +145,12 @@ describe('/liquidaciones', () => {
     expect(within(estado).getByText('Sin renovar: 2', { selector: 'title' })).toBeInTheDocument();
   });
 
-  it('dibuja la actividad diaria con un título por barra y por punto', async () => {
+  it('dibuja la actividad diaria con las asistencias y lo cobrado en el título de cada barra', async () => {
     marzo();
 
     const actividad = await screen.findByRole('region', { name: 'Actividad diaria' });
-    expect(within(actividad).getByText('1 mar: 4 asistencias')).toBeInTheDocument();
-    expect(within(actividad).getByText('2 mar: $6.700 cobrados')).toBeInTheDocument();
+    expect(within(actividad).getByText('1 mar: 4 asistencias, $0 cobrados')).toBeInTheDocument();
+    expect(within(actividad).getByText('2 mar: 2 asistencias, $6.700 cobrados')).toBeInTheDocument();
   });
 
   it('pide el tablero del período elegido', async () => {

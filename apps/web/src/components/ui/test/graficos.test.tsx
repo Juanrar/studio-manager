@@ -20,25 +20,25 @@ function dibujarBarras() {
 }
 
 describe('BarrasConLinea', () => {
-  it('dibuja una barra por dato con su valor en el título accesible', () => {
+  it('dibuja una barra por dato con las asistencias y lo cobrado en el título accesible', () => {
     dibujarBarras();
 
     expect(screen.getByRole('group', { name: 'Actividad por día' })).toBeInTheDocument();
-    expect(screen.getByText('1 mar: 4 asistencias')).toBeInTheDocument();
-    expect(screen.getByText('2 mar: 2 asistencias')).toBeInTheDocument();
-    expect(screen.getByText('3 mar: 0 asistencias')).toBeInTheDocument();
+    expect(screen.getByText('1 mar: 4 asistencias, $0 cobrados')).toBeInTheDocument();
+    expect(screen.getByText('2 mar: 2 asistencias, $3000 cobrados')).toBeInTheDocument();
+    expect(screen.getByText('3 mar: 0 asistencias, $1500 cobrados')).toBeInTheDocument();
   });
 
   it('escala las barras al máximo y deja en 0 la del día sin asistencias', () => {
     dibujarBarras();
 
-    const alturas = DATOS.map((dato) =>
-      screen.getByText(`${dato.etiqueta}: ${dato.barra} asistencias`).parentElement!.getAttribute('height'),
+    const alturas = ['1 mar: 4 asistencias, $0 cobrados', '2 mar: 2 asistencias, $3000 cobrados', '3 mar: 0 asistencias, $1500 cobrados'].map(
+      (titulo) => screen.getByText(titulo).parentElement!.getAttribute('height'),
     );
     expect(alturas).toEqual(['144', '72', '0']);
   });
 
-  it('dibuja la línea con su propia escala y un punto con título por día', () => {
+  it('dibuja la línea fina con su propia escala y sin puntos', () => {
     const { container } = render(
       <BarrasConLinea
         etiqueta="Actividad por día"
@@ -48,10 +48,11 @@ describe('BarrasConLinea', () => {
       />,
     );
 
-    expect(container.querySelector('polyline')).toHaveAttribute('points', '100,152 300,8 500,80');
-    expect(screen.getByText('1 mar: $0 cobrados')).toBeInTheDocument();
-    expect(screen.getByText('2 mar: $3000 cobrados')).toBeInTheDocument();
-    expect(screen.getByText('3 mar: $1500 cobrados')).toBeInTheDocument();
+    const linea = container.querySelector('polyline');
+    expect(linea).toHaveAttribute('points', '100,152 300,8 500,80');
+    expect(linea).toHaveAttribute('stroke-width', '1.5');
+    expect(linea).toHaveAttribute('vector-effect', 'non-scaling-stroke');
+    expect(container.querySelectorAll('circle')).toHaveLength(0);
   });
 
   it('con todo en 0 no produce alturas negativas ni NaN', () => {

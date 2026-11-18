@@ -9,7 +9,13 @@ function redondear(valor: number): number {
 
 type DatoDeBarra = { etiqueta: string; barra: number };
 
-function RectasDeBarras({ datos, texto }: { datos: readonly DatoDeBarra[]; texto: (valor: number) => string }) {
+function RectasDeBarras<Dato extends DatoDeBarra>({
+  datos,
+  texto,
+}: {
+  datos: readonly Dato[];
+  texto: (dato: Dato) => string;
+}) {
   const ranura = ANCHO / Math.max(datos.length, 1);
   const maximo = Math.max(...datos.map((dato) => dato.barra), 0) || 1;
   return datos.map((dato, indice) => {
@@ -23,7 +29,7 @@ function RectasDeBarras({ datos, texto }: { datos: readonly DatoDeBarra[]; texto
         height={alto}
         className="fill-acento/50"
       >
-        <title>{`${dato.etiqueta}: ${texto(dato.barra)}`}</title>
+        <title>{`${dato.etiqueta}: ${texto(dato)}`}</title>
       </rect>
     );
   });
@@ -41,7 +47,7 @@ export function Barras({
   return (
     <svg viewBox={`0 0 ${ANCHO} ${ALTO}`} role="group" aria-label={etiqueta} className="h-auto w-full">
       <line x1="0" x2={ANCHO} y1={ALTO - MARGEN} y2={ALTO - MARGEN} className="stroke-borde-fuerte" />
-      <RectasDeBarras datos={datos} texto={textoBarra} />
+      <RectasDeBarras datos={datos} texto={(dato) => textoBarra(dato.barra)} />
     </svg>
   );
 }
@@ -68,13 +74,15 @@ export function BarrasConLinea({
   return (
     <svg viewBox={`0 0 ${ANCHO} ${ALTO}`} role="group" aria-label={etiqueta} className="h-auto w-full">
       <line x1="0" x2={ANCHO} y1={ALTO - MARGEN} y2={ALTO - MARGEN} className="stroke-borde-fuerte" />
-      <RectasDeBarras datos={datos} texto={(valor) => `${valor} ${unidadBarra}`} />
-      <polyline points={puntos.join(' ')} fill="none" strokeWidth="2" strokeLinejoin="round" className="stroke-texto" />
-      {datos.map((dato, indice) => (
-        <circle key={indice} cx={centro(indice)} cy={alturaLinea(dato.linea)} r="3" className="fill-texto">
-          <title>{`${dato.etiqueta}: ${textoLinea(dato.linea)}`}</title>
-        </circle>
-      ))}
+      <RectasDeBarras datos={datos} texto={(dato) => `${dato.barra} ${unidadBarra}, ${textoLinea(dato.linea)}`} />
+      <polyline
+        points={puntos.join(' ')}
+        fill="none"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+        className="stroke-texto"
+      />
     </svg>
   );
 }
