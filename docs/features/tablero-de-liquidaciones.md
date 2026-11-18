@@ -128,11 +128,11 @@ Los tests de `csv.test.ts` siguen sin cambios.
 - Modificar: `apps/api/src/modules/alumnos/alumnos.service.ts`: `idsDeAlumnosActivos()`.
 - Test: `apps/api/src/modules/tablero/test/tablero.test.ts`
 
-- [ ] **Paso 1:** escribir los 6 primeros tests de la tabla y la parte de `/api/tablero` del test de permisos.
-- [ ] **Paso 2:** correrlos y verificar que fallan con 404.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(tablero): resumen del mes para liquidaciones`.
+- [x] **Paso 1:** escribir los 6 primeros tests de la tabla y la parte de `/api/tablero` del test de permisos.
+- [x] **Paso 2:** correrlos y verificar que fallan con 404.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(tablero): resumen del mes para liquidaciones`.
 
 ### Tarea 2: Ficha del profesor en la API
 

@@ -1,6 +1,7 @@
 import type { IngresosDelPeriodo, Pago, RegistrarPagoInput, ResumenDelPack } from '@studio/shared';
 import { config } from '../../config.ts';
 import { db, type Ejecutor } from '../../db/client.ts';
+import { dividirEnPartes } from '../../lib/dinero.ts';
 import { NoEncontradoError, ReglaDeNegocioError } from '../../lib/errores.ts';
 import { hoyEnEstudio, rangoDelPeriodo, sumarUnMes, type FechaDia, type Periodo } from '../../lib/fechas.ts';
 import { obtenerAlumno, reactivarPorCompra } from '../alumnos/alumnos.service.ts';
@@ -124,4 +125,33 @@ export async function ingresosDelPeriodo(periodo: Periodo): Promise<IngresosDelP
   const { desde, hasta } = rangoDelPeriodo(periodo);
   const porMedio = await repo.ingresosPorMedio(db, desde, hasta, config.tzEstudio);
   return { periodo, total: porMedio.reduce((suma, fila) => suma + fila.total, 0), porMedio };
+}
+
+export async function cobradoPorDia(periodo: Periodo): Promise<Map<FechaDia, number>> {
+  const { desde, hasta } = rangoDelPeriodo(periodo);
+  const filas = await repo.cobradoPorDia(db, desde, hasta, config.tzEstudio);
+  return new Map(filas.map((fila) => [fila.fecha, fila.total]));
+}
+
+export async function alumnosNuevos(periodo: Periodo): Promise<number> {
+  const { desde, hasta } = rangoDelPeriodo(periodo);
+  return repo.contarAlumnosNuevos(db, desde, hasta, config.tzEstudio);
+}
+
+export async function clasesPerdidas(
+  periodo: Periodo,
+  hoy: FechaDia,
+): Promise<{ clases: number; valor: number }> {
+  const { desde, hasta } = rangoDelPeriodo(periodo);
+  const vencidos = await repo.listarVencidosEnElPeriodo(db, desde, hasta, hoy);
+  return vencidos.reduce(
+    (total, pago) => {
+      const sinUsar = pago.cantidadClases - pago.clasesUsadas;
+      return {
+        clases: total.clases + sinUsar,
+        valor: total.valor + sinUsar * dividirEnPartes(pago.monto, pago.cantidadClases),
+      };
+    },
+    { clases: 0, valor: 0 },
+  );
 }
