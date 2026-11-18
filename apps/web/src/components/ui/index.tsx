@@ -14,7 +14,7 @@ import { Icono, type NombreIcono } from './Icono.tsx';
 export { Icono, type NombreIcono } from './Icono.tsx';
 export { Flotante, type Ancla } from './Flotante.tsx';
 export { SelectorDeHora } from './SelectorDeHora.tsx';
-export { BarraApilada, Barras, BarrasConLinea } from './Graficos.tsx';
+export { Barras, BarrasConLinea } from './Graficos.tsx';
 
 type VarianteBoton = 'primario' | 'secundario' | 'peligro';
 
@@ -238,12 +238,10 @@ export function Pagina({
     <section className="flex min-h-0 flex-1 flex-col">
       <header className="flex h-12 flex-none items-center gap-2 border-b border-borde px-4">
         {volverA !== undefined && (
-          <>
-            <Link to={volverA.ruta} className="text-[15px] text-apagado hover:text-texto">
-              {volverA.texto}
-            </Link>
-            <span className="text-apagado">/</span>
-          </>
+          <Link to={volverA.ruta} className={`${claseDeBoton('secundario')} h-7 px-2`}>
+            <Icono nombre="anterior" />
+            {volverA.texto}
+          </Link>
         )}
         <h1 className="truncate text-[15px] font-semibold">{titulo}</h1>
         {hayAlgo(acciones) && <div className="ml-auto flex items-center gap-2 pl-2">{acciones}</div>}

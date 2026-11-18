@@ -1,42 +1,53 @@
-import { Link, useSearchParams } from 'react-router';
-import {
-  hoyEnEstudio,
-  periodoDe,
-  sumarMeses,
-  type FilaDelRanking,
-  type Indicadores,
-  type TableroDelMes,
-} from '@studio/shared';
-import {
-  Aviso,
-  BarraApilada,
-  BarrasConLinea,
-  Boton,
-  Cargando,
-  Celda,
-  CeldaDeAcciones,
-  Entrada,
-  Insignia,
-  Pagina,
-  Tabla,
-} from '../../components/ui/index.tsx';
+import { useSearchParams } from 'react-router';
+import { hoyEnEstudio, periodoDe, sumarMeses, type TableroDelMes } from '@studio/shared';
+import { Aviso, Cargando, Entrada, Pagina, Pestanas, type Pestana } from '../../components/ui/index.tsx';
 import { mensajeDeError } from '../../lib/api.ts';
-import {
-  NOMBRES_MEDIO_DE_PAGO,
-  formatearDiaYMes,
-  formatearInstante,
-  formatearPeriodo,
-  formatearPesos,
-} from '../../lib/formato.ts';
-import { useCerrarLiquidacion, useMarcarPagada, useTablero } from './api.ts';
-import { Panel } from './Panel.tsx';
-import { variacion } from './variacion.ts';
+import { formatearPeriodo } from '../../lib/formato.ts';
+import { useTablero } from './api.ts';
+import { ResumenDelMes } from './ResumenDelMes.tsx';
+
+export type PropsDeSolapa = {
+  tablero: TableroDelMes;
+  periodo: string;
+  profesorId: number | null;
+  alElegir: (id: number) => void;
+};
+
+type IdSolapa = 'resumen' | 'liquidar' | 'estadisticas';
+
+const SOLAPAS: readonly Pestana<IdSolapa>[] = [
+  { id: 'resumen', texto: 'Resumen', icono: 'tablero' },
+  { id: 'liquidar', texto: 'Liquidar', icono: 'billetera' },
+  { id: 'estadisticas', texto: 'Estadísticas', icono: 'barras' },
+];
+
+function solapaDe(valor: string | null): IdSolapa {
+  return SOLAPAS.find((solapa) => solapa.id === valor)?.id ?? 'resumen';
+}
+
+function profesorDe(valor: string | null): number | null {
+  const id = Number(valor);
+  return valor !== null && Number.isInteger(id) && id > 0 ? id : null;
+}
 
 export function LiquidacionesPage() {
   const [parametros, setParametros] = useSearchParams();
   const periodo = parametros.get('periodo') ?? periodoDe(sumarMeses(hoyEnEstudio(), -1));
+  const solapa = solapaDe(parametros.get('solapa'));
+  const profesorId = profesorDe(parametros.get('profesor'));
   const tablero = useTablero(periodo);
   const esMesEnCurso = periodo === periodoDe(hoyEnEstudio());
+
+  function cambiar(nombre: string, valor: string, reemplazar = false) {
+    setParametros(
+      (actuales) => {
+        const siguientes = new URLSearchParams(actuales);
+        siguientes.set(nombre, valor);
+        return siguientes;
+      },
+      { replace: reemplazar },
+    );
+  }
 
   return (
     <Pagina
@@ -52,198 +63,26 @@ export function LiquidacionesPage() {
           aria-label="Mes"
           className="w-auto"
           value={periodo}
-          onChange={(evento) => evento.target.value !== '' && setParametros({ periodo: evento.target.value })}
+          onChange={(evento) => evento.target.value !== '' && cambiar('periodo', evento.target.value)}
         />
       }
     >
-      {tablero.isPending && <Cargando />}
-      {tablero.isError && <Aviso>{mensajeDeError(tablero.error)}</Aviso>}
-      {tablero.data && <Resumen tablero={tablero.data} periodo={periodo} />}
-    </Pagina>
-  );
-}
-
-function Resumen({ tablero, periodo }: { tablero: TableroDelMes; periodo: string }) {
-  const { alumnosPorEstado } = tablero;
-  return (
-    <div className="flex flex-col gap-6">
-      <PanelDeIndicadores actual={tablero.actual} anterior={tablero.anterior} />
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <Panel id="titulo-actividad" titulo="Actividad diaria">
-          <BarrasConLinea
-            etiqueta="Asistencias y cobrado por día"
-            unidadBarra="asistencias"
-            textoLinea={(valor) => `${formatearPesos(valor)} cobrados`}
-            datos={tablero.porDia.map((dia) => ({
-              etiqueta: formatearDiaYMes(dia.fecha),
-              barra: dia.asistencias,
-              linea: dia.cobrado,
-            }))}
-          />
-          <p className="mt-2 text-xs text-apagado">Barras: asistencias por día. Línea: lo cobrado ese día.</p>
-        </Panel>
-        <Ingresos tablero={tablero} />
+      <div className="-m-4">
+        <Pestanas pestanas={SOLAPAS} activa={solapa} alCambiar={(id) => cambiar('solapa', id)}>
+          <div className="p-4">
+            {tablero.isPending && <Cargando />}
+            {tablero.isError && <Aviso>{mensajeDeError(tablero.error)}</Aviso>}
+            {tablero.data && solapa === 'resumen' && (
+              <ResumenDelMes
+                tablero={tablero.data}
+                periodo={periodo}
+                profesorId={profesorId}
+                alElegir={(id) => cambiar('profesor', String(id), true)}
+              />
+            )}
+          </div>
+        </Pestanas>
       </div>
-      <Ranking profesores={tablero.profesores} periodo={periodo} />
-      <Panel id="titulo-alumnos" titulo="Estado de los alumnos hoy">
-        <BarraApilada
-          etiqueta="Alumnos activos por estado del pack"
-          segmentos={[
-            { etiqueta: 'Al día', valor: alumnosPorEstado.vigente, tono: 'verde' },
-            { etiqueta: 'Por vencer', valor: alumnosPorEstado.por_vencer, tono: 'ambar' },
-            { etiqueta: 'Sin renovar', valor: alumnosPorEstado.vencido + alumnosPorEstado.sin_clases, tono: 'rojo' },
-            { etiqueta: 'Sin pack', valor: alumnosPorEstado.sin_pack, tono: 'neutro' },
-          ]}
-        />
-      </Panel>
-    </div>
-  );
-}
-
-function PanelDeIndicadores({ actual, anterior }: { actual: Indicadores; anterior: Indicadores }) {
-  return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-      <Indicador
-        nombre="Ingresos cobrados"
-        valor={formatearPesos(actual.ingresos)}
-        actual={actual.ingresos}
-        anterior={anterior.ingresos}
-      />
-      <Indicador
-        nombre="Sueldos del mes"
-        valor={formatearPesos(actual.sueldos)}
-        actual={actual.sueldos}
-        anterior={anterior.sueldos}
-      />
-      <Indicador
-        nombre="Le queda al estudio"
-        valor={formatearPesos(actual.leQuedaAlEstudio)}
-        negativo={actual.leQuedaAlEstudio < 0}
-        actual={actual.leQuedaAlEstudio}
-        anterior={anterior.leQuedaAlEstudio}
-      />
-      <Indicador
-        nombre="Asistencias"
-        valor={String(actual.asistencias)}
-        actual={actual.asistencias}
-        anterior={anterior.asistencias}
-      />
-      <Indicador
-        nombre="Alumnos activos"
-        valor={String(actual.alumnosActivos)}
-        actual={actual.alumnosActivos}
-        anterior={anterior.alumnosActivos}
-      />
-      <Indicador
-        nombre="Alumnos nuevos"
-        valor={String(actual.alumnosNuevos)}
-        actual={actual.alumnosNuevos}
-        anterior={anterior.alumnosNuevos}
-      />
-      <Indicador
-        nombre="Clases que se perdieron"
-        valor={String(actual.clasesPerdidas)}
-        detalle={`${formatearPesos(actual.valorPerdido)} sin usar`}
-        actual={actual.clasesPerdidas}
-        anterior={anterior.clasesPerdidas}
-      />
-    </div>
-  );
-}
-
-function Indicador({
-  nombre,
-  valor,
-  detalle,
-  negativo = false,
-  actual,
-  anterior,
-}: {
-  nombre: string;
-  valor: string;
-  detalle?: string;
-  negativo?: boolean;
-  actual: number;
-  anterior: number;
-}) {
-  return (
-    <div role="group" aria-label={nombre} className="rounded-md border border-borde p-3">
-      <p className="text-apagado">{nombre}</p>
-      <p className={`text-2xl font-semibold ${negativo ? 'text-red-400' : ''}`}>{valor}</p>
-      {detalle !== undefined && <p className="text-tenue">{detalle}</p>}
-      <p className="text-xs text-apagado">
-        <span className="font-medium text-tenue">{variacion(actual, anterior)}</span> contra el mes anterior
-      </p>
-    </div>
-  );
-}
-
-function Ingresos({ tablero }: { tablero: TableroDelMes }) {
-  return (
-    <Panel id="titulo-ingresos" titulo="Ingresos del mes">
-      <p className="mb-2 text-2xl font-semibold">{formatearPesos(tablero.actual.ingresos)}</p>
-      <Tabla columnas={['Medio', 'Pagos', 'Total']}>
-        {tablero.ingresosPorMedio.map((fila) => (
-          <tr key={fila.medio}>
-            <Celda>{NOMBRES_MEDIO_DE_PAGO[fila.medio]}</Celda>
-            <Celda>{fila.cantidad}</Celda>
-            <Celda>{formatearPesos(fila.total)}</Celda>
-          </tr>
-        ))}
-      </Tabla>
-    </Panel>
-  );
-}
-
-function Ranking({ profesores, periodo }: { profesores: FilaDelRanking[]; periodo: string }) {
-  const cerrar = useCerrarLiquidacion(periodo);
-  const pagar = useMarcarPagada(periodo);
-
-  return (
-    <Panel id="titulo-ranking" titulo="Ranking de profesores">
-      {cerrar.isError && <Aviso>{mensajeDeError(cerrar.error)}</Aviso>}
-      {pagar.isError && <Aviso>{mensajeDeError(pagar.error)}</Aviso>}
-      <Tabla columnas={['Profesor', 'Asistencias', 'Contra el mes anterior', 'Sueldo', 'Estado', '']}>
-        {profesores.map((fila) => {
-          const { liquidacion } = fila;
-          return (
-            <tr key={fila.profesor.id}>
-              <Celda>
-                <Link to={`/liquidaciones/${fila.profesor.id}?periodo=${periodo}`} className="text-acento hover:underline">
-                  {fila.profesor.apellido}, {fila.profesor.nombre}
-                </Link>
-              </Celda>
-              <Celda>{fila.asistencias}</Celda>
-              <Celda>{variacion(fila.asistencias, fila.asistenciasMesAnterior)}</Celda>
-              <Celda>
-                {formatearPesos(liquidacion?.monto ?? fila.montoCalculado)}
-                {liquidacion !== null && liquidacion.monto !== fila.montoCalculado && (
-                  <span className="block text-xs text-amber-300">Calculado hoy: {formatearPesos(fila.montoCalculado)}</span>
-                )}
-              </Celda>
-              <Celda>
-                {liquidacion === null && <Insignia tono="ambar">Abierta</Insignia>}
-                {liquidacion !== null && liquidacion.pagadoEn === null && <Insignia>Cerrada</Insignia>}
-                {liquidacion?.pagadoEn != null && (
-                  <Insignia tono="verde">Pagada el {formatearInstante(liquidacion.pagadoEn)}</Insignia>
-                )}
-              </Celda>
-              <CeldaDeAcciones>
-                {liquidacion === null && (
-                  <Boton disabled={cerrar.isPending} onClick={() => cerrar.mutate(fila.profesor.id)}>
-                    Cerrar
-                  </Boton>
-                )}
-                {liquidacion !== null && liquidacion.pagadoEn === null && (
-                  <Boton disabled={pagar.isPending} onClick={() => pagar.mutate(liquidacion.id)}>
-                    Marcar pagada
-                  </Boton>
-                )}
-              </CeldaDeAcciones>
-            </tr>
-          );
-        })}
-      </Tabla>
-    </Panel>
+    </Pagina>
   );
 }

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import { BarraApilada, Barras, BarrasConLinea } from '../Graficos.tsx';
+import { Barras, BarrasConLinea } from '../Graficos.tsx';
 
 const DATOS = [
   { etiqueta: '1 mar', barra: 4, linea: 0 },
@@ -126,27 +126,5 @@ describe('Barras', () => {
     await usuario.hover(screen.getByLabelText('Febrero 2026: $4000'));
 
     expect([...screen.getByRole('tooltip').children].map((linea) => linea.textContent)).toEqual(['Febrero 2026', '$4000']);
-  });
-});
-
-describe('BarraApilada', () => {
-  it('dibuja un segmento por tramo con su valor, proporcional al total', () => {
-    const { container } = render(
-      <BarraApilada
-        etiqueta="Estado de los alumnos"
-        segmentos={[
-          { etiqueta: 'Al día', valor: 6, tono: 'verde' },
-          { etiqueta: 'Por vencer', valor: 2, tono: 'ambar' },
-          { etiqueta: 'Sin renovar', valor: 0, tono: 'rojo' },
-          { etiqueta: 'Sin pack', valor: 2, tono: 'neutro' },
-        ]}
-      />,
-    );
-
-    expect(screen.getByRole('group', { name: 'Estado de los alumnos' })).toBeInTheDocument();
-    const anchos = [...container.querySelectorAll('rect')].map((rect) => rect.getAttribute('width'));
-    expect(anchos).toEqual(['600', '360', '120', '0', '120']);
-    expect(screen.getByText('Al día: 6', { selector: 'title' })).toBeInTheDocument();
-    expect(screen.getByText('Sin renovar: 0', { selector: 'title' })).toBeInTheDocument();
   });
 });

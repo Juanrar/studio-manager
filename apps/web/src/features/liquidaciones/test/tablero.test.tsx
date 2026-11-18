@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Indicadores, TableroDelMes } from '@studio/shared';
@@ -113,36 +113,36 @@ describe('/liquidaciones', () => {
     expect(celdasDe(within(ingresos).getByRole('row', { name: /Transferencia/ }))).toEqual(['Transferencia', '1', '$5.200']);
   });
 
-  it('muestra el ranking en el orden que manda la API con variación, sueldo y estado de cada profesor', async () => {
+  it('muestra el ranking en el orden que manda la API, sin estado, botones ni enlaces', async () => {
     marzo();
 
     const ranking = await screen.findByRole('region', { name: 'Ranking de profesores' });
+    expect(within(ranking).getAllByRole('columnheader').map((columna) => columna.textContent)).toEqual([
+      'Profesor',
+      'Asistencias',
+      'Contra el mes anterior',
+      'Sueldo',
+    ]);
     const filas = within(ranking).getAllByRole('row').slice(1);
     expect(filas.map(celdasDe)).toEqual([
-      ['Speroni, Iaru', '5', '+25%', '$3.600Calculado hoy: $4.000', 'Cerrada', 'Marcar pagada'],
-      ['Zapata, Erik', '3', '—', '$2.050', 'Abierta', 'Cerrar'],
-      ['Rosas, Malena', '2', '-50%', '$1.300', 'Pagada el 02/04/2026', ''],
+      ['Speroni, Iaru', '5', '+25%', '$3.600Calculado hoy: $4.000'],
+      ['Zapata, Erik', '3', '—', '$2.050'],
+      ['Rosas, Malena', '2', '-50%', '$1.300'],
     ]);
+    expect(within(ranking).queryByRole('button')).not.toBeInTheDocument();
+    expect(within(ranking).queryByRole('link')).not.toBeInTheDocument();
   });
 
-  it('el nombre del profesor lleva a su ficha con el mismo período', async () => {
+  it('muestra el estado de los alumnos con el total y cuatro números, juntando vencidos y sin clases', async () => {
     marzo();
 
-    const iaru = await screen.findByRole('link', { name: 'Speroni, Iaru' });
-    expect(iaru).toHaveAttribute('href', '/liquidaciones/2?periodo=2026-03');
-  });
-
-  it('muestra la barra de alumnos por estado agrupando los vencidos y sin clases', async () => {
-    marzo();
-
-    const estado = await screen.findByRole('region', { name: 'Estado de los alumnos hoy' });
-    expect(within(estado).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
-      'Al día: 3',
-      'Por vencer: 1',
-      'Sin renovar: 2',
-      'Sin pack: 2',
+    const estado = await screen.findByRole('region', { name: 'Alumnos activos hoy: 8' });
+    expect(within(estado).getAllByRole('group').map((recuadro) => recuadro.textContent)).toEqual([
+      'Al día3',
+      'Por vencer1',
+      'Sin renovar2',
+      'Sin pack2',
     ]);
-    expect(within(estado).getByText('Sin renovar: 2', { selector: 'title' })).toBeInTheDocument();
   });
 
   it('dibuja la actividad diaria con las asistencias y lo cobrado en el nombre de cada barra', async () => {
@@ -186,35 +186,42 @@ describe('/liquidaciones', () => {
     expect(screen.queryByText('mes en curso')).not.toBeInTheDocument();
   });
 
-  it('"Cerrar" manda el profesor y el período elegido', async () => {
-    let cuerpoRecibido: unknown;
-    servidor.use(
-      http.post('/api/liquidaciones', async ({ request }) => {
-        cuerpoRecibido = await request.json();
-        return HttpResponse.json({ id: 72, profesorId: 1, periodo: '2026-03', monto: 2050, pagadoEn: null }, { status: 201 });
-      }),
-    );
-    const { usuario } = marzo();
+  it('dibuja las tres solapas con Resumen elegida', async () => {
+    marzo();
 
-    const erik = await screen.findByRole('row', { name: /Zapata/ });
-    await usuario.click(within(erik).getByRole('button', { name: 'Cerrar' }));
-
-    await waitFor(() => expect(cuerpoRecibido).toEqual({ profesorId: 1, periodo: '2026-03' }));
+    const solapas = await screen.findAllByRole('tab');
+    expect(solapas.map((solapa) => solapa.textContent)).toEqual(['Resumen', 'Liquidar', 'Estadísticas']);
+    expect(solapas.map((solapa) => solapa.getAttribute('aria-selected'))).toEqual(['true', 'false', 'false']);
   });
 
-  it('"Marcar pagada" llama a la API de esa liquidación', async () => {
-    let liquidacionPagada: string | undefined;
-    servidor.use(
-      http.post('/api/liquidaciones/:id/pagar', ({ params }) => {
-        liquidacionPagada = String(params.id);
-        return HttpResponse.json({ id: 70, profesorId: 2, periodo: '2026-03', monto: 3600, pagadoEn: '2026-04-05T15:00:00.000Z' });
-      }),
-    );
-    const { usuario } = marzo();
+  it('cambiar de solapa escribe solapa en la dirección y conserva período y profesor', async () => {
+    conSesion(ADMIN);
+    servidor.use(http.get('/api/tablero', () => HttpResponse.json(TABLERO_DE_MARZO)));
+    const { router, usuario } = renderizarEn('/liquidaciones?periodo=2026-03&profesor=2');
 
-    const iaru = await screen.findByRole('row', { name: /Speroni/ });
-    await usuario.click(within(iaru).getByRole('button', { name: 'Marcar pagada' }));
+    await usuario.click(await screen.findByRole('tab', { name: 'Estadísticas' }));
 
-    await waitFor(() => expect(liquidacionPagada).toBe('70'));
+    expect(router.state.location.search).toBe('?periodo=2026-03&profesor=2&solapa=estadisticas');
+    expect(screen.getByRole('tab', { name: 'Estadísticas' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.queryByRole('region', { name: 'Ranking de profesores' })).not.toBeInTheDocument();
+  });
+
+  it('cambiar el mes conserva la solapa y el profesor', async () => {
+    conSesion(ADMIN);
+    servidor.use(http.get('/api/tablero', () => HttpResponse.json(TABLERO_DE_MARZO)));
+    const { router } = renderizarEn('/liquidaciones?periodo=2026-03&solapa=liquidar&profesor=2');
+
+    fireEvent.change(await screen.findByLabelText('Mes'), { target: { value: '2026-02' } });
+
+    await waitFor(() => expect(router.state.location.search).toBe('?periodo=2026-02&solapa=liquidar&profesor=2'));
+  });
+
+  it('una solapa desconocida muestra Resumen', async () => {
+    conSesion(ADMIN);
+    servidor.use(http.get('/api/tablero', () => HttpResponse.json(TABLERO_DE_MARZO)));
+    renderizarEn('/liquidaciones?periodo=2026-03&solapa=otra');
+
+    await screen.findByRole('region', { name: 'Ranking de profesores' });
+    expect(screen.getByRole('tab', { name: 'Resumen' })).toHaveAttribute('aria-selected', 'true');
   });
 });

@@ -184,11 +184,11 @@ Casos que la tabla cubre por pedido de esta sección, por si un revisor los busc
 **Interfaces:**
 - Produce: `type PropsDeSolapa = { tablero: TableroDelMes; periodo: string; profesorId: number | null; alElegir: (id: number) => void }`, exportado desde `LiquidacionesPage.tsx`.
 
-- [ ] **Paso 1:** escribir los tests de solapas, `solapa` desconocida, ranking, estado de los alumnos y `volverA`.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/web exec vitest run src/features/liquidaciones src/components/ui` y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(liquidaciones): solapas y resumen sin acciones`.
+- [x] **Paso 1:** escribir los tests de solapas, `solapa` desconocida, ranking, estado de los alumnos y `volverA`.
+- [x] **Paso 2:** correr `pnpm --filter @studio/web exec vitest run src/features/liquidaciones src/components/ui` y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(liquidaciones): solapas y resumen sin acciones`.
 
 ### Tarea 3: Solapa Liquidar y CSV con alumnos
 
