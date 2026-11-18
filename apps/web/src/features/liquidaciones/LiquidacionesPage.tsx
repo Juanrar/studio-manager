@@ -4,6 +4,7 @@ import { Aviso, Cargando, Entrada, Pagina, Pestanas, type Pestana } from '../../
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearPeriodo } from '../../lib/formato.ts';
 import { useTablero } from './api.ts';
+import { Estadisticas } from './Estadisticas.tsx';
 import { Liquidar } from './Liquidar.tsx';
 import { ResumenDelMes } from './ResumenDelMes.tsx';
 
@@ -79,6 +80,7 @@ export function LiquidacionesPage() {
             {tablero.isError && <Aviso>{mensajeDeError(tablero.error)}</Aviso>}
             {tablero.data && solapa === 'resumen' && <ResumenDelMes {...propsDeSolapa(tablero.data)} />}
             {tablero.data && solapa === 'liquidar' && <Liquidar {...propsDeSolapa(tablero.data)} />}
+            {tablero.data && solapa === 'estadisticas' && <Estadisticas {...propsDeSolapa(tablero.data)} />}
           </div>
         </Pestanas>
       </div>

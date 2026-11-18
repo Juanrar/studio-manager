@@ -125,9 +125,13 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
 
   await test.step('ver el sueldo del profesor y los ingresos del mes', async () => {
     await page.goto(`/liquidaciones?periodo=${hoy.slice(0, 7)}`);
-    const erik = page.getByRole('row', { name: /Zapata/ });
-    await expect(erik).toContainText('$1.400');
-    await expect(erik).toContainText('Abierta');
     await expect(page.getByRole('region', { name: 'Ingresos del mes' })).toContainText('$6.700');
+
+    await page.getByRole('tab', { name: 'Liquidar' }).click();
+    await page.getByRole('textbox', { name: 'Buscar profesor' }).fill('Zapata');
+    const erik = page.getByRole('list', { name: 'Profesores' }).getByRole('button', { name: /Zapata, Erik/ });
+    await erik.click();
+    await expect(erik).toContainText('$1.400');
+    await expect(erik).toContainText('Sin cerrar');
   });
 });

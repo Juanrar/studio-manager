@@ -221,11 +221,11 @@ Casos que la tabla cubre por pedido de esta sección, por si un revisor los busc
 **Interfaces:**
 - Consume: `PropsDeSolapa` (tarea 2), `ListaDeProfesores`, `detalleACsv` y `nombreDelCsv` (tarea 3).
 
-- [ ] **Paso 1:** escribir los tests de Estadísticas y de la redirección, y adaptar el e2e.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests web y `pnpm e2e`, y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(liquidaciones): solapa de estadísticas del profesor`.
+- [x] **Paso 1:** escribir los tests de Estadísticas y de la redirección, y adaptar el e2e.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests web y `pnpm e2e`, y verificar que pasan.
+- [x] **Paso 5:** commit `feat(liquidaciones): solapa de estadísticas del profesor`.
 
 ## Verificación final
 
