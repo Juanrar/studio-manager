@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, inArray, isNull, max, sql, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, isNull, lt, max, sql, type SQL } from 'drizzle-orm';
 import type { Ejecutor } from '../../db/client.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 import { asistencia, pack, pago, usuario, type NuevoPago } from '../../db/schema.ts';
@@ -163,4 +163,54 @@ export async function ingresosPorMedio(
     .where(and(isNull(pago.anuladoEn), sql`${dia} >= ${desde}`, sql`${dia} < ${hasta}`))
     .groupBy(pago.medio)
     .orderBy(asc(pago.medio));
+}
+
+export async function cobradoPorDia(
+  ej: Ejecutor,
+  desde: FechaDia,
+  hasta: FechaDia,
+  tz: string,
+): Promise<{ fecha: FechaDia; total: number }[]> {
+  const dia = sql`(${pago.fecha} at time zone ${tz})::date`;
+  return ej
+    .select({
+      fecha: sql<string>`to_char(${dia}, 'YYYY-MM-DD')`,
+      total: sql<number>`sum(${pago.monto})`.mapWith(Number),
+    })
+    .from(pago)
+    .where(and(isNull(pago.anuladoEn), sql`${dia} >= ${desde}`, sql`${dia} < ${hasta}`))
+    .groupBy(sql`1`)
+    .orderBy(sql`1`);
+}
+
+export async function contarAlumnosNuevos(
+  ej: Ejecutor,
+  desde: FechaDia,
+  hasta: FechaDia,
+  tz: string,
+): Promise<number> {
+  const primerDia = sql`(min(${pago.fecha}) at time zone ${tz})::date`;
+  const filas = await ej
+    .select({ alumnoId: pago.alumnoId })
+    .from(pago)
+    .where(isNull(pago.anuladoEn))
+    .groupBy(pago.alumnoId)
+    .having(and(sql`${primerDia} >= ${desde}`, sql`${primerDia} < ${hasta}`));
+  return filas.length;
+}
+
+export type PagoVencido = { monto: number; cantidadClases: number; clasesUsadas: number };
+
+export async function listarVencidosEnElPeriodo(
+  ej: Ejecutor,
+  desde: FechaDia,
+  hasta: FechaDia,
+  hoy: FechaDia,
+): Promise<PagoVencido[]> {
+  return ej
+    .select({ monto: pago.monto, cantidadClases: pago.cantidadClases, clasesUsadas: count(asistencia.id) })
+    .from(pago)
+    .leftJoin(asistencia, eq(asistencia.pagoId, pago.id))
+    .where(and(isNull(pago.anuladoEn), gte(pago.venceEl, desde), lt(pago.venceEl, hasta), lt(pago.venceEl, hoy)))
+    .groupBy(pago.id);
 }

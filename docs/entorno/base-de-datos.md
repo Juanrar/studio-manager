@@ -20,3 +20,5 @@ Ejemplo: la migración `0003_renombrar_horario_y_clase`.
 ## Consultas con Drizzle
 
 Drizzle escribe las columnas sin la tabla cuando la consulta es de una sola tabla. En una subconsulta con `sql`, `${profesor.id}` sale como `"id"` y puede apuntar a la tabla de adentro. Para ver el SQL sin ejecutarlo: `.toSQL()`.
+
+Le pasa a `clasesUsadasSql` de `pagos.repository.ts`: en un `select` que sale solo de `pago`, su `pago.id` se lee como `asistencia.id` y cuenta mal sin dar error. Funciona en consultas con `join`. En una de una sola tabla, se cuentan las asistencias con `leftJoin(asistencia, ...)`, `count(asistencia.id)` y `groupBy(pago.id)`, como `listarVencidosEnElPeriodo`.

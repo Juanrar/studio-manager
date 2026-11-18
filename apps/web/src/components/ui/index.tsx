@@ -15,6 +15,7 @@ export { Icono, type NombreIcono } from './Icono.tsx';
 export { Flotante, type Ancla } from './Flotante.tsx';
 export { SelectorDeHora } from './SelectorDeHora.tsx';
 export { BuscadorDeOpciones } from './BuscadorDeOpciones.tsx';
+export { BarraApilada, Barras, BarrasConLinea } from './Graficos.tsx';
 
 type VarianteBoton = 'primario' | 'secundario' | 'peligro';
 

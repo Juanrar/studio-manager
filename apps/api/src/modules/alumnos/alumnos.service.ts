@@ -66,3 +66,7 @@ function traducirDniRepetido(error: unknown): unknown {
     ? new ReglaDeNegocioError('Ya existe un alumno con ese DNI')
     : error;
 }
+
+export async function idsDeAlumnosActivos(): Promise<number[]> {
+  return repo.listarIdsActivos(db);
+}

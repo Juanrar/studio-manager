@@ -127,3 +127,8 @@ export async function listar(
 export async function listarTodos(ej: Ejecutor, filtros: ListadoQuery): Promise<{ id: number; activo: boolean }[]> {
   return ej.select({ id: alumno.id, activo: alumno.activo }).from(alumno).where(filtroDe(filtros));
 }
+
+export async function listarIdsActivos(ej: Ejecutor): Promise<number[]> {
+  const filas = await ej.select({ id: alumno.id }).from(alumno).where(eq(alumno.activo, true));
+  return filas.map((fila) => fila.id);
+}
