@@ -188,4 +188,4 @@ Propuesto en la misma conversación y dejado afuera de esta feature para que la 
 
 - [x] `pnpm test` y `pnpm typecheck` pasan.
 - [x] `pnpm e2e` pasa: recorre la liquidación y tiene que seguir encontrando cerrar y marcar pagada.
-- [ ] Mirar `/liquidaciones` y una ficha en Chromium con la base de desarrollo, en el tema existente (`index.css` solo define el oscuro).
+- [x] Mirar `/liquidaciones` y una ficha en Chromium con la base de desarrollo, en el tema existente (`index.css` solo define el oscuro).
