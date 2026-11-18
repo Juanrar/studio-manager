@@ -21,7 +21,7 @@ import {
   type ClaseDeTest,
 } from '../../../../test/fabricas.ts';
 import { db } from '../../../db/client.ts';
-import { liquidacion } from '../../../db/schema.ts';
+import { clase, liquidacion } from '../../../db/schema.ts';
 import { actualizarAlumno } from '../../alumnos/alumnos.service.ts';
 import { registrarAsistencia } from '../../asistencias/asistencias.service.ts';
 import { registrarPago } from '../../pagos/pagos.service.ts';
@@ -266,5 +266,153 @@ describe('GET /api/tablero', () => {
     const respuesta = await get('/api/tablero?periodo=2026-03', cookieRecepcion);
 
     expect(respuesta.statusCode).toBe(403);
+  });
+});
+
+async function armarAbrilDeErik() {
+  const hipHop = await crearHorarioDeTest(erik.id, { estilo: 'Hip-Hop', diaSemana: 2 });
+  const contemporaneo = await crearHorarioDeTest(erik.id, { estilo: 'Contemporáneo', diaSemana: 3 });
+  const funk = await crearHorarioDeTest(erik.id, { estilo: 'Funk', diaSemana: 5 });
+  const salsa = await crearHorarioDeTest(erik.id, { estilo: 'Salsa', diaSemana: 4 });
+  const clasePrincipal = await crearClaseDeTest(contemporaneo.id, '2026-04-01');
+  await crearClaseDeTest(hipHop.id, '2026-04-07');
+  const claseCancelada = await crearClaseDeTest(funk.id, '2026-04-03');
+  await db.update(clase).set({ estado: 'cancelada' }).where(eq(clase.id, claseCancelada.id));
+  const claseDeSalsa = await crearClaseDeTest(salsa.id, '2026-04-02');
+  await db.update(clase).set({ profesorId: iaru.id }).where(eq(clase.id, claseDeSalsa.id));
+  const suplenciaDeJazz = await crearClaseDeTest(jazzDeIaru, '2026-04-02');
+  await db.update(clase).set({ profesorId: erik.id }).where(eq(clase.id, suplenciaDeJazz.id));
+  const [unica] = await db
+    .insert(clase)
+    .values({
+      horarioId: null,
+      semana: '2026-03-30',
+      fecha: '2026-04-04',
+      horaInicio: '11:00',
+      horaFin: '13:00',
+      estilo: 'Taller',
+      profesorId: erik.id,
+    })
+    .returning({ id: clase.id, fecha: clase.fecha });
+
+  const hoy = '2026-04-05';
+  await registrarAsistencia(clasePrincipal.id, { alumnoId: martina.id }, recepcion.id, AHORA, hoy);
+  await registrarAsistencia(clasePrincipal.id, { alumnoId: lucia.id }, recepcion.id, AHORA, hoy);
+  await registrarAsistencia(suplenciaDeJazz.id, { alumnoId: martina.id }, recepcion.id, AHORA, hoy);
+  await registrarAsistencia(unica!.id, { alumnoId: lucia.id }, recepcion.id, AHORA, hoy);
+  return { contemporaneo, suplenciaDeJazz, unica: unica!, clasePrincipal };
+}
+
+describe('GET /api/tablero/profesores/:id', () => {
+  it('cuenta las clases dictadas sin la cancelada ni la futura, separa suplencias dadas y recibidas y agrupa por horario', async () => {
+    const { contemporaneo, suplenciaDeJazz, unica, clasePrincipal } = await armarAbrilDeErik();
+
+    const respuesta = await get(`/api/tablero/profesores/${erik.id}?periodo=2026-04`);
+
+    expect(respuesta.statusCode).toBe(200);
+    const cuerpo = respuesta.json();
+    expect(cuerpo).toEqual({
+      periodo: '2026-04',
+      profesor: { id: erik.id, nombre: 'Erik', apellido: 'Zapata', aliasCbu: null, porcentajeBp: 8000 },
+      liquidacion: null,
+      montoCalculado: 4160,
+      clasesDictadas: 3,
+      clasesCanceladas: 1,
+      asistencias: 4,
+      alumnosDistintos: 2,
+      suplenciasDadas: 1,
+      suplenciasRecibidas: 1,
+      sueldoPorMes: expect.any(Array),
+      porHorario: [
+        {
+          horarioId: contemporaneo.id,
+          estilo: 'Contemporáneo',
+          diaSemana: 3,
+          horaInicio: '19:00',
+          clases: 1,
+          asistencias: 2,
+          monto: 2080,
+        },
+        {
+          horarioId: jazzDeIaru,
+          estilo: 'Jazz',
+          diaSemana: 4,
+          horaInicio: '19:00',
+          clases: 1,
+          asistencias: 1,
+          monto: 1040,
+        },
+        {
+          horarioId: null,
+          estilo: 'Clases únicas',
+          diaSemana: null,
+          horaInicio: null,
+          clases: 1,
+          asistencias: 1,
+          monto: 1040,
+        },
+      ],
+      clases: [
+        { claseId: clasePrincipal.id, fecha: '2026-04-01', estilo: 'Contemporáneo', asistentes: 2, monto: 2080 },
+        { claseId: suplenciaDeJazz.id, fecha: '2026-04-02', estilo: 'Jazz', asistentes: 1, monto: 1040 },
+        { claseId: unica.id, fecha: '2026-04-04', estilo: 'Taller', asistentes: 1, monto: 1040 },
+      ],
+    });
+  });
+
+  it('trae 6 meses de sueldo, del más viejo al elegido, con el guardado en el cerrado y el calculado en los abiertos', async () => {
+    await app.inject({
+      method: 'POST',
+      url: '/api/liquidaciones',
+      payload: { profesorId: erik.id, periodo: '2026-03' },
+      headers: { cookie: cookieAdmin },
+    });
+    await db.update(liquidacion).set({ monto: 1500 }).where(eq(liquidacion.profesorId, erik.id));
+
+    const respuesta = await get(`/api/tablero/profesores/${erik.id}?periodo=2026-04`);
+
+    expect(respuesta.json().sueldoPorMes).toEqual([
+      { periodo: '2025-11', monto: 0 },
+      { periodo: '2025-12', monto: 0 },
+      { periodo: '2026-01', monto: 0 },
+      { periodo: '2026-02', monto: 650 },
+      { periodo: '2026-03', monto: 1500 },
+      { periodo: '2026-04', monto: 0 },
+    ]);
+  });
+
+  it('muestra la liquidación cerrada y el monto calculado por separado', async () => {
+    await app.inject({
+      method: 'POST',
+      url: '/api/liquidaciones',
+      payload: { profesorId: erik.id, periodo: '2026-03' },
+      headers: { cookie: cookieAdmin },
+    });
+    await db.update(liquidacion).set({ monto: 1500 }).where(eq(liquidacion.profesorId, erik.id));
+
+    const respuesta = await get(`/api/tablero/profesores/${erik.id}?periodo=2026-03`);
+
+    expect(respuesta.json().liquidacion).toEqual({
+      id: expect.any(Number),
+      profesorId: erik.id,
+      periodo: '2026-03',
+      monto: 1500,
+      pagadoEn: null,
+    });
+    expect(respuesta.json().montoCalculado).toBe(1400);
+  });
+
+  it('recepción recibe 403', async () => {
+    const cookieRecepcion = await loguear(app, RECEPCION.email, RECEPCION.password);
+
+    const respuesta = await get(`/api/tablero/profesores/${erik.id}?periodo=2026-04`, cookieRecepcion);
+
+    expect(respuesta.statusCode).toBe(403);
+  });
+
+  it('un profesor que no existe da 404', async () => {
+    const respuesta = await get('/api/tablero/profesores/99999?periodo=2026-04');
+
+    expect(respuesta.statusCode).toBe(404);
   });
 });

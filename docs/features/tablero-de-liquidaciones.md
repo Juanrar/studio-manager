@@ -140,11 +140,11 @@ Los tests de `csv.test.ts` siguen sin cambios.
 - Modificar: `tablero.repository.ts`, `tablero.service.ts`, `tablero.routes.ts`, `packages/shared/src/tablero.ts`.
 - Test: `tablero.test.ts`
 
-- [ ] **Paso 1:** escribir los tests de la ficha, de `sueldoPorMes` y el resto del de permisos.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(tablero): ficha del profesor en el mes`.
+- [x] **Paso 1:** escribir los tests de la ficha, de `sueldoPorMes` y el resto del de permisos.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(tablero): ficha del profesor en el mes`.
 
 ### Tarea 3: Gráficos y pantalla de resumen
 

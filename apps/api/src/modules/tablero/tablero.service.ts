@@ -1,8 +1,17 @@
-import type { EstadoPack, FilaDelRanking, Indicadores, ResumenProfesor, TableroDelMes } from '@studio/shared';
+import type {
+  EstadoPack,
+  FilaDelRanking,
+  FilaPorHorario,
+  Indicadores,
+  ResumenProfesor,
+  TableroDelMes,
+  TableroDelProfesor,
+} from '@studio/shared';
 import { db } from '../../db/client.ts';
-import { rangoDelPeriodo, sumarDias, sumarMeses, type FechaDia, type Periodo } from '../../lib/fechas.ts';
+import { aplicarPorcentaje } from '../../lib/dinero.ts';
+import { periodoDe, rangoDelPeriodo, sumarDias, sumarMeses, type FechaDia, type Periodo } from '../../lib/fechas.ts';
 import { idsDeAlumnosActivos } from '../alumnos/alumnos.service.ts';
-import { resumenDelPeriodo } from '../liquidaciones/liquidaciones.service.ts';
+import { detalleDelPeriodo, resumenDelPeriodo } from '../liquidaciones/liquidaciones.service.ts';
 import {
   alumnosNuevos,
   clasesPerdidas,
@@ -10,6 +19,7 @@ import {
   ingresosDelPeriodo,
   resumenDePacks,
 } from '../pagos/pagos.service.ts';
+import { obtenerProfesor } from '../profesores/profesores.service.ts';
 import * as repo from './tablero.repository.ts';
 
 const ESTADOS: EstadoPack[] = ['vigente', 'por_vencer', 'sin_clases', 'vencido', 'sin_pack'];
@@ -18,8 +28,12 @@ function sueldoDe(item: ResumenProfesor): number {
   return item.liquidacion?.monto ?? item.montoCalculado;
 }
 
+function mesDesplazado(periodo: Periodo, meses: number): Periodo {
+  return periodoDe(sumarMeses(`${periodo}-01`, meses));
+}
+
 function mesAnteriorDe(periodo: Periodo): Periodo {
-  return sumarMeses(`${periodo}-01`, -1).slice(0, 7);
+  return mesDesplazado(periodo, -1);
 }
 
 async function indicadoresDe(
@@ -102,5 +116,92 @@ export async function tableroDelMes(periodo: Periodo, hoy: FechaDia): Promise<Ta
     ingresosPorMedio: actual.ingresos.porMedio,
     profesores: rankingDe(actual.resumen.items, anterior.resumen.items),
     alumnosPorEstado: estados,
+  };
+}
+
+const MESES_DE_SUELDO = 6;
+const ESTILO_DE_CLASES_UNICAS = 'Clases únicas';
+
+function filaPorHorario(
+  clases: repo.ClaseDelProfesor[],
+  asistencias: repo.AsistenciaDeClase[],
+): FilaPorHorario {
+  const primera = clases[0]!;
+  const ids = new Set(clases.map((c) => c.id));
+  const suyas = asistencias.filter((a) => ids.has(a.claseId));
+  return {
+    horarioId: primera.horarioId,
+    estilo: primera.estilo ?? ESTILO_DE_CLASES_UNICAS,
+    diaSemana: primera.diaSemana,
+    horaInicio: primera.horaInicio,
+    clases: clases.length,
+    asistencias: suyas.length,
+    monto: suyas.reduce((total, a) => total + aplicarPorcentaje(a.valorClase, a.porcentajeBp), 0),
+  };
+}
+
+function ordenarFilasPorHorario(filas: FilaPorHorario[]): FilaPorHorario[] {
+  return filas.sort(
+    (a, b) =>
+      Number(a.horarioId === null) - Number(b.horarioId === null) ||
+      (a.diaSemana ?? 0) - (b.diaSemana ?? 0) ||
+      (a.horaInicio ?? '').localeCompare(b.horaInicio ?? ''),
+  );
+}
+
+async function sueldoDelProfesor(profesorId: number, periodo: Periodo, hoy: FechaDia): Promise<number> {
+  const resumen = await resumenDelPeriodo(periodo, hoy);
+  const item = resumen.items.find((i) => i.profesor.id === profesorId);
+  return item === undefined ? 0 : sueldoDe(item);
+}
+
+export async function tableroDelProfesor(
+  profesorId: number,
+  periodo: Periodo,
+  hoy: FechaDia,
+): Promise<TableroDelProfesor> {
+  const { desde, hasta } = rangoDelPeriodo(periodo);
+  const periodosDeSueldo = Array.from({ length: MESES_DE_SUELDO }, (_, i) =>
+    mesDesplazado(periodo, i - (MESES_DE_SUELDO - 1)),
+  );
+  const [profesor, resumen, clasesDelMes, asistenciasDelMes, recibidas, detalle, sueldos] = await Promise.all([
+    obtenerProfesor(profesorId, hoy),
+    resumenDelPeriodo(periodo, hoy),
+    repo.listarClasesDelProfesor(db, profesorId, desde, hasta),
+    repo.listarAsistenciasDelProfesor(db, profesorId, desde, hasta),
+    repo.contarSuplenciasRecibidas(db, profesorId, desde, hasta, hoy),
+    detalleDelPeriodo(profesorId, periodo),
+    Promise.all(periodosDeSueldo.map((p) => sueldoDelProfesor(profesorId, p, hoy))),
+  ]);
+  const item = resumen.items.find((i) => i.profesor.id === profesorId);
+  const canceladas = clasesDelMes.filter((c) => c.estado === 'cancelada');
+  const dictadas = clasesDelMes.filter((c) => c.estado !== 'cancelada' && c.fecha <= hoy);
+  const idsDictadas = new Set(dictadas.map((c) => c.id));
+  const asistencias = asistenciasDelMes.filter((a) => idsDictadas.has(a.claseId));
+
+  return {
+    periodo,
+    profesor: {
+      id: profesor.id,
+      nombre: profesor.nombre,
+      apellido: profesor.apellido,
+      aliasCbu: profesor.aliasCbu,
+      porcentajeBp: profesor.porcentajeVigenteBp,
+    },
+    liquidacion: item?.liquidacion ?? null,
+    montoCalculado: item?.montoCalculado ?? 0,
+    clasesDictadas: dictadas.length,
+    clasesCanceladas: canceladas.length,
+    asistencias: asistencias.length,
+    alumnosDistintos: new Set(asistencias.map((a) => a.alumnoId)).size,
+    suplenciasDadas: dictadas.filter((c) => c.titularId !== null && c.titularId !== profesorId).length,
+    suplenciasRecibidas: recibidas,
+    sueldoPorMes: periodosDeSueldo.map((p, i) => ({ periodo: p, monto: sueldos[i]! })),
+    porHorario: ordenarFilasPorHorario(
+      [...Map.groupBy(dictadas, (c) => c.horarioId).values()].map((deHorario) =>
+        filaPorHorario(deHorario, asistencias),
+      ),
+    ),
+    clases: detalle,
   };
 }
