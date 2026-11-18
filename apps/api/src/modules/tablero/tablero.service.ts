@@ -1,4 +1,6 @@
 import type {
+  ClaseDelMes,
+  DetalleDeClase,
   EstadoPack,
   FilaDelRanking,
   FilaPorHorario,
@@ -155,6 +157,21 @@ async function sueldoDelProfesor(profesorId: number, periodo: Periodo, hoy: Fech
   return item === undefined ? 0 : sueldoDe(item);
 }
 
+function clasesConAlumnos(detalle: DetalleDeClase[], alumnos: repo.AlumnoEnClase[]): ClaseDelMes[] {
+  const porClase = Map.groupBy(alumnos, (a) => a.claseId);
+  return detalle.map((deClase) => ({
+    ...deClase,
+    alumnos: (porClase.get(deClase.claseId) ?? []).map((a) => ({
+      alumnoId: a.alumnoId,
+      nombre: a.nombre,
+      apellido: a.apellido,
+      pack: a.pack,
+      valorClase: a.valorClase,
+      parte: aplicarPorcentaje(a.valorClase, a.porcentajeBp),
+    })),
+  }));
+}
+
 export async function tableroDelProfesor(
   profesorId: number,
   periodo: Periodo,
@@ -164,13 +181,14 @@ export async function tableroDelProfesor(
   const periodosDeSueldo = Array.from({ length: MESES_DE_SUELDO }, (_, i) =>
     mesDesplazado(periodo, i - (MESES_DE_SUELDO - 1)),
   );
-  const [profesor, resumen, clasesDelMes, asistenciasDelMes, recibidas, detalle, sueldos] = await Promise.all([
+  const [profesor, resumen, clasesDelMes, asistenciasDelMes, recibidas, detalle, alumnosDeLasClases, sueldos] = await Promise.all([
     obtenerProfesor(profesorId, hoy),
     resumenDelPeriodo(periodo, hoy),
     repo.listarClasesDelProfesor(db, profesorId, desde, hasta),
     repo.listarAsistenciasDelProfesor(db, profesorId, desde, hasta),
     repo.contarSuplenciasRecibidas(db, profesorId, desde, hasta, hoy),
     detalleDelPeriodo(profesorId, periodo),
+    repo.listarAlumnosDeLasClases(db, profesorId, desde, hasta),
     Promise.all(
       periodosDeSueldo.map((p) => (p === periodo ? null : sueldoDelProfesor(profesorId, p, hoy))),
     ),
@@ -210,6 +228,6 @@ export async function tableroDelProfesor(
         filaPorHorario(deHorario, asistencias),
       ),
     ),
-    clases: detalle,
+    clases: clasesConAlumnos(detalle, alumnosDeLasClases),
   };
 }

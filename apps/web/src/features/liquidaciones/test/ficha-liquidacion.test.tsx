@@ -36,8 +36,8 @@ const FICHA_DE_IARU: TableroDelProfesor = {
     { horarioId: null, estilo: 'Clase única', diaSemana: null, horaInicio: null, clases: 1, asistencias: 2, monto: 800 },
   ],
   clases: [
-    { claseId: 10, fecha: '2026-03-03', estilo: 'Salsa', asistentes: 3, monto: 1200 },
-    { claseId: 11, fecha: '2026-03-10', estilo: 'Salsa', asistentes: 5, monto: 2000 },
+    { claseId: 10, fecha: '2026-03-03', estilo: 'Salsa', asistentes: 3, monto: 1200, alumnos: [] },
+    { claseId: 11, fecha: '2026-03-10', estilo: 'Salsa', asistentes: 5, monto: 2000, alumnos: [] },
   ],
 };
 

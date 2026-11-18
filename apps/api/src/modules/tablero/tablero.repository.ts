@@ -1,6 +1,6 @@
-import { and, count, eq, exists, gte, lt, lte, ne, or } from 'drizzle-orm';
+import { and, asc, count, eq, exists, gte, lt, lte, ne, or } from 'drizzle-orm';
 import type { Ejecutor } from '../../db/client.ts';
-import { asistencia, clase, horario } from '../../db/schema.ts';
+import { alumno, asistencia, clase, horario, pack, pago } from '../../db/schema.ts';
 import type { FechaDia } from '../../lib/fechas.ts';
 import { horaHHMM } from '../../lib/postgres.ts';
 
@@ -69,6 +69,41 @@ export async function listarAsistenciasDelProfesor(
     .from(asistencia)
     .innerJoin(clase, eq(clase.id, asistencia.claseId))
     .where(and(eq(clase.profesorId, profesorId), gte(clase.fecha, desde), lt(clase.fecha, hasta)));
+}
+
+export type AlumnoEnClase = {
+  claseId: number;
+  alumnoId: number;
+  nombre: string;
+  apellido: string;
+  pack: string;
+  valorClase: number;
+  porcentajeBp: number;
+};
+
+export async function listarAlumnosDeLasClases(
+  ej: Ejecutor,
+  profesorId: number,
+  desde: FechaDia,
+  hasta: FechaDia,
+): Promise<AlumnoEnClase[]> {
+  return ej
+    .select({
+      claseId: asistencia.claseId,
+      alumnoId: asistencia.alumnoId,
+      nombre: alumno.nombre,
+      apellido: alumno.apellido,
+      pack: pack.nombre,
+      valorClase: asistencia.valorClase,
+      porcentajeBp: asistencia.porcentajeBp,
+    })
+    .from(asistencia)
+    .innerJoin(clase, eq(clase.id, asistencia.claseId))
+    .innerJoin(alumno, eq(alumno.id, asistencia.alumnoId))
+    .innerJoin(pago, eq(pago.id, asistencia.pagoId))
+    .innerJoin(pack, eq(pack.id, pago.packId))
+    .where(and(eq(clase.profesorId, profesorId), gte(clase.fecha, desde), lt(clase.fecha, hasta)))
+    .orderBy(asc(alumno.apellido), asc(alumno.nombre));
 }
 
 export async function contarSuplenciasRecibidas(

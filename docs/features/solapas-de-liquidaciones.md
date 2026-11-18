@@ -165,11 +165,11 @@ Casos que la tabla cubre por pedido de esta sección, por si un revisor los busc
 **Interfaces:**
 - Produce: `ClaseDelMes` y `AlumnoDeLaClase` exportados desde `@studio/shared`, y `TableroDelProfesor.clases: ClaseDelMes[]`.
 
-- [ ] **Paso 1:** escribir los dos tests de la API de la tabla y sumar `alumnos` a la respuesta completa del test de la ficha que ya existe.
-- [ ] **Paso 2:** correr `pnpm --filter @studio/api exec vitest run src/modules/tablero` y verificar que fallan porque falta `alumnos`.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan. Correr `pnpm typecheck`.
-- [ ] **Paso 5:** commit `feat(tablero): alumnos de cada clase en la ficha del profesor`.
+- [x] **Paso 1:** escribir los dos tests de la API de la tabla y sumar `alumnos` a la respuesta completa del test de la ficha que ya existe.
+- [x] **Paso 2:** correr `pnpm --filter @studio/api exec vitest run src/modules/tablero` y verificar que fallan porque falta `alumnos`.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan. Correr `pnpm typecheck`.
+- [x] **Paso 5:** commit `feat(tablero): alumnos de cada clase en la ficha del profesor`.
 
 ### Tarea 2: Solapas, resumen sin acciones y botón de volver
 

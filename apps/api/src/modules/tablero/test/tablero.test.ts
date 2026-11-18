@@ -37,6 +37,7 @@ let erik: Profesor;
 let iaru: Profesor;
 let martina: Alumno;
 let bruno: Alumno;
+let joaquin: Alumno;
 let lucia: Alumno;
 let packX4: Pack;
 let claseSuelta: Pack;
@@ -82,7 +83,7 @@ beforeEach(async () => {
   const clase12DeMarzo = await crearClaseDeTest(jazz.id, '2026-03-12');
 
   martina = await crearAlumnoDeTest({ nombre: 'Martina', apellido: 'García' });
-  const joaquin = await crearAlumnoDeTest({ nombre: 'Joaquín', apellido: 'Pérez' });
+  joaquin = await crearAlumnoDeTest({ nombre: 'Joaquín', apellido: 'Pérez' });
   bruno = await crearAlumnoDeTest({ nombre: 'Bruno', apellido: 'Díaz' });
   lucia = await crearAlumnoDeTest({ nombre: 'Lucía', apellido: 'Gómez' });
   const sofia = await crearAlumnoDeTest({ nombre: 'Sofía', apellido: 'Ruiz' });
@@ -363,9 +364,37 @@ describe('GET /api/tablero/profesores/:id', () => {
         },
       ],
       clases: [
-        { claseId: clasePrincipal.id, fecha: '2026-04-01', estilo: 'Contemporáneo', asistentes: 2, monto: 2080 },
-        { claseId: suplenciaDeJazz.id, fecha: '2026-04-02', estilo: 'Jazz', asistentes: 1, monto: 1040 },
-        { claseId: unica.id, fecha: '2026-04-04', estilo: 'Taller', asistentes: 1, monto: 1040 },
+        {
+          claseId: clasePrincipal.id,
+          fecha: '2026-04-01',
+          estilo: 'Contemporáneo',
+          asistentes: 2,
+          monto: 2080,
+          alumnos: [
+            { alumnoId: martina.id, nombre: 'Martina', apellido: 'García', pack: 'Pack x4', valorClase: 1300, parte: 1040 },
+            { alumnoId: lucia.id, nombre: 'Lucía', apellido: 'Gómez', pack: 'Pack x4', valorClase: 1300, parte: 1040 },
+          ],
+        },
+        {
+          claseId: suplenciaDeJazz.id,
+          fecha: '2026-04-02',
+          estilo: 'Jazz',
+          asistentes: 1,
+          monto: 1040,
+          alumnos: [
+            { alumnoId: martina.id, nombre: 'Martina', apellido: 'García', pack: 'Pack x4', valorClase: 1300, parte: 1040 },
+          ],
+        },
+        {
+          claseId: unica.id,
+          fecha: '2026-04-04',
+          estilo: 'Taller',
+          asistentes: 1,
+          monto: 1040,
+          alumnos: [
+            { alumnoId: lucia.id, nombre: 'Lucía', apellido: 'Gómez', pack: 'Pack x4', valorClase: 1300, parte: 1040 },
+          ],
+        },
       ],
     });
   });
@@ -419,6 +448,59 @@ describe('GET /api/tablero/profesores/:id', () => {
         asistencias: 1,
         monto: 1040,
       },
+    ]);
+  });
+
+  it('trae en cada clase a sus alumnos por apellido, con pack o clase suelta y la parte con el porcentaje copiado', async () => {
+    const aguirre = await crearAlumnoDeTest({ nombre: 'Abel', apellido: 'Aguirre' });
+    await pagar(aguirre, claseSuelta, '2026-03-10');
+    const [claseDel10] = await db.select({ id: clase.id, fecha: clase.fecha }).from(clase).where(eq(clase.fecha, '2026-03-10'));
+    await asistir(claseDel10!, aguirre);
+    await asistir(claseDel10!, martina);
+
+    const respuesta = await get(`/api/tablero/profesores/${erik.id}?periodo=2026-03`);
+
+    expect(respuesta.json().clases).toEqual([
+      {
+        claseId: expect.any(Number),
+        fecha: '2026-03-03',
+        estilo: 'Hip-Hop',
+        asistentes: 1,
+        monto: 650,
+        alumnos: [
+          { alumnoId: martina.id, nombre: 'Martina', apellido: 'García', pack: 'Pack x4', valorClase: 1300, parte: 650 },
+        ],
+      },
+      {
+        claseId: claseDel10!.id,
+        fecha: '2026-03-10',
+        estilo: 'Hip-Hop',
+        asistentes: 3,
+        monto: 2150,
+        alumnos: [
+          { alumnoId: aguirre.id, nombre: 'Abel', apellido: 'Aguirre', pack: 'Clase suelta', valorClase: 1500, parte: 750 },
+          { alumnoId: martina.id, nombre: 'Martina', apellido: 'García', pack: 'Pack x4', valorClase: 1300, parte: 650 },
+          { alumnoId: joaquin.id, nombre: 'Joaquín', apellido: 'Pérez', pack: 'Clase suelta', valorClase: 1500, parte: 750 },
+        ],
+      },
+    ]);
+  });
+
+  it('la suma de las partes de cada clase es su monto', async () => {
+    await armarAbrilDeErik();
+
+    const respuesta = await get(`/api/tablero/profesores/${erik.id}?periodo=2026-04`);
+
+    const sumas = respuesta
+      .json()
+      .clases.map((c: { monto: number; alumnos: { parte: number }[] }) => ({
+        monto: c.monto,
+        partes: c.alumnos.reduce((total, a) => total + a.parte, 0),
+      }));
+    expect(sumas).toEqual([
+      { monto: 2080, partes: 2080 },
+      { monto: 1040, partes: 1040 },
+      { monto: 1040, partes: 1040 },
     ]);
   });
 

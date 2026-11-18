@@ -34,6 +34,17 @@ export type FilaPorHorario = {
   monto: number;
 };
 
+export type AlumnoDeLaClase = {
+  alumnoId: number;
+  nombre: string;
+  apellido: string;
+  pack: string;
+  valorClase: number;
+  parte: number;
+};
+
+export type ClaseDelMes = DetalleDeClase & { alumnos: AlumnoDeLaClase[] };
+
 export type TableroDelProfesor = {
   periodo: string;
   profesor: { id: number; nombre: string; apellido: string; aliasCbu: string | null; porcentajeBp: number | null };
@@ -47,5 +58,5 @@ export type TableroDelProfesor = {
   suplenciasRecibidas: number;
   sueldoPorMes: { periodo: string; monto: number }[];
   porHorario: FilaPorHorario[];
-  clases: DetalleDeClase[];
+  clases: ClaseDelMes[];
 };
