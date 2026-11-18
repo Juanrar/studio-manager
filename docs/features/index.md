@@ -38,6 +38,7 @@ Estado de cada feature de Studio Manager. Este archivo es la fuente de verdad de
 | 23 | [Ficha del profesor con sus clases](ficha-del-profesor.md) | lista | 15, 20 |
 | 31 | [Agenda en lista](agenda-en-lista.md) | lista | 25 |
 | 32 | [Resumen del alumno en una ventana](resumen-del-alumno.md) | lista | 21 |
+| 37 | [Tablero de liquidaciones](tablero-de-liquidaciones.md) | en curso | 16, 23 |
 
 ## Grilla semanal
 
