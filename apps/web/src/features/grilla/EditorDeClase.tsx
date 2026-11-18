@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { diaSemanaIso } from '@studio/shared';
-import { Aviso, Boton, BotonIcono, Campo, Entrada, SelectorDeHora, Selector } from '../../components/ui/index.tsx';
+import { Aviso, Boton, BotonIcono, BuscadorDeOpciones, Campo, Entrada, SelectorDeHora, Selector } from '../../components/ui/index.tsx';
 import { nombreDelDia } from '../../lib/formato.ts';
 import { useProfesores } from '../profesores/api.ts';
 
@@ -36,8 +36,9 @@ export function EditorDeClase({
   const [borrador, setBorrador] = useState(inicial);
   const [error, setError] = useState<string | null>(null);
   const cambiar = (cambios: Partial<Borrador>) => setBorrador((anterior) => ({ ...anterior, ...cambios }));
+  // Un profesor dado de baja no aparece en la lista: si es el de la clase, el campo lo muestra como "El profesor de la clase".
   const opciones = profesores.data ?? [];
-  const incluyeActual = opciones.some((profesor) => profesor.id === borrador.profesorId);
+  // Una clase nueva arranca sin profesor: toma el primero de la lista cuando llega.
   const primero = opciones[0]?.id;
   useEffect(() => {
     if (primero !== undefined) setBorrador((anterior) => (anterior.profesorId === 0 ? { ...anterior, profesorId: primero } : anterior));
@@ -68,14 +69,14 @@ export function EditorDeClase({
         <div className="col-span-2">
           <Campo etiqueta="Profesor">
             {(id) => (
-              <Selector id={id} value={borrador.profesorId} onChange={(e) => cambiar({ profesorId: Number(e.target.value) })}>
-                {!incluyeActual && <option value={borrador.profesorId}>{borrador.profesorId === 0 ? 'Elegí un profesor' : 'El profesor de la clase'}</option>}
-                {opciones.map((profesor) => (
-                  <option key={profesor.id} value={profesor.id}>
-                    {profesor.nombre} {profesor.apellido}
-                  </option>
-                ))}
-              </Selector>
+              <BuscadorDeOpciones
+                id={id}
+                etiqueta="Profesor"
+                valor={borrador.profesorId}
+                textoDelValor={borrador.profesorId === 0 ? '' : 'El profesor de la clase'}
+                opciones={opciones.map((profesor) => ({ valor: profesor.id, texto: `${profesor.nombre} ${profesor.apellido}` }))}
+                alElegir={(profesorId) => cambiar({ profesorId })}
+              />
             )}
           </Campo>
         </div>

@@ -124,6 +124,36 @@ describe('/grilla: editar una semana', () => {
     );
   });
 
+  // Si el campo de profesor volviera a ser una lista desplegable, no habría nada que tipear ni filtrar.
+  it('el profesor se busca por nombre: las sugerencias aparecen al tipear, sin tildes ni mayúsculas', async () => {
+    const { usuario, pedidos } = grillaEditable();
+
+    await usuario.click(await screen.findByRole('button', { name: /^Hip-Hop/ }));
+    const editor = await screen.findByRole('dialog', { name: 'Hip-Hop Inicial' });
+    const campo = within(editor).getByRole('combobox', { name: 'Profesor' });
+    expect(campo).toHaveValue('Erik Zapata');
+
+    await usuario.click(campo);
+    expect(screen.queryByRole('listbox', { name: 'Profesor' })).not.toBeInTheDocument();
+
+    await usuario.keyboard('SPERO');
+    expect(within(screen.getByRole('listbox', { name: 'Profesor' })).getAllByRole('option').map((opcion) => opcion.textContent)).toEqual(['Iaru Speroni']);
+
+    await usuario.keyboard('{Enter}');
+    expect(campo).toHaveValue('Iaru Speroni');
+    await usuario.click(within(editor).getByRole('button', { name: 'Guardar' }));
+
+    await waitFor(() =>
+      expect(pedidos).toEqual([
+        [
+          'PATCH',
+          '/api/clases/50',
+          { fecha: '2026-03-12', horaInicio: '19:00', horaFin: '20:30', estilo: 'Hip-Hop', nivel: 'Inicial', profesorId: 2 },
+        ],
+      ]),
+    );
+  });
+
   it('"Deshacer" vuelve la clase a como estaba', async () => {
     const { usuario, pedidos } = grillaEditable();
 
