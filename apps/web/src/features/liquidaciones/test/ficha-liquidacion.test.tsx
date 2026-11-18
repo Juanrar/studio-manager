@@ -91,12 +91,12 @@ describe('/liquidaciones/:profesorId', () => {
     expect(indicador('Asistentes por clase').getByText('—')).toBeInTheDocument();
   });
 
-  it('dibuja el sueldo de los últimos 6 meses con un título por barra', async () => {
+  it('dibuja el sueldo de los últimos 6 meses con el mes y el monto en el nombre de cada barra', async () => {
     abrirFicha();
 
     const grafico = await screen.findByRole('region', { name: 'Sueldo de los últimos 6 meses' });
-    const titulos = [...grafico.querySelectorAll('title')].map((titulo) => titulo.textContent);
-    expect(titulos).toEqual([
+    const nombres = [...grafico.querySelectorAll('rect[aria-label]')].map((barra) => barra.getAttribute('aria-label'));
+    expect(nombres).toEqual([
       'Octubre 2025: $0',
       'Noviembre 2025: $1.000',
       'Diciembre 2025: $2.000',
