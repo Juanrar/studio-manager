@@ -1,6 +1,6 @@
 # Tablero de liquidaciones
 
-**Estado:** en curso  
+**Estado:** lista  
 **Depende de:** frontend-liquidaciones, ficha-del-profesor  
 **Listo cuando:** `pnpm test` y `pnpm typecheck` pasan; admin abre `/liquidaciones`, ve el resumen del mes con indicadores, actividad diaria, ranking de profesores y estado de los alumnos, y desde el ranking abre la ficha de un profesor en ese mes, donde cierra, marca pagada y descarga el CSV.
 
@@ -186,6 +186,6 @@ Propuesto en la misma conversación y dejado afuera de esta feature para que la 
 
 ## Verificación final
 
-- [ ] `pnpm test` y `pnpm typecheck` pasan.
-- [ ] `pnpm e2e` pasa: recorre la liquidación y tiene que seguir encontrando cerrar y marcar pagada.
+- [x] `pnpm test` y `pnpm typecheck` pasan.
+- [x] `pnpm e2e` pasa: recorre la liquidación y tiene que seguir encontrando cerrar y marcar pagada.
 - [ ] Mirar `/liquidaciones` y una ficha en Chromium con la base de desarrollo, en el tema existente (`index.css` solo define el oscuro).
