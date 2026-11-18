@@ -6,6 +6,8 @@ import { conversar } from './asistente.service.ts';
 import type { ModeloDeLenguaje } from './modelo.ts';
 
 export async function rutasAsistente(app: FastifyInstance, { modelo }: { modelo: ModeloDeLenguaje | null }): Promise<void> {
+  app.get('/api/asistente/disponible', { preHandler: requerirRol('recepcion') }, async () => ({ disponible: modelo !== null }));
+
   app.post('/api/asistente/mensajes', { preHandler: requerirRol('recepcion') }, async (request) => {
     const entrada = mensajeAlAsistenteSchema.parse(request.body);
     if (modelo === null) {

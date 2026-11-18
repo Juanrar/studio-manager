@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 import type { Rol, UsuarioPublico } from '@studio/shared';
+import { useAsistenteDisponible } from '../features/asistente/api.ts';
 import { useLogout } from '../features/auth/api.ts';
 import { NOMBRES_ROL } from '../lib/formato.ts';
 import { BotonIcono, Icono, type NombreIcono } from './ui/index.tsx';
@@ -34,7 +35,12 @@ const SECCIONES: { titulo: string; rol: Rol; opciones: Opcion[] }[] = [
 export function Layout({ usuario, children }: { usuario: UsuarioPublico; children: ReactNode }) {
   const navegar = useNavigate();
   const logout = useLogout();
-  const secciones = SECCIONES.filter((seccion) => seccion.rol === 'recepcion' || usuario.rol === 'admin');
+  const asistente = useAsistenteDisponible();
+  const asistenteVisible = asistente.data?.disponible === true;
+  const secciones = SECCIONES.filter((seccion) => seccion.rol === 'recepcion' || usuario.rol === 'admin').map((seccion) => ({
+    ...seccion,
+    opciones: seccion.opciones.filter((opcion) => opcion.ruta !== '/asistente' || asistenteVisible),
+  }));
 
   return (
     <div className="flex h-screen flex-col md:flex-row">

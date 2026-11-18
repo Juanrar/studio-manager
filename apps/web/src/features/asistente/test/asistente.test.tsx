@@ -337,7 +337,7 @@ describe('/asistente', () => {
 
     expect(await screen.findByRole('heading', { name: '¿Por dónde empezamos?' })).toBeInTheDocument();
     expect(screen.getByText('Hola, Rita')).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: 'Menú' })).toHaveTextContent('Asistente');
+    expect(await within(screen.getByRole('navigation', { name: 'Menú' })).findByRole('link', { name: 'Asistente' })).toBeInTheDocument();
     const sugerencias = within(screen.getByRole('group', { name: 'Sugerencias' })).getAllByRole('button');
     expect(sugerencias.map((boton) => boton.textContent)).toEqual(['Clases del jueves', 'Clases de un profesor']);
   });

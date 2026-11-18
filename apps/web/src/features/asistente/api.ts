@@ -1,6 +1,14 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AltaDeProfesorInput, MensajeAlAsistenteInput, Profesor, RespuestaDelAsistente } from '@studio/shared';
 import { api } from '../../lib/api.ts';
+
+export function useAsistenteDisponible() {
+  return useQuery({
+    queryKey: ['asistente', 'disponible'],
+    queryFn: () => api.get<{ disponible: boolean }>('/asistente/disponible'),
+    staleTime: Infinity,
+  });
+}
 
 export function useConversar() {
   return useMutation({

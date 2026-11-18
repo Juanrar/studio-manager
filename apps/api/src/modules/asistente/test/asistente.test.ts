@@ -282,3 +282,26 @@ describe('POST /api/asistente/mensajes', () => {
     ]);
   });
 });
+
+describe('GET /api/asistente/disponible', () => {
+  it('responde disponible: false cuando la API no tiene modelo, así la web oculta la solapa', async () => {
+    await crearUsuarioDeTest(RECEPCION);
+    app = await crearAppDeTest({ modelo: null });
+    const cookie = await loguear(app, RECEPCION.email, RECEPCION.password);
+
+    const respuesta = await app.inject({ method: 'GET', url: '/api/asistente/disponible', headers: { cookie } });
+
+    expect(respuesta.statusCode).toBe(200);
+    expect(respuesta.json()).toEqual({ disponible: false });
+  });
+
+  it('responde disponible: true cuando hay modelo configurado', async () => {
+    await crearUsuarioDeTest(RECEPCION);
+    app = await crearAppDeTest({ modelo: crearModeloFalso([]) });
+    const cookie = await loguear(app, RECEPCION.email, RECEPCION.password);
+
+    const respuesta = await app.inject({ method: 'GET', url: '/api/asistente/disponible', headers: { cookie } });
+
+    expect(respuesta.json()).toEqual({ disponible: true });
+  });
+});
