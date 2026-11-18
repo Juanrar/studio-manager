@@ -203,11 +203,11 @@ Casos que la tabla cubre por pedido de esta sección, por si un revisor los busc
 - Consume: `PropsDeSolapa` (tarea 2), `ClaseDelMes` (tarea 1).
 - Produce: `ListaDeProfesores`, `detalleACsv`, `nombreDelCsv`, que usa la tarea 4.
 
-- [ ] **Paso 1:** escribir los tests de CSV y de Liquidar de la tabla.
-- [ ] **Paso 2:** correrlos y verificar que fallan.
-- [ ] **Paso 3:** implementar.
-- [ ] **Paso 4:** correr los tests y verificar que pasan.
-- [ ] **Paso 5:** commit `feat(liquidaciones): solapa para liquidar con buscador`.
+- [x] **Paso 1:** escribir los tests de CSV y de Liquidar de la tabla.
+- [x] **Paso 2:** correrlos y verificar que fallan.
+- [x] **Paso 3:** implementar.
+- [x] **Paso 4:** correr los tests y verificar que pasan.
+- [x] **Paso 5:** commit `feat(liquidaciones): solapa para liquidar con buscador`.
 
 ### Tarea 4: Solapa Estadísticas, redirección y e2e
 

@@ -227,7 +227,7 @@ describe('/liquidaciones/:profesorId', () => {
 
     expect(descargarCsv).toHaveBeenCalledWith(
       'sueldo-speroni-iaru-2026-03.csv',
-      'Fecha;Clase;Asistentes;Monto\r\n03/03/2026;Salsa;3;1200\r\n10/03/2026;Salsa;5;2000\r\nTotal;;8;3200',
+      'Fecha;Clase;Alumno;Pack;Valor de la clase;Parte del profesor\r\n03/03/2026;Salsa;3 alumnos;;;1200\r\n10/03/2026;Salsa;5 alumnos;;;2000\r\nTotal;;;;;3200',
     );
   });
 });

@@ -4,6 +4,7 @@ import { Aviso, Cargando, Entrada, Pagina, Pestanas, type Pestana } from '../../
 import { mensajeDeError } from '../../lib/api.ts';
 import { formatearPeriodo } from '../../lib/formato.ts';
 import { useTablero } from './api.ts';
+import { Liquidar } from './Liquidar.tsx';
 import { ResumenDelMes } from './ResumenDelMes.tsx';
 
 export type PropsDeSolapa = {
@@ -49,6 +50,10 @@ export function LiquidacionesPage() {
     );
   }
 
+  function propsDeSolapa(datos: TableroDelMes): PropsDeSolapa {
+    return { tablero: datos, periodo, profesorId, alElegir: (id) => cambiar('profesor', String(id), true) };
+  }
+
   return (
     <Pagina
       titulo={
@@ -72,14 +77,8 @@ export function LiquidacionesPage() {
           <div className="p-4">
             {tablero.isPending && <Cargando />}
             {tablero.isError && <Aviso>{mensajeDeError(tablero.error)}</Aviso>}
-            {tablero.data && solapa === 'resumen' && (
-              <ResumenDelMes
-                tablero={tablero.data}
-                periodo={periodo}
-                profesorId={profesorId}
-                alElegir={(id) => cambiar('profesor', String(id), true)}
-              />
-            )}
+            {tablero.data && solapa === 'resumen' && <ResumenDelMes {...propsDeSolapa(tablero.data)} />}
+            {tablero.data && solapa === 'liquidar' && <Liquidar {...propsDeSolapa(tablero.data)} />}
           </div>
         </Pestanas>
       </div>

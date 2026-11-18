@@ -12,7 +12,7 @@ import {
   nombreDelDia,
 } from '../../lib/formato.ts';
 import { useCerrarLiquidacion, useMarcarPagada, useTableroDelProfesor } from './api.ts';
-import { descargarCsv, detalleACsv } from './csv.ts';
+import { descargarCsv, detalleACsv, nombreDelCsv } from './csv.ts';
 import { Panel } from './Panel.tsx';
 
 const SIN_DATO = '—';
@@ -29,9 +29,7 @@ function nombreDelHorario(fila: FilaPorHorario): string {
 }
 
 function descargarClases(ficha: TableroDelProfesor) {
-  const { profesor, periodo } = ficha;
-  const nombreArchivo = `sueldo-${profesor.apellido}-${profesor.nombre}-${periodo}.csv`.toLowerCase();
-  descargarCsv(nombreArchivo, detalleACsv(ficha.clases));
+  descargarCsv(nombreDelCsv(ficha), detalleACsv(ficha.clases));
 }
 
 export function FichaLiquidacionPage() {

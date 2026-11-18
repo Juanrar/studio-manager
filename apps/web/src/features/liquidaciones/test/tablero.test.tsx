@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Indicadores, TableroDelMes } from '@studio/shared';
+import type { Indicadores, TableroDelMes, TableroDelProfesor } from '@studio/shared';
 import { ADMIN, conSesion, renderizarEn } from '../../../../test/render.tsx';
 import { servidor } from '../../../../test/servidor.ts';
 import { celdasDe } from '../../../../test/tabla.ts';
@@ -67,6 +67,24 @@ function marzo(tablero: TableroDelMes = TABLERO_DE_MARZO) {
   conSesion(ADMIN);
   servidor.use(http.get('/api/tablero', () => HttpResponse.json(tablero)));
   return renderizarEn('/liquidaciones?periodo=2026-03');
+}
+
+function fichaDeIaru(periodo: string): TableroDelProfesor {
+  return {
+    periodo,
+    profesor: { ...IARU, aliasCbu: null, porcentajeBp: 5000 },
+    liquidacion: null,
+    montoCalculado: 0,
+    clasesDictadas: 0,
+    clasesCanceladas: 0,
+    asistencias: 0,
+    alumnosDistintos: 0,
+    suplenciasDadas: 0,
+    suplenciasRecibidas: 0,
+    sueldoPorMes: [],
+    porHorario: [],
+    clases: [],
+  };
 }
 
 function indicador(nombre: string) {
@@ -206,14 +224,24 @@ describe('/liquidaciones', () => {
     expect(screen.queryByRole('region', { name: 'Ranking de profesores' })).not.toBeInTheDocument();
   });
 
-  it('cambiar el mes conserva la solapa y el profesor', async () => {
+  it('cambiar el mes conserva la solapa y el profesor y pide sus datos del mes nuevo', async () => {
+    const periodosDelProfesor: (string | null)[] = [];
     conSesion(ADMIN);
-    servidor.use(http.get('/api/tablero', () => HttpResponse.json(TABLERO_DE_MARZO)));
+    servidor.use(
+      http.get('/api/tablero', () => HttpResponse.json(TABLERO_DE_MARZO)),
+      http.get('/api/tablero/profesores/2', ({ request }) => {
+        const periodo = new URL(request.url).searchParams.get('periodo');
+        periodosDelProfesor.push(periodo);
+        return HttpResponse.json(fichaDeIaru(periodo ?? ''));
+      }),
+    );
     const { router } = renderizarEn('/liquidaciones?periodo=2026-03&solapa=liquidar&profesor=2');
 
-    fireEvent.change(await screen.findByLabelText('Mes'), { target: { value: '2026-02' } });
+    await screen.findByRole('heading', { name: 'Iaru Speroni' });
+    fireEvent.change(screen.getByLabelText('Mes'), { target: { value: '2026-02' } });
 
     await waitFor(() => expect(router.state.location.search).toBe('?periodo=2026-02&solapa=liquidar&profesor=2'));
+    await waitFor(() => expect(periodosDelProfesor).toEqual(['2026-03', '2026-02']));
   });
 
   it('una solapa desconocida muestra Resumen', async () => {
