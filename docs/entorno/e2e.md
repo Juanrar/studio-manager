@@ -7,19 +7,20 @@
 - Usa el reloj real: crea la clase para el día de hoy en Buenos Aires.
 - Usa el puerto fijo 3100 (`PUERTO_E2E` en `e2e/entorno.ts`). Si otro proceso lo ocupa, Playwright no levanta la API. Cambiá el número para esa corrida y volvé atrás con `git checkout -- e2e/entorno.ts`. No cierres un proceso que no es de este proyecto.
 
-## Mirar la app con datos
+## `pnpm mirar`
 
-La base `studio_manager_e2e` sirve para mirar la app sin tocar la base de desarrollo: levantá la API con esa base en otro puerto y `WEB_DIST=../web/dist`.
+Levanta la app con datos y guarda capturas: ver el skill `verify` (`.claude/skills/verify/SKILL.md`) y `docs/mapa-de-pantallas.md`.
 
-Un script de capturas que vive fuera del repo carga Playwright con `createRequire('<repo>/e2e/package.json')`.
+- Usa la base `studio_manager_e2e`, igual que `pnpm e2e`: una corrida de una borra lo que dejó la otra. Con `--sin-preparar` reusa la base y busca los datos de ejemplo por nombre; si no están (por ejemplo, después de `pnpm e2e`), los carga.
+- Usa el puerto 3101, para no chocar con el 3100 de `pnpm e2e`. Si el puerto ya responde, sale sin levantar nada.
+- En Windows cierra la API con `taskkill /pid <pid> /T /F`: matar solo el `pnpm` deja vivo el `node.exe` de la API.
+- Desde Git Bash, `MSYS_NO_PATHCONV=1 pnpm mirar /alumnos`. Sin eso, la ruta llega como `C:/Program Files/Git/alumnos` y el script sale con código 2 y lo explica. Desde PowerShell no hace falta.
+- `fullPage: true` no muestra lo que queda abajo: el contenido de `Pagina` scrollea dentro de su contenedor, no la página. Por eso, si algún `.overflow-auto` tiene scroll, el script saca una segunda captura `-abajo` con todos esos contenedores al final. En la grilla, las clases de la tarde están en esa.
+- `/liquidaciones` sin `periodo` abre el mes anterior, vacío con los datos de ejemplo. Usá `"/liquidaciones?periodo=:periodo"`.
+- Una ruta de admin con `--rol recepcion` no redirige: muestra "No tenés permiso para ver esta pantalla.".
+- El título que imprime el resumen es el `innerText` del primer `h1`. Con la ficha del alumno abierta es "Alumnos", porque la ficha es una ventana sobre el listado.
 
-## Mirar una pantalla sin base
-
-Un script de Playwright fuera del repo puede simular la API con `page.route('**/api/**', ...)`, respondiendo `/api/auth/yo` con un admin. Sirve para capturas de una pantalla contra `pnpm dev:web`.
-
-`fullPage: true` no muestra lo que queda abajo: el contenido de `Pagina` scrollea dentro de su contenedor, no la página. Para ver el final, hacé scroll de los `.overflow-auto` con `page.evaluate` antes de la captura.
-
-Si el puerto 5173 está ocupado, `pnpm dev:web` arranca en 5174 y lo dice en su salida. Un `curl` a `localhost:5173` responde igual, porque contesta el otro proceso: las capturas van al puerto que imprimió Vite.
+Tiempos del 2026-11-21, medidos por el script, con `/alumnos /liquidaciones /grilla`: la corrida completa tarda 14,3 s (prepara la base y compila el frontend). Con `--sin-preparar`, tres corridas seguidas: 4,5 s, 4,4 s y 4,5 s. `pnpm` suma alrededor de 1 s al arrancar.
 
 ## Qué se verifica acá y no en jsdom
 

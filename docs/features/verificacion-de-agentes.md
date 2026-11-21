@@ -94,15 +94,26 @@ Los tests de propiedades se prueban rompiendo el código a propósito: se cambia
 - Crear: `e2e/mirar.ts`, `e2e/datos-de-ejemplo.ts`, `docs/mapa-de-pantallas.md`, `.claude/skills/verify/SKILL.md`
 - Modificar: `e2e/preparar.ts`, `e2e/package.json`, `package.json`, `.gitignore`, `docs/entorno/e2e.md`
 
-- [ ] **Paso 1:** cambiar `.gitignore` para versionar `.claude/settings.json`, `.claude/verificacion.json`, `.claude/hooks/` y `.claude/skills/verify/`, e ignorar `.claude/verificacion/` y `e2e/capturas/`. Verificar con `git check-ignore -v` que los otros skills, `worktrees/` y `settings.local.json` siguen ignorados.
-- [ ] **Paso 2:** pasar la preparación de la base de `preparar.ts` a una función exportada, con una opción para no compilar el frontend. `pnpm e2e` sigue igual.
-- [ ] **Paso 3:** escribir `datos-de-ejemplo.ts` y `mirar.ts`. Argumentos: una o más rutas, `--rol admin|recepcion` (por defecto admin), `--sin-preparar` (usa la base y el `dist` que ya están) y `--ancho <px>` para pantallas angostas. Antes de la captura hace scroll de los `.overflow-auto` (ver `docs/entorno/e2e.md`). En Windows cierra la API con `taskkill /pid <pid> /T /F`. Agregar `"mirar"` a `e2e/package.json` y a la raíz.
-- [ ] **Paso 4:** correr `pnpm mirar /alumnos /liquidaciones /grilla` y abrir las capturas con `Read`. Tienen que mostrar los datos de ejemplo. Verificar con `netstat -ano` que el puerto 3101 quedó libre.
-- [ ] **Paso 5:** romper a propósito una pantalla (por ejemplo, un `throw` en un componente), correr `pnpm mirar` sobre esa ruta y verificar que sale con código 1 y nombra el error. Volver atrás.
-- [ ] **Paso 6:** correr `pnpm mirar --sin-preparar` tres veces seguidas sobre las mismas rutas. Las tres pasan; anotar el tiempo de cada una en `docs/entorno/e2e.md`.
-- [ ] **Paso 7:** escribir `docs/mapa-de-pantallas.md` y `.claude/skills/verify/SKILL.md`. El skill dice: usarlo antes de cerrar una tarea que toca `apps/web/` o una respuesta de la API que una pantalla muestra; elegir las rutas con el mapa; leer cada captura con `Read`; comparar con lo que pide la feature; tres intentos fallidos y se avisa. Reemplazar en `docs/entorno/e2e.md` las notas de "scripts fuera del repo" por `pnpm mirar`.
-- [ ] **Paso 8:** correr `pnpm typecheck` y `pnpm test`, y verificar que pasan.
-- [ ] **Paso 9:** commit `feat(verificacion): skill verify y pnpm mirar para ver la app con datos`.
+- [x] **Paso 1:** cambiar `.gitignore` para versionar `.claude/settings.json`, `.claude/verificacion.json`, `.claude/hooks/` y `.claude/skills/verify/`, e ignorar `.claude/verificacion/` y `e2e/capturas/`. Verificar con `git check-ignore -v` que los otros skills, `worktrees/` y `settings.local.json` siguen ignorados.
+- [x] **Paso 2:** pasar la preparación de la base de `preparar.ts` a una función exportada, con una opción para no compilar el frontend. `pnpm e2e` sigue igual.
+- [x] **Paso 3:** escribir `datos-de-ejemplo.ts` y `mirar.ts`. Argumentos: una o más rutas, `--rol admin|recepcion` (por defecto admin), `--sin-preparar` (usa la base y el `dist` que ya están) y `--ancho <px>` para pantallas angostas. Antes de la captura hace scroll de los `.overflow-auto` (ver `docs/entorno/e2e.md`). En Windows cierra la API con `taskkill /pid <pid> /T /F`. Agregar `"mirar"` a `e2e/package.json` y a la raíz.
+- [x] **Paso 4:** correr `pnpm mirar /alumnos /liquidaciones /grilla` y abrir las capturas con `Read`. Tienen que mostrar los datos de ejemplo. Verificar con `netstat -ano` que el puerto 3101 quedó libre.
+- [x] **Paso 5:** romper a propósito una pantalla (por ejemplo, un `throw` en un componente), correr `pnpm mirar` sobre esa ruta y verificar que sale con código 1 y nombra el error. Volver atrás.
+- [x] **Paso 6:** correr `pnpm mirar --sin-preparar` tres veces seguidas sobre las mismas rutas. Las tres pasan; anotar el tiempo de cada una en `docs/entorno/e2e.md`.
+- [x] **Paso 7:** escribir `docs/mapa-de-pantallas.md` y `.claude/skills/verify/SKILL.md`. El skill dice: usarlo antes de cerrar una tarea que toca `apps/web/` o una respuesta de la API que una pantalla muestra; elegir las rutas con el mapa; leer cada captura con `Read`; comparar con lo que pide la feature; tres intentos fallidos y se avisa. Reemplazar en `docs/entorno/e2e.md` las notas de "scripts fuera del repo" por `pnpm mirar`.
+- [x] **Paso 8:** correr `pnpm typecheck` y `pnpm test`, y verificar que pasan.
+- [x] **Paso 9:** commit `feat(verificacion): skill verify y pnpm mirar para ver la app con datos`.
+
+Correcciones al plan hechas en la tarea 1 (2026-11-21):
+
+- `e2e/tsconfig.json` también cambia: suma `dom` a `lib`, porque `mirar.ts` usa `document` dentro de `page.evaluate`.
+- El script no hace scroll antes de la única captura: bajar hasta el final esconde la parte de arriba. Saca la captura de arriba y, si algún `.overflow-auto` tiene scroll, una segunda captura `-abajo`. En la grilla de 800 px de alto, las clases de la tarde solo se ven en esa.
+- Los ids de los datos de ejemplo dependen de lo que ya tenía la base, y `/liquidaciones` sin `periodo` abre el mes anterior, vacío con los datos de ejemplo. Por eso las rutas aceptan las marcas `:alumno`, `:alumno-sin-pack`, `:profesor`, `:clase` y `:periodo`, y el resumen imprime los ids.
+- `--rol recepcion` necesita un usuario de recepción: los datos de ejemplo crean `recepcion@estudio.test`. Sus credenciales están en `datos-de-ejemplo.ts`, no en `entorno.ts`, porque `pnpm e2e` no las usa.
+- Con `--sin-preparar`, el script busca los datos de ejemplo por nombre y los carga si faltan, por ejemplo después de `pnpm e2e`. Cargarlos dos veces duplicaría los alumnos y la asistencia fallaría.
+- Git Bash convierte `/alumnos` en `C:/Program Files/Git/alumnos` antes de que llegue a `pnpm`. El script reconoce una ruta de Windows y sale con código 2 pidiendo `MSYS_NO_PATHCONV=1`.
+- El paso 5 deja el `dist` compilado con el `throw`. Antes de las corridas con `--sin-preparar` del paso 6 hace falta una corrida completa para recompilar.
+- Para la tarea 5: con recepción, `/liquidaciones` no redirige. `SoloAdmin` muestra "No tenés permiso para ver esta pantalla.". El paso 1 de la tarea 5 queda corregido.
 
 ### Tarea 2: Reglas de verificación y `REVIEW.md`
 
@@ -151,7 +162,7 @@ Los tests de propiedades se prueban rompiendo el código a propósito: se cambia
 - Crear: `e2e/recepcion.spec.ts`, `e2e/pagos.spec.ts`
 - Modificar: `docs/entorno/e2e.md`, `docs/mapa-de-pantallas.md` si hace falta
 
-- [ ] **Paso 1:** `recepcion.spec.ts`: un usuario de recepción entra, ve solo su menú, abre la grilla, entra a una clase de hoy desde la grilla y anota a un alumno con pack. Un intento de ir a `/liquidaciones` lo saca de ahí.
+- [ ] **Paso 1:** `recepcion.spec.ts`: un usuario de recepción entra, ve solo su menú, abre la grilla, entra a una clase de hoy desde la grilla y anota a un alumno con pack. Un intento de ir a `/liquidaciones` muestra "No tenés permiso para ver esta pantalla." y no muestra datos de liquidaciones.
 - [ ] **Paso 2:** `pagos.spec.ts`: se registra un pack a un alumno, se anula con motivo y el listado de alumnos deja de mostrarlo vigente.
 - [ ] **Paso 3:** los datos que necesita cada spec los crea el mismo spec por la API o la pantalla. Ningún spec depende de lo que dejó otro.
 - [ ] **Paso 4:** correr `pnpm e2e` y verificar que pasan los tres specs. Correrlo dos veces más; si uno falla una sola vez, se busca la causa antes de seguir (regla de tests intermitentes).

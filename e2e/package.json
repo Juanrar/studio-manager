@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "e2e": "tsx preparar.ts && playwright test",
+    "mirar": "tsx mirar.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
