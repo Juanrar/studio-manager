@@ -76,6 +76,17 @@ Decisiones tomadas con el estudio el 2026-11-21. No se vuelven a discutir en la 
 | En modo `observar` el control sale con 0 y escribe en `registro.jsonl`; en `bloquear` sale con 2; en `apagado` no escribe nada | Unitario de hook | Confundir los modos |
 | En modo `bloquear`, el tercer commit de la sesión después de dos bloqueos pasa y queda registrado como liberado | Unitario de hook | Perder la válvula y dejar al agente trabado |
 | `al-terminar` sale con 0 sin correr nada si `stop_hook_active` es `true` | Unitario de hook | Un ciclo infinito de `Stop` |
+| `registrar-verificacion` reconoce los comandos con `&&`, `;`, una tubería, `MSYS_NO_PATHCONV=1` delante y `pnpm run`, y guarda `-r` y `--filter=` con su filtro | Unitario de hook | Partir el comando solo por espacios, o perder el filtro y contar un test parcial como completo |
+| `registrar-verificacion` cuenta `packages/` y `e2e/` con `Write` y `MultiEdit`, acepta la raíz con otras mayúsculas y barras, e ignora un `apps/` de otro proyecto | Unitario de hook | Comparar rutas con `startsWith` sin normalizar las de Windows |
+| El control marca un commit con código en stage si `pnpm test` y `pnpm typecheck` no corrieron nunca en la sesión | Unitario de hook | Tomar "sin cambio registrado" como "verificado" |
+| Un `pnpm --filter X test` no reemplaza a `pnpm test` | Unitario de hook | Aceptar un test parcial para el control |
+| Un commit sin código en stage pasa en `bloquear` con solo la línea `Verificado:` | Unitario de hook | Pedir tests para un commit de documentación |
+| Sin `.claude/verificacion.json`, el control observa | Unitario de hook | Bloquear o apagar el control si falta el archivo |
+| Un commit verificado vuelve a cero los bloqueos | Unitario de hook | Liberar todo después del primer par de bloqueos |
+| El control lee el mensaje de `git commit -F archivo` | Unitario de hook | Buscar la línea solo en el texto del comando |
+| El control suma las rutas de un `git add` del mismo comando, y con `git add -A` o `git commit -a` usa `git status` | Unitario de hook | Mirar solo el stage, que está vacío cuando el hook corre antes del `git add` |
+| El control ignora `git status`, `echo "git commit ..."` y `git commit-tree` | Unitario de hook | Reconocer el commit con un `includes` |
+| `al-terminar` no corre `pnpm typecheck` sin cambios de código, sale con 0 si pasa, y con 2 y las últimas 40 líneas si falla | Unitario de hook | Correr typecheck en cada vuelta, o mandar la salida entera o ninguna |
 | `aplicarPorcentaje(m, bp)` da entre 0 y `m`, da `m` con 10000, crece con `bp`, y `aplicarPorcentaje(m, bp) + aplicarPorcentaje(m, 10000 - bp)` se aleja de `m` en 1 como mucho | Propiedad, `fast-check` | Cambiar el redondeo, o dividir por 100 en lugar de 10000 |
 | `dividirEnPartes(t, n) * n` se aleja de `t` en `n / 2` como mucho | Propiedad | Truncar en lugar de redondear |
 | `sumarDias(sumarDias(f, n), -n)` es `f`, y el resultado siempre es una fecha válida | Propiedad | Un error de fin de mes o de año bisiesto |
@@ -140,14 +151,26 @@ Correcciones al plan hechas en la tarea 2 (2026-11-21):
 - Crear: `.claude/settings.json`, `.claude/verificacion.json`, `.claude/hooks/registrar-verificacion.mjs`, `.claude/hooks/control-de-commit.mjs`, `.claude/hooks/al-terminar.mjs`, `.claude/hooks/estado.mjs`, `.claude/hooks/test/*.test.mjs`
 - Modificar: `package.json`, `docs/entorno/verificacion.md`
 
-- [ ] **Paso 1:** escribir los tests de hooks de la tabla en `.claude/hooks/test/`. Cada test llama a la función con la entrada JSON que manda Claude Code y una carpeta de estado temporal; no lanza procesos de Claude.
-- [ ] **Paso 2:** agregar `"test:hooks": "node --test \".claude/hooks/test/*.test.mjs\""` y sumarlo al `test` de la raíz. Correrlo y verificar que falla porque los hooks no existen.
-- [ ] **Paso 3:** escribir los hooks. La lógica va en funciones exportadas; el archivo que llama Claude Code solo lee la entrada de `stdin`, llama a la función y sale con el código que devuelve. Sin comentarios en el código.
-- [ ] **Paso 4:** correr `pnpm test:hooks` y verificar que pasa.
-- [ ] **Paso 5:** escribir `.claude/settings.json` con los tres hooks, usando `node "$CLAUDE_PROJECT_DIR/.claude/hooks/<archivo>.mjs"`, y `.claude/verificacion.json` en `observar`.
-- [ ] **Paso 6:** probarlos de verdad en una rama descartable: editar un archivo de `apps/`, intentar un commit sin `Verificado:` y ver la línea en `registro.jsonl`; pasar a `bloquear`, ver el bloqueo y la explicación, y ver que el tercer intento pasa. Verificar si un subagente comparte el `session_id` de la sesión principal y escribirlo en `docs/entorno/verificacion.md`. Volver a `observar` y borrar la rama.
-- [ ] **Paso 7:** correr `pnpm typecheck` y `pnpm test`, y verificar que pasan.
-- [ ] **Paso 8:** commit `feat(verificacion): hooks que registran y controlan la verificación`.
+- [x] **Paso 1:** escribir los tests de hooks de la tabla en `.claude/hooks/test/`. Cada test llama a la función con la entrada JSON que manda Claude Code y una carpeta de estado temporal; no lanza procesos de Claude.
+- [x] **Paso 2:** agregar `"test:hooks": "node --test \".claude/hooks/test/*.test.mjs\""` y sumarlo al `test` de la raíz. Correrlo y verificar que falla porque los hooks no existen.
+- [x] **Paso 3:** escribir los hooks. La lógica va en funciones exportadas; el archivo que llama Claude Code solo lee la entrada de `stdin`, llama a la función y sale con el código que devuelve. Sin comentarios en el código.
+- [x] **Paso 4:** correr `pnpm test:hooks` y verificar que pasa.
+- [x] **Paso 5:** escribir `.claude/settings.json` con los tres hooks, usando `node "$CLAUDE_PROJECT_DIR/.claude/hooks/<archivo>.mjs"`, y `.claude/verificacion.json` en `observar`.
+- [x] **Paso 6:** probarlos de verdad en una rama descartable: editar un archivo de `apps/`, intentar un commit sin `Verificado:` y ver la línea en `registro.jsonl`; pasar a `bloquear`, ver el bloqueo y la explicación, y ver que el tercer intento pasa. Verificar si un subagente comparte el `session_id` de la sesión principal y escribirlo en `docs/entorno/verificacion.md`. Volver a `observar` y borrar la rama.
+- [x] **Paso 7:** correr `pnpm typecheck` y `pnpm test`, y verificar que pasan.
+- [x] **Paso 8:** commit `feat(verificacion): hooks que registran y controlan la verificación`.
+
+Correcciones al plan hechas en la tarea 3 (2026-11-21):
+
+- La tabla de tests suma once filas, una por cada test que no estaba. Se suma `.claude/hooks/test/ayudantes.mjs`, con la carpeta temporal, el reloj y las entradas de Claude Code que comparten los tres archivos de tests. `node --test` no lo corre porque no termina en `.test.mjs`.
+- El `test` de la raíz queda `pnpm test:hooks && pnpm -r test`.
+- La lógica de cada hook está en el mismo `.mjs` que llama Claude Code, en funciones exportadas. La parte que lee `stdin` y sale es `correrHook` de `estado.mjs`, que solo actúa cuando el archivo es el que se ejecutó, así los tests lo importan sin efectos.
+- Solo `pnpm test` y `pnpm typecheck` de la raíz cuentan para el control. `pnpm --filter X test` queda guardado con su filtro y no alcanza, porque no corre los otros paquetes ni `test:hooks`.
+- `registro.jsonl` recibe todos los commits, también los que pasan, con su `resultado`. "Cómo funcionan los hooks" decía que solo se escribe lo que falla, pero la verificación final pide revisar las entradas de todos los commits de la feature.
+- El contador de bloqueos vuelve a 0 cuando un commit pasa, también el liberado. El plan no lo decía; sin eso, después de la primera liberación pasarían todos.
+- El matcher de `PostToolUse` también incluye `MultiEdit` y `NotebookEdit`.
+- El paso 6 suponía que había que reiniciar Claude Code. Los hooks se cargaron en vivo: el `PostToolUse` siguiente a escribir `settings.json` ya guardó estado. Por eso los commits del paso 6 pasaron por el hook real, llamado desde un subagente. `Stop` no corre en un subagente: `al-terminar.mjs` se probó por stdin.
+- El estado y el registro que dejó la prueba se borraron antes del paso 7, para que `registro.jsonl` empiece con los commits de la feature.
 
 ### Tarea 4: Tests de propiedades
 

@@ -22,6 +22,44 @@ Vive en `.claude/skills/verify/SKILL.md` y usa `pnpm mirar`. Las trampas de `pnp
 
 Va en cada commit, después de una línea en blanco: `Verificado: pnpm test, pnpm typecheck, pnpm mirar` o `Verificado: ninguno (motivo)`. Un mensaje de varias líneas se commitea desde Git Bash con `git commit -F -` y un heredoc (ver `windows.md`).
 
-## Hooks y CI
+## Hooks
 
-Todavía no existen: son las tareas 3 y 6 de la feature. Sus trampas van acá.
+Están en `.claude/settings.json` y `.claude/hooks/`. El modo del control de commit está en `.claude/verificacion.json` (`apagado`, `observar` o `bloquear`); sin ese archivo, o con un valor desconocido, el control observa. El estado por sesión y `registro.jsonl` van en `.claude/verificacion/`, que git ignora. Los tests corren con `pnpm test:hooks`, que es parte de `pnpm test`.
+
+Cómo se activan:
+
+- En Windows, Claude Code corre el `command` de cada hook con Git Bash. `node "$CLAUDE_PROJECT_DIR/.claude/hooks/x.mjs"` funciona así.
+- El 2026-11-21 los hooks se cargaron en vivo: se escribió `settings.json` en medio de la sesión y la llamada siguiente ya corrió el hook, sin reiniciar. La documentación dice que el watcher de archivos levanta los cambios. Si un hook no corre, se mira en `/hooks` o se reinicia Claude Code.
+- Para probar un hook a mano: `echo '{"session_id":"x","hook_event_name":"Stop","stop_hook_active":false}' | CLAUDE_PROJECT_DIR="$PWD" node .claude/hooks/al-terminar.mjs; echo $?`. Sin `CLAUDE_PROJECT_DIR`, el hook usa el `cwd` de la entrada.
+
+Qué registra y qué cuenta:
+
+- Solo `pnpm test` y `pnpm typecheck` de la raíz cuentan para el control. `pnpm --filter @studio/api test` o `pnpm -r test` quedan guardados con su filtro (`test --filter @studio/api`), pero no reemplazan a `pnpm test`: el de la raíz también corre `test:hooks`, y un paquete solo no muestra si se rompió otro. Lo mismo con `pnpm mirar` y `pnpm e2e` para la regla de `apps/web/`: cuenta el de la raíz, no `pnpm --filter @studio/e2e mirar`.
+- Un comando se reconoce dentro de una cadena con `&&`, `||`, `;` o `|`, con variables delante (`MSYS_NO_PATHCONV=1 pnpm mirar /x`) y con `pnpm run test`. No cuentan `pnpm test:watch`, `pnpm test:hooks` ni un `echo "pnpm test"`. El cuerpo de un heredoc no se lee como comandos.
+- Un Bash que sale con código distinto de 0 dispara `PostToolUseFailure`, no `PostToolUse`, así que un `pnpm test` en rojo no se guarda. Pero `pnpm test | tail -20` sale con el código de `tail`, y `pnpm test > x.txt; echo $?` con el de `echo`: se guardan aunque los tests fallen.
+- El último cambio de código sale de `Edit`, `Write`, `MultiEdit` y `NotebookEdit` sobre `apps/`, `packages/` o `e2e/`. Un archivo cambiado con `sed -i`, `cat >` o un script desde Bash no cuenta como cambio. Se vio en la prueba del 2026-11-21: tres `sed -i` sobre `dinero.ts` no movieron la hora.
+- `cd apps/api && pnpm test` cuenta como el `pnpm test` de la raíz: el hook no sigue los `cd`.
+
+Cómo arma el commit:
+
+- El mensaje sale de `-m` (uno o varios), de `--message=`, del heredoc de `-F -` o del archivo de `-F archivo` (relativo a la raíz del proyecto). Con `-F -` sin heredoc, por ejemplo `echo ... | git commit -F -`, busca la línea en todo el comando. Una línea `Verificado:` vacía cuenta como que falta.
+- Los archivos son los de `git diff --cached --name-only`, más las rutas de un `git add` o de un `git commit <rutas>` del mismo comando. Con `git add -A`, `git add .`, `git add -u`, un glob o `git commit -a`, suma todo lo que muestra `git status --porcelain`, también lo que no se va a commitear. Puede pedir verificación de más, nunca de menos.
+- Un `git commit` dentro de `bash -c "..."`, de un script o de un alias no se ve.
+- El modo se lee cuando el hook corre, antes del comando. Un `printf ... > .claude/verificacion.json && git commit` usa el modo viejo.
+- Cada commit deja una línea en `registro.jsonl`, pase o no, con `resultado`: `verificado`, `sin verificar` (`Verificado: ninguno (motivo)`), `observado`, `bloqueado` o `liberado`. Así se revisa al final de la feature si hubo falsos positivos.
+- En `bloquear`, el contador de bloqueos vuelve a 0 cuando un commit pasa, también el liberado. Sin eso, después de la primera liberación todo pasaría.
+
+Subagentes:
+
+- En la prueba del 2026-11-21, las llamadas de un subagente llegaron con el `session_id` de la sesión principal y con `agent_id`. El estado y el contador de bloqueos se comparten: un `pnpm test` del subagente cuenta para un commit de la sesión principal. El registro guarda `agente` para distinguirlos. Falta confirmarlo con un hook disparado desde la sesión principal en la misma sesión.
+- `Stop` no corre para un subagente (para eso existe `SubagentStop`, que no se usa). `al-terminar.mjs` se probó por stdin.
+
+`al-terminar.mjs`:
+
+- Corre `pnpm typecheck` completo cuando `git status` muestra cambios en `apps/`, `packages/` o `e2e/`. Tardó 7 s en esta máquina. El timeout es de 300 s.
+- En Windows `pnpm` es `pnpm.cmd` y `spawnSync` lo necesita con `shell: true`.
+- Si `stop_hook_active` es `true`, sale con 0 sin correr nada. Además, Claude Code deja de hacer caso al bloqueo después de ocho seguidos.
+
+## CI
+
+Todavía no existe: es la tarea 6 de la feature. Sus trampas van acá.
