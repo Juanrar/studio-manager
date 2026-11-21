@@ -1,3 +1,4 @@
+import { diaSemanaIso, sumarDias } from '@studio/shared';
 import { ADMIN_E2E } from './entorno.ts';
 
 export const RECEPCION_DE_EJEMPLO = { email: 'recepcion@estudio.test', password: 'clave-recepcion-segura', nombre: 'Recepción Ejemplo' };
@@ -48,17 +49,6 @@ const ALUMNOS = {
 } as const;
 
 const ESTILO_DE_HOY = 'Hip-Hop';
-
-function diaSemanaIso(fecha: string): number {
-  const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
-  const diaUtc = new Date(Date.UTC(anio, mes - 1, dia)).getUTCDay();
-  return diaUtc === 0 ? 7 : diaUtc;
-}
-
-function sumarDias(fecha: string, dias: number): string {
-  const [anio, mes, dia] = fecha.split('-').map(Number) as [number, number, number];
-  return new Date(Date.UTC(anio, mes - 1, dia + dias)).toISOString().slice(0, 10);
-}
 
 async function hoyDeLaApi(api: ClienteApi): Promise<string> {
   const { hoy } = await api<{ hoy: string }>('/api/alumnos?porPagina=1');

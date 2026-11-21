@@ -51,6 +51,8 @@ Una ruta con `?` o `&` va entre comillas: `pnpm mirar "/liquidaciones?periodo=:p
 | `/liquidaciones?periodo=:periodo&solapa=estadisticas&profesor=:profesor` | admin | Las estadísticas de Lucía en el mes. | solapas-de-liquidaciones |
 | `/liquidaciones/:profesor` | admin | Redirige a `/liquidaciones?periodo=<mes anterior>&solapa=estadisticas&profesor=<id>`. Es la dirección vieja de la ficha de liquidación. | solapas-de-liquidaciones |
 
+`/` redirige a `/agenda`, y una ruta que no existe redirige a `/`. En la columna "Rol", "recepción" quiere decir que la ven los dos roles.
+
 Con `--rol recepcion`, el menú muestra solo Agenda, Grilla, Alumnos y Asistente, y una ruta de admin no redirige: muestra "No tenés permiso para ver esta pantalla." sin título.
 
 Cuando una feature agrega o cambia una ruta, actualiza su fila acá.

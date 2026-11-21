@@ -4,6 +4,7 @@ import { relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { chromium, type Page } from '@playwright/test';
+import { periodoDe } from '@studio/shared';
 import { buscarDatosDeEjemplo, cargarDatosDeEjemplo, entrarALaApi, RECEPCION_DE_EJEMPLO, type DatosDeEjemplo } from './datos-de-ejemplo.ts';
 import { ADMIN_E2E, URL_BASE_E2E } from './entorno.ts';
 import { prepararBase } from './preparar.ts';
@@ -61,7 +62,7 @@ function leerOpciones(): Opciones {
 
 function reemplazarMarcas(ruta: string, datos: DatosDeEjemplo): string {
   const valores: Record<string, string | number | null> = {
-    ':periodo': datos.hoy.slice(0, 7),
+    ':periodo': periodoDe(datos.hoy),
     ':alumno-sin-pack': datos.alumnos.sinPack,
     ':alumno': datos.alumnos.conPackX8,
     ':profesor': datos.profesorId,
@@ -101,10 +102,10 @@ function levantarApi(salida: string[]): ChildProcess {
 }
 
 function cerrarApi(api: ChildProcess | null): void {
-  if (api === null || api.pid === undefined || api.exitCode !== null) return;
+  if (api === null || api.pid === undefined) return;
   try {
-    if (process.platform === 'win32') execSync(`taskkill /pid ${api.pid} /T /F`, { stdio: 'ignore' });
-    else process.kill(-api.pid, 'SIGTERM');
+    if (process.platform !== 'win32') process.kill(-api.pid, 'SIGTERM');
+    else if (api.exitCode === null) execSync(`taskkill /pid ${api.pid} /T /F`, { stdio: 'ignore' });
   } catch {
     return;
   }
@@ -154,6 +155,10 @@ async function mirarRutas(opciones: Opciones, datos: DatosDeEjemplo): Promise<Re
     page.on('pageerror', (error) => errores.push(`error de página: ${primeraLinea(error.message)}`));
     page.on('console', (mensaje) => {
       if (mensaje.type() === 'error' && !mensaje.text().startsWith('Failed to load resource')) errores.push(`consola: ${primeraLinea(mensaje.text())}`);
+    });
+    page.on('requestfailed', (pedido) => {
+      const url = new URL(pedido.url());
+      errores.push(`pedido fallido: ${pedido.method()} ${url.pathname}${url.search} (${pedido.failure()?.errorText ?? 'sin detalle'})`);
     });
     page.on('response', (respuesta) => {
       if (respuesta.status() >= 400) {
@@ -205,6 +210,17 @@ function vaciarCapturas(): void {
   for (const archivo of readdirSync(CAPTURAS)) rmSync(`${CAPTURAS}/${archivo}`, { force: true });
 }
 
+async function obtenerDatosDeEjemplo(opciones: Opciones): Promise<DatosDeEjemplo> {
+  try {
+    const admin = await entrarALaApi(URL_BASE, ADMIN_E2E);
+    return (await buscarDatosDeEjemplo(admin)) ?? (await cargarDatosDeEjemplo(URL_BASE));
+  } catch (error) {
+    if (!opciones.sinPreparar) throw error;
+    const motivo = error instanceof Error ? error.message : String(error);
+    throw new Error(`${motivo}\nLa base puede tener datos de ejemplo a medio cargar. Corré sin --sin-preparar para recrearla.`);
+  }
+}
+
 async function main(): Promise<number> {
   const inicio = Date.now();
   const opciones = leerOpciones();
@@ -215,22 +231,22 @@ async function main(): Promise<number> {
 
   const salida: string[] = [];
   let api: ChildProcess | null = null;
-  const alInterrumpir = () => {
+  const alInterrumpir = (senal: NodeJS.Signals) => {
     cerrarApi(api);
-    process.exit(130);
+    process.exit(senal === 'SIGINT' ? 130 : 143);
   };
-  process.on('SIGINT', alInterrumpir);
+  const senales: NodeJS.Signals[] = ['SIGINT', 'SIGTERM', 'SIGHUP'];
+  for (const senal of senales) process.on(senal, alInterrumpir);
   try {
     api = levantarApi(salida);
     await esperarApi(api, salida);
-    const admin = await entrarALaApi(URL_BASE, ADMIN_E2E);
-    const datos = (await buscarDatosDeEjemplo(admin)) ?? (await cargarDatosDeEjemplo(URL_BASE));
+    const datos = await obtenerDatosDeEjemplo(opciones);
     const resultados = await mirarRutas(opciones, datos);
     imprimirResumen(opciones, datos, resultados, inicio);
     return resultados.some((resultado) => resultado.errores.length > 0) ? 1 : 0;
   } finally {
     cerrarApi(api);
-    process.off('SIGINT', alInterrumpir);
+    for (const senal of senales) process.off(senal, alInterrumpir);
   }
 }
 
