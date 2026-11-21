@@ -4,7 +4,11 @@
 
 - No corre dentro de `pnpm test`. Necesita Docker, compila el frontend y usa la base `studio_manager_e2e`, que se borra y se crea en cada corrida.
 - Usa el Postgres de desarrollo (puerto 5433). Si falla con `ECONNREFUSED 127.0.0.1:5433`, el contenedor está apagado: `docker start studio-manager-db`. Desde un worktree, `docker compose up` falla porque el nombre del contenedor ya existe y deja un volumen vacío con el nombre de la carpeta.
-- Usa el reloj real: crea la clase para el día de hoy en Buenos Aires.
+- Usa el reloj real: crea la clase para el día de hoy en Buenos Aires. La API no tiene forma de fijar la hora fuera de los tests (decisión 11 de `verificacion-de-agentes.md`). Una corrida que cruza la medianoche de Buenos Aires puede fallar: el spec calcula "hoy" al empezar y la API ya está en el día siguiente. Si falla cerca de las 00:00, se vuelve a correr después; no es un test intermitente.
+- Corre con `workers: 1` (`e2e/playwright.config.ts`): los specs comparten la base. `flujo-principal.spec.ts` lee los ingresos del mes por la API antes de cobrar y espera los previos más $6.700, porque `recepcion.spec.ts` también cobra un pack. Con dos specs a la vez, un cobro del otro entre la lectura y la comprobación rompería la cuenta.
+- Cada spec crea sus datos por la API con nombres propios (Erik Zapata y Hip-Hop en `flujo-principal`, Valeria Acosta en `pagos`, Valentina Ruiz, Salsa y `recepcion-flujo@estudio.test` en `recepcion`) y no depende del orden. Un spec nuevo usa nombres que no estén en esa lista: un `getByRole('row', { name: /Zapata/ })` con dos filas falla por modo estricto.
+- Un spec no se puede repetir sobre la misma base sin `preparar.ts`: crearía sus datos dos veces. Para correr uno solo, `pnpm --filter @studio/e2e exec tsx preparar.ts` y después `pnpm --filter @studio/e2e exec playwright test <spec>`.
+- Tiempos del 2026-11-21 con los tres specs: `pnpm e2e` tardó 21 s, 20 s y 21 s (preparar la base y compilar el frontend, unos 10 s; Playwright, 10 s; cada spec entre 1,4 s y 4,2 s).
 - Usa el puerto fijo 3100 (`PUERTO_E2E` en `e2e/entorno.ts`). Si otro proceso lo ocupa, Playwright no levanta la API. Cambiá el número para esa corrida y volvé atrás con `git checkout -- e2e/entorno.ts`. No cierres un proceso que no es de este proyecto.
 
 ## `pnpm mirar`

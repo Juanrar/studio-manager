@@ -93,7 +93,8 @@ Decisiones tomadas con el estudio el 2026-11-21. No se vuelven a discutir en la 
 | `lunesDe(f)` es lunes, no es posterior a `f` y está a menos de 7 días | Propiedad | Probado: tomar el domingo como inicio de semana (`-(diaSemanaIso(f) % 7)`), contraejemplo `["1970-01-01"]` |
 | `sumarMeses(f, n)` es una fecha válida, en el mes que corresponde, y su día no supera al de `f`; además conserva el día de `f` o cae en el último día del mes | Propiedad | Probado: no recortar al último día del mes (contraejemplos `["2200-12-31", -426]` y `["1900-07-31", 2]`) y un mes de febrero de 28 días fijos, sin bisiestos (contraejemplo `["1907-11-30", -717]`, que cae en febrero de 1848) |
 | `estadoDelPack`: con pagos que usaron como mucho las clases del pack, las clases restantes del pago actual están entre 0 y las del pack; sin pagos, el estado es `sin_pack` | Propiedad | Probado: restar al revés en `restantes`, contraejemplo un pago de 5 clases sin usar que vence hoy |
-| Los flujos E2E nuevos (ver tarea 5) | E2E | Lo que cada uno describe en su `test.step` |
+| `recepcion.spec.ts`: recepción entra y ve solo Agenda, Grilla, Alumnos y Asistente; abre la clase de hoy desde la grilla; anota a una alumna con Pack x4; en `/liquidaciones` ve "No tenés permiso para ver esta pantalla.", la URL no cambia, no hay panel de ingresos ni solapa Liquidar y no se pide `/api/tablero` ni `/api/liquidaciones` | E2E | Mostrar a recepción un enlace de admin en el menú, que la clase de la grilla deje de ser un enlace para recepción, que `SoloAdmin` redirija o deje montar la pantalla y pida los datos |
+| `pagos.spec.ts`: una alumna sin pack recibe un Pack x8 por transferencia y el listado la muestra Vigente con 8 de 8; se anula con motivo, la ficha muestra Anulado y el motivo, y el listado vuelve a Sin pack | E2E | Que el listado no se actualice después de registrar o anular (dejar de invalidar `['alumnos']`), o que el estado del pack cuente un pago anulado |
 
 Los tests de propiedades se prueban rompiendo el código a propósito: se cambia un `Math.round` por `Math.ceil` (o la función que corresponda), se ve que el test falla con un contraejemplo y se vuelve atrás.
 
@@ -200,15 +201,24 @@ Correcciones al plan hechas en la tarea 4 (2026-11-21):
 
 **Archivos:**
 - Crear: `e2e/recepcion.spec.ts`, `e2e/pagos.spec.ts`
-- Modificar: `docs/entorno/e2e.md`, `docs/mapa-de-pantallas.md` si hace falta
+- Modificar: `docs/entorno/e2e.md`, `docs/mapa-de-pantallas.md` si hace falta, `e2e/playwright.config.ts`, `e2e/entorno.ts`, `e2e/datos-de-ejemplo.ts`, `e2e/flujo-principal.spec.ts`
 
-- [ ] **Paso 1:** `recepcion.spec.ts`: un usuario de recepción entra, ve solo su menú, abre la grilla, entra a una clase de hoy desde la grilla y anota a un alumno con pack. Un intento de ir a `/liquidaciones` muestra "No tenés permiso para ver esta pantalla." y no muestra datos de liquidaciones.
-- [ ] **Paso 2:** `pagos.spec.ts`: se registra un pack a un alumno, se anula con motivo y el listado de alumnos deja de mostrarlo vigente.
-- [ ] **Paso 3:** los datos que necesita cada spec los crea el mismo spec por la API o la pantalla. Ningún spec depende de lo que dejó otro.
-- [ ] **Paso 4:** correr `pnpm e2e` y verificar que pasan los tres specs. Correrlo dos veces más; si uno falla una sola vez, se busca la causa antes de seguir (regla de tests intermitentes).
-- [ ] **Paso 5:** sumar a `docs/entorno/e2e.md` la nota de la medianoche (decisión 11) y el tiempo total de `pnpm e2e`.
+- [x] **Paso 1:** `recepcion.spec.ts`: un usuario de recepción entra, ve solo su menú, abre la grilla, entra a una clase de hoy desde la grilla y anota a un alumno con pack. Un intento de ir a `/liquidaciones` muestra "No tenés permiso para ver esta pantalla." y no muestra datos de liquidaciones.
+- [x] **Paso 2:** `pagos.spec.ts`: se registra un pack a un alumno, se anula con motivo y el listado de alumnos deja de mostrarlo vigente.
+- [x] **Paso 3:** los datos que necesita cada spec los crea el mismo spec por la API o la pantalla. Ningún spec depende de lo que dejó otro.
+- [x] **Paso 4:** correr `pnpm e2e` y verificar que pasan los tres specs. Correrlo dos veces más; si uno falla una sola vez, se busca la causa antes de seguir (regla de tests intermitentes).
+- [x] **Paso 5:** sumar a `docs/entorno/e2e.md` la nota de la medianoche (decisión 11) y el tiempo total de `pnpm e2e`.
 - [x] **Paso 6:** correr `pnpm typecheck` y `pnpm test`, y verificar que pasan.
-- [ ] **Paso 7:** commit `test(e2e): flujos de recepción y de anulación de un pago`.
+- [x] **Paso 7:** commit `test(e2e): flujos de recepción y de anulación de un pago`.
+
+Correcciones al plan hechas en la tarea 5 (2026-11-21):
+
+- `e2e/playwright.config.ts` pasa a `workers: 1`. Los tres specs comparten la base `studio_manager_e2e`, y la cuenta de ingresos de `flujo-principal.spec.ts` no aguanta un cobro de otro spec en paralelo.
+- `flujo-principal.spec.ts` también cambia. Esperaba $6.700 de ingresos del mes, que solo da con la base vacía: si `recepcion.spec.ts` corre antes, su Pack x4 suma $5.200. Ahora lee los ingresos del mes por `/api/tablero` al empezar y espera los previos más $6.700. Se probó corriendo `pagos` y `recepcion` primero y `flujo-principal` después sobre la misma base, y pasó. Los pagos anulados no suman ingresos, así que `pagos.spec.ts` no mueve la cuenta.
+- `e2e/entorno.ts` suma `URL_E2E`, que usan la config y los specs para cargar datos con `entrarALaApi`. `hoyDeLaApi` de `datos-de-ejemplo.ts` pasa a exportarse: `recepcion.spec.ts` arma el horario para el día de la API, no para el del navegador.
+- `recepcion.spec.ts` usa su propio usuario (`recepcion-flujo@estudio.test`), no el de los datos de ejemplo de `pnpm mirar`, y una clase a las 10:00 para no compartir carril con el Hip-Hop de las 19:00 que `flujo-principal` arrastra.
+- `docs/mapa-de-pantallas.md` no cambia: ninguna ruta cambió.
+- Las tres corridas del paso 4 pasaron sin fallas: 21 s, 20 s y 21 s.
 
 ### Tarea 6: GitHub Actions
 

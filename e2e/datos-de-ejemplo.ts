@@ -50,7 +50,7 @@ const ALUMNOS = {
 
 const ESTILO_DE_HOY = 'Hip-Hop';
 
-async function hoyDeLaApi(api: ClienteApi): Promise<string> {
+export async function hoyDeLaApi(api: ClienteApi): Promise<string> {
   const { hoy } = await api<{ hoy: string }>('/api/alumnos?porPagina=1');
   return hoy;
 }
