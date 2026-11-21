@@ -87,12 +87,12 @@ Decisiones tomadas con el estudio el 2026-11-21. No se vuelven a discutir en la 
 | El control suma las rutas de un `git add` del mismo comando, y con `git add -A` o `git commit -a` usa `git status` | Unitario de hook | Mirar solo el stage, que está vacío cuando el hook corre antes del `git add` |
 | El control ignora `git status`, `echo "git commit ..."` y `git commit-tree` | Unitario de hook | Reconocer el commit con un `includes` |
 | `al-terminar` no corre `pnpm typecheck` sin cambios de código, sale con 0 si pasa, y con 2 y las últimas 40 líneas si falla | Unitario de hook | Correr typecheck en cada vuelta, o mandar la salida entera o ninguna |
-| `aplicarPorcentaje(m, bp)` da entre 0 y `m`, da `m` con 10000, crece con `bp`, y `aplicarPorcentaje(m, bp) + aplicarPorcentaje(m, 10000 - bp)` se aleja de `m` en 1 como mucho | Propiedad, `fast-check` | Cambiar el redondeo, o dividir por 100 en lugar de 10000 |
-| `dividirEnPartes(t, n) * n` se aleja de `t` en `n / 2` como mucho | Propiedad | Truncar en lugar de redondear |
-| `sumarDias(sumarDias(f, n), -n)` es `f`, y el resultado siempre es una fecha válida | Propiedad | Un error de fin de mes o de año bisiesto |
-| `lunesDe(f)` es lunes, no es posterior a `f` y está a menos de 7 días | Propiedad | Tomar el domingo como inicio de semana |
-| `sumarMeses(f, n)` es una fecha válida, en el mes que corresponde, y su día no supera al de `f` | Propiedad | No recortar al último día del mes |
-| `estadoDelPack`: con pagos que usaron como mucho las clases del pack, las clases restantes del pago actual están entre 0 y las del pack; sin pagos, el estado es `sin_pack` | Propiedad | Restar al revés o guardar un contador |
+| `aplicarPorcentaje(m, bp)` da entre 0 y `m`, da `m` con 10000, no baja cuando sube `bp`, `aplicarPorcentaje(m, bp) + aplicarPorcentaje(m, 10000 - bp)` se aleja de `m` en 1 como mucho, y el resultado se aleja de `m * bp / 10000` en 0,5 como mucho | Propiedad, `fast-check` | Probado: `Math.ceil` en lugar de `Math.round` (solo lo ve la propiedad de 0,5, contraejemplo `[1, 1]`) y dividir por 100 (fallan cuatro, por ejemplo `[1, 150]` da 2 con `m = 1`) |
+| `dividirEnPartes(t, n) * n` se aleja de `t` en `n / 2` como mucho | Propiedad | Probado: `Math.trunc` en lugar de `Math.round`, contraejemplo `[2197708755, 203]` |
+| `sumarDias(sumarDias(f, n), -n)` es `f`, y el resultado es una fecha válida a `n` días de `f` | Propiedad | Probado: leer el resultado con `getFullYear`, `getMonth` y `getDate` (hora local) en lugar de los `getUTC*`; contraejemplo `["1970-01-01", 0]`, también rompe `lunesDe` |
+| `lunesDe(f)` es lunes, no es posterior a `f` y está a menos de 7 días | Propiedad | Probado: tomar el domingo como inicio de semana (`-(diaSemanaIso(f) % 7)`), contraejemplo `["1970-01-01"]` |
+| `sumarMeses(f, n)` es una fecha válida, en el mes que corresponde, y su día no supera al de `f`; además conserva el día de `f` o cae en el último día del mes | Propiedad | Probado: no recortar al último día del mes (contraejemplos `["2200-12-31", -426]` y `["1900-07-31", 2]`) y un mes de febrero de 28 días fijos, sin bisiestos (contraejemplo `["1907-11-30", -717]`, que cae en febrero de 1848) |
+| `estadoDelPack`: con pagos que usaron como mucho las clases del pack, las clases restantes del pago actual están entre 0 y las del pack; sin pagos, el estado es `sin_pack` | Propiedad | Probado: restar al revés en `restantes`, contraejemplo un pago de 5 clases sin usar que vence hoy |
 | Los flujos E2E nuevos (ver tarea 5) | E2E | Lo que cada uno describe en su `test.step` |
 
 Los tests de propiedades se prueban rompiendo el código a propósito: se cambia un `Math.round` por `Math.ceil` (o la función que corresponda), se ve que el test falla con un contraejemplo y se vuelve atrás.
@@ -178,13 +178,23 @@ Correcciones al plan hechas en la tarea 3 (2026-11-21):
 - Crear: `apps/api/src/lib/test/dinero.propiedades.test.ts`, `packages/shared/src/test/fechas.propiedades.test.ts`, `apps/api/src/modules/pagos/test/estado-del-pack.propiedades.test.ts`
 - Modificar: `apps/api/package.json`, `packages/shared/package.json`
 
-- [ ] **Paso 1:** agregar `fast-check` como dependencia de desarrollo en `apps/api` y `packages/shared`.
-- [ ] **Paso 2:** escribir los tests de propiedades de la tabla. Las fechas se generan como días entre 1900 y 2200 y se pasan a `FechaDia`; nada usa `new Date()` sin argumento. Cada propiedad corre con la semilla que elige `fast-check` y, si falla, el mensaje muestra la semilla y el contraejemplo.
-- [ ] **Paso 3:** correrlos y verificar que pasan.
-- [ ] **Paso 4:** por cada archivo, romper la función a propósito y verificar que el test falla con un contraejemplo. Volver atrás. Anotar en la tabla de tests qué se rompió.
-- [ ] **Paso 5:** si una propiedad encuentra un error real en el código, escribir el contraejemplo como test de ejemplo común en el archivo de tests que ya existe, arreglarlo y dejarlo escrito en la bitácora.
-- [ ] **Paso 6:** correr `pnpm typecheck` y `pnpm test`, y verificar que pasan.
-- [ ] **Paso 7:** commit `test(dominio): propiedades de dinero, fechas y estado del pack`.
+- [x] **Paso 1:** agregar `fast-check` como dependencia de desarrollo en `apps/api` y `packages/shared`.
+- [x] **Paso 2:** escribir los tests de propiedades de la tabla. Las fechas se generan como días entre 1900 y 2200 y se pasan a `FechaDia`; nada usa `new Date()` sin argumento. Cada propiedad corre con la semilla que elige `fast-check` y, si falla, el mensaje muestra la semilla y el contraejemplo.
+- [x] **Paso 3:** correrlos y verificar que pasan.
+- [x] **Paso 4:** por cada archivo, romper la función a propósito y verificar que el test falla con un contraejemplo. Volver atrás. Anotar en la tabla de tests qué se rompió.
+- [x] **Paso 5:** si una propiedad encuentra un error real en el código, escribir el contraejemplo como test de ejemplo común en el archivo de tests que ya existe, arreglarlo y dejarlo escrito en la bitácora.
+- [x] **Paso 6:** correr `pnpm typecheck` y `pnpm test`, y verificar que pasan.
+- [x] **Paso 7:** commit `test(dominio): propiedades de dinero, fechas y estado del pack`.
+
+Correcciones al plan hechas en la tarea 4 (2026-11-21):
+
+- La propiedad de `aplicarPorcentaje` suma "se aleja de `m * bp / 10000` en 0,5 como mucho". Con `Math.ceil` en lugar de `Math.round`, las cuatro de la tabla siguieron pasando: el complemento suma `m + 1`, que entra en la tolerancia de 1. Con `Math.floor` suma `m - 1` y pasa lo mismo (por la cuenta, no se corrió). Sin la quinta, el test no veía el cambio de redondeo que la tabla dice que lo rompe.
+- `sumarMeses` suma "conserva el día de `f` o cae en el último día del mes". "Su día no supera al de `f`" no ve un recorte de más: con un febrero de 28 días fijos, el 31 de enero de 2024 más un mes daba 2024-02-28 y pasaba.
+- Para ver ese error, las fechas de `sumarMeses` salen la mitad de las veces de un generador de últimos días de mes y la propiedad corre 1000 veces. Con 100 fechas uniformes, el caso (día 29 o más y destino febrero de un año bisiesto) sale en una corrida de cada seis, según la cuenta, y la corrida de prueba pasó. Con el cambio falló en las tres corridas de prueba.
+- `sumarDias` se rompió leyendo el resultado con la hora local en lugar de UTC. Un error de fin de mes o de bisiesto dentro de `sumarDias` no se puede escribir sin reemplazar `setUTCDate`, que es lo que los evita; ese tipo de error se probó en `sumarMeses`.
+- `sumarDias` también comprueba que el resultado esté a `n` días de `f`, contados con `Date.UTC` en el test.
+- No apareció ningún error real: el paso 5 no cambió código ni bitácora.
+- Las propiedades suman unos 0,2 s de tests (fechas 0,12 s, dinero y estado del pack 0,05 s).
 
 ### Tarea 5: Más flujos de punta a punta
 
@@ -197,7 +207,7 @@ Correcciones al plan hechas en la tarea 3 (2026-11-21):
 - [ ] **Paso 3:** los datos que necesita cada spec los crea el mismo spec por la API o la pantalla. Ningún spec depende de lo que dejó otro.
 - [ ] **Paso 4:** correr `pnpm e2e` y verificar que pasan los tres specs. Correrlo dos veces más; si uno falla una sola vez, se busca la causa antes de seguir (regla de tests intermitentes).
 - [ ] **Paso 5:** sumar a `docs/entorno/e2e.md` la nota de la medianoche (decisión 11) y el tiempo total de `pnpm e2e`.
-- [ ] **Paso 6:** correr `pnpm typecheck` y `pnpm test`, y verificar que pasan.
+- [x] **Paso 6:** correr `pnpm typecheck` y `pnpm test`, y verificar que pasan.
 - [ ] **Paso 7:** commit `test(e2e): flujos de recepción y de anulación de un pago`.
 
 ### Tarea 6: GitHub Actions
