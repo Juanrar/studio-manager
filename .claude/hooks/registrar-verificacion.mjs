@@ -27,6 +27,7 @@ export function registrarVerificacion(entrada, { carpeta, raiz, ahora }) {
     return { codigo: 0 };
   }
   if (entrada.tool_name === 'Bash') {
+    if (entrada.tool_input?.run_in_background === true) return { codigo: 0 };
     const comandos = comandosDeVerificacion(entrada.tool_input?.command ?? '');
     if (comandos.length === 0) return { codigo: 0 };
     const estado = leerEstado(carpeta, sesion);

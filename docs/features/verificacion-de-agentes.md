@@ -53,7 +53,7 @@ Decisiones tomadas con el estudio el 2026-11-21. No se vuelven a discutir en la 
 
 ### Cómo funcionan los hooks
 
-- **`registrar-verificacion.mjs`** corre en `PostToolUse`. Con `Edit` o `Write` sobre un archivo de `apps/`, `packages/` o `e2e/`, guarda la hora del último cambio de código. Con `Bash`, si el comando corrió `pnpm test`, `pnpm typecheck`, `pnpm e2e` o `pnpm mirar`, guarda la hora de cada uno. `PostToolUse` solo corre cuando la herramienta terminó bien. El estado va en `.claude/verificacion/<session_id>.json`.
+- **`registrar-verificacion.mjs`** corre en `PostToolUse`. Con `Edit` o `Write` sobre un archivo de `apps/`, `packages/` o `e2e/`, guarda la hora del último cambio de código. Con `Bash`, si el comando corrió `pnpm test`, `pnpm typecheck`, `pnpm e2e` o `pnpm mirar`, guarda la hora de cada uno. `PostToolUse` solo corre cuando la herramienta terminó bien. Con `run_in_background: true`, `PostToolUse` llega cuando el comando arranca, así que un Bash en segundo plano no se guarda. El estado va en `.claude/verificacion/<session_id>.json`.
 - **`control-de-commit.mjs`** corre en `PreToolUse` con `Bash`. Si el comando tiene `git commit`, revisa:
   1. que el mensaje tenga una línea `Verificado:`;
   2. que `pnpm test` y `pnpm typecheck` hayan corrido después del último cambio de código;
@@ -77,6 +77,7 @@ Decisiones tomadas con el estudio el 2026-11-21. No se vuelven a discutir en la 
 | En modo `bloquear`, el tercer commit de la sesión después de dos bloqueos pasa y queda registrado como liberado | Unitario de hook | Perder la válvula y dejar al agente trabado |
 | `al-terminar` sale con 0 sin correr nada si `stop_hook_active` es `true` | Unitario de hook | Un ciclo infinito de `Stop` |
 | `registrar-verificacion` reconoce los comandos con `&&`, `;`, una tubería, `MSYS_NO_PATHCONV=1` delante y `pnpm run`, y guarda `-r` y `--filter=` con su filtro | Unitario de hook | Partir el comando solo por espacios, o perder el filtro y contar un test parcial como completo |
+| `registrar-verificacion` no guarda los comandos de un Bash con `run_in_background: true` | Unitario de hook | Contar como pasado un `pnpm test` en segundo plano, que dispara `PostToolUse` al arrancar y puede fallar después |
 | `registrar-verificacion` cuenta `packages/` y `e2e/` con `Write` y `MultiEdit`, acepta la raíz con otras mayúsculas y barras, e ignora un `apps/` de otro proyecto | Unitario de hook | Comparar rutas con `startsWith` sin normalizar las de Windows |
 | El control marca un commit con código en stage si `pnpm test` y `pnpm typecheck` no corrieron nunca en la sesión | Unitario de hook | Tomar "sin cambio registrado" como "verificado" |
 | Un `pnpm --filter X test` no reemplaza a `pnpm test` | Unitario de hook | Aceptar un test parcial para el control |

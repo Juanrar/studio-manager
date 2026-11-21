@@ -39,6 +39,7 @@ Qué registra y qué cuenta:
 - Un Bash que sale con código distinto de 0 dispara `PostToolUseFailure`, no `PostToolUse`, así que un `pnpm test` en rojo no se guarda. Pero `pnpm test | tail -20` sale con el código de `tail`, y `pnpm test > x.txt; echo $?` con el de `echo`: se guardan aunque los tests fallen.
 - El último cambio de código sale de `Edit`, `Write`, `MultiEdit` y `NotebookEdit` sobre `apps/`, `packages/` o `e2e/`. Un archivo cambiado con `sed -i`, `cat >` o un script desde Bash no cuenta como cambio. Se vio en la prueba del 2026-11-21: tres `sed -i` sobre `dinero.ts` no movieron la hora.
 - `cd apps/api && pnpm test` cuenta como el `pnpm test` de la raíz: el hook no sigue los `cd`.
+- Un Bash con `run_in_background: true` dispara `PostToolUse` cuando arranca, no cuando termina, así que el hook no guarda sus comandos: el resultado todavía no se conoce. Para que cuente, `pnpm test` va en primer plano. Si se corrió en segundo plano, se vuelve a correr en primer plano o el commit lleva `Verificado: ninguno (motivo)`.
 
 Cómo arma el commit:
 
@@ -59,6 +60,10 @@ Subagentes:
 - Corre `pnpm typecheck` completo cuando `git status` muestra cambios en `apps/`, `packages/` o `e2e/`. Tardó 7 s en esta máquina. El timeout es de 300 s.
 - En Windows `pnpm` es `pnpm.cmd` y `spawnSync` lo necesita con `shell: true`.
 - Si `stop_hook_active` es `true`, sale con 0 sin correr nada. Además, Claude Code deja de hacer caso al bloqueo después de ocho seguidos.
+
+## Limitaciones conocidas
+
+- Un paso con el mismo texto en dos tareas se marca de más si el checkbox se marca con un reemplazo global (`replace_all` o `sed` sin contexto). Pasó en la tarea 4 de `verificacion-de-agentes.md`: se marcó también el paso 6 de la tarea 5. Se marca con `Edit` y un `old_string` que incluya texto propio de la tarea.
 
 ## CI
 

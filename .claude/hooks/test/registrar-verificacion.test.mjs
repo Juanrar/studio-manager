@@ -97,3 +97,18 @@ test('cuenta como código packages/ y e2e/ con Write, también con otra forma de
   registrar(entradaEdicion('C:\\otro\\apps\\web\\x.tsx', 'sesion-4'), carpeta);
   assert.equal(leerEstadoDeSesion(carpeta, 'sesion-4').ultimoCambioDeCodigo, null);
 });
+
+test('no guarda un pnpm test lanzado en segundo plano, que dispara PostToolUse al arrancar', () => {
+  const carpeta = carpetaTemporal();
+  const entrada = entradaBash('pnpm test && pnpm typecheck');
+  entrada.tool_input.run_in_background = true;
+
+  assert.deepEqual(registrar(entrada, carpeta), { codigo: 0 });
+  registrar(entradaBash('pnpm e2e'), carpeta);
+
+  assert.deepEqual(leerEstadoDeSesion(carpeta, 'sesion-1'), {
+    ultimoCambioDeCodigo: null,
+    comandos: { e2e: HORA },
+    bloqueos: 0,
+  });
+});
