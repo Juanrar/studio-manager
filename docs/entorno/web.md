@@ -10,6 +10,10 @@ Trampas del frontend y de sus tests. Los tests web no necesitan Docker. Lo que j
 - jsdom no calcula el diseño ni evalúa media queries como `pointer-coarse`.
 - jsdom descarta un estilo inválido (`height: NaNpx`): un test que busca `NaN` en el HTML no lo ve. Afirmá el valor del estilo.
 
+## Menú
+
+En el teléfono el menú está cerrado detrás del botón "Abrir menú" y lleva `invisible`. jsdom no aplica las clases de Tailwind, así que un test encuentra los links de `navigation` "Menú" sin abrirlo. El e2e corre en escritorio, donde el menú está siempre a la vista.
+
 ## Tablas y listados
 
 `celdasDe(fila)` de `apps/web/test/tabla.ts` devuelve el texto de cada celda sin lo que es `aria-hidden` (la inicial del avatar). El listado de alumnos se simula con `unListadoDeAlumnos` y `unAlumnoEnListado` de `test/datos.ts`.

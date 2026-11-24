@@ -45,7 +45,7 @@ export function BotonIcono({
   etiqueta,
   className = '',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { icono: NombreIcono; etiqueta: string }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { icono: NombreIcono; etiqueta: string; ref?: Ref<HTMLButtonElement> }) {
   return (
     <button
       type="button"
