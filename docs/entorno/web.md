@@ -35,3 +35,7 @@ El campo es un combobox (`getByRole('combobox', { name: 'Empieza' })`) y la list
 ## Listas que se reemplazan enteras
 
 Una lista que se reemplaza entera (las clases del mes en el resumen) no lleva una clave que se pueda repetir, como la fecha: con dos filas de la misma clave React deja una fila vieja al cambiar los datos. Se le pone `key` al contenedor para que se remonte.
+
+## Fallas sueltas de la grilla con la máquina cargada
+
+El 2026-11-23, un `pnpm test` corrido apenas se prendió Docker Desktop dio 2 fallas en `apps/web`: un test de `grilla-edicion.test.tsx` (el archivo tardó 8 s) y uno de `grilla-vistas.test.tsx` (4,6 s). Los dos archivos solos pasaron, la suite web sola pasó, y un segundo `pnpm test` completo pasó entero. No se guardó el mensaje porque la salida iba filtrada con `grep`. Si vuelve a pasar, se guarda la salida completa (`pnpm test > salida.txt 2>&1`) y se mira si es un `findBy` que vence a los 1000 ms o el `testTimeout` de 5 s. No se agregan esperas ni reintentos mientras no se sepa la causa.

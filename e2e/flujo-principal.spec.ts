@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
-import { ADMIN_E2E } from './entorno.ts';
+import type { TableroDelMes } from '@studio/shared';
+import { entrarALaApi } from './datos-de-ejemplo.ts';
+import { ADMIN_E2E, URL_E2E } from './entorno.ts';
 
 function hoyEnBuenosAires(): string {
   return new Intl.DateTimeFormat('en-CA', {
@@ -18,6 +20,18 @@ function nombreDelDia(fecha: string): string {
   return DIAS[diaUtc === 0 ? 6 : diaUtc - 1]!;
 }
 
+const formateadorPesos = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+
+function enPesos(monto: number): string {
+  return formateadorPesos.format(monto).replace(/\s/g, '');
+}
+
+async function ingresosDelMes(periodo: string): Promise<number> {
+  const api = await entrarALaApi(URL_E2E, ADMIN_E2E);
+  const tablero = await api<TableroDelMes>(`/api/tablero?periodo=${periodo}`);
+  return tablero.actual.ingresos;
+}
+
 async function irA(page: Page, pantalla: string) {
   await page.getByRole('navigation', { name: 'Menú' }).getByRole('link', { name: pantalla }).click();
 }
@@ -34,6 +48,7 @@ async function crearAlumno(page: Page, nombre: string, apellido: string) {
 
 test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidación', async ({ page }) => {
   const hoy = hoyEnBuenosAires();
+  const ingresosPrevios = await ingresosDelMes(hoy.slice(0, 7));
 
   await test.step('iniciar sesión', async () => {
     await page.goto('/login');
@@ -125,7 +140,7 @@ test('recepción de punta a punta: pago, asistencia, cobro en el acto y liquidac
 
   await test.step('ver el sueldo del profesor y los ingresos del mes', async () => {
     await page.goto(`/liquidaciones?periodo=${hoy.slice(0, 7)}`);
-    await expect(page.getByRole('region', { name: 'Ingresos del mes' })).toContainText('$6.700');
+    await expect(page.getByRole('region', { name: 'Ingresos del mes' })).toContainText(enPesos(ingresosPrevios + 6700));
 
     await page.getByRole('tab', { name: 'Liquidar' }).click();
     await page.getByRole('textbox', { name: 'Buscar profesor' }).fill('Zapata');
