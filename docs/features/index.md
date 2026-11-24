@@ -70,6 +70,12 @@ Refactors que no cambian lo que hace el sistema. Salen de la revisión de arquit
 | 33 | [El horario y sus clases en un módulo](horarios-y-sus-clases.md) | lista | 25, 26, 28 |
 | 34 | [Los días del negocio en un solo módulo](dias-del-negocio.md) | lista | 3 |
 
+## Entorno de los agentes
+
+| # | Feature | Estado | Depende de |
+|---|---|---|---|
+| 39 | [Verificación de los agentes](verificacion-de-agentes.md) | en curso | 17 |
+
 ## Bitácora
 
 Una línea por sesión, la más reciente arriba. Sirve para retomar el trabajo sin releer todo el repositorio.

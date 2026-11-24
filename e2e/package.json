@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "e2e": "tsx preparar.ts && playwright test",
+    "mirar": "tsx mirar.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "@studio/shared": "workspace:*",
     "@types/node": "^22.20.4",
     "postgres": "^3.4.9",
     "tsx": "^4.23.15",

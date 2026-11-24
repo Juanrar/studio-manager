@@ -1,6 +1,13 @@
-# Skills de agentes: son herramientas locales, no parte del proyecto
+# Skills de agentes: son herramientas locales. Se versionan solo los hooks, la configuración y el skill verify
 .agents/
-.claude/
+.claude/*
+!.claude/settings.json
+!.claude/verificacion.json
+!.claude/hooks/
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/verify/
+.claude/verificacion/
 skills-lock.json
 
 # Dependencias
@@ -34,6 +41,7 @@ coverage/
 # Resultados de Playwright
 e2e/test-results/
 e2e/playwright-report/
+e2e/capturas/
 
 # Mockups de brainstorming (servidor local, no es parte del proyecto)
 .superpowers/

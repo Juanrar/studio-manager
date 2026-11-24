@@ -2,6 +2,7 @@
   "name": "studio-manager",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@12.6.0",
   "engines": {
     "node": ">=22",
     "pnpm": ">=9"
@@ -9,14 +10,16 @@
   "scripts": {
     "dev": "docker compose up -d --wait && pnpm --parallel --filter @studio/api --filter @studio/web dev",
     "dev:api": "pnpm --filter @studio/api dev",
-    "test": "pnpm -r test",
+    "test": "pnpm test:hooks && pnpm -r test",
+    "test:hooks": "node --test \".claude/hooks/test/*.test.mjs\"",
     "typecheck": "pnpm -r typecheck",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "dev:web": "pnpm --filter @studio/web dev",
     "build": "pnpm --filter @studio/web build",
     "start": "pnpm --filter @studio/api start",
-    "e2e": "pnpm --filter @studio/e2e e2e"
+    "e2e": "pnpm --filter @studio/e2e e2e",
+    "mirar": "pnpm --filter @studio/e2e mirar"
   },
   "devDependencies": {
     "typescript": "^5.7.2"

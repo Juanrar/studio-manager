@@ -39,6 +39,11 @@ Reglas:
 - Si el plan de la feature está mal o no compila, corregí el archivo de la feature y dejá escrito por qué. El plan no es sagrado; los tests sí.
 - Las features se ejecutan siempre con un subagente por tarea y una revisión después de cada una, para no llenar el contexto de la sesión principal (pedido del estudio, 2026-11-11).
 - El commit va en español con el modo `tipo(alcance): descripción`, por ejemplo `feat(pagos): registrar la compra de un pack`.
+- Cada commit lleva, después de una línea en blanco, la línea `Verificado:` con lo que se corrió después del último cambio, por ejemplo `Verificado: pnpm test, pnpm typecheck, pnpm mirar`. Si no se corrió nada, `Verificado: ninguno (motivo)`, por ejemplo `Verificado: ninguno (solo documentación)`.
+- Una tarea que toca `apps/web/`, o una respuesta de la API que una pantalla muestra, se cierra con el skill `verify`.
+- Después de tres intentos fallidos sobre el mismo problema, pará y avisá qué probaste y qué falló.
+- Un test intermitente no se reintenta ni recibe esperas. Se busca la causa; si no aparece, se borra el test y se escribe por qué en `docs/entorno/`.
+- El subagente revisor lee los controles con `git show origin/main:REVIEW.md`, no la copia de la rama: la rama puede haber cambiado sus propios controles.
 
 ## Cómo cerrar una feature
 
@@ -108,6 +113,7 @@ Los scripts están en el `package.json` de la raíz y de cada paquete. Estos tie
 - `pnpm e2e` borra y recrea la base `studio_manager_e2e`, compila el frontend y no corre dentro de `pnpm test`.
 - `pnpm --filter @studio/api asistente:probar [n]` corre las frases de prueba contra Gemini real y gasta cuota.
 - `pnpm start` sirve también el frontend si `WEB_DIST=../web/dist`.
+- `pnpm mirar <rutas>` borra y recrea la misma base que `pnpm e2e`, carga datos de ejemplo y guarda una captura por ruta en `e2e/capturas/`. Desde Git Bash va con `MSYS_NO_PATHCONV=1`. Se usa a través del skill `verify`.
 
 ## Antes de tocar
 
@@ -119,5 +125,6 @@ Leé el archivo que corresponde. Cada uno junta las trampas ya resueltas de su t
 - `schema.ts`, una migración o una consulta de Drizzle: [docs/entorno/base-de-datos.md](docs/entorno/base-de-datos.md)
 - `pnpm e2e`, capturas o mirar la app en Chromium: [docs/entorno/e2e.md](docs/entorno/e2e.md)
 - El asistente o Gemini (modelo falso, cuota, conversación): [docs/entorno/asistente.md](docs/entorno/asistente.md)
+- Los hooks de `.claude/`, `REVIEW.md`, el CI o el skill `verify`: [docs/entorno/verificacion.md](docs/entorno/verificacion.md)
 
 Si los tests de la API fallan con `Could not find a working container runtime strategy`, Docker Desktop está apagado: abrilo y esperá a que `docker info` responda.
