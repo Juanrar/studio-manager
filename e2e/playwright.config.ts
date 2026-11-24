@@ -15,8 +15,8 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'pnpm --filter @studio/api start',
-    cwd: '..',
+    command: 'node --import tsx --env-file=.env src/server.ts',
+    cwd: '../apps/api',
     url: `${URL_E2E}/api/health`,
     reuseExistingServer: false,
     timeout: 60_000,

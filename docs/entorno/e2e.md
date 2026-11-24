@@ -9,6 +9,7 @@
 - Cada spec crea sus datos por la API con nombres propios (Erik Zapata y Hip-Hop en `flujo-principal`, Valeria Acosta en `pagos`, Valentina Ruiz, Salsa y `recepcion-flujo@estudio.test` en `recepcion`) y no depende del orden. Un spec nuevo usa nombres que no estén en esa lista: un `getByRole('row', { name: /Zapata/ })` con dos filas falla por modo estricto.
 - Un spec no se puede repetir sobre la misma base sin `preparar.ts`: crearía sus datos dos veces. Para correr uno solo, `pnpm --filter @studio/e2e exec tsx preparar.ts` y después `pnpm --filter @studio/e2e exec playwright test <spec>`.
 - Tiempos del 2026-11-21 con los tres specs: `pnpm e2e` tardó 21 s, 20 s y 21 s (preparar la base y compilar el frontend, unos 10 s; Playwright, 10 s; cada spec entre 1,4 s y 4,2 s).
+- El `webServer` de `e2e/playwright.config.ts` arranca `node --import tsx` directo, sin `pnpm`, `sh` ni el binario `tsx` en el medio. Al apagar, Playwright espera el evento `close` del proceso que lanzó, que llega cuando se cierran sus pipes. Si el servidor es un nieto, mantiene los pipes abiertos y el job de CI se cuelga después de `3 passed`, sin timeout.
 - Usa el puerto fijo 3100 (`PUERTO_E2E` en `e2e/entorno.ts`). Si otro proceso lo ocupa, Playwright no levanta la API. Cambiá el número para esa corrida y volvé atrás con `git checkout -- e2e/entorno.ts`. No cierres un proceso que no es de este proyecto.
 
 ## `pnpm mirar`
