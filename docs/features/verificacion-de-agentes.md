@@ -227,11 +227,18 @@ Correcciones al plan hechas en la tarea 5 (2026-11-21):
 - Crear: `.github/workflows/verificacion.yml`
 - Modificar: `docs/entorno/verificacion.md`, `package.json` si hace falta fijar `packageManager`
 
-- [ ] **Paso 1:** escribir el workflow: `on` con `pull_request` y `push` a `main`; `concurrency` por rama con `cancel-in-progress: true`; un job en `ubuntu-latest` con `timeout-minutes: 25`. Pasos: checkout, pnpm, Node 22 con caché de pnpm, `pnpm install --frozen-lockfile`, copiar `.env.example` a `apps/api/.env`, `pnpm typecheck`, `pnpm test`, `docker compose up -d --wait`, `pnpm e2e`, y subir `e2e/test-results/` como artefacto solo si falla, con `retention-days: 7`. Las acciones van con versión fija.
-- [ ] **Paso 2:** validar el archivo con `actionlint` (por ejemplo, `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest`). Verificar que pasa.
-- [ ] **Paso 3:** escribir en `docs/entorno/verificacion.md` cómo pedir el check en la protección de `main` (Settings → Branches) y que el CI lee el workflow de la rama del PR: un PR puede cambiarlo, y la revisión humana del PR tiene que mirar ese archivo.
-- [ ] **Paso 4:** correr `pnpm typecheck` y `pnpm test`, y verificar que pasan.
-- [ ] **Paso 5:** commit `ci: typecheck, tests y e2e en cada PR a main`. El push lo decide el estudio.
+- [x] **Paso 1:** escribir el workflow: `on` con `pull_request` y `push` a `main`; `concurrency` por rama con `cancel-in-progress: true`; un job en `ubuntu-latest` con `timeout-minutes: 25`. Pasos: checkout, pnpm, Node 22 con caché de pnpm, `pnpm install --frozen-lockfile`, copiar `.env.example` a `apps/api/.env`, `pnpm typecheck`, `pnpm test`, `docker compose up -d --wait`, `pnpm e2e`, y subir `e2e/test-results/` como artefacto solo si falla, con `retention-days: 7`. Las acciones van con versión fija.
+- [x] **Paso 2:** validar el archivo con `actionlint` (por ejemplo, `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest`). Verificar que pasa.
+- [x] **Paso 3:** escribir en `docs/entorno/verificacion.md` cómo pedir el check en la protección de `main` (Settings → Branches) y que el CI lee el workflow de la rama del PR: un PR puede cambiarlo, y la revisión humana del PR tiene que mirar ese archivo.
+- [x] **Paso 4:** correr `pnpm typecheck` y `pnpm test`, y verificar que pasan.
+- [x] **Paso 5:** commit `ci: typecheck, tests y e2e en cada PR a main`. El push lo decide el estudio.
+
+Notas de la tarea 6 (2026-11-23):
+
+- El subagente de la tarea se cortó cuando se cerró la sesión, con el workflow escrito y sin commit. Los pasos 2 a 5 se terminaron en la sesión principal.
+- Antes del CI se corrigió el hook (commit `fix(verificacion): no contar comandos en segundo plano como verificados`): un Bash con `run_in_background: true` se registraba como verificado al arrancar.
+- `package.json` fija `packageManager: pnpm@12.6.0` para `pnpm/action-setup`, y el lockfile suma el bloque `packageManagerDependencies`.
+- El primer `pnpm typecheck` y `pnpm test` del paso 4 dieron 2 fallas sueltas en la grilla web, que no se repitieron. Están en `docs/entorno/web.md`.
 
 ## Verificación final
 

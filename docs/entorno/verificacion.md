@@ -67,4 +67,13 @@ Subagentes:
 
 ## CI
 
-Todavía no existe: es la tarea 6 de la feature. Sus trampas van acá.
+El workflow es `.github/workflows/verificacion.yml`. Corre en cada PR a `main` y en cada push a `main`: `pnpm typecheck`, `pnpm test` y `pnpm e2e`, en `ubuntu-latest`. El repositorio es público, así que los minutos de GitHub Actions no se cobran. Se mantiene así: un solo job, nada de `macos` ni `windows`, `timeout-minutes: 25` y `concurrency` con `cancel-in-progress`, que corta la corrida vieja cuando llega otro push a la misma rama.
+
+- `pnpm/action-setup` toma la versión de pnpm de `packageManager` en el `package.json` de la raíz. Al fijarla, pnpm 12 agrega al `pnpm-lock.yaml` un bloque `packageManagerDependencies` con los binarios de pnpm de cada sistema. Es esperable y va en el mismo commit.
+- `pnpm test` usa Testcontainers, que en `ubuntu-latest` anda con el Docker del runner. `pnpm e2e` usa el Postgres de `docker compose` en el puerto 5433, el mismo de `.env.example`, que el workflow copia a `apps/api/.env`.
+- Si `pnpm e2e` falla, `e2e/test-results/` queda como artefacto de la corrida durante 7 días: capturas y trazas de Playwright.
+- Para validar el archivo: `MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W):/repo" -w /repo rhysd/actionlint:latest`. Sin `MSYS_NO_PATHCONV`, Git Bash convierte `/repo` en una ruta de Windows. actionlint no chequea que la versión de una acción exista: se mira con `git ls-remote --tags https://github.com/actions/checkout.git`.
+
+Para que el check sea obligatorio, en GitHub: Settings → Branches → regla de protección de `main` (o Settings → Rules → Rulesets) → "Require status checks to pass before merging" → elegir el check `verificacion`. El check aparece en la lista recién después de que el workflow corrió una vez.
+
+El CI lee el workflow de la rama del PR, no el de `main`. Un PR puede cambiar `verificacion.yml` y sacar un paso, y el check sale verde igual. En la revisión humana de un PR se mira si tocó `.github/workflows/`.
